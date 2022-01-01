@@ -1,0 +1,69 @@
+<% content_for :title, t('.title') %>
+<div class="row">
+  <div class="col-lg-2 col-md-3 col-sm-12"><%= render partial: 'users/sidebar', locals: { active_tab: 'profile' } %></div>
+  <div class="col-lg-10 col-md-9 col-sm-12">
+    <div class="tab-content">
+      <div class="tab-pane active">
+        <div class="row">
+
+          <div class="<%= current_user.errors.count.zero? ? 'col-xs-12' : 'col-lg-8 col-md-12' %>">
+            <div class="row">
+              <div class="col-xs-12">
+                <div class="panel panel-default">
+                  <div class="panel-body">
+                    <div class="row">
+                      <div class="col-md-10 col-xs-8">
+                        <h5 style="margin-top:25px;"><%= t '.title' %></h5>
+                        <p><%= link_to "Edit Avatar #{tag.i(nil, class: 'fa fa-external-link')}".html_safe, "https://www.libravatar.org/", target: "_blank" %></p>
+                      </div>
+                      <div class="col-md-2 col-xs-4 text-right">
+                        <%= image_tag current_user.avatar_url, class: "img-circle" %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xs-12">
+                <%= form_for current_user, url: '/users/edit' do |f| %>
+                  <div class="panel panel-default">
+                    <div class="panel-body"><%= render partial: "users/form", locals: { f: f } %></div>
+                    <div class="panel-footer text-right"><%= submit_tag t('actions.save'), class: 'btn btn-success' %></div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:25px;">
+              <div class="col-md-12">
+                <div class="panel panel-default">
+                  <div class="panel-body">
+                    <small><b><%= t('users.edit.limits').upcase  %></b></small>
+                  </div>
+                  <%= render partial: 'users/quotas', locals: { user: current_user } %>
+                </div>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:25px;">
+              <div class="col-md-12">
+                <div class="panel panel-default">
+                  <div class="panel-body">
+                    <small><b>CONNECTION HELPERS</b></small>
+                  </div>
+                  <%= render partial: 'users/connection_helpers' %>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <%= render(partial: 'application/model_errors', locals: { errors: current_user.errors, obj: 'account' }) unless current_user.errors.count.zero? %>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

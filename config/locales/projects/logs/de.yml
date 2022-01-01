@@ -1,0 +1,24 @@
+de:
+  deployments:
+    logs:
+      attr:
+        alert: Alarm
+        event: Ereignis
+      show:
+        breadcrumb:
+          deployments: Projekte
+          log: Log
+      log:
+        title: "Log anzeigen: %{log}"
+        type: Log Type
+        status: Status
+        started: Gestartet
+        finished: Abgeschlossen
+        last_updated: Letzte Aktualisierung
+        relates_to: Bezieht sich auf
+        log_data: Log Daten
+      list:
+        empty: Keine Ereignisse
+      index:
+        title: "Logs für Projekt: %{deployment}"
+        log: Projekt Log

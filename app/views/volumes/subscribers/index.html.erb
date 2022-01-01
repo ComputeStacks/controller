@@ -1,0 +1,23 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Volumes", "/volumes" %></li>
+      <li><%= link_to @volume.label, "/volumes/#{@volume.id}" %></li>
+      <li class="active">Attached Containers</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12">
+    <p class="lead"><%= t 'volumes.containers' %></p>
+  </div>
+</div>
+
+<hr />
+
+<div class="row">
+  <div class="col-xs-12 remote-resource" data-url="<%= "/volumes/#{@volume.id}/subscribers?js=true" %>">
+    <div class="text-center"><%= t 'common.loading' %>...</div>
+  </div>
+</div>

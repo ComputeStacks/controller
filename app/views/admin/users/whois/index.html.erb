@@ -1,0 +1,33 @@
+<% content_for :title, "IP Addresses for #{@user.full_name}" %>
+<div class="row has-breadcrumb">
+  <ol class="breadcrumb">
+    <li><a href="/admin/users">Users</a></li>
+    <li><a href="/admin/users/<%= @user.id %>"><%= @user.full_name %></a></li>
+    <li class="active">IP Addresses</li>
+  </ol>
+</div>
+
+<div class="row">
+  <div class="col-md-10">
+    <table class="table table-hover admin-users-table">
+      <thead>
+        <tr><th>IP Addresses</th></tr>
+      </thead>
+      <tbody>
+        <% if @ips.count < 1 %>
+        <tr><td style="text-align:middle;">No IP Addresses found</td></tr>
+        <% end %>
+        <% @ips.each do |i| %>
+        <tr>
+          <td>
+            <%= link_to i['ip_addr'], "/admin/users/#{@user.id}/ip/#{i['ip_addr'].gsub(".", "-")}" unless i['ip_addr'].nil? %>
+          </td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-2">
+    <%= render :partial => "admin/users/show/sidebar" %>
+  </div>
+</div>

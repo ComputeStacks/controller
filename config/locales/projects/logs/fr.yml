@@ -1,0 +1,24 @@
+fr:
+  deployments:
+    logs:
+      attr:
+        alert: Alert
+        event: Event
+      show:
+        breadcrumb:
+          deployments: Projects
+          log: Log
+      log:
+        title: "Viewing Log: %{log}"
+        type: Log Type
+        status: Status
+        started: Started
+        finished: Finished
+        last_updated: Last Updated
+        relates_to: Relates to
+        log_data: Log Data
+      list:
+        empty: No Events
+      index:
+        title: "Logs for Project: %{deployment}"
+        log: Project Log

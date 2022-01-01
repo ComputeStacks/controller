@@ -1,0 +1,2 @@
+vagrant_log_client:
+  endpoint: "http://192.168.173.10:3100"

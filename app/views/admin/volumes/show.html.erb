@@ -1,0 +1,55 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Volumes", "/admin/volumes" %></li>
+      <li class="active">Volume: <%= @volume.id %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <div class="col-md-6">
+      <p class="lead" style="word-wrap: break-word;"><%= @volume.label %></p>
+    </div>
+    <div class="col-md-6 text-right">
+      <% if Feature.check('backups', current_user) %>
+        <a href="#" class="btn btn-sm btn-success" data-toggle="modal" data-target="#volumeCreateBackup" style="margin-right:5px;">
+          <i class="fa fa-clone"></i>
+          Create Backup
+        </a>
+      <% end %>
+      <a href="/admin/volumes/<%= @volume.id %>/logs" class="btn btn-sm btn-default" style="margin-right:5px;">
+        <i class="fa fa-list"></i>
+        Events
+      </a>
+      <a href="/admin/volumes/<%= @volume.id %>/subscribers" class="btn btn-sm btn-default" style="margin-right:5px;">
+        <i class="fa fa-link"></i>
+        Containers
+      </a>
+      <a href="/admin/volumes/<%= @volume.id %>/edit" class="btn btn-sm btn-default" style="margin-right:5px;">
+        <i class="fa fa-wrench"></i>
+      </a>
+      <%= link_to tag.i(nil, class: 'fa fa-trash'), "/admin/volumes/#{@volume.id}", method: :delete, data: { confirm: 'Are you sure? This will result in data loss.' }, class: 'btn btn-sm btn-danger' %>
+    </div>
+  </div>
+</div>
+
+<div class="row" style="margin-top:25px;">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <%= render partial: "admin/volumes/show/overview", locals: { volume: @volume } %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12 remote-resource refresh" data-url="<%= request.path %>/logs"></div>
+</div>
+
+<% if Feature.check('backups', current_user) %>
+  <div class="row" style="margin-top:25px;">
+    <div class="col-lg-8 col-lg-offset-2 col-md-12">
+      <%= render partial: "volumes/show/backups", locals: { volume: @volume } %>
+    </div>
+  </div>
+  <%= render partial: "volumes/backups/new", locals: { volume: @volume } %>
+<% end %>

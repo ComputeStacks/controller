@@ -1,0 +1,17 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+      <li><%= link_to @ingress.container_service.deployment.name, deployments_path(@ingress.container_service.deployment) %></li>
+      <li><%= link_to @ingress.container_service.label, container_service_path(@ingress.container_service) %></li>
+      <li class="active">Edit <%= @ingress.port %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @ingress.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= render partial: "container_services/ingress/form", locals: { ingress_rule: @ingress } %>
+  </div>
+  <%= render partial: 'application/model_errors', locals: { errors: @ingress.errors, obj: 'ingress rule' } unless @ingress.errors.count.zero? %>
+</div>

@@ -1,0 +1,47 @@
+<% if data.empty? %>
+  <table class="table">
+    <tbody>
+    <tr>
+      <td class="text-center">
+        <%= link_to t('volumes.list.new_button'), new_container_image_volume_path(image) %>
+        <br>
+        <%= t 'volumes.list.new_button_help' %>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+<% else %>
+<table class="table">
+  <thead>
+  <tr>
+    <th><%= t 'volumes.table.name' %></th>
+    <th><%= t 'volumes.table.mounted' %></th>
+    <% if Feature.check('backups', current_user) %>
+      <th><%= t 'volumes.table.backup' %></th>
+    <% end %>
+    <th>SFTP</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% data.each do |i| %>
+    <tr>
+      <td><%= i.label.blank? ? '...' : i.label %></td>
+      <td><%= i.mount_path %></td>
+      <% if Feature.check('backups', current_user) %>
+        <td><%= i.borg_enabled ? i.borg_strategy : 'Disabled' %></td>
+      <% end %>
+      <td><%= i.enable_sftp ? t('common.yes') : t('common.no') %></td>
+      <td class="text-right">
+        <% if @container.can_edit?(current_user) %>
+          <div class="btn-group">
+            <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_image_volume_path(i), class: 'btn btn-xs btn-default' %>
+            <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_volume_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' if current_user.is_admin? || i.container_image.user == current_user %>
+          </div>
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+<% end %>

@@ -1,0 +1,149 @@
+fr:
+  auth:
+    login: Login
+    register: Sign Up
+    pw_reset: Password Reset
+    confirm: Send Confirmation
+    unlock: Unlock Account
+  user_groups:
+    advanced_section: Advanced
+    allow_driver_override:
+      title: Allow forcing local storage when creating a custom container image?
+      help: "If you're using clustered storage for a given region, this will allow users to manually specify local storage as an option when creating a custom image."
+  registration:
+    user:
+      title: Sign up
+      register_btn: Register
+  users:
+    project_notifications:
+      title: Project Notifications
+      breadcrumb:
+        new: New Notification
+        edit: Update Notification
+      rules:
+        new: Create Rule
+        empty: No Notification Rules Found
+        exhausted: All possible notifications have been created
+        table:
+          alert: Alert Name
+          count: Active Notifiers
+      show:
+        title: Notification Settings
+        title_help_html: |
+          Any alerts configured here will be triggered in addition to alerts configured on individual projects.<br>If you configure the same rule here, and on a project, you will see duplicate notifications.
+        table:
+          service: Service
+          description: Description
+          configuration: Configuration
+      create_services:
+        email: Create Email Notifier
+        google_chat: Create Google Chat Notifier
+        slack: Create Slack Notifier
+        webhook: Create Webhook Notifier
+    developer:
+      nav:
+        legacy_api: API Credentials
+        auth: Authorized Apps
+        apps: Applications
+    profile_sidebar:
+      main: My Profile
+      notifications: Project Notifications
+      sec: Account Security
+      dev: Developer
+    fields:
+      fname: First Name
+      lname: Last Name
+      email: Email
+      current_password: Current Password
+      password: Password
+      password_confirmation: Confirm Password
+      password_hint: Password must be 8 characters long.
+      phone: Phone
+      address_1: Street Address
+      address_2: '' # Line 2. can optionally be blank
+      city: City
+      state: State
+      country: Country
+      zip: Postal Code
+      vat: VAT
+      company: Company
+      currency: My Currency
+    api:
+      title: API Credentials
+      edit_breadcrumb: Update API Credentials
+      notice: 'Your API Password will not be shown again. Please write it down.'
+      api_key: API Username
+      api_secret: API Password
+      disabled: Successfully disabled API Access
+      error: Error generating API Credentials
+      docs: View API Documentation
+      oauth: 'OAuth Settings'
+      api_propose_oauth_html: 'These credentials can be used with HTTP Basic Auth, or OAuth2 Password grant.'
+      list:
+        empty: You have no API credentials
+        create: Generate Credentials
+    edit:
+      title: Edit My Account
+      sec_title: Security Settings
+      limits: Account Limits
+      api:
+        enable: Enable API Access
+        disable: Disable API Access
+        regen: Regenerate
+        regen_prompt: Are you sure? This will immediately invalidate your existing token.
+      authy:
+        enable: Enable Authy 2FA
+        disable: Disable Authy 2FA
+        help_link: Click to learn more about using Authy 2FA.
+    authy:
+      new:
+        title: Enable Authy 2FA
+        cc: Country Code
+        phone: Mobile Phone
+        apps: Click Here to install the Authy Apps
+      edit:
+        title: Activate Authy 2FA
+        token: Authy Token
+        apps: Click Here to install the Authy Apps
+    security_key:
+      controller:
+        removed: Security Key Removed
+        u2f:
+          added: Security Key successfully added.
+        errors:
+          removed: "Error removing Security Key: %{error}"
+          key_type: Invalid key type
+          exists: Security Key already associated with your account.
+      index:
+        title: Security Keys
+        add_u2f: 'Add Security Key'
+        table_empty_html: "You have no security keys.<br>Protect your account by adding one now!"
+      new:
+        title: Add a Security Key
+        label: Your Key Name
+        u2f:
+          placeholder: Primary Security Key
+          title: Please Insert your security security key into your computer.
+          l1: If it has a button, please press it to register.
+    ## Intentionally left blank ####
+    security_key_auth:
+      controller:
+        no_authy: "No Authy account associated with your user account."
+        authy_disabled: "Authy authentication is disabled. Please contact support."
+        invalid_token: Invalid Token
+      new:
+        title: Authentication Gateway
+        alt_methods: Alternative Login Methods
+        help_title: Trouble logging in?
+        support: "Please contact support at: %{support_line}"
+        u2f:
+          l1: If it has a button, please press it to authenticate.
+          error: Authentication Error! Please refresh the page and try again.
+        authy:
+          title: Authenticate with your Authy 2FA app
+    totp:
+      title: Authenticator App
+      setup: Configure Authenticator App
+      form:
+        code: Authenticator App Code
+      apps: Recommended Applications

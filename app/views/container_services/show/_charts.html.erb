@@ -1,0 +1,34 @@
+<div class="row visible-lg visible-md">
+  <div class="col-md-6 col-sm-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <p class="text-center">CPU Usage (%)</p>
+        <%= area_chart "#{container_service_charts_cpu_path(service.id)}.json",
+                       points: false,
+                       download: true,
+                       refresh: 30,
+                       label: "CPU %",
+                       curve: false,
+                       height: '175px',
+                       legend: false
+        %>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-sm-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <p class="text-center">Memory Usage (MB)</p>
+        <%= area_chart "#{container_service_charts_memory_path(service.id)}.json",
+                       points: false,
+                       download: true,
+                       refresh: 30,
+                       label: 'MB',
+                       curve: false,
+                       height: '175px',
+                       legend: false
+        %>
+      </div>
+    </div>
+  </div>
+</div>

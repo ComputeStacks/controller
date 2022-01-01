@@ -1,0 +1,21 @@
+<div class="row">
+  <div class="<%= @setting.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <div class="panel <%= settings_license_header(@license_check_error, @license_status) %> ">
+      <div class="panel-heading" <% unless @license_check_error %>style="padding:2px;"<% end %>>
+        <%= "Error Connecting to License Server" if @license_check_error %>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-sm-6">
+            <strong>LICENSE STATUS</strong><br/>
+            <%= @license_status %>
+          </div>
+          <div class="col-sm-6">
+            <strong>LAST CHECKED</strong><br />
+            <%= l @license_last_check if @license_last_check %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

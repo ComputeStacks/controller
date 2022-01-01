@@ -1,0 +1,1 @@
+attributes :id, :label, :hostname, :primary_ip, :disconnected, :failed_health_checks, :active, :online_at, :disconnected_at, :public_ip, :region_id, :maintenance, :maintenance_updated, :job_status, :job_performed, :ssh_port, :volume_device, :block_write_bps, :block_read_bps, :block_write_iops, :block_read_iops, :created_at, :updated_at

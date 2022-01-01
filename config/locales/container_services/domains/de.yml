@@ -1,0 +1,25 @@
+de:
+  container_services:
+    domains:
+      attributes:
+        service: Dienst
+        endpoint: Verweisen auf
+        created: Erstellt
+        hsts: HSTS aktiviert
+        status: Status
+      table:
+        none: Keine Domains gefunden.
+      breadcrumb:
+        new: Domain hinzufügen
+        routing: Domain Routing
+      enable_le_html: '<a href="%{link}">Klick hier</a> um LetsEncrypt auf Ihren bestehenden Domains zu aktivieren.'
+      form:
+        enabled: "Aktiviert?"
+        enabled_help:
+          system: "System Domains können nur aktiviert oder deaktiviert werden. Andere Einstellungen sind nicht verfügbar."
+          user: "Wenn Sie dieses Kontrollkästchen deaktivieren, wird das Routing dieser Domain sofort abgeschaltet."
+        le: Kostenloses LetsEncrypt SSL Zertifikat aktivieren
+        hsts: Aktiviere HSTS Header
+        hsts_help: Dadurch wird der HSTS Header zum Load Balancer hinzugefügt. Funktioniert nur bei SSL-Verbindungen.
+        # For LetsEncrypt, we will automatically enable this. This is the message they will see in that situation.
+        hsts_auto_help: Automatisch aktiviert für Domains mit aktiviertem LetsEncrypt.

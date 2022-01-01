@@ -1,0 +1,20 @@
+<% if request.xhr? %>
+  <%= render partial: 'alert_notifications/alert', locals: { alert: @alert } %>
+<% else %>
+
+  <% content_for :breadcrumb do %>
+    <div class="row has-breadcrumb">
+      <ol class="breadcrumb">
+        <li><%= link_to 'Projects', "/deployments" %></li>
+        <li><%= link_to 'Project Alerts', '/alert_notifications' %></li>
+        <li class="active">Alert <%= @alert.fingerprint %></li>
+      </ol>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-12 remote-resource refresh" data-url="/alert_notifications/<%= @alert.id %>">
+      <%= render partial: 'alert_notifications/alert', locals: { alert: @alert } %>
+    </div>
+  </div>
+<% end %>

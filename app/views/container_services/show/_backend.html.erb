@@ -1,0 +1,25 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="panel-title" style="font-size:0.9em;"><%= t 'obj.containers' %></div>
+  </div>
+  <table class="table">
+    <thead>
+    <tr>
+      <th><%= t 'obj.port' %></th>
+      <th><%= t 'container_images.ingress_rules.list.table.columns.proto' %></th>
+      <th><%= t 'container_services.domains.attributes.service' %></th>
+    </tr>
+    </thead>
+    <tbody>
+    <% service.ingress_rules.each do |rule| %>
+      <% rule.load_balanced_rules.each do |i| %>
+        <tr>
+          <td><%= i.port %></td>
+          <td><%= ingress_backend_proto i %></td>
+          <td><%= ingress_attached_service i %></td>
+        </tr>
+      <% end %>
+    <% end %>
+    </tbody>
+  </table>
+</div>

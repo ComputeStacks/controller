@@ -1,0 +1,37 @@
+<table class="table">
+  <thead>
+  <tr>
+    <th><%= t 'container_services.env.table.name' %></th>
+    <th><%= t 'container_services.env.table.type' %></th>
+    <th><%= t 'container_services.env.table.value' %></th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% unless service.env_params.exists? %>
+    <tr>
+      <td colspan="4" class="text-center">No Environmental Rules Found</td>
+    </tr>
+  <% end %>
+  <% service.env_params.sorted.each do |i| %>
+    <tr>
+      <td style="vertical-align: middle;">
+        <% if (i.label == i.name) || i.label.blank? %>
+          <%= i.name %>
+        <% else %>
+          <%= i.label %><br>
+          <small><%= i.name %></small>
+        <% end %>
+      </td>
+      <td style="vertical-align: middle;"><%= i.param_type.capitalize %></td>
+      <td style="vertical-align: middle;"><%= i.value %></td>
+      <td class="text-right">
+        <div class="btn-group">
+          <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_service_environmental_path(i), class: 'btn btn-xs btn-default' %>
+          <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_service_environmental_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+        </div>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

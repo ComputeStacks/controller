@@ -1,0 +1,14 @@
+- content_for :title, "Create User"
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to 'Users', "/admin/users"
+      li.active New User
+
+
+.row: .col-md-10.col-md-offset-1: p.lead Create New User
+
+.row
+  .col-md-10.col-md-offset-1
+    = form_for @user, url: "/admin/users" do |f|
+      .panel.panel-default= render partial: "admin/users/form", locals: {f: f}

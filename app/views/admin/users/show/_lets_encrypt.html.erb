@@ -1,0 +1,35 @@
+<div class="row">
+  <div class="col-sm-12">
+    <div class="panel panel-default">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Names</th>
+            <th>Status</th>
+            <th>Last Generated</th>
+            <th>Created</th>
+            <th>Expires</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if certs.empty? %>
+            <tr>
+              <td colspan="7" class="text-center">None</td>
+            </tr>
+          <% end %>
+          <% certs.each do |i| %>
+            <tr>
+              <td><%= link_to i.id, "/admin/lets_encrypt/#{i.id}" %></td>
+              <td><%= truncate i.names.join(', '), length: 45 %></td>
+              <td><%= i.status %></td>
+              <td><%= i.last_generated_at.nil? ? '...' : l(i.last_generated_at, format: :short) %></td>
+              <td><%= l i.created_at, format: :short %></td>
+              <td><%= i.expires_at.nil? ? 'n/a' : l(i.expires_at, format: :short) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div> 

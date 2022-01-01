@@ -1,0 +1,71 @@
+<div class="row">
+  <div class="col-md-6 col-sm-4">
+    <div class="row"><div class="col-xs-12"><%= image_content_ssh service %></div></div>
+
+    <div class="row">
+      <div class="col-xs-12" style="margin-top: 25px;">
+        <h6>Connection Helpers</h6>
+        <ul class="list-inline">
+          <li class="list-inline-item"><%= link_to "#{image_tag("#{CS_CDN_URL}/images/icons/filezilla.png", width: 30)} Download Filezilla Profile".html_safe, "/deployments/#{service.deployment.token}/connection_helper/filezilla", method: :post %></li>
+          <li class="list-inline-item"><%= link_to "#{image_tag("#{CS_CDN_URL}/images/icons/panic-transmit.png", width: 30)} Download Transmit Favorite".html_safe, "/deployments/#{service.deployment.token}/connection_helper/transmit", method: :post %></li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+  <div class="col-md-6 col-sm-8">
+    <% service.sftp_containers.each do |i| %>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <div class="panel-title" style="font-size:0.9em;">
+            <%= link_to("Disable Password Auth", sftp_path(i), method: :patch, class: 'pull-right') if i.pw_auth %>
+            <%= "#{i.location.name} (#{i.region.name})" %>
+          </div>
+        </div>
+        <table class="table-list">
+          <tr>
+            <td><%= t 'obj.ip' %></td>
+            <td class="code-font-minimal"><%= i.ip_addr %></td>
+          </tr>
+          <tr>
+            <td><%= t 'obj.port' %></td>
+            <td class="code-font-minimal"><%= i.public_port.zero? ? '...' : i.public_port %></td>
+          </tr>
+          <tr>
+            <td><%= t 'common.username' %></td>
+            <td class="code-font-minimal">sftpuser</td>
+          </tr>
+          <tr>
+            <td><%= t 'common.password' %></td>
+            <td id="sftp-password" class="code-font-minimal">
+              <% if i.pw_auth %>
+                <%= link_to t('actions.show'), sftp_password_path(i), onclick: "inlineRemoteResource('sftp-password');return false;" %>
+              <% else %>
+                <%= link_to "Enable Password Auth", sftp_path(i), method: :patch %>
+              <% end %>
+            </td>
+          </tr>
+        </table>
+      </div>
+    <% end %>
+    <% unless service.volumes.sftp_enabled.empty? %>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <div class="panel-title" style="font-size:0.9em;">
+            <%= t 'sftp.path' %>
+          </div>
+        </div>
+        <table class="table">
+          <% service.volumes.sftp_enabled.each do |i| %>
+            <tr>
+              <td class="code-font-minimal">
+                /home/sftpuser/apps/<%= service.name %>/<%= i.label %>
+              </td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</div>
+<hr>

@@ -1,0 +1,7 @@
+de:
+  orders:
+    show:
+      title:
+        confirmation: Auftragsbestätigung
+        detail: Details zum Auftrag
+      estimate_warning: Alle Preise sind Schätzungen und können aufgrund von kostenlosen Testphasen und Rabatten, die während Ihres Abrechnungszeitraums enden können, schwanken.

@@ -1,0 +1,299 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to "DNS Zones", "/admin/dns"
+      li.active= @zone.name
+      - if @zone.saved_state_ts
+        li.pull-right.no-spacer= link_to "Discard Changes", "#{@zone.id}-#{@zone.name.parameterize}?dns_zone[revert_changes]=1", method: :put, class: 'btn btn-sm btn-danger', style: 'margin-top: -3px;margin-left:10px;', data: {confirm: t('confirm_prompt')}
+        li.pull-right.no-spacer= link_to "Commit Changes", "#{@zone.id}-#{@zone.name.parameterize}?dns_zone[commit_changes]=1", method: :put, class: 'btn btn-sm btn-success', style: 'margin-top: -3px;margin-left:10px;', data: {confirm: t('confirm_prompt')}
+        li.pull-right.no-spacer style="margin-right:10px;"
+          | Last Updated:&nbsp;
+          = l @zone.saved_state_ts.in_time_zone(Time.zone), format: :long
+      - else
+        li.pull-right.no-spacer= link_to "New Zone", new_admin_dn_url, :class => "btn btn-sm btn-default", :style => "margin-top:-3px;"
+
+.row
+  .col-lg-10.col-md-9.col-sm-8.col-xs-12
+    p
+      span.lead= @zone.name
+      br
+      em Owner: #{@zone.user.nil? ? 'System' : @zone.user.full_name}
+  .col-lg-2.col-md-3.col-sm-4.col-xs-12.text-right
+    = link_to "Collaborators", "/admin/dns/#{@zone.id}/collaborators", class: 'btn btn-sm btn-primary', style: 'margin-right: 10px;'
+    = link_to content_tag(:i, nil, class: 'fa fa-fw fa-wrench'), edit_admin_dn_url(@zone), class: 'btn btn-sm btn-default'
+    = link_to content_tag(:i, nil, class: 'fa fa-fw fa-trash'), admin_dn_url(@zone), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger', style: 'margin-left:10px;'
+
+- if @zone.can_view?(current_user)
+  .row
+    .col-md-12
+      .panel.panel-default
+        .panel-heading
+          h4.panel-title NS
+        table.table style="table-layout:fixed;width:100%;"
+          thead
+            tr
+              th style="width:40%;" Name Server
+              th style="width:30%;" Domain
+              th style="width:15%;" TTL
+              th style="width:15%;"
+          tbody
+            - @zone_client.records['NS'].each_with_index do |i,k|
+              - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
+              tr
+                td style="word-wrap:break-word;"= i.hostname
+                td style="word-wrap:break-word;"= i.name
+                td= i.ttl
+                td.text-right
+                  - if i.name == @zone.name || i.name == "#{@zone.name}."
+                    .btn-group
+                      = link_to raw("<i class='fa fa-wrench'></i>"), '#', disabled: 'disabled', class: 'btn btn-sm btn-default', title: 'Unable to Edit'
+                      = link_to raw("<i class='fa fa-trash'></i>"), '#', disabled: 'disabled', class: 'btn btn-sm btn-danger', title: 'Unable to Destroy'
+                  - else
+                    .btn-group
+                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+  .row
+    .col-md-12
+      .panel.panel-default
+        .panel-heading
+          h4.panel-title
+          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=a", :class => "btn btn-xs btn-default pull-right"
+          | A/AAAA
+        table.table style="table-layout:fixed;width:100%;"
+          - if @zone_client.records['A'].empty? && @zone_client.records['AAAA'].empty?
+            tr
+              th.text-center No A/AAAA Records
+          - else
+            thead
+              tr
+                th style="width:40%;" Hostname
+                th style="width:30%;" IP Address
+                th style="width:15%;" TTL
+                th style="width:15%;"
+            tbody
+              - @zone_client.records['A'].each_with_index do |i,k|
+                - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
+                tr
+                  td style="word-wrap:break-word;"= i.name
+                  td.code-font style="font-size:12px;"= i.ip
+                  td= i.ttl
+                  td.text-right
+                    .btn-group
+                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+              - @zone_client.records['AAAA'].each do |i,k|
+                - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
+                tr
+                  td style="word-wrap:break-word;"= i.name
+                  td.code-font style="font-size:12px;"= i.ip
+                  td= i.ttl
+                  td.text-right
+                    .btn-group
+                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+  .row
+    .col-md-12
+      .panel.panel-default
+        .panel-heading
+          h4.panel-title
+          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=mx", :class => "btn btn-xs btn-default pull-right"
+          | MX
+        table.table style="table-layout:fixed;width:100%;"
+          - if @zone_client.records['MX'].empty?
+            tr
+              th.text-center No MX Records
+          - else
+            thead
+              tr
+                th style="width:30%;" Domain
+                th style="width:15%;" Priority
+                th style="width:30%;" Mail Server
+                th style="width:15%;" TTL
+                th style="width:10%;"
+            tbody
+              - @zone_client.records['MX'].each_with_index do |i,k|
+                - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
+                tr
+                  td style="word-wrap:break-word;"= i.name
+                  td= i.priority
+                  td style="word-wrap:break-word;"= i.hostname
+                  td= i.ttl
+                  td.text-right
+                    .btn-group
+                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+  .row
+    .col-md-12
+      .panel.panel-default
+        .panel-heading
+          h4.panel-title
+          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=cname", :class => "btn btn-xs btn-default pull-right"
+          | CNAME
+        table.table style="table-layout:fixed;width:100%;"
+          - if @zone_client.records['CNAME'].empty?
+            tr
+              th.text-center No CNAME Records
+          - else
+            thead
+              tr
+                th style="width:40%;" Name
+                th style="width:40%;" Hostname
+                th style="width:10%;" TTL
+                th style="width:10%;"
+            tbody
+              - @zone_client.records['CNAME'].each_with_index do |i,k|
+                - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
+                tr
+                  td style="word-wrap:break-word;"= i.name
+                  td style="word-wrap:break-word;"= i.hostname
+                  td= i.ttl
+                  td.text-right
+                    .btn-group
+                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+
+  .row
+    .col-md-12
+      .panel.panel-default
+        .panel-heading
+          h4.panel-title
+          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=txt", :class => "btn btn-xs btn-default pull-right"
+          | TXT
+        table.table style="table-layout:fixed;width:100%;"
+          - if @zone_client.records['TXT'].empty?
+            tr
+              th.text-center No TXT Records
+          - else
+            thead
+              tr
+                th style="width:25%;" Name
+                th style="width:50%;" Value
+                th style="width:15%;" TTL
+                th style="width:10%;"
+            tbody
+              - @zone_client.records['TXT'].each_with_index do |i, k|
+                - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
+                tr
+                  td style="word-wrap:break-word;"= i.name
+                  td.code-font style="word-wrap:break-word;font-size:12px;"= i.value
+                  td= i.ttl
+                  td.text-right
+                    .btn-group
+                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+
+  .row
+    .col-md-12
+      .panel.panel-default
+        .panel-heading
+          h4.panel-title
+          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=srv", :class => "btn btn-xs btn-default pull-right"
+          | SRV
+        table.table style="table-layout:fixed;width:100%;"
+          - if @zone_client.records['SRV'].empty?
+            tr
+              th.text-center No SRV Records
+          - else
+            thead
+              tr
+                th style="width:25%;" Name
+                th style="width:50%;" Value
+                th style="width:15%;" TTL
+                th style="width:10%;"
+            tbody
+              - @zone_client.records['SRV'].each_with_index do |i,k|
+                - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
+                tr
+                  td style="word-wrap:break-word;"= i.name
+                  td.code-font style="word-wrap:break-word;font-size:12px;"= i.value
+                  td= i.ttl
+                  td.text-right
+                    .btn-group
+                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+
+  .row
+    .col-md-12
+      .panel.panel-default
+        .panel-heading
+          h4.panel-title
+          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=caa", :class => "btn btn-xs btn-default pull-right"
+          | CAA
+        table.table style="table-layout:fixed;width:100%;"
+          - if @zone_client.records['CAA'].empty?
+            tr
+              th.text-center No CAA Records
+          - else
+            thead
+              tr
+                th style="width:25%;" Name
+                th style="width:50%;" Value
+                th style="width:15%;" TTL
+                th style="width:10%;"
+            tbody
+              - @zone_client.records['CAA'].each_with_index do |i,k|
+                - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
+                tr
+                  td style="word-wrap:break-word;"= i.name
+                  td.code-font style="word-wrap:break-word;font-size:12px;"= i.value
+                  td= i.ttl
+                  td.text-right
+                    .btn-group
+                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+
+  .row
+    .col-md-12
+      .panel.panel-default
+        .panel-heading
+          h4.panel-title
+          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=ptr", :class => "btn btn-xs btn-default pull-right"
+          | PTR
+        table.table style="table-layout:fixed;width:100%;"
+          - if @zone_client.records['PTR'].empty?
+            tr
+              th.text-center No PTR Records
+          - else
+            thead
+              tr
+                th style="width:40%;" Name
+                th style="width:40%;" Value
+                th style="width:10%;" TTL
+                th style="width:10%;"
+            tbody
+              - @zone_client.records['PTR'].each_with_index do |i,k|
+                - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
+                tr
+                  td style="word-wrap:break-word;"= i.name
+                  td style="word-wrap:break-word;"= i.value
+                  td= i.ttl
+                  td.text-right
+                    .btn-group
+                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+
+  - if @dns_driver.support_dnssec?
+    .row: .col-md-12: .panel.panel-default
+      .panel-heading: h4.panel-title DNSSEC
+      table.table style="table-layout:fixed;width:100%;"
+        - if @dnsec.nil?
+          tr: th.text-center No DN Records
+        - else
+          thead: tr
+            th style="width:10%;" Key Tag
+            th style="width:10%;" Algorithm Type
+            th style="width:20%;" Digest Type
+            th style="width:60%;" Digest
+          tbody
+            - @dnsec.each do |i|
+              - i['keys'].each do |k|
+                tr
+                  td= k['tag']
+                  td= k['algo']
+                  td= "#{k['digest_type']} #{k['digest_type_human'].upcase}"
+                  td.code-font style="word-wrap:break-word;font-size:12px;"= k['digest']
+
+- elsif @zone.provision_driver.nil?
+  .row: .col-md-12.text-center: p.lead This zone has no DNS server.
+- else
+  .row: .col-md-12.text-center: p.lead Access denied

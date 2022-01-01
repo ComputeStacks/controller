@@ -1,0 +1,145 @@
+<hr>
+<div class="panel-body">
+  <strong style="text-transform: uppercase;"><%= t 'volumes.form.backups.title' %></strong>
+</div>
+<div class="panel-body">
+  <div class="row">
+    <div class="col-lg-2 col-md-12">
+      <div class="form-group">
+        <%= f.label :borg_enabled, t('volumes.form.backups.enabled') %>
+        <%= f.check_box :borg_enabled, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-lg-6 col-md-12">
+      <div class="form-group">
+        <%= f.label :borg_freq, t('volumes.form.backups.schedule') %>
+        <%= f.text_field :borg_freq, class: 'form-control code-font', style: 'font-size:12px;' %>
+        <span class="help-block">
+          <%= t 'volumes.form.backups.cron' %>
+          <%= link_to "(help)", "#", style: "font-size:11px;vertical-align:top;", data: { toggle: 'modal', target: '#borgCronModal', keyboard: 'true' } %>
+        </span>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-12">
+      <div class="form-group">
+        <label for="container_image_volume_param_borg_strategy">
+          <%= t('volumes.form.backups.data_type') %>
+        </label>
+        <select id="container_image_volume_param_borg_strategy" name="container_image_volume_param[borg_strategy]" class="form-control">
+          <% borg_strategies.each do |i| %>
+            <option value="<%= i[:id] %>" <% if volume.borg_strategy == i[:id] %>selected="selected"<% end %>><%= i[:label] %></option>
+          <% end %>
+        </select>
+        <span class="help-block"><%= t('volumes.form.backups.data_type_help') %></span>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <div class="row">
+    <div class="col-md-12">
+      <p class="lead"><%= t 'volumes.form.backups.retention.title' %></p>
+      <p><%= t 'volumes.form.backups.retention.subtitle' %></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-3 col-xs-6">
+      <div class="form-group">
+        <%= f.label :borg_keep_hourly, t('volumes.form.backups.retention.hourly') %>
+        <%= f.text_field :borg_keep_hourly, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-3 col-xs-6">
+      <div class="form-group">
+        <%= f.label :borg_keep_daily, t('volumes.form.backups.retention.daily') %>
+        <%= f.text_field :borg_keep_daily, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-3 col-xs-6">
+      <div class="form-group">
+        <%= f.label :borg_keep_weekly, t('volumes.form.backups.retention.weekly') %>
+        <%= f.text_field :borg_keep_weekly, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-3 col-xs-6">
+      <div class="form-group">
+        <%= f.label :borg_keep_monthly, t('volumes.form.backups.retention.monthly') %>
+        <%= f.text_field :borg_keep_monthly, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <div class="row">
+    <div class="col-md-12">
+      <p class="lead"><%= t 'volumes.form.backups.hooks.custom' %></p>
+      <%= t 'volumes.form.backups.hooks.custom_help_html' %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-2 col-md-4 col-xs-12">
+      <%= f.label :borg_backup_error, t('volumes.form.backups.hooks.pre_backup.continue_on_error') %>
+      <%= f.check_box :borg_backup_error, class: 'form-control' %>
+    </div>
+    <div class="col-lg-10 col-md-8 col-xs-12">
+      <%= f.label :borg_pre_backup, t('volumes.form.backups.hooks.pre_backup.custom_script.title') %>
+      <%= f.text_field :borg_pre_backup, class: 'form-control code-font-min' %>
+      <span class="help-block">
+        <%= t('volumes.form.backups.hooks.pre_backup.custom_script.help_html') %>
+      </span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <%= f.label :borg_post_backup, t('volumes.form.backups.hooks.post_backup') %>
+      <%= f.text_field :borg_post_backup, class: 'form-control code-font-min' %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-2 col-md-4 col-xs-12">
+      <%= f.label :borg_restore_error, t('volumes.form.backups.hooks.pre_restore.continue') %>
+      <%= f.check_box :borg_restore_error, class: 'form-control' %>
+    </div>
+    <div class="col-lg-10 col-md-8 col-xs-12">
+      <%= f.label :borg_pre_restore, t('volumes.form.backups.hooks.pre_restore.title') %>
+      <%= f.text_field :borg_pre_restore, class: 'form-control' %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <%= f.label :borg_post_restore, t('volumes.form.backups.hooks.post_restore') %>
+      <%= f.text_field :borg_post_restore, class: 'form-control code-font-min' %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <%= f.label :borg_rollback, t('volumes.form.backups.hooks.rollback') %>
+      <%= f.text_field :borg_rollback, class: 'form-control code-font-min' %>
+      <span class="help-block"><%= t('volumes.form.backups.hooks.rollback_help') %></span>
+    </div>
+  </div>
+</div>
+
+
+<div id="borgCronModal" class="modal" tabindex="-1" style="top:2%;">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title"><%= t 'volumes.form.cron.modal.title' %></h4>
+      </div>
+      <div class="modal-body">
+        <%= t 'volumes.form.cron.modal.help_html' %>
+      </div>
+      <%= t 'volumes.form.cron.modal.help_example_table_html' %>
+    </div>
+  </div>
+</div>

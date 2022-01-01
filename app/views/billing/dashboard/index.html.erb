@@ -1,0 +1,59 @@
+<% content_for :title, "Billing Overview" %>
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li class="active">Billing Overview</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row" style="margin-bottom:20px;">
+  <div class="col-lg-10 col-lg-offset-1 col-md-12">
+    <small>BILLING</small>
+    <h4 style="margin-top:0px;">Overview</h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-10 col-lg-offset-1 col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <p class="text-center">Monthly Cost Summary</p>
+        <%=
+          column_chart @monthly_summary.map { |i| [l(i[0], format: '%B %Y'), sprintf('%0.2f', i[1])] },
+                       prefix: Money.new(1, current_user.currency).symbol,
+                       ytitle: Money.new(1, current_user.currency).symbol
+        %>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-10 col-lg-offset-1 col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <strong>CURRENT USAGE</strong>
+      </div>
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Product</th>
+          <th>Qty</th>
+          <th class="text-right">Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% @product_summary.each do |i| %>
+          <tr>
+            <td><%= i[:product] %></td>
+            <td><%= i[:qty] %></td>
+            <td class="text-right"><%= "#{Money.new(1, current_user.currency).symbol} #{sprintf('%0.4f', i[:total])}" %></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

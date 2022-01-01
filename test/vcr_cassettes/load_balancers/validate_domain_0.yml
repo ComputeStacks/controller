@@ -1,0 +1,135 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://www.cloudflare.com/ips-v4
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Wed, 20 Oct 2021 22:29:58 GMT
+      Content-Type:
+      - text/plain;charset=UTF-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Cf-Ray:
+      - 6a15b0220c195fbc-SEA
+      Age:
+      - '77882'
+      Cache-Control:
+      - s-maxage=86400
+      Vary:
+      - Accept-Encoding
+      Cf-Cache-Status:
+      - HIT
+      Expect-Ct:
+      - max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+      Set-Cookie:
+      - __cf_bm=mNTL5Z9mIgtih9wM1sVdyFDaRhQG1_sFRCXIkdAmv7A-1634768998-0-ATqzNvSKNgVXA7VdCt7rMnFRyNTCulkU1bCew4AZwIiBMeYLr2U3J7VQICIuJ7Cm6dZ2f3qmU/HLLSg695ibiDlsbWF/Jg7C5cFdQ3YBe3bJ;
+        path=/; expires=Wed, 20-Oct-21 22:59:58 GMT; domain=.www.cloudflare.com; HttpOnly;
+        Secure; SameSite=None
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=Q0VaESEsFvqiN1kksJ0kmP%2BJlEomBnE73sKfdsQNy82%2FtKV8QFk4pLUy0qvOX7r2bk9b%2BoiP0EhBAbCTV%2BAWNr38sNOd7kE%2BaC1%2BP0BD3rcDQjsJNfwvzaWDrloInYRLj%2FUIcw%3D%3D"}],"group":"cf-nel","max_age":604800}'
+      Nel:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Alt-Svc:
+      - h3=":443"; ma=86400, h3-29=":443"; ma=86400, h3-28=":443"; ma=86400, h3-27=":443";
+        ma=86400
+    body:
+      encoding: ASCII-8BIT
+      string: |-
+        173.245.48.0/20
+        103.21.244.0/22
+        103.22.200.0/22
+        103.31.4.0/22
+        141.101.64.0/18
+        108.162.192.0/18
+        190.93.240.0/20
+        188.114.96.0/20
+        197.234.240.0/22
+        198.41.128.0/17
+        162.158.0.0/15
+        104.16.0.0/13
+        104.24.0.0/14
+        172.64.0.0/13
+        131.0.72.0/22
+  recorded_at: Wed, 20 Oct 2021 22:29:58 GMT
+- request:
+    method: get
+    uri: https://www.cloudflare.com/ips-v6
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Wed, 20 Oct 2021 22:29:59 GMT
+      Content-Type:
+      - text/plain;charset=UTF-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Cf-Ray:
+      - 6a15b0227bfa5fda-SEA
+      Age:
+      - '32532'
+      Cache-Control:
+      - s-maxage=86400
+      Vary:
+      - Accept-Encoding
+      Cf-Cache-Status:
+      - HIT
+      Expect-Ct:
+      - max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+      Set-Cookie:
+      - __cf_bm=CTFUShQxVGDJvX7VRrUJZd163eztDJObE9lZ_yvHOU8-1634768999-0-AaXt8L65/a/FpnV70JKDgzNMktOp1TdBydAbR75S8EGNzHsAQara+/4ieg87LFazNuiAhDSbuxWXutDSXd6cCeh7mrJKE+Pi67ztflRGOWex;
+        path=/; expires=Wed, 20-Oct-21 22:59:59 GMT; domain=.www.cloudflare.com; HttpOnly;
+        Secure; SameSite=None
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=kCjq94W%2F0RhKzDXuDWzV%2F8kLbByGGu%2FYpJpwmlXF8ofeRDwSTOUDTD4Cr6f7Dg7jkx2daf7jpdegItcoxhY0wEU01PMIt63sHlPlCZkgm7%2F2sbmD3Ie070GdFw%2FA6VELBNIdQg%3D%3D"}],"group":"cf-nel","max_age":604800}'
+      Nel:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Alt-Svc:
+      - h3=":443"; ma=86400, h3-29=":443"; ma=86400, h3-28=":443"; ma=86400, h3-27=":443";
+        ma=86400
+    body:
+      encoding: ASCII-8BIT
+      string: |-
+        2400:cb00::/32
+        2606:4700::/32
+        2803:f800::/32
+        2405:b500::/32
+        2405:8100::/32
+        2a06:98c0::/29
+        2c0f:f248::/32
+  recorded_at: Wed, 20 Oct 2021 22:29:58 GMT
+recorded_with: VCR 6.0.0

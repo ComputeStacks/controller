@@ -1,0 +1,19 @@
+<%= link_to "<i class='fa fa-table'></i> #{t('container_services.containers.logs.breadcrumb')}".html_safe, "/deployments/#{@deployment.token}/project_logs", class: 'btn btn-sm btn-default', style: 'margin-right:10px;' %>
+
+<div class="btn-group">
+  <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <i class="fa fa-cog"></i>
+    <span class="caret"></span>
+    <span class="sr-only"><%= t 'actions.manage' %></span>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-right">
+    <li><%= link_to t('actions.edit'), '#', 'data-toggle' => 'modal', 'data-target' => "#edit-deployment" %></li>
+    <li><%= link_to t('users.project_notifications.title'), "/deployments/#{@deployment.token}/notification_rules" %></li>
+    <li><%= link_to "SSH Keys", "/deployments/#{@deployment.token}/ssh_keys" %></li>
+    <li><%= link_to "Rebuild SSH", "/deployments/#{@deployment.token}/sftp", method: :post %></li>
+    <% if @deployment.can_administer?(current_user) %>
+      <li class="divider"></li>
+      <li><%= link_to  t('actions.destroy'), "/deployments/#{@deployment.token}", method: :delete, data: {confirm: t('confirm_destructive_prompt', obj: t('obj.deployment'))} %></li>
+    <% end %>
+  </ul>
+</div>

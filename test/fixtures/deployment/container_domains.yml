@@ -1,0 +1,49 @@
+wordpress_default:
+  domain: "keen-shannon1951.a.cs.local"
+  system_domain: true
+  ingress_rule: wordpress_web_http
+  le_enabled: false
+  enabled: true
+  user: admin
+wordpress_litespeed:
+  domain: "keen-shannon1952.a.cs.local"
+  ingress_rule: wordpress_web_ls
+  system_domain: true
+  le_enabled: false
+  enabled: true
+  user: admin
+wordpress_custom_default:
+  domain: "mark-shannon200.a.cs.local"
+  system_domain: true
+  ingress_rule: wordpress_custom_web_http
+  le_enabled: false
+  enabled: true
+  user: admin
+wordpress_custom_litespeed:
+  domain: "mark-shannon201.a.cs.local"
+  ingress_rule: wordpress_custom_web_ls
+  system_domain: true
+  le_enabled: false
+  enabled: true
+  user: admin
+nginx_default:
+  domain: "super-faker393.a.cs.local"
+  system_domain: true
+  ingress_rule: nginx_http
+  le_enabled: false
+  enabled: true
+  user: admin
+user_nginx_default:
+  domain: "photo-faker593.a.cs.local"
+  system_domain: true
+  ingress_rule: user_nginx_http
+  le_enabled: false
+  enabled: true
+  user: user
+pma_default:
+  domain: "pma01.a.cs.local"
+  system_domain: true
+  ingress_rule: pma_http
+  le_enabled: false
+  enabled: true
+  user: admin

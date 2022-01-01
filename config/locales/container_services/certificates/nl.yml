@@ -1,0 +1,28 @@
+nl:
+  container_services:
+    certificates:
+      breadcrumb:
+        index: SSL Certificates
+        new: Add SSL Certificate
+        edit: Edit SSL Certificate
+      attributes:
+        expires: Expires
+        issuer: Issuer
+        cert: Certificate
+        privkey: Private Key
+      none:
+        custom: No custom certificates found.
+        le: No LetsEncrypt certificates found.
+      verify_domain: Verify DNS
+      le:
+        title: LetsEncrypt Free Certificates
+        action: Setup Free SSL
+      custom:
+        title: Custom SSL Certificates
+        action: Upload SSL
+      form:
+        already_exists:
+          title: Certificate already installed
+          help: To update or replace an existing certificate, please delete and re-add.
+        cacert: "Certificate Authority (optional)"
+        cacert_help: "Many certificate authorities will provide a separate certificate bundle to include. Without this additional certificate, your SSL may not be recognized by some browsers."

@@ -1,0 +1,29 @@
+= form_for(resource, :as => resource_name, :url => password_path(resource_name), :html => { role: 'form', class: 'visible-xs' }) do |f|
+  .row: .col-xs-11: .col-xs-offset-1
+    .row: .col-xs-12
+      h6= t 'devise.forms.password.req_title'
+    .row: .col-xs-12: .panel.panel-primary
+      .panel-body
+        .form-group: .input-group
+          span.input-group-addon
+            i.fa.fa-envelope
+          = text_field resource_name, :email, class: 'form-control', placeholder: 'user@domain.com'
+      .panel-footer
+        = link_to t('actions.cancel'), '/', class: 'btn btn-default btn-sm'
+        = submit_tag t('actions.submit'), class: "btn btn-sm btn-primary pull-right", data: { locale: t('common.please_wait') }
+
+= form_for(resource, :as => resource_name, :url => password_path(resource_name), :html => { :role => 'form', :class => 'hidden-xs'}) do |f|
+  #passwordResetNewModal.modal
+    .modal-dialog.modal-lg
+      .modal-content
+        .modal-header
+          h5.modal-title= t('devise.forms.password.req_title')
+        .modal-body style="padding-top:40px;"
+          .form-group
+            .input-group
+              span.input-group-addon
+                i.fa.fa-envelope
+              = text_field resource_name, :email, class: 'form-control', placeholder: 'user@domain.com'
+        .modal-footer
+          = link_to t('actions.cancel'), "/", class: "btn btn-default pull-left"
+          = submit_tag t('actions.save'), class: "btn btn-primary", data: { locale: t('common.please_wait') }

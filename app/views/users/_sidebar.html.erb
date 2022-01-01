@@ -1,0 +1,24 @@
+<% 2.times do |i| %>
+  <div style="<%= i.zero? ? '' : 'margin-bottom:20px;' %>" class="tabbable <%= i.zero? ? 'tabs-left hidden-xs hidden-sm' : 'visible-xs visible-sm' %>">
+    <ul class="nav nav-tabs" role="tablist" style="<%= i.zero? ? 'width:100%;text-align:right;' : '' %>">
+      <li role="presentation" class="<%= active_tab == 'profile' ? 'active' : '' %>">
+        <%= link_to t('users.profile_sidebar.main'), '/users/edit' %>
+      </li>
+      <li role="presentation" class="<%= active_tab == 'collaborations' ? 'active' : '' %>">
+        <%= link_to "Collaborations", "/collaborations" %>
+      </li>
+      <li role="presentation" class="<%= active_tab == 'notifications' ? 'active' : '' %>">
+        <%= link_to t('users.project_notifications.title'), "/user_notifications" %>
+      </li>
+      <li role="presentation" class="<%= active_tab == 'twofactor' ? 'active' : '' %>">
+        <%= link_to t('users.profile_sidebar.sec'), '/users/security' %>
+      </li>
+      <li role="presentation" class="<%= active_tab == 'developer' ? 'active' : '' %>">
+        <%= link_to t('users.profile_sidebar.dev'), '/users/api_credentials' %>
+      </li>
+      <li role="presentation" class="<%= active_tab == 'ssh' ? 'active' : '' %>">
+        <%= link_to "SSH Keys", '/users/ssh_keys' %>
+      </li>
+    </ul>
+  </div>
+<% end %>

@@ -1,0 +1,16 @@
+<table class="table-list">
+  <tr>
+    <td><%= t 'obj.containers' %></td>
+    <td><span <% if user.current_quota.dig(:containers, :is_over) %>class="text-danger"<% end %>><%= user.current_quota.dig(:containers, :current) %></span> / <%= user.current_quota.dig(:containers, :quota) %></td>
+  </tr>
+  <tr>
+    <td><%= t 'obj.registries' %></td>
+    <td><span <% if user.current_quota.dig(:cr, :is_over) %>class="text-danger"<% end %>><%= user.current_quota.dig(:cr, :current) %></span> / <%= user.current_quota.dig(:cr, :quota) %></td>
+  </tr>
+  <% if Feature.check('dns', user) %>
+    <tr>
+      <td><%= t 'obj.dnss' %></td>
+      <td><span <% if user.current_quota.dig(:dns_zones, :is_over) %>class="text-danger"<% end %>><%= user.current_quota.dig(:dns_zones, :current) %></span> / <%= user.current_quota.dig(:dns_zones, :quota) %></td>
+  </tr>
+  <% end %>
+</table>

@@ -1,0 +1,26 @@
+<div class="panel panel-default">
+
+  <div class="panel-body">
+    <%= pluralize collaborations.count, resource %>
+  </div>
+
+  <table class="table">
+    <tbody>
+    <% if collaborations.empty? %>
+      <tr><td colspan="2" class="text-center"><%= t 'collaborators.list.empty', resource: resource %></td></tr>
+    <% end %>
+    <% collaborations.each do |i| %>
+      <tr>
+        <td><%= link_to collaboration_resource_name(i), collaboration_resource_path(i) %></td>
+        <td class="text-right">
+          <div class="btn-group">
+            <%= link_to t('actions.approve'), collaborations_path(i), method: :patch, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-success' unless i.active %>
+            <%= link_to tag.i(nil, class: 'fa fa-trash'), collaborations_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger' %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+
+</div>

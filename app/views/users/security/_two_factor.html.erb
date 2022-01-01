@@ -1,0 +1,33 @@
+<div class="panel panel-default">
+  <table class="table">
+    <tbody>
+    <% if current_user.authy_enabled %>
+      <tr>
+        <td style="font-size:1.5rem; vertical-align: middle;">Authy</td>
+        <td style="font-size:1.5rem; vertical-align: middle;">Configured</td>
+        <td class="text-right">
+          <%= link_to 'Disable', '/users/authy', method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger' %>
+        </td>
+      </tr>
+    <% end %>
+    <tr>
+      <td style="font-size:1.5rem; vertical-align: middle;">Authenticator App</td>
+      <td style="font-size:1.5rem; vertical-align: middle;"><%= current_user.totp_enabled? ? 'Configured' : 'Not Configured' %></td>
+      <td class="text-right">
+        <% if current_user.totp_enabled? %>
+          <%= link_to 'Disable', '/users/totp', method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger' %>
+        <% else %>
+          <%= link_to 'Setup', '/users/totp/new', class: 'btn btn-success' %>
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <td style="font-size:1.5rem; vertical-align: middle;">Security Keys</td>
+      <td style="font-size:1.5rem; vertical-align: middle;"><%= current_user.security_keys.empty? ? 'Not Configured' : pluralize(current_user.security_keys.count, 'security key') %></td>
+      <td class="text-right">
+        <%= link_to 'Manage', '/users/security_key', class: 'btn btn-default' %>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,32 @@
+de:
+  orders:
+    projects:
+      errors:
+        missing_name: Bitte geben Sie Ihrem Projekt einen Namen.
+        missing_package: Bitte wählen Sie für jede Anwendung ein Paket aus.
+        general: "Es liegt ein Fehler in Ihrem Projekt vor, bitte kontaktieren Sie den Support."
+        general_restart: "Fehler! Es gab ein Problem mit Ihrer Bestellung. Bitte versuchen Sie es erneut."
+        degraded: "Es ist nicht möglich, ein Projekt zu ändern, während es sich im aktuellen Zustand befindet."
+        working: "Bitte warten Sie das Erstprojekt ab, bevor Sie Änderungen vornehmen."
+        session_error: "Fehler! Bestellvorgang kann nicht gestartet werden. Bitte versuchen Sie es erneut."
+        missing_app: Bitte wählen Sie eine Applikation
+        missing_data: Fehler! Fehlende Bestelldaten.
+      cancel: Bestellung abbrechen
+      containers:
+        choose_apps: Wählen Sie Ihre Applikationen
+        custom_app: Benutzerdefinierte Appliktion erstellen
+        my_images: Meine Images
+        public_apps: Public Appliktionen
+        deployment_name: Benennen Sie Ihr Projekt
+        existing_html: "Container hinzufügen zu: <b>%{project}</b>"
+      container_params:
+        app_settings: Applikations-Einstellungen
+        review: Überprüfen & Bereitstellen
+        no_packages:
+          none: Es sind keine Pakete verfügbar. Bitte kontaktieren Sie den Support. # no packages in their billing plan
+          resources_html: | # If no packages fit the min requirements for the image
+            Es sind keine Pakete verfügbar, die die Anforderungen für dieses Image erfüllen.<br>
+            Benötigt mindestens %{cpu} CPU Cores, und %{memory} MB Arbeitsspeicher.
+      ## Intentionally left blank ####
+      shared_containers:
+        name: Container Name

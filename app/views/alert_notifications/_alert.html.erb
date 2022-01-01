@@ -1,0 +1,75 @@
+<div class="panel <%= alert.active? ? 'panel-danger' : 'panel-success' %>">
+  <div class="panel-heading" style="padding:2px;"></div>
+  <table class="table-list">
+    <tr>
+      <td>ID</td>
+      <td><%= alert.fingerprint %></td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>
+        <% if alert.active? %>
+          <i class="fa fa-refresh fa-spin"></i> Active for <%= time_ago_in_words alert.last_event %>
+        <% else %>
+          <i class="fa fa-check-circle" style="color:green;"></i> Resolved on <%= l alert.updated_at, format: :short %>
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <td>Name</td>
+      <td><%= alert.name %></td>
+    </tr>
+    <tr>
+      <td>Number of Events</td>
+      <td><%= alert.event_count %></td>
+    </tr>
+    <tr>
+      <td>Severity</td>
+      <td><%= alert.severity.capitalize %></td>
+    </tr>
+    <% unless alert.service.blank? %>
+      <tr>
+        <td>Service</td>
+        <td><%= alert.service %></td>
+      </tr>
+    <% end %>
+    <% if alert.sftp_container %>
+      <tr>
+        <td>SFTP Container</td>
+        <td>
+          <% if current_user.is_admin %>
+            <%= link_to alert.sftp_container.name, "/admin/sftp/#{alert.sftp_container.id}"  %>
+          <% else %>
+            <%= alert.sftp_container.name %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    <% if alert.container %>
+      <tr>
+        <td>Container</td>
+        <td><%= link_to alert.container.name, container_path(alert.container) %></td>
+      </tr>
+    <% end %>
+    <% if current_user.is_admin && alert.node %>
+      <tr>
+        <td>Node</td>
+        <td><%= alert.node&.label %></td>
+      </tr>
+    <% end %>
+    <% alert.labels.each do |k,v| %>
+    <tr>
+      <td><%= k.capitalize %></td>
+      <td><%= v %></td>
+    </tr>
+    <% end %>
+    <tr>
+      <td>Value</td>
+      <td><%= alert.value %></td>
+    </tr>
+    <tr>
+      <td>Description</td>
+      <td><%= alert.description %></td>
+    </tr>
+  </table>
+</div>

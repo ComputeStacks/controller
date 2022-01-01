@@ -1,0 +1,12 @@
+<div class="row">
+  <div class="col-sm-12">
+    <%= link_to "API Documentation", "/documentation/api", target: "_blank", class: 'pull-right hidden-xs' %>
+    <div class="tabbable">
+      <ul class="nav nav-tags" role="tablist">
+        <li role="presentation" class="<%= active_tab == 'api' ? 'active' : '' %>"><%= link_to t('users.developer.nav.legacy_api'), "/users/api_credentials" %></li>
+        <li role="presentation" class="<%= active_tab == 'oauth_auth' ? 'active' : '' %>"><%= link_to t('users.developer.nav.auth'), '/api/oauth/authorized_applications' %></li>
+        <li role="presentation" class="<%= active_tab == 'oauth_apps' ? 'active' : '' %>"><%= link_to t('users.developer.nav.apps'), '/api/oauth/applications' %></li>
+      </ul>
+    </div>
+  </div>
+</div>

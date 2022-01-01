@@ -1,0 +1,28 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active">AutoScale</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @service.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @service, url: "#{container_service_path(@service)}/auto_scale", method: :put do |f| %>
+
+      <div class="panel panel-default">
+        <%= render partial: 'container_services/auto_scale/form', locals: { f: f, service: @service } %>
+        <div class="panel-footer">
+          <%= link_to t('actions.cancel'), container_service_path(@service), class: 'btn btn-default' %>
+          <%= submit_tag t('actions.save'), class: 'btn btn-success pull-right' %>
+        </div>
+
+      </div>
+
+    <% end %>
+  </div>
+  <%= render(partial: 'application/model_errors', locals: { errors: @service.errors, obj: t('obj.service') }) unless @service.errors.count.zero? %>
+</div>

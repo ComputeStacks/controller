@@ -1,0 +1,53 @@
+<div class="panel-body">
+
+  <div class="row">
+    <div class="col-md-7 col-sm-12">
+      <div class="form-group">
+        <%= f.label :name, t('common.name') %>
+        <%= f.text_field :name, class: 'form-control', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false' %>
+        <%= t('container_images.params.common.name_help.description') %>
+      </div>
+    </div>
+    <div class="col-md-5 col-sm-12">
+      <div class="form-group">
+        <%= f.label :label, t('common.label') %>
+        <%= f.text_field :label, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 col-sm-12">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <%= f.radio_button :param_type, 'static' %>
+            <label for="container_image_setting_param_param_type_static">
+              <strong><%= t('container_images.params.settings.form.static') %></strong>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <%= f.label :value, t('container_images.params.settings.form.default_value') %>
+          <%= f.text_field :value, class: 'form-control', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false' %>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-md-6 col-sm-12">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <%= f.radio_button :param_type, 'password' %>
+            <label for="container_image_setting_param_param_type_password">
+              <strong><%= t('container_images.params.settings.form.password') %></strong>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

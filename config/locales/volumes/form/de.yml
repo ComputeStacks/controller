@@ -1,0 +1,42 @@
+de:
+  volumes:
+    form:
+      label: Name
+      label_help: "Verwenden Sie Kleinbuchstaben, keine Sonderzeichen oder Zahlen, und ersetzen Sie Leerzeichen durch Unterstriche."
+      enable_sftp: SFTP Zugriff aktivieren
+      enable_sftp_help: Volume über den SFTP/SSH-Container verfügbar machen.
+      mount_path: Mount Pfad
+      mount_path_help: Wohin mounten im Container
+      destroy: Zeitplan für das Löschen von Volumes
+      backups:
+        title: Volume Backup Einstellungen
+        enabled: Backups aktiviert
+        schedule: Zeitplan
+        cron: Cron Syntax
+        data_type: Daten Typ # Asking what kind of data is stored in the volume (e.g. files, mysql)
+        data_type_help: "Damit wird festgelegt, wie wir Ihre Daten sichern."
+        retention:
+          title: "Aufbewahrungs Einstellungen"
+          subtitle: "Wie viele Backups sollten wir in jedem Zeitraum aufbewahren?"
+          hourly: Stündlich
+          daily: Täglich
+          weekly: Wöchentlich
+          monthly: Monatlich
+        hooks:
+          custom: Benutzerdefinierte Hooks
+          custom_help_html: |
+            <p>Vorher- und Nachher-Befehle zur Ausführung innerhalb des Containers</p>
+            <p>Ihr Skript muss einen Exit-Code von 0 zurückgeben, sonst wird es als fehlgeschlagen gewertet.</p>
+          ## Space is intentional ####          
+          pre_backup:
+            continue_on_error: "Fortsetzung bei Fehler?" # If a pre-backup hook fails, should we continue?
+            custom_script:
+              title: "Skript für die Vorab-Sicherung"
+              help_html: "Beispiel: <code>bash /pfad/zum/skript.sh</code>"
+          post_backup: "Skript nach der Sicherung"
+          pre_restore:
+            title: "Pre-Restore Skript"
+            continue: "Fortsetzung bei Fehler?"
+          post_restore: "Post-Restore Skript"
+          rollback: "Rollback Skript"
+          rollback_help: "Dies wird ausgelöst, wenn Ihr Pre-Restore-Skript fehlschlägt."

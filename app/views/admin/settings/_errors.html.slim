@@ -1,0 +1,6 @@
+.col-sm-4: .panel.panel-body
+  strong= "#{pluralize(@setting.errors.count, "error")} prevented this Setting from being saved:"
+
+  ul.list-unstyled
+    - @setting.errors.full_messages.each do |msg|
+      li style="color: red;"= msg

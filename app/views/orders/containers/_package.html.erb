@@ -1,0 +1,43 @@
+<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+  <div class="panel panel-primary">
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-sm-5 col-xs-4 text-center">
+          <h5 style="margin-top:15%;">
+            <%= package.product.label %>
+          </h5>
+          <span style="color:black;">
+            <%= display_current_price(region, package.product) %>
+          </span>
+          <% if !package.product.price_phases(project_owner, region)[:trial].empty? || !package.product.price_phases(project_owner, region)[:discount].empty? %>
+            <%= render partial: 'orders/containers/package_price_table', locals: { region: region, product: package.product, phases: package.product.price_phases(project_owner, region) } %>
+          <% end %>
+        </div>
+        <div class="col-md-7 col-sm-8">
+          <ul class="list-unstyled">
+            <li>
+              <%= t 'attributes.mem' %>
+              <b class="pull-right"><%= package.memory %> MB</b>
+            </li>
+            <li>
+              CPU
+              <b class="pull-right"><%= "#{package.cpu} #{package.cpu > 1 ? 'CORES' : 'CORE'}" %></b>
+            </li>
+            <li>
+              <%= t 'attributes.disk' %>
+              <%= content_tag :b, "#{package.storage} GB", class: 'pull-right' %>
+            </li>
+            <li>
+              <%= t 'attributes.local_disk' %>
+              <%= content_tag :b, "#{package.local_disk} GB", class: 'pull-right' %>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <%= button_tag 'CHOOSE', type: 'button', class: 'btn btn-default btn-block container-package-selection', data: {package_id: package.product_id, i: container[:container_id], choose: I18n.t('actions.choose'), selected: I18n.t('actions.selected')}, id: "cpackage-btn-#{container[:container_id]}-#{package.product_id}" %>
+    </div>
+  </div>
+
+</div>

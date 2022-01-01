@@ -1,0 +1,24 @@
+<%
+  pma_container = service.deployment.services.where(container_images: {role: 'pma'}).joins(:container_image).first
+  pw_setting = service.setting_params.find_by(name: 'mysql_password')
+%>
+<div class="row">
+  <div class="col-xs-12">
+    <h4>phpMyAdmin</h4>
+  </div>
+</div>
+<div class="row" style="margin-top:10px;">
+  <div class="col-sm-4">
+    <small>URL</small><br>
+    <%= link_to pma_container.default_domain, "https://#{pma_container.default_domain}" %>
+  </div>
+  <div class="col-sm-4">
+    <small><%= t('common.username').upcase %></small><br>
+    <code>root</code>
+  </div>
+  <div class="col-sm-4">
+    <small><%= t('common.password').upcase %></small><br>
+    <code id="pma-setting"><%= pw_setting.nil? ? '...' : link_to(t('actions.show'), service_param_path(pw_setting), onclick: "inlineRemoteResource('pma-setting');return false;") %></code>
+  </div>
+</div>
+<hr>

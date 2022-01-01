@@ -1,0 +1,65 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active">Scale</li>
+    </ol>
+  </div>
+<% end %>
+
+<%= form_tag "#{container_service_path(@service)}/scale_service", method: :post do %>
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-12 col-xs-12">
+
+      <div class="row">
+        <div class="col-md-12">
+          <%= link_to t('actions.cancel'), container_service_path(@service), class: 'btn btn-sm btn-default pull-right' %>
+          <small>SCALE SERVICE</small>
+          <h4 style="margin-top:0;"><%= @service.label %></h4>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <hr/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <p class="lead">Increase or decrease the number of containers running your application.</p>
+            <label for="qty">Containers</label>
+            <br />
+            <% cquota = current_user.current_quota.dig(:containers, :available) %>
+            <% if @service.containers.count <= cquota %>
+              <input title="container quantity" type="range" class="form-control" name="qty" min="1" max="<%= cquota > 30 ? '30' : cquota %>" step="1" value="<%= @service.containers.count %>">
+            <% else %>
+              <input title="container quantity" type="range" class="form-control" name="qty" min="1" max="<%= @service.containers.count %>" step="1" value="<%= @service.containers.count %>">
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <hr/>
+          <p>
+            <i class="fa fa-exclamation-triangle fa-fw"></i><b>Tip: Consider <a href="resize_service">resizing</a> your container before scaling.</b><br>
+            Resizing is nearly instant and will give your application more memory to work with. Horizontal scaling should be used after you have resized as far as you can, or you have high number of concurrent users using your application.
+          </p>
+          <hr/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <%= submit_tag t('actions.save'), class: 'btn btn-success btn-block' %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<% end %>

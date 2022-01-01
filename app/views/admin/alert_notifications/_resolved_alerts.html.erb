@@ -1,0 +1,48 @@
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <strong>RECENT RESOLVED ALERTS</strong>
+      </div>
+      <table class="table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Alert Kind</th>
+          <th>Container</th>
+          <th>Description</th>
+          <th>Value</th>
+          <th>Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% alerts.each do |i| %>
+          <tr>
+            <td><%= link_to i.fingerprint, admin_alert_notification_path(i) %></td>
+            <td><%= i.name.blank? ? '...' : i.name %></td>
+            <td>
+              <% if i.container %>
+                <%= link_to i.container.name, admin_container_path(i.container) %>
+              <% elsif i.sftp_container %>
+                <%= link_to i.sftp_container.name, "/admin/deployments/#{i.sftp_container.deployment.token}" %>
+              <% elsif i.labels.dig('container') %>
+                <%= i.labels['container'] %>
+              <% else %>
+                ...
+              <% end %>
+            </td>
+            <td>
+              <%= i.description.blank? ? '...' : i.description %>
+            </td>
+            <td><%= i.value.blank? ? 0.0 : i.value.round(4) %></td>
+            <td><%= l i.created_at %></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+      <div class="panel-body text-center" style="padding-bottom:0; padding-top:0;">
+        <%= will_paginate alerts %>
+      </div>
+    </div>
+  </div>
+</div>

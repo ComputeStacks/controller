@@ -1,0 +1,8 @@
+---
+:timeout: 300
+:concurrency: <%= ENV['QUEUE_SYSTEM'] || 15 %>
+:queues:
+  - [critical, 2]
+  - default
+  - low
+  - mailers

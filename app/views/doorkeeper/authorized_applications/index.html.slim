@@ -1,0 +1,22 @@
+.row
+  .col-lg-2.col-md-3.col-sm-12= render partial: 'users/sidebar', locals: { active_tab: 'developer' }
+  .col-lg-10.col-md-9.col-sm-12: .tab-content: .tab-pane.active
+    .row: .col-sm-12
+      = render partial: 'users/developer/shared_nav', locals: { active_tab: 'oauth_auth' }
+    .row style="margin-top:10px;"
+      .col-sm-12: .tab-content: .tab-pane.active
+        h5= t('doorkeeper.authorized_applications.index.title')
+        table.table style="margin-top:20px;"
+          thead: tr
+            th= t('doorkeeper.authorized_applications.index.application')
+            th= t('doorkeeper.authorized_applications.index.created_at')
+            th
+          tbody
+            - if @applications.empty?
+              tr: td.text-center colspan="3"
+                | You have no authorized applications
+            - @applications.each do |application|
+              tr
+                td= application.name
+                td= application.created_at.strftime(t('doorkeeper.authorized_applications.index.date_format'))
+                td.text-right= render 'delete_form', application: application, submit_btn_css: 'btn btn-xs btn-danger'

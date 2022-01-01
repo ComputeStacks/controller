@@ -1,0 +1,7 @@
+fi:
+  orders:
+    show:
+      title:
+        confirmation: Tilausvahvistus
+        detail: Tilauksen tiedot 
+      estimate_warning: Kaikki hinnat ovat arvioita ja voivat muuttua resurssien käytön, ilmaisten kokeilujen ja alennusten johdosta mitä laskutusjakson aikana saattaa ilmetä.

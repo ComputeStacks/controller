@@ -1,0 +1,16 @@
+<%= render partial: 'admin/layouts/shared/settings_nav' %>
+<div class="row">
+  <div class="col-xs-12">
+    <h4>DNS Zones</h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-10">
+    <%= render partial: 'admin/dns/index' %>
+    <%= will_paginate @zones unless @zones.is_a?(Array) %>
+  </div>
+  <div class="col-md-2">
+    <%= render :partial => "admin/dns/sidebar" %>
+  </div>
+</div>

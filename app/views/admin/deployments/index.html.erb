@@ -1,0 +1,20 @@
+<%= render partial: 'admin/layouts/shared/containers_nav' %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <p class="lead">
+      Projects <%= "for: #{link_to(@user.full_name, admin_user_path(@user))}".html_safe if @user %>
+    </p>
+  </div>
+</div>
+
+<%= render partial: "admin/deployments/index/filter" %>
+
+<hr />
+<%= render partial: "admin/deployments/index/list", locals: { deployments: @deployments } %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @deployments %>
+  </div>
+</div>

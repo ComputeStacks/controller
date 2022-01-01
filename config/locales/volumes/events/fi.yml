@@ -1,0 +1,7 @@
+fi:
+  volumes:
+    events:
+      breadcrumb: Tapahtumat
+      title: "Tapahtumat tallennustilalle %{volume}"
+      recent: Viimeisimmät tapahtumat
+      item: "Tapahtuma %{id}"

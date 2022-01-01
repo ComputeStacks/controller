@@ -1,0 +1,25 @@
+<%= form_for ingress_rule, url: ingress_rule_path(ingress_rule) do |f| %>
+  <input type="hidden" name="return_to" value="<%= params[:return_to] %>" />
+  <div class="panel panel-default">
+    <%= render partial: 'container_images/ingress_params/form', locals: { f: f, allow_lb: !ingress_rule.public_network? } %>
+    <% unless ingress_rule.public_network? %>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <%= f.label :restrict_cf, t('container_images.ingress_rules.form.restrict_cf') %>
+            <%= f.check_box :restrict_cf, class: 'form-control'  %>
+            <span class="help-block"><%= t 'container_images.ingress_rules.form.restrict_cf_help_html' %></span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    <div class="panel-footer">
+      <% if params[:return_to] == 'service' %>
+        <%= link_to t('actions.cancel'), container_service_path(ingress_rule.container_service) , class: 'btn btn-default', style: 'margin-right: 10px;' %>
+      <% else %>
+        <%= link_to t('actions.cancel'), "/container_services/#{ingress_rule.container_service.id}/ingress", class: 'btn btn-default', style: 'margin-right: 10px;' %>
+      <% end %>
+      <%= submit_tag ingress_rule.id.nil? ? t('actions.create') : t('actions.update'), class: 'btn btn-success pull-right' %>
+    </div>
+  </div>
+<% end %>

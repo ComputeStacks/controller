@@ -1,0 +1,15 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ul.nav.nav-pills.sub-menu-pills.pull-left
+      li class="#{controller.controller_name == 'event_logs' ? 'active' : ''}"= link_to "Event Logs", "/admin/event_logs"
+      li class="#{controller.controller_name == 'audit' ? 'active' : ''}"= link_to "Audit Trail", "/admin/audit"
+      li class="#{request.path =~ /system_events/ ? 'active' : ''}"= link_to "System Alerts", "/admin/system_events"
+
+    - if controller.controller_name == 'system_events'
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to "Clear Events", "/admin/system_events/all", method: :delete, data: { confirm: "Are you sure?" }, class: 'btn btn-sm btn-danger'
+
+    - else
+      ol.breadcrumb.breadcrumb-action.text-right style="height:45px;"
+        li
+          | &nbsp;

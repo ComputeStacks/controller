@@ -1,0 +1,17 @@
+fi:
+  mailers:
+    confirmation_instructions:
+      title: 'Tervetuloa, %{email}'
+      l1: 'Voit vahvistaa sähköpostiosoitteesi ja ottaa tilisi käyttöön alla olevan linkin kautta:'
+      link_text: 'Vahvista sähköpostiosoitteeni'
+    reset_password_instructions:
+      title: 'Hei, %{email}'
+      l1: 'Joku on pyytänyt salasanasi vaihtoa. Voit vaihtaa salasanasi alla olevan linkin kautta.'
+      l2: "Jos et pyytänyt salasanan vaihtoa itse, voit jättää tämän viestin huomiotta."
+      l3: "Salasanasi vaihtuu vasta kun vaihdat salasanan linkin kautta."
+      link_text: 'Vaihda salasanani'
+    unlock_instructions:
+      title: 'Hei %{email}'
+      l1: 'Tilisi on suljettu toistuvien epäonnistuneiden kirjautumisyritysten seurauksena.'
+      l2: 'Avaa tilisi alla olevan linkin kautta:'
+      link_text: 'Avaa tilini'

@@ -1,0 +1,111 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Subscriptions', '/admin/subscriptions' %></li>
+      <li class="active"><%= "Subscription ##{@subscription.id}" %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-sm-8 col-xs-12 lead"><%= @subscription.label.blank? ? @subscription.details['label'] : @subscription.label %></div>
+  <div class="col-sm-4 col-xs-12">
+    <div class="text-right">
+      <%= link_to raw("<i class='fa fa-signal'></i> Usage Data"), "/admin/subscriptions/#{@subscription.id}/subscription_usage", class: 'btn btn-primary btn-sm', style: 'margin-right: 10px;' %>
+      <div class="btn-group">
+        <%= link_to raw("<i class='fa fa-clock-o'></i> Events"),"/admin/subscriptions/#{@subscription.id}/subscription_events", class: 'btn btn-sm btn-default'  %>
+        <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_admin_subscription_path(@subscription), class: 'btn btn-sm btn-default' %>
+        <%= link_to raw("<i class='fa fa-trash'></i>"), admin_subscriptions_path(@subscription), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger' %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row deployment-overview-sub hidden-xs">
+
+  <div class="col-md-3">
+    <div class="deployment-overview-sub-header">User</div>
+    <div class="deployment-overview-sub-content">
+      <%= @subscription.user.nil? ? '...' : link_to(@subscription.user.full_name, admin_user_path(@subscription.user)) %>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="deployment-overview-sub-header">Status</div>
+    <div class="deployment-overview-sub-content">
+      <%= @subscription.active ? 'Active' : 'Inactive' %>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="deployment-overview-sub-header">Created</div>
+    <div class="deployment-overview-sub-content">
+      <%= l @subscription.created_at, format: :short %>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="deployment-overview-sub-header">Container</div>
+    <div class="deployment-overview-sub-content">
+      <%= subscription_obj_link(@subscription) %>
+    </div>
+  </div>
+
+</div>
+
+
+<div class="row" style="margin-top:20px;">
+  <div class="<%= @subscription.related.empty? ? 'col-xs-12' : 'col-lg-8 col-md-7 col-sm-6 col-xs-12' %>">
+    <% if @subscription.details.nil? %>
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div style="font-size:10px;cursor:help;" title="Amount consumed this month">BILLED THIS MONTH</div>
+              <span style="font-size:14px;"><%= subscription_cost_period(@subscription) %></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div style="font-size:10px;cursor:help;" title="Amount that has not been invoiced">UNPROCESSED AMOUNT</div>
+              <span style="font-size:14px;"><%= subscription_unprocessed_cost(@subscription) %></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div style="font-size:10px;cursor:help;" title="Estimated Monthly Total">MONTHLY RUN RATE</div>
+              <span style="font-size:14px;"><%= format_currency @subscription.run_rate %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="row"><div class="col-md-12">
+        <div class="panel panel-default"><div class="panel-body">
+          <pre class="code"><%= @subscription.details.to_yaml %></pre>
+        </div></div>
+      </div></div>
+    <% end %>
+    <div class="row">
+      <div class="col-md-12 remote-resource" data-url="/admin/subscriptions/<%= @subscription.id %>/subscription_products">
+        <p class="text-center"><i class="fa fa-refresh fa-spin"></i></p>
+      </div>
+    </div>
+  </div>
+  <% unless @subscription.related.empty? %>
+    <div class="col-lg-4 col-md-5 col-sm-6 col-xs-12">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <div class="panel-body"><strong>RELATED SUBSCRIPTIONS</strong></div>
+            <%= render partial: 'admin/subscriptions/index/list_compact', locals: { subscriptions: @subscription.related } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

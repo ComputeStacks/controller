@@ -1,0 +1,37 @@
+<%= render partial: 'admin/layouts/shared/billing_nav' %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <h4>Billing Plans</h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <table id="billing_plan_table" class="table table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>User Groups</th>
+          <th>Users</th>
+          <th>Currencies</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      <% @billing_plans.each do |i| %>
+        <tr onclick="window.location='/admin/billing_plans/<%= i.id %>';" style="cursor: pointer;">
+          <td><%= i.name %></td>
+          <td><%= billing_plan_groups i %></td>
+          <td><%= i.users.count %></td>
+          <td><%= i.available_currencies.join(', ') %></td>
+          <td class="text-right">
+            <%= link_to tag.i(nil, class: 'fa fa-clone'), "/admin/billing_plans/new?clone=#{i.id}", title: 'Clone Billing Plan', class: 'btn btn-sm btn-default' %>
+            <%= link_to tag.i(nil, class: 'fa fa-cogs'), "/admin/billing_plans/#{i.id}", title: 'Manage Billing Plan', class: 'btn btn-sm btn-primary' %>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

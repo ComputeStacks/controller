@@ -1,0 +1,46 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th colspan="3">Name</th>
+      <th>Email</th>
+      <th>Last Active</th>
+      <th>Created</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if users.empty? %>
+      <tr>
+        <td class="text-center" colspan="7">No Users</td>
+      </tr>
+    <% end %>
+    <% users.each do |i| %>
+      <tr>
+        <td width="28"><%= image_tag i.avatar_url(28), class: 'img-circle' %></td>
+        <td><%= link_to i.full_name, admin_user_path(i) %></td>
+        <td>
+          <% if i.is_support_admin? %>
+            <%= content_tag(:span, 'SUPPORT', class: 'label label-info') %>
+          <% else %>
+            <%= content_tag(:span, '2FA', class: 'label label-danger') if i.has_2fa? && i.bypass_second_factor %>
+            <%= content_tag(:span, '2FA', class: 'label label-success') if i.has_2fa? && !i.bypass_second_factor %>
+            <%= content_tag(:span, 'ADMIN', class: 'label label-warning') if i.is_admin %>
+            <%= content_tag(:span, 'SUSPENDED', class: 'label label-danger') unless i.active %>
+            <%= content_tag(:span, 'NO BILL', class: 'label label-danger') if i.bypass_billing %>
+            <%= content_tag(:span, 'SERVICE ACCOUNT', class: 'label label-info') if i.is_service_account? %>
+          <% end %>
+        </td>
+        <td><%= i.email %></td>
+        <td><%= l (i.last_request_at.nil? ? i.created_at : i.last_request_at).in_time_zone(Time.zone), format: :long %></td>
+        <td><%= l i.created_at.in_time_zone(Time.zone), format: :long %></td>
+        <td class="text-right">
+          <div class="btn-group">
+            <%= link_to raw('<i class="fa fa-cogs fa-fw"></i>'), admin_user_path(i), class: 'btn btn-default btn-xs' %>
+            <%= link_to raw('<i class="fa fa-wrench fa-fw"></i>'), "#{admin_user_path(i)}/edit", class: 'btn btn-default btn-xs' %>
+            <%= link_to raw('<i class="fa fa-trash fa-fw"></i>'), admin_user_path(i), method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-danger btn-xs' %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

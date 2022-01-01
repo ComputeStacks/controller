@@ -1,0 +1,108 @@
+pma:
+  name: 'pma'
+  label: 'phpMyAdmin'
+  description: 'phpMyAdmin'
+  container_image_provider: dockerhub
+  registry_image_path: "cmptstks/phpmyadmin"
+  registry_image_tag: "litespeed"
+  min_cpu: 1
+  min_memory: 512
+  role: pma
+  role_class: web
+  can_scale: true
+  is_free: false
+
+wordpress:
+  name: 'wordpress'
+  label: 'Wordpress'
+  description: 'Wordpress'
+  container_image_provider: dockerhub
+  registry_image_path: "cmptstks/wordpress"
+  registry_image_tag: "php7.3-litespeed"
+  min_cpu: 1
+  min_memory: 512
+  role: wordpress
+  role_class: web
+  can_scale: true
+  is_free: false
+
+nginx:
+  name: 'nginx'
+  label: 'nginx'
+  description: 'nginx'
+  container_image_provider: dockerhub
+  registry_image_path: "nginx"
+  registry_image_tag: "latest"
+  min_cpu: 0
+  min_memory: 0
+  role: nginx
+  role_class: web
+  can_scale: true
+  is_free: false
+
+mariadb:
+  name: 'mariadb-105'
+  label: 'MariaDB 10.5'
+  role: mysql
+  role_class: database
+  can_scale: false
+  container_image_provider: dockerhub
+  registry_image_path: mariadb
+  registry_image_tag: 10.5
+
+custom:
+  name: 'custom'
+  label: 'Custom Wordpress'
+  description: 'Wordpress'
+  container_image_provider: dockerhub
+  registry_image_path: "cmptstks/wordpress"
+  registry_image_tag: "php7.3-litespeed"
+  min_cpu: 1
+  min_memory: 512
+  role: wordpress
+  role_class: web
+  can_scale: true
+  is_free: false
+  user: admin
+
+deletable:
+  name: 'deleteme'
+  label: 'Delete Me'
+  description: 'delete'
+  container_image_provider: dockerhub
+  registry_image_path: "cmptstks/wordpress"
+  registry_image_tag: "php7.3-litespeed"
+  min_cpu: 1
+  min_memory: 512
+  role: wordpress
+  role_class: web
+  can_scale: true
+  is_free: false
+  user: admin
+
+elasticsearch:
+  name: elasticsearch
+  label: ElasticSearch
+  description: 'ElasticSearch'
+  container_image_provider: dockerhub
+  registry_image_path: "cmptstks/elasticsearch"
+  registry_image_tag: "6.4.3"
+  role: "elasticsearch"
+  role_class: "misc"
+  min_cpu: 1
+  min_memory: 1024
+  can_scale: true
+
+es_load_balancer:
+  name: 'es_load_balancer'
+  label: 'Load Balancer for ElasticSearch'
+  description: 'This provides secure public access to elastic search, and supports the Autosuggest feature of wordpress & woocommerce'
+  container_image_provider: dockerhub
+  registry_image_path: "cmptstks/esnginx"
+  registry_image_tag: "latest"
+  min_cpu: 0.5
+  min_memory: 256
+  role: loadbalancer
+  role_class: loadbalancer
+  can_scale: true
+  is_free: true

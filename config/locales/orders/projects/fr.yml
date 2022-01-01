@@ -1,0 +1,32 @@
+fr:
+  orders:
+    projects:
+      errors:
+        missing_name: Please give your project a name.
+        missing_package: Please select a package for each application.
+        general: "There is an error with your project, please contact support."
+        general_restart: "Error! There was a problem with your order. Please try again."
+        degraded: "Unable to modify a project while it's in a degraded state."
+        working: "Please wait for initial project before making changes."
+        session_error: "Error! Unable to start order process. Please try again."
+        missing_app: Please choose an application
+        missing_data: Error! Missing order data.
+      cancel: Cancel Order
+      containers:
+        choose_apps: Choose your Applications
+        custom_app: Create Custom App
+        my_images: My Images
+        public_apps: Public Apps
+        deployment_name: Name your Project
+        existing_html: "Add containers to: <b>%{project}</b>"
+      container_params:
+        app_settings: Application Settings
+        review: Review & Deploy
+        no_packages:
+          none: There are no packages available. Please contact support. # no packages in their billing plan
+          resources_html: | # If no packages fit the min requirements for the image
+            There are no packages available that meet the requirements for this image.<br>
+            Need at least %{cpu} CPU Cores, and %{memory} MB of memory.
+      ## Intentionally left blank ####
+      shared_containers:
+        name: Container Name

@@ -1,0 +1,18 @@
+<% content_for :title, "Alerts" %>
+<% if request.xhr? %>
+  <%= render partial: 'admin/alert_notifications/list', locals: { alerts: @active_alerts } %>
+<% else %>
+  <%= render partial: 'admin/alert_notifications/active_alerts', locals: { alerts: @active_alerts } if params[:page].nil? || params[:page].to_i == 1 %>
+  <%= render partial: 'admin/alert_notifications/resolved_alerts', locals: { alerts: @alerts } unless @alerts.empty? %>
+
+  <% if @alerts.empty? && @active_alerts.empty? %>
+    <div class="row">
+      <div class="col-xs-12 text-center">
+        <p class="lead">
+          No Alert History
+        </p>
+      </div>
+    </div>
+  <% end %>
+
+<% end %>

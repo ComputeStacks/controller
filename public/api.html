@@ -1,0 +1,22 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>API</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/installation.md -->
+  <script src="//unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+  <link rel="stylesheet" href="//unpkg.com/swagger-ui-dist@3.23.5/swagger-ui.css">
+</head>
+<body>  
+  <div id="swagger-ui"></div>
+  <script>
+    SwaggerUIBundle({
+      url: '/swagger.json',
+      dom_id: '#swagger-ui'
+    })
+  </script>
+</body>
+</html>  

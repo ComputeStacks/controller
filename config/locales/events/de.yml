@@ -1,0 +1,115 @@
+de:
+  events:
+    link_to: Ereignis Logs
+    singular: Ereignis
+    plural: Ereignisse
+    code: Ereignis Code
+    details: Ereignis Details
+    none: Keine Ereignisse
+    status:
+      pending: Ausstehend
+      completed: Abgeschlossen
+      running: Läuft
+      failed: Fehlgeschlagen
+    kind:
+      info: Info
+      notice: Hinweis
+      warn: Warnung
+      alert: Warnung
+    messages:
+      unknown: "Fehler, Unbekanntes Ereignis"
+      alert:
+        general: "[%{label}] Eine Warnung wurde generiert (%{val})."
+        container:
+          cpu: "[%{label}] CPU Last (%{val}%) Schwellenwert erreicht."
+          mem: "[%{label}] Arbeitsspeicher Verbrauch (%{val}%) Schwellenwert erreicht."
+        node:
+          offline: Node %{node} ist offline
+          cpu: Node %{node} hat eine hohe CPU-Auslastung
+          memory: Node %{node} weist einen hohen Arbeitsspeicher Verbrauch auf
+          disk:
+            inodes: Node %{node} hat keine inodes mehr
+            read_latency: Node %{node} hat eine ungewöhnliche Festplatten-Lese-Latenz
+            write_latency: Node %{node} hat eine ungewöhnliche Festplatten-Schreib-Latenz
+            full: Node %{node} hat keinen Festplattenspeicherplatz
+            full_soon: Node %{node} wird keinen Festplattenspeicherplatz mehr in ~ 4 Stunden haben
+        notifications:
+          processing: "Verarbeitung von Benachrichtigungen für %{name}"
+        prom:
+          config_reload: Fehler beim Neuladen der Prometheus-Konfiguration
+          alert_manager_disconnected: Prometheus ist nicht mit dem Alarmierungs Manager verbunden
+          alert_manager_config_reload: Fehler beim Neuladen der Alarmierungs Manager Konfiguration
+          exporter_down: Ein Prometheus-Exporter ist offline
+      backup:
+        delete: Entfernen der Volumensicherung
+        sync_volumes: Lokal erstellte Volumes synchronisieren
+      container:
+        start: "[%{label}] Starte Container %{container}."
+        stop: "[%{label}] Stoppe Container %{container}."
+        restart: "[%{label}] Neustart Container %{container}."
+        rebuild: "[%{label}] Wiederherstellung Container %{container}."
+        delete: "[%{label}] Lösche Container %{container}."
+        build: "[%{label}] Erstelle Container %{container}."
+        migrating: "[%{container}] Migration zu neuem Node."
+        errors:
+          general_provision: "[%{label}] Ein Bereitstellungsfehler ist aufgetreten für %{container}."
+          resize: "[%{label}] Skalierung fehlgeschlagen für Container: %{container}."
+          stay_online: "[%{label}] Wiederherstellungsversuche sind fehlgeschlagen für %{container}."
+      deployment:
+        trash: "[%{project}] Projekt löschen"
+        sftp_init: "[%{project}] Aktualisiere SFTP Container"
+        errors:
+          fatal: "Schwerwiegender Fehler bei der Bereitstellung."
+          missing_loadbalancer: "Load Balancer kann nicht gefunden werden."
+      lets_encrypt:
+        generate: "Generiertes LetsEncrypt für %{common_name}"
+        renew: "Erneuern von LetsEncrypt für %{common_name}"
+        validate: "Validierung der Domain %{domain} für LetsEncrypt"
+      load_balancers:
+        validate_domain: "Validierung der Domain %{domain} für Load Balancer %{load_balancer}"
+        generate_lets_encrypt: "LetsEncrypt Einrichtung für Load Balancer %{load_balancer}"
+      node:
+        images:
+          pull: "[%{node}] aktualisiert lokale Images"
+        maintenance:
+          enable: "Aktivieren des Wartungsmodus auf dem Node %{node}."
+          disable: "Deaktivieren des Wartungsmodus auf dem Node %{node}."
+        evacuating: "Evakuiere Node %{node}."
+        ports:
+          reload: "[%{node}] Externe Ports neu laden."
+          open: "[%{container}] Generieren eines öffentlichen Ports für %{port}."
+          close: "[%{container}] Entfernen des öffentlichen Zugriffs für den Port %{port}."
+        volumes:
+          provision: "Bereitstellung Volume %{volume} auf Node %{node}."
+      order:
+        provision: Bereitstellung neuer Auftrag
+      service:
+        autoscale: "[%{label}] AutoScaling Dienst."
+        building_1: "[%{label}] Bereitstellung 1 Container."
+        building: "[%{label}] Bereitstellung %{count} Container."
+        removing_1: "[%{label}] Entferne 1 Container."
+        removing: "[%{label}] Entferne %{count} Container."
+        resizing_1: "[%{label}] Skalierung 1 Container."
+        resizing: "[%{label}] Skalierung %{count} Container."
+        scaling: "[%{label}] Skalierung von %{from} zu %{to} Containern."
+        trash: "[%{label}] Dienst löschen"
+        errors:
+          scale: "[%{label}] Die Skalierung der Container ist fehlgeschlagen."
+          resize: "[%{label}] Die Größenänderung von Containern ist fehlgeschlagen."
+          delete: "[%{label}] Der Dienst konnte nicht gelöscht werden."
+      snapshots:
+        restore: "Wiederherstellen des Snapshots %{snapshot} auf Volume %{volume}."
+      system:
+        process_uage: Verarbeitung der genutzten Ressourcen für die Abrechnung
+        sync_volumes: Lokal erstellte Volumes synchronisieren
+      users:
+        inactive: "[%{user}] Benutzer gesperrt."
+        active: "[%{user}] Benutzer wird entsperrt."
+      volumes:
+        clone: "Klone Volume %{volume}"
+        imported: "Importiertes Volume %{volume}"
+      volume:
+        backup: Durchführen einer Volume Sicherung
+        delete: Entferne Volume
+        imported: "Importiertes Volume %{volume}"
+        restore: Wiederherstellung Volume

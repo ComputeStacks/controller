@@ -1,0 +1,23 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-md-12">
+      <h5>Volume Storage Driver</h5>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :volume_backend, 'Local Storage' %>
+        <%= f.radio_button :volume_backend, 'local', class: 'form-control' %>
+      </div>
+
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :volume_backend, 'NFS' %>
+        <%= f.radio_button :volume_backend, 'nfs', class: 'form-control' %>
+        <span class="help-block">Enables High-Availability</span>
+      </div>
+    </div>
+  </div>
+</div>

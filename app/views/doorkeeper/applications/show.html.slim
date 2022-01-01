@@ -1,0 +1,56 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to 'My Profile', '/profile'
+      li= link_to 'Developer', '/api/oauth/applications'
+      li.active= @application.name
+
+.row: .col-xs-10.col-xs-offset-1  
+  .pull-right  
+    .pull-right= render 'delete_form', application: @application, submit_btn_css: 'btn btn-danger'
+    = link_to t('doorkeeper.applications.buttons.edit'), edit_oauth_application_path(@application), class: 'btn btn-primary', style: 'margin-right: 10px;'
+  h4= t '.title', name: @application.name
+  .panel.panel-default
+    .panel-body
+      .row
+        .col-sm-6
+          small: strong
+            = t('.application_id').upcase
+          br
+          code.code-font= @application.uid
+        .col-sm-6
+          small: strong
+            = t('.secret').upcase
+          br
+          code.code-font= @application.plaintext_secret
+      - if oauth_application_owner @application
+        .row style="margin-top:15px;"
+          .col-xs-12
+            small: strong Owner
+            br
+            code.code-font= oauth_application_owner @application
+      .row style="margin-top:15px;"
+        .col-xs-12: hr
+      .row style="margin-top:15px;"
+        .col-xs-12
+          .row
+            - @application.scopes.each do |scope|
+              .col-sm-4.col-xs-6 style="padding-bottom:20px;"
+                strong: small
+                  = t(scope, scope: [:doorkeeper, :scopes]).upcase
+                br
+                code.code-font= scope
+            .clearfix
+    table.table
+      thead
+        tr
+          th colspan="2"
+            = t('.callback_urls') 
+      tbody
+        - @application.redirect_uri.split.each do |uri|
+          tr
+            td
+              code.code-font= uri
+            td style="font-size:1.25em;"
+              = link_to t('doorkeeper.applications.buttons.authorize'), oauth_authorization_path(client_id: @application.uid, redirect_uri: uri, response_type: 'code', scope: @application.scopes), target: '_blank'
+      

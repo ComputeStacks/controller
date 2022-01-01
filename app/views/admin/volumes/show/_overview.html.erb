@@ -1,0 +1,67 @@
+<div class="panel panel-default">
+  <table class="table-list">
+    <tr>
+      <td>ID</td>
+      <td><%= volume.id %></td>
+    </tr>
+    <tr>
+      <td>Project</td>
+      <td><%= volume.deployment.nil? ? '...' : link_to(volume.deployment.name, "/admin/deployments/#{volume.deployment.id}") %></td>
+    </tr>
+    <tr>
+      <td>Service</td>
+      <td><%= volume.container_service.nil? ? '...' : volume.container_service.name %></td>
+    </tr>
+    <tr>
+      <td>Path</td>
+      <td><%= volume.container_path %></td>
+    </tr>
+    <tr>
+      <td>User</td>
+      <td><%= volume.user.nil? ? '...' : link_to(volume.user.full_name, admin_user_path(volume.user)) %></td>
+    </tr>
+    <tr>
+      <td><%= t 'volumes.table.usage' %></td>
+      <td><%= volume.usage %> GB</td>
+    </tr>
+    <tr>
+      <td>Region</td>
+      <td>
+        <% if volume.region.nil? && volume.nodes.empty? %>
+          ...
+        <% elsif volume.region.nil? %>
+          <%= volume.nodes.first.region&.name %>
+        <% else %>
+          <%= volume.region.name %>
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <td><%= volume.nodes.count < 2 ? 'Node' : 'Node' %></td>
+      <td>
+        <% if volume.nodes.empty? %>
+        ...
+        <% else %>
+          <%= volume.nodes.pluck(:label).join(', ') %>
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <td>Created</td>
+      <td><%=l volume.created_at %></td>
+    </tr>
+    <% if volume.to_trash && !volume.trash_after.nil? %>
+      <tr>
+        <td>Deleted After</td>
+        <td><%=l volume.trash_after %></td>
+      </tr>
+    <% end %>
+    <tr>
+      <td>Volume Driver</td>
+      <td><%= volume.volume_backend %></td>
+    </tr>
+  </table>
+  <div class="panel panel-footer text-center">
+    <span class="code-font-minimal" style="font-size:0.9em;word-wrap: break-word;"><%= volume.name %></span>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Image Providers", admin_container_images_providers_url %></li>
+      <li class="active"><%= @provider.name %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row"></div>

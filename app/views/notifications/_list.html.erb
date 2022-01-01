@@ -1,0 +1,36 @@
+<div class="panel panel-default">
+  <% if notifications.empty? %>
+    <div class="panel-body text-center">
+      <p class="lead"><%= t 'users.project_notifications.rules.empty' %></p>
+      <p><%= link_to t('users.project_notifications.rules.new'), "#{base_path}/new" %></p>
+    </div>
+  <% else %>
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Notifier</th>
+        <th>Service</th>
+        <th>Value</th>
+        <th>Rules</th>
+        <th class="text-right">
+          <%= link_to tag.i(nil, class: 'fa fa-plus'), "#{base_path}/new", class: 'btn btn-sm btn-primary' %>
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <% notifications.each do |i| %>
+        <tr>
+          <td><%= link_to i.label, "#{base_path}/#{i.id}" %></td>
+          <td><%= i.notifier_name %></td>
+          <td><%= i.notifier_formatted_value %></td>
+          <td><%= notifier_rule_table_list i, base_path %></td>
+          <td class="text-right">
+            <%= link_to tag.i(nil, class: 'fa fa-wrench'), "#{base_path}/#{i.id}/edit", class: 'btn btn-sm btn-default' %>
+            <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{base_path}/#{i.id}", method: :delete, class: 'btn btn-sm btn-danger', data: { confirm: t('confirm_prompt') } %>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</div>

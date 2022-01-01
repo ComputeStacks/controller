@@ -1,0 +1,32 @@
+pma:
+  network: netone
+  cidr: "10.100.25.225/32"
+  container: pma_1
+nginx:
+  network: netone
+  cidr: "10.100.7.225/32"
+  container: nginx_1
+user_nginx:
+  network: netone
+  cidr: "10.100.7.224/32"
+  container: user_nginx_1
+wordpress:
+  network: netone
+  cidr: "10.100.7.215/32"
+  container: wordpress_1
+wordpress_custom:
+  network: netone
+  cidr: "10.100.7.216/32"
+  container: wordpress_custom_1
+mysql:
+  network: netone
+  cidr: "10.100.7.199/32"
+  container: mysql_1
+sftp:
+  network: netone
+  cidr: "10.100.0.43/32"
+  sftp_container: project_test_testone
+custom_sftp:
+  network: netone
+  cidr: "10.100.0.44/32"
+  sftp_container: user_project_test_testone

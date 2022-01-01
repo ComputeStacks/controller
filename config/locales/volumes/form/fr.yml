@@ -1,0 +1,42 @@
+fr:
+  volumes:
+    form:
+      label: Name
+      label_help: "Use lower-case letters, no special characters or numbers, and replaces spaces with underscores."
+      enable_sftp: Enable SFTP Access
+      enable_sftp_help: Make volume available via the SFTP/SSH container.
+      mount_path: Mount Path
+      mount_path_help: Where to mount inside of the container
+      destroy: Schedule Volume Deletion
+      backups:
+        title: Volume Backup Settings
+        enabled: Backups Enabled
+        schedule: Schedule
+        cron: Cron Syntax
+        data_type: Data Type # Asking what kind of data is stored in the volume (e.g. files, mysql)
+        data_type_help: "This will determine how we back up your data."
+        retention:
+          title: "Retention Settings"
+          subtitle: "How many backups, in each time period, should we keep?"
+          hourly: Hourly
+          daily: Daily
+          weekly: Weekly
+          monthly: Monthly
+        hooks:
+          custom: Custom Hooks
+          custom_help_html: |
+            <p>Before and after commands to run inside of container</p>
+            <p>Your script must return an exit code of 0, otherwise it will be considered a failure.</p>
+          ## Space is intentional ####
+          pre_backup:
+            continue_on_error: "Continue on error?" # If a pre-backup hook fails, should we continue?
+            custom_script:
+              title: "Pre-Backup Script"
+              help_html: "example: <code>bash /path/to/script.sh</code>"
+          post_backup: "Post-Backup Script"
+          pre_restore:
+            title: "Pre-Restore Script"
+            continue: "Continue on error?"
+          post_restore: "Post-Restore Script"
+          rollback: "Rollback Script"
+          rollback_help: "This is triggered if your pre-restore script fails."

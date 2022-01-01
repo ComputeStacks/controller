@@ -1,0 +1,40 @@
+de:
+  container_images:
+    form:
+      label: Name
+      free: "Kostenlos?"
+      active: "Aktiviert?" # If it's available for new orders.
+      role: Rolle
+      role_class: Kategorie
+      min_cpu: Minimum CPU
+      min_mem: Minimum Speicher
+      scaling: Horizontale Skalierung? # Asking if this image can scale
+      volume_override:
+        title: Verwenden Sie lokalen Speicher für das Volume-Backend
+        help: "Wenn Sie dies aktivieren, werden alle Volumes lokal auf dem Knoten erstellt. Lokale Volumes profitieren von einer deutlich höheren Festplattenleistung, ermöglichen aber keine Hochverfügbarkeits-Szenarien."
+      registry:
+        source: Image Quelle
+        source_custom_placeholder: "my.custom-registry.com"
+        source_custom_help: Optional, stelle eine benutzerdefinierte Registry URL zur Verfügung.
+        image: Image # e.g. mysql
+        tag: Tag # e.g. latest
+        auth:
+          title: Registry Authentifizierung
+          enabled: Authentifizierung aktivieren
+          subtitle_html: |
+            Diese Einstellungen werden <em>ignoriert</em> wenn Sie die integrierte Container Registry nutzen.
+      ## Blank line intentional ####
+      owner: Eigentümer
+      command: # Override the default command for an image
+        title: Container-Befehl überschreiben
+        help_html: |
+          <p>Optional, stellen Sie einen Container-Befehl zum überschreiben zur Verfügung. Beispiele:</p>
+          <p><code>npm start</code>, <em>oder für MySQL</em> <code>--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci</code></p>
+      content_blocks:
+        title: Inhaltsblock
+        description_html: Verknüpfen Sie bestimmte Inhaltsblöcke mit diesem Image, andernfalls werden die Standardblöcke angezeigt.
+        sections:
+          general: Allgemeine Informationen
+          ssh: SSH Verbindungsinformationen
+          domain: Domain Informationen
+          remote: Fernzugriff Informationen

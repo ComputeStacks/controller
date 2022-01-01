@@ -1,0 +1,18 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Volumes", "/admin/volumes" %></li>
+      <li class="active">Edit Volume: <%= @volume.id %></li>
+    </ol>
+  </div>
+<% end %>
+
+
+<div class="row">
+  <div class="<%= @volume.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @volume, url: "/admin/volumes/#{@volume.id}" do |f| %>
+      <div class="panel panel-default"><%= render partial: 'admin/volumes/form', locals: { f: f } %></div>
+    <% end %>
+  </div>
+  <%= render partial: 'admin/volumes/errors' unless @volume.errors.count.zero? %>
+</div>

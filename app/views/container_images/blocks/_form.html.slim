@@ -1,0 +1,29 @@
+hr
+.row style="margin-bottom: 20px;"
+  .col-md-12
+    h4= t 'container_images.form.content_blocks.title'
+    = t 'container_images.form.content_blocks.description_html'
+
+.row
+  .col-sm-6.col-xs-12
+    .form-group
+      = f.label :general_block_id, t('container_images.form.content_blocks.sections.general')
+      = f.collection_select :general_block_id, @custom_blocks, :id, :title, { include_blank: true }, class: 'form-control'
+  .col-sm-6.col-xs-12
+    .form-group
+      = f.label :ssh_block_id, t('container_images.form.content_blocks.sections.ssh')
+      = f.collection_select :ssh_block_id, @custom_blocks, :id, :title, { include_blank: true }, class: 'form-control'
+
+.row
+  .col-sm-6.col-xs-12
+    .form-group
+      = f.label :domains_block_id, t('container_images.form.content_blocks.sections.domain')
+      = f.collection_select :domains_block_id, @custom_blocks, :id, :title, { include_blank: true }, class: 'form-control'
+      span.help-block Only visible to containers with a load balancer
+  .col-sm-6.col-xs-12
+    .form-group
+      = f.label :remote_block_id, t('container_images.form.content_blocks.sections.remote')
+      = f.collection_select :remote_block_id, @custom_blocks, :id, :title, { include_blank: true }, class: 'form-control'
+
+
+hr

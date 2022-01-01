@@ -1,0 +1,11 @@
+nl:
+  container_services:
+    setup:
+      domains:
+        title: Default Domain
+        ip: Public IP Address
+      ingress:
+
+        # This is the section header for the remote connection snippet
+        # e.g. `mysql -u root -h <ip> -p` for mysql.
+        title: Connection Command

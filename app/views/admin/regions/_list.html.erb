@@ -1,0 +1,30 @@
+<div class="col-lg-3 col-md-4 col-xs-6">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <div class="panel-title">
+        <%= region.name %>
+      </div>
+    </div>
+    <div class="panel-body">
+      <ul class="list-unstyled">
+        <li>
+          Load Balancer
+          <b class="pull-right">
+            <%= region.load_balancer.nil? ? '...' : link_to(region.load_balancer.public_ip, edit_admin_load_balancer_url(region.load_balancer))  %>
+          </b>
+        </li>
+        <li>
+          Nodes
+          <b class="pull-right"><%= region.nodes.available.count %></b>
+        </li>
+        <li>
+          Containers
+          <b class="pull-right"><%= region.container_count %></b>
+        </li>
+      </ul>
+      <div>
+        <%= link_to raw("<i class='fa fa-gears'></i> #{t('actions.manage')}"), admin_region_url(region), class: "btn btn-default btn-block" %>
+      </div>
+    </div>
+  </div>
+</div>

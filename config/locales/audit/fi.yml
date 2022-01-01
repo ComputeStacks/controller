@@ -1,0 +1,3 @@
+fi:
+  audit:
+    performed_by_html:  "Suorittanut käyttäjä: %{user}"

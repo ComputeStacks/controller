@@ -1,0 +1,79 @@
+<% if deployments.empty? %>
+  <div class="row">
+    <div class="col-md-12 text-center">
+      No projects found
+    </div>
+  </div>
+<% end %>
+
+<% deployments.each do |d| %>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="panel <%= deployment_panel_header d %>">
+        <div class="panel-heading" style="padding: 2px;"></div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-xs-6">
+              <span class="lead"><%= d.name %></span>
+            </div>
+            <div class="col-xs-6 text-right">
+              <% deployment_icons(d).each_with_index do |c,k| %>
+                <img style="width:20px;height:20px;"
+                     title="<%= c.label %>"
+                     onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
+                     src="<%= c.icon_url %>">
+              <% end %>
+            </div>
+          </div>
+          <div class="row" style="padding-top:10px;">
+            <div class="col-xs-6">
+              <small>
+                <% if d.user.nil? %><i class="fa fa-user-circle-o"></i><% else %><%= image_tag d.user.avatar_url(18), class: 'img-circle' %><% end %> <%= d.user.nil? ? 'none' : link_to(d.user.full_name, admin_user_path(d.user)) %>
+                | Created: <%= l d.created_at.in_time_zone(Time.zone), format: :short %>
+                | Containers: <%= d.deployed_containers.count %>
+              </small>
+            </div>
+            <div class="col-xs-6 text-right">
+              <%= link_to %Q(#{tag.i(nil, class: 'fa fa-gears')} MANAGE).html_safe, admin_deployments_path(d), class: 'btn btn-primary btn-sm' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<% end %>
+
+<% if 2 == 3 %>
+<div class="row">
+  <div class="col-xs-12">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>User</th>
+        <th>Region</th>
+        <th>Containers</th>
+        <th>Created</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% if deployments.empty? %>
+        <tr><td colspan="5" class="text-center">No projects found.</td></tr>
+      <% end %>
+      <% deployments.each do |i| %>
+        <tr>
+          <td><%= link_to i.name, admin_deployments_path(i) %></td>
+          <td><%= link_to(i.user.full_name, admin_user_path(i.user)) if i.user %></td>
+          <td><%= link_to(i.regions.first.name, "/admin/regions/#{i.regions.first.id}") unless i.regions.empty? %></td>
+          <td><%= i.deployed_containers.count %></td>
+          <td><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+<% end %>

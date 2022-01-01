@@ -1,0 +1,29 @@
+<table class="table">
+  <tbody>
+  <% if volume.list_archives.empty? %>
+    <tr>
+      <td colspan="2" class="text-center">
+        <a href="#" data-toggle="modal" data-target="#volumeCreateBackup" <% if volume.operation_in_progress? %>disabled="disabled"<% end %>>
+          <%= t 'volumes.backups.new' %>
+        </a>
+      </td>
+    </tr>
+  <% end %>
+  <% volume.list_archives.each do |i| %>
+    <tr>
+      <td class="code-font" style="vertical-align:middle; font-size:12px;"><%= volume_borg_backup_name(i) %></td>
+      <td class="text-right">
+        <div class="btn-group">
+          <% if volume.operation_in_progress? %>
+            <%= link_to t('volumes.backups.restore.title_html'), '#', disabled: 'disabled', title: 'Operation In Progress', class: 'btn btn-sm btn-success' %>
+            <%= link_to '<i class="fa fa-trash"></i>'.html_safe, '#', disabled: 'disabled', title: 'Operation In Progress', class: 'btn btn-sm btn-danger' %>
+          <% else %>
+            <%= link_to t('volumes.backups.restore.title_html'), "#{volume_path(volume)}/restore/#{i[:id]}", method: :put, data: {confirm: t('volumes.backups.restore.confirm')}, class: 'btn btn-sm btn-success' %>
+            <%= link_to '<i class="fa fa-trash"></i>'.html_safe, "#{volume_path(volume)}/backups/#{i[:id]}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
+          <% end %>
+        </div>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

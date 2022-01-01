@@ -1,0 +1,13 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to 'My Profile', '/profile'
+      li= link_to 'Developer', '/api/oauth/applications'
+      li= link_to @application.name, "/api/oauth/applications/#{@application.id}"
+      li.active Edit Application
+
+.row
+  div class=(@application.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8')
+    h4= t('.title')
+    = render 'form', application: @application
+  = render(partial: 'application/model_errors', locals: { errors: @application.errors, obj: 'oauth application'} ) unless @application.errors.count.zero?

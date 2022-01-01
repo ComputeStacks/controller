@@ -1,0 +1,2 @@
+vagrant_metric_client:
+  endpoint: "http://promuser:EZZrdGw0g3vlACmwyWNOO1Oj@192.168.173.10:8133"

@@ -1,0 +1,14 @@
+<div class="btn-group">
+  <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <i class="fa fa-power-off"></i>
+    <span class="caret"></span>
+    <span class="sr-only">Power Controls</span>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-right">
+    <li><%= container.can_power? ? link_to("Start", admin_container_start_path(container), method: :put) : link_to("Start", "", disabled: 'disabled') %></li>
+    <li><%= container.can_power? ? link_to("Stop", admin_container_stop_path(container), method: :put) : link_to("Stop", "", disabled: 'disabled') %></li>
+    <li><%= container.can_power? ? link_to("Restart", admin_container_restart_path(container), method: :put) : link_to("Restart", "", disabled: 'disabled') %></li>
+    <li role="separator" class="divider"></li>
+    <li><%= link_to('Rebuild', admin_container_rebuild_path(container), method: :put, data: {confirm: t('confirm_prompt')}) %></li>
+  </ul>
+</div>

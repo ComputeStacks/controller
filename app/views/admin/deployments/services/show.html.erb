@@ -1,0 +1,85 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Projects", "/admin/deployments" %></li>
+      <li><%= link_to @service.deployment.name, admin_deployments_path(@service.deployment) %></li>
+      <li class="active"><%= @service.label %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-sm-12">
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="pull-right">
+          <%= link_to '<i class="fa fa-external-link"></i> Service Details'.html_safe, container_service_path(@service), class: 'btn btn-primary btn-sm' %>
+        </div>
+        <p class="lead"><%= @service.label %></p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div style="font-size:10px;">NAME</div>
+            <span style="font-size:14px;"><%= @service.name %></span>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div style="font-size:10px;">PROJECT</div>
+            <span style="font-size:14px;"><%= link_to(@service.deployment.name, admin_deployments_path(@service.deployment)) %></span>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div style="font-size:10px;">IMAGE</div>
+            <span style="font-size:14px;"><%= link_to @service.container_image.label, admin_container_image_path(@service.container_image) %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-body"><strong>CONTAINERS</strong></div>
+          <div class="remote-resource" data-url="<%= admin_container_service_path(@service) %>/containers">
+            <div style="padding:25px 0;" class="text-center">
+              <i class="fa fa-refresh fa-spin"></i>
+              <%= t 'common.loading_obj', obj: t('obj.containers') %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-body"><strong>SUBSCRIPTIONS</strong></div>
+          <%= render partial: 'admin/subscriptions/index/list', locals: { subscriptions: @service.subscriptions } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="remote-resource refresh" data-url="<%=  admin_container_service_path(@service) %>/events">
+            <div class="text-center" style="padding: 25px 0;">
+              <i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading_obj', obj: t('events.plural') %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

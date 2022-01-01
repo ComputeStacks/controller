@@ -1,0 +1,48 @@
+<%= render partial: 'admin/layouts/shared/settings_nav' %>
+
+<div class="row">
+  <div class="col-md-12">
+    <p class="lead">Content Blocks</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>System Code</th>
+          <th>Languages</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @blocks.each do |i| %>
+          <tr>
+            <td><%= link_to truncate(i.title, length: 50), "/admin/blocks/#{i.id}" %></td>
+            <td><%= i.content_key.blank? ? '...' : i.content_key %></td>
+            <td><%= i.block_contents.distinct.pluck(:locale).join(', ') %></td>
+            <td class="text-right">
+              <%= link_to tag.i(nil, class: 'fa fa-book'), "/admin/blocks/#{i.id}/block_contents", class: 'btn btn-primary btn-sm', style: 'margin-right: 10px;' %>
+              <div class="btn-group">
+                <%= link_to "<i class='fa fa-wrench'></i>".html_safe, "/admin/blocks/#{i.id}/edit", class: 'btn btn-default btn-sm' %>
+                <% if i.content_key.blank? %>
+                  <%= link_to "<i class='fa fa-trash'></i>".html_safe, "/admin/blocks/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
+                <% else %>
+                  <%= link_to "<i class='fa fa-trash'></i>".html_safe, "/", disabled: 'disabled', title: 'Unable to delete system content block', class: 'btn btn-danger btn-sm' %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @blocks %>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <p><strong><%= t('container_images.show.overview.reg') %></strong></p>
+    <span class="code-font">
+      <%= @container.container_registry.nil? ? @container.full_image_path : link_to(@container.full_image_path, request.path =~ /admin/ && current_user.is_admin ? admin_container_images_registry_path(@container.container_registry) : container_registry_path(@container.container_registry)) %>
+    </span>
+  </div>
+</div>

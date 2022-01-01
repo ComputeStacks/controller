@@ -1,0 +1,51 @@
+<div class="col-xs-12 hidden-xs" style="margin-bottom:30px;">
+  <div class="row deployment-overview-sub hidden-xs" style="margin-top:5px;">
+    <div class="col-xs-3">
+      <div class="deployment-overview-sub-header"><%= t('obj.region').upcase %></div>
+      <div class="deployment-overview-sub-content"><%= @service.region&.name %></div>
+    </div>
+    <div class="col-xs-3">
+      <div class="deployment-overview-sub-header"><%= t('container_services.header.price').upcase %></div>
+      <div class="deployment-overview-sub-content"><%= format_currency @service.run_rate %> /<%= t 'billing.month' %></div>
+    </div>
+    <% unless @service.package.nil? %>
+      <div class="col-xs-3">
+        <div class="deployment-overview-sub-header"><%= t('container_services.header.plan').upcase %></div>
+        <div class="deployment-overview-sub-content">
+          <span style="text-decoration: underline; cursor: help;" data-toggle="tooltip" data-placement="bottom" title="<%= pluralize @service.package.cpu, 'CORE', 'CORES' %> / <%= @service.package.memory %> MB">
+            <%= @service.package.product.label %>
+          </span>
+        </div>
+      </div>
+    <% end %>
+    <div class="<%= @service.package.nil? ? 'col-xs-6' : 'col-xs-3' %>">
+      <div class="deployment-overview-sub-header"><%= t('deployments.show.header.last_event').upcase %></div>
+      <div class="deployment-overview-sub-content remote-resource refresh" data-url="/container_services/<%= @service.id %>/events/last_event">
+        ...
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-xs-12 visible-xs">
+  <div class="panel panel-default">
+    <table class="table-list">
+      <tr>
+        <td><%= t('container_services.header.app') %></td>
+        <td><%= @service.container_image.label %></td>
+      </tr>
+      <tr>
+        <td><%= t('container_services.header.price') %></td>
+        <td><%= format_currency @service.run_rate %> /<%= t 'billing.month' %></td>
+      </tr>
+      <tr>
+        <td><%= t('container_services.header.plan') %></td>
+        <td><%= @service.package.nil? ? '...' : @service.package.product.label %></td>
+      </tr>
+      <tr>
+        <td><%= t 'obj.region' %></td>
+        <td><%= @service.region&.name %></td>
+      </tr>
+    </table>
+  </div>
+</div>

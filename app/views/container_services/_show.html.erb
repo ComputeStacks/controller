@@ -1,0 +1,39 @@
+<% if service.is_load_balancer && service.subscriptions.empty? %>
+  <hr style="margin-top:0;">
+<% else %>
+  <div class="row">
+    <%= render partial: "container_services/show/header" %>
+  </div>
+<% end %>
+<div class="row">
+  <div class="col-md-12">
+    <%= render partial: 'container_services/show/charts', locals: { service: service } %>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-4 col-md-5 col-sm-12">
+
+    <%= render partial: "container_services/show/overview", locals: {service: service, settings: service.combined_settings} %>
+    <%= render partial: "container_services/show/volumes", locals: {volumes: service.volumes.order(:label)} unless service.volumes.empty? %>
+    <%= render partial: "container_services/show/backend", locals: { service: service } if service.is_load_balancer %>
+    <%= render partial: 'container_services/show/custom/pma' if service.container_image.service_container? %>
+
+  </div>
+  <div class="col-lg-8 col-md-7 col-sm-12">
+
+    <%= render partial: 'container_services/show/domains', locals: { service: service } unless service.domains.empty? %>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default remote-resource refresh" data-url="<%= container_service_containers_path service %>">
+          <div class="text-center" style="padding: 25px 0;">
+            <i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading' %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <%= render partial: 'container_services/show/ingress_rules', locals: { service: service } unless service.container_image.service_container? %>
+
+  </div>
+</div>
+

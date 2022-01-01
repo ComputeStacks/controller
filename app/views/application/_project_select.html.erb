@@ -1,0 +1,8 @@
+<% if deployments.empty? %>
+  <option><%= t 'project_select.none' %></option>
+<% else %>
+  <option value=""><%= t 'project_select.title' %></option>
+  <% deployments.each do |i| %>
+    <option value="<%= i.token %>" <% if deployment_id == i.id %>selected="selected"<% end %>><%= i.name %></option>
+  <% end %>
+<% end %>

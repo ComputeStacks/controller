@@ -1,0 +1,16 @@
+<%
+  # Render price resource obj
+  #
+  # Locals:
+  # @type [BillingResourcePrice] price_resource
+%>
+<li>
+  <%= price_resource.price.zero? ? I18n.t('common.free') : format_currency(price_resource.price, price_resource.price_precision) + " /" + I18n.t("billing.#{price_resource.term}") %>
+  <b class="pull-right">
+    <% if price_resource.billing_phase.time_unit.nil? %>
+      <span style="font-size:20px;line-height:10px;" title="No time limit.">-</span>
+    <% else %>
+      <%= billable_phase_price_quote(price_resource.billing_phase) %>
+    <% end %>
+  </b>
+</li>

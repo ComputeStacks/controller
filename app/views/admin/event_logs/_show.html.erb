@@ -1,0 +1,96 @@
+<div class="col-md-4">
+  <div class="row">
+    <div class="col-md-12">
+      <% unless log.state_reason.blank? %>
+        <div class="alert <%= log_reason_class(log) %>"><%= log.state_reason %></div>
+      <% end %>
+      <div class="panel panel-default">
+        <table class="table-list">
+          <tr>
+            <td><%= t('deployments.logs.log.type') %></td>
+            <td><%= log.notice ? t('deployments.logs.attr.alert') : t('deployments.logs.attr.event') %></td>
+          </tr>
+          <tr>
+            <td><%= t('deployments.logs.log.status') %></td>
+            <td><%= t "events.#{log.status}" %></td>
+          </tr>
+          <tr>
+            <td><%= t('deployments.logs.log.started') %></td>
+            <td><%= l log.created_at.in_time_zone(Time.zone), format: :long %></td>
+          </tr>
+          <tr>
+            <td><%= log.status == 'pending' || log.status == 'running' ? t('deployments.logs.log.last_updated') : t('deployments.logs.log.finished') %></td>
+            <td><%= l log.updated_at, format: :long %></td>
+          </tr>
+          <tr>
+            <td>Event Code</td>
+            <td class="code-font-minimal">
+              <small><%= log.event_code %></small>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <% if log.audit %>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <%= render partial: "admin/audit/overview", locals: { audit: log.audit } %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  <% unless subscribers.empty? %>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <%= render partial: "event_logs/show/related_services", locals: { subscribers: @subscribers, from_admin: true } %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="col-md-8">
+
+  <div class="row">
+    <div class="col-md-12">
+      <% unless deployment_event(log).strip.blank? %>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <%= strip_tags deployment_event(log).gsub(/\[(.*?)\]/, '') %>
+          </div>
+        </div>
+      <% end %>
+      <% if log.event_details.exists? %>
+        <hr/>
+        <div style="font-size:12px;margin-bottom:20px;">EVENT DETAILS</div>
+        <% log.event_details.sorted.each do |i| %>
+          <div class="panel panel-default">
+            <div class="panel-body" style="padding-bottom: 0;">
+              <pre><%= i.formatted_data %></pre>
+            </div>
+            <table class="table" style="font-size:11px;border:none;">
+              <tr>
+                <td>
+                  <%= l i.created_at, format: :long %>
+                </td>
+                <td class="text-right">
+                  <%= i.event_code %>
+                </td>
+              </tr>
+            </table>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+  <% if log.system_events.exists? %>
+    <div class="row">
+      <div class="col-md-12">
+        <%= render partial: "admin/event_logs/show/system_events", locals: { events: log.system_events } %>
+      </div>
+    </div>
+  <% end %>
+</div>

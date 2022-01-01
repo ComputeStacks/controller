@@ -1,0 +1,10 @@
+.row
+  .col-md-6.col-sm-4.col-xs-12= image_content_remote service
+  .col-md-6.col-sm-8.col-xs-12
+    .row: .col-xs-12
+      = render partial: 'container_services/show/ingress_rules', locals: { service: service }
+    .row: .col-xs-12
+      - unless ingress_remote_connect_helper(service).blank?
+        small= t('container_services.setup.ingress.title').upcase
+        br
+        pre= ingress_remote_connect_helper(service)

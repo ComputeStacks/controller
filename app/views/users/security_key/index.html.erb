@@ -1,0 +1,18 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to t('users.profile_sidebar.main'), "/users/edit" %></li>
+      <li><%= link_to t('users.profile_sidebar.sec'), "/users/security" %></li>
+      <li class="active"><%= t 'users.security_key.index.title' %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <h5><%= t 'users.security_key.index.title' %></h5>
+    <div class="panel panel-default">
+      <%= render partial: 'users/security_key/index', locals: { seckeys: current_user.security_keys.order(created_at: :desc) } %>
+    </div>
+  </div>
+</div>

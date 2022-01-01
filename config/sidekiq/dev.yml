@@ -1,0 +1,12 @@
+---
+:timeout: 45
+:concurrency: 15
+:queues:
+  - [critical, 2]
+  - [dep_critical, 2]
+  - dep
+  - default
+  - dep_low
+  - low
+  - mailers
+  - letsencrypt

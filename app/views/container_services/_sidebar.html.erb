@@ -1,0 +1,24 @@
+<% 2.times do |i| %>
+
+  <div class="tabbable <%= i.zero? ? 'tabs-left hidden-xs hidden-sm' : 'visible-xs visible-sm' %>">
+    <ul class="nav nav-tabs" <% if i.zero? %>style="width:100%;text-align:right;"<% end %>>
+      <li class="<%= active == 'overview' ? 'active' : ''%>" onclick="javascript:window.location='/container_services/<%= @service.id %>';">
+        <%= link_to t('container_services.sidebar.overview'), "/container_services/#{@service.id}" %>
+      </li>
+      <li class="<%= active == 'activity' ? 'active' : '' %>" onclick="javascript:window.location='/container_services/<%= @service.id %>/events';">
+        <%= link_to t('container_services.sidebar.events'), "/container_services/#{@service.id}/events" %>
+      </li>
+      <% if @primary_container %>
+        <li class="<%= active == 'access' ? 'active' : '' %>" onclick="javascript:window.location='/containers/<%= @primary_container.id %>/ports';">
+          <%= link_to t('container_services.sidebar.remote'), "/containers/#{@primary_container.id}/ports" %>
+        </li>
+        <li class="<%= active == 'logs' ? 'active' : '' %>" onclick="javascript:window.location='/containers/<%= @primary_container.id %>/logs';">
+          <%= link_to t('container_services.sidebar.logs'), "/containers/#{@primary_container.id}/logs" %>
+        </li>
+      <% end %>
+      <li class="<%= active == 'settings' ? 'active' : '' %>" onclick="javascript:window.location='/container_services/<%= @service.id %>/edit';">
+        <%= link_to t('container_services.sidebar.settings'), "/container_services/#{@service.id}/edit" %>
+      </li>
+    </ul>
+  </div>
+<% end %>

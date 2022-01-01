@@ -1,0 +1,8 @@
+fi:
+  volumes:
+    backups:
+      new: Luo varmuuskopio
+      restore:
+        title_html: '<i class="fa fa-refresh"></i> Palauta'
+        confirm: Oletko varma? Toiminto ylikirjoittaa tämänhetkiset tiedot ja uudelleenkäynnistää tähän liittyvät kontit.
+      name: Varmuuskopion nimi

@@ -1,0 +1,50 @@
+.panel.panel-primary
+  .panel-heading style="padding:2px;"
+  table.table
+    - if request.path =~ /admin/ && @container.user
+      tr
+        th= t 'container_images.show.overview.owner'
+        td.text-right= link_to @container.user.full_name, admin_user_path(@container.user)
+    tr
+      th= t 'container_images.show.overview.enabled'
+      td.text-right= @container.active ? t('common.yes') : t('common.no')
+    tr
+      th= t 'container_images.show.overview.role'
+      td.text-right= @container.role
+    tr
+      th= t 'container_images.show.overview.role_class'
+      td.text-right= container_category(@container.role_class)
+    tr
+      th= t 'container_images.show.overview.scale'
+      td.text-right= @container.can_scale ? t('common.yes') : t('common.no')
+    - if current_user.is_admin?
+      tr
+        th= t 'container_images.show.overview.free'
+        td.text-right= @container.is_free ? t('common.yes') : t('common.no')
+
+    - if current_user.is_admin? || @container.user == current_user
+      tr
+        th= t 'container_images.show.overview.in_use'
+        td.text-right
+          - if @container.deployed_containers.count > 0
+            = "#{@container.deployed_containers.count} #{@container.deployed_containers.count > 1 ? t('obj.containers') : t('obj.container')}"
+          - else
+            = "0 #{t('obj.containers')}"
+
+    - if @container.min_cpu > 0 || @container.min_memory > 0
+      tr
+        th= t 'container_images.show.overview.min'
+        td.text-right= image_minimums(@container)
+- unless @container.command.blank?
+  .panel.panel-danger
+    .panel-heading style="padding:2px;"
+    .panel-body style="padding-bottom:2px;padding-top:2px;"
+      small: b= t('container_images.show.overview.command').upcase
+    table.table
+      tr
+        td.code-font.text-center style="font-size:1.1rem;"= @container.command
+
+- unless @container.description.blank?
+  .panel.panel-default: .panel-body
+    p: strong= t 'container_images.show.overview.desc' 
+    p= @container.description.html_safe

@@ -1,0 +1,29 @@
+.panel-body
+  .row
+    .col-sm-6: .form-group
+      = label_tag :name, 'Name'
+      = f.text_field :name, required: true, class: 'form-control', disabled: 'disabled'
+
+    .col-sm-6: .form-group
+      = label_tag :description, 'Description'
+      = f.text_field :description, class: 'form-control', disabled: 'disabled'
+  .row
+    .col-sm-12: .form-group
+      = label_tag :value, 'Value'
+      - if @setting.encrypted
+        = f.text_area :value, class: 'form-control', value: @setting.decrypted_value, rows: 5
+      - else
+        - if @setting.name == 'billing_module'
+          = f.select :value, options_for_select(setting_billing_module_list, @setting.value), {}, class: 'form-control'
+        - else
+          - if setting_display_in_fw_font?(@setting)
+            = f.text_area :value, class: 'form-control code-font', rows: 5
+          - else
+            = f.text_area :value, class: 'form-control', rows: 5
+
+.panel-footer
+  = link_to t('actions.cancel'), "/admin/settings", class: 'btn btn-default', style: 'margin-right:10px;'
+  - if @setting.name == 'license_key'
+    = submit_tag "Save & Validate License", class: 'btn btn-success pull-right'
+  - else
+    = submit_tag t('actions.save'), class: 'btn btn-success pull-right'

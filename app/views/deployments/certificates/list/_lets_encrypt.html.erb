@@ -1,0 +1,34 @@
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th><%= t 'obj.domain' %></th>
+      <th><%= t 'container_services.domains.attributes.service' %></th>
+      <th><%= t 'container_services.domains.attributes.endpoint' %></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if domains.empty? %>
+      <tr>
+        <td class="text-center" colspan="4"><%= t 'container_services.certificates.none.le' %></td>
+      </tr>
+    <% end %>
+    <% domains.each do |i| %>
+      <tr>
+        <td>
+          <%= link_to i.domain, "/container_domains/#{i.id}/edit" %>
+          <%= domain_le_badge i %>
+        </td>
+        <td><%= i.container_service.nil? ? '...' : link_to(i.container_service.label, container_service_path(i.container_service)) %></td>
+        <td><%= i.expected_dns_entries.join(', ') %></td>
+        <td class="text-right">
+          <%= link_to t('container_services.certificates.verify_domain'), "/container_domains/#{i.id}/verify_dns", method: :post, class: 'btn btn-xs btn-default' if i.le_require_verify? %>
+          <div class="btn-group">
+            <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_container_domain_path(i), class: 'btn btn-xs btn-default' %>
+            <%= link_to "<i class='fa fa-trash'></i>".html_safe, container_domain_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

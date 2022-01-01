@@ -1,0 +1,21 @@
+final_bandwidth:
+  billing_resource: bandwidth
+  phase_type: final
+final_disk:
+  billing_resource: disk
+  phase_type: final
+final_local_disk:
+  billing_resource: local_disk
+  phase_type: local_final
+final_containersmall:
+  billing_resource: containersmall
+  phase_type: final
+final_containerm:
+  billing_resource: containerm
+  phase_type: final
+final_containerl:
+  billing_resource: containerl
+  phase_type: final
+final_backup:
+  billing_resource: backup
+  phase_type: final

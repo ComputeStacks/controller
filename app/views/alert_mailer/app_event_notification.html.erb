@@ -1,0 +1,15 @@
+<h1 style="box-sizing: border-box; color: #2F3133; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 19px; font-weight: bold; margin-top: 0;" align="left">
+  <%= @header.html_safe %>
+</h1>
+<div style="box-sizing: border-box; color: #74787E; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 16px; line-height: 1.5em; margin-top: 0;" align="left">
+  <%= @body %>
+</div>
+<% unless @labels.empty? %>
+<div style="box-sizing: border-box; color: #74787E; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 16px; line-height: 1.5em; margin-top: 0;" align="left">
+  <ul>
+    <% @labels.each do |label| %>
+      <li><b><%= label[0] %></b> <%= label[1] %></li>
+    <% end %>
+  </ul>
+</div>
+<% end %>

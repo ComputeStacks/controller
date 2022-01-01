@@ -1,0 +1,42 @@
+<% content_for :title, t('obj.domains') %>
+<%= render partial: "deployments/shared/main_nav" %>
+
+<div class="row">
+  <div class="col-md-12">
+
+    <table id="container-domains-list" class="table table-hover">
+      <thead>
+        <tr>
+          <th><%= t 'obj.domain' %></th>
+          <th><%= t 'obj.deployment' %></th>
+          <th><%= t 'container_services.domains.attributes.service' %></th>
+          <th><%= t 'container_services.domains.attributes.endpoint' %></th>
+          <th><%= t 'container_services.domains.attributes.created' %></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @domains.each do |i| %>
+          <tr>
+            <td>
+              <%= link_to i.domain, "/container_domains/#{i.id}/edit" %>
+              <%= domain_le_badge i %>
+            </td>
+            <td><%= i.deployment.nil? ? '...' : link_to(i.deployment.name, deployments_path(i.deployment)) %></td>
+            <td><%= i.container_service.nil? ? '...' : link_to(i.container_service.label, container_service_path(i.container_service)) %></td>
+            <td><%= i.container_service.nil? ?  '...' : i.expected_dns_entries.join(', ') %></td>
+            <td><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
+            <td class="text-right">
+              <div class="btn-group">
+                <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_container_domain_path(i), class: 'btn btn-sm btn-default' %>
+                <%= link_to raw("<i class='fa fa-trash'></i>"), container_domain_path(i), method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-sm btn-danger' %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+
+  </div>
+</div>

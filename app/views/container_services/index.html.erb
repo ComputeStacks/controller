@@ -1,0 +1,60 @@
+<% unless request.xhr? %>
+  <% content_for :breadcrumb do %>
+    <div class="row has-breadcrumb">
+      <ol class="breadcrumb">
+        <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+        <li><%= link_to @deployment.name, deployments_path(@deployment) if @deployment %></li>
+        <li class="active"><%= t 'obj.services' %></li>
+      </ol>
+    </div>
+  <% end %>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12">
+
+    <% if @services.empty? %>
+      <div class="col-md-6 col-md-offset-3">
+        <div class="text-center" style="margin-top:50px;opacity: 0.2;">
+          <i class="fa fa-cubes" style="font-size:6em;"></i>
+          <div style="color:#333;font-size:2em;">No Applications Found</div>
+        </div>
+      </div>
+    <% end %>
+
+    <% @services.each do |i| %>
+      <div class="panel <%= service_list_banner_color i %>">
+        <div class="panel-heading" style="padding:1px;"></div>
+        <div class="panel-body">
+          <div id="service-<%= i.id %>" style="display:inline;">
+            <div class="pull-left" style="width:35px;margin-right:10px;margin-top:-2px;">
+              <%= service_img_icon_tag i %>
+            </div>
+            <span style="cursor: pointer;" onclick='window.location="<%= container_service_path(i) %>";' title="<%= i.name %>"><%= i.container_image.label.upcase %></span>
+            &nbsp;&nbsp;|&nbsp;&nbsp; <%= link_to i.label, container_service_path(i) %>
+            <div class="pull-right hidden-xs">
+              <%= service_list_status i %>
+              <%= link_to('Login', container_service_connect_index_path(i), title: "Login") if service_show_login(i) %>
+            &nbsp;&nbsp;<%= link_to "<i class='fa fa-cogs'></i>".html_safe, container_service_path(i), title: i.name %>
+            </div>
+          </div>
+        </div>
+        <div class="panel-footer" style="padding: 5px 15px;font-size:1.14rem;">
+          <div class="row">
+            <div class="col-xs-6">
+              <%= service_list_domain i %>
+            </div>
+            <div class="col-xs-6 text-right">
+              <%= service_list_status_indicator i %>
+              <% unless i.public_network? %>
+              &nbsp;|&nbsp;
+              <%= pluralize i.containers.count, t('obj.container'), plural: t('obj.containers') %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+</div>

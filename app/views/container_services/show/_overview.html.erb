@@ -1,0 +1,28 @@
+<%= render partial: 'container_services/show/settings', locals: { settings: settings } unless settings.empty? %>
+
+<% unless service.command.blank? || service.command == service.container_image.command  %>
+  <div class="panel panel-danger">
+    <div class="panel-heading" style="padding:2px;"></div>
+    <div class="panel-body" style="padding-bottom: 2px; padding-top: 2px;">
+      <small>
+        <b><%= t('container_images.show.overview.command').upcase %></b>
+      </small>
+    </div>
+    <table class="table">
+      <tr>
+        <td class="code-font text-center" style="font-size:1.1rem;">
+          <%= service.command %>
+        </td>
+      </tr>
+    </table>
+  </div>
+<% end %>
+
+<% if service.uses_load_balancer? && has_ingress_connect_helper?(service) %>
+  <div class="panel panel-info">
+    <div class="panel-heading" style="padding:2px;"></div>
+    <div class="panel-body">
+      <code><%= link_to truncate(ingress_remote_connect_helper(service), length: 60, omission: '...'), "/container_services/#{service.id}/connect" %></code>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,89 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'LetsEncrypt Certificates', '/admin/lets_encrypt' %></li>
+      <li class="active"><%= "LetsEncrypt #{@lets_encrypt.id}" %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row deployment-overview-sub hidden-xs">
+
+  <div class="col-md-3">
+    <div class="deployment-overview-sub-header">User</div>
+    <div class="deployment-overview-sub-content">
+      <%= @lets_encrypt.user.nil? ? 'System' : link_to(@lets_encrypt.user.full_name, admin_user_path(@lets_encrypt.user)) %>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="deployment-overview-sub-header">Status</div>
+    <div class="deployment-overview-sub-content">
+      <%= @lets_encrypt.status.capitalize %>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="deployment-overview-sub-header">Expires</div>
+    <div class="deployment-overview-sub-content">
+      <%= @lets_encrypt.expires_at.nil? ? 'n/a' : l(@lets_encrypt.expires_at, format: :short) %>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="deployment-overview-sub-header">Last Generated</div>
+    <div class="deployment-overview-sub-content">
+      <%= @lets_encrypt.last_generated_at.nil? ? 'n/a' : l(@lets_encrypt.last_generated_at, format: :short) %>
+    </div>
+  </div>
+
+</div>
+
+<div class="row" style="margin-top:25px;">
+  <div class="col-md-6 col-sm-12">
+    <div class="panel panel-primary">
+      <div class="panel-heading" style="padding:1px;"></div>
+      <div class="panel-body">
+        <strong>DOMAINS</strong>
+      </div>
+      <div class="panel-body">
+        <% if @lets_encrypt.names.empty? %>
+          <p>No domains have been provisioned yet</p>
+        <% else %>
+          <ul class="list-unstyled">
+            <% @lets_encrypt.names.each do |i| %>
+              <li><%= link_to i, "https://#{i}", target: "_blank" %></li>
+            <% end %>
+          </ul>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-sm-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <strong>RECENT VALIDATIONS</strong>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Domain</th>
+            <th>Challenge Type</th>
+            <th>Challenge Expires</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @lets_encrypt.lets_encrypt_auths.sorted.each do |auth| %>
+            <tr>
+              <td><%= auth.domain %></td>
+              <td><%= auth.challenge_type %></td>
+              <td><%= auth.expires_at.blank? ? 'n/a' : l(auth.expires_at, format: :short) %></td>
+              <td class="text-right"><%= link_to tag.i(nil, class: 'fa fa-trash'), admin_lets_encrypt_auth_path(auth), method: :delete, data: {confirm: 'Are you sure? Be sure to also disable LetsEncrypt for this domain.'}, class: 'btn btn-sm btn-danger' %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

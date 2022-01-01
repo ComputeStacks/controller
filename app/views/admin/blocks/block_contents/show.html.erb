@@ -1,0 +1,26 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Content Blocks", "/admin/blocks" %></li>
+      <li><%= link_to truncate(@block.title, length: 30), @base_url %></li>
+      <li class="active"><%= @block_content.locale %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12 col-sm-12">
+    <div class="pull-right"><%= link_to 'Edit', "#{@section_url}/edit", class: 'btn btn-default btn-sm' %></div>
+    <p class="lead"><%= @block_content.locale %></p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12 col-sm-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <%= @block_content.body.html_safe %>
+      </div>
+    </div>
+  </div>
+</div>

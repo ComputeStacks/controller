@@ -1,0 +1,23 @@
+<%= render partial: 'admin/layouts/shared/accounts_nav' %>
+
+<div class="row">
+  <div class="col-md-12">
+    <p class="lead">Users</p>
+  </div>
+</div>
+
+<div class="row"><%= render partial: "admin/users/index/filter" %></div>
+
+<hr />
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= render partial: "admin/users/index/list", locals: { users: @users } %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @users %>
+  </div>
+</div>

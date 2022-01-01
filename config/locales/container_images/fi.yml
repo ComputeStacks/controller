@@ -1,0 +1,74 @@
+fi:
+  container_images:
+    clone: Clone # Duplicate an image and create a new one.
+    params:
+      common:
+        name_help:
+          title: Muodon opastus
+          description: "Käytä pienaakkosia, ei erikoismerkkejä tai numeroita ja korvaa välilyönnit alaviivalla (_)."
+        param_type:
+          title: Tyyppi
+          static: Staattinen arvo
+          var: Muuttuja
+          pass: Salasana
+        value: Arvo
+      env:
+        table:
+          title: Ympäristömuuttujat
+        breadcrumb:
+          edit: "Muokkaa %{name}"
+          new: Lisää ympäristömuuttuja
+        new_button: Lisää ympäristömuuttuja
+        new_snippet_html: "Ympäristömuuttujat välitetään suoraan konttiisi.<br>Ne voivat olla staattisia arvoja, muuttujia tai muuttujia jotka luetaan tästä tai linkitetystä kontista."
+      settings:
+        table:
+          title: Muuttujat
+        breadcrumb:
+          edit: "Muokataan %{setting}"
+          new: Lisää asetus
+        new_button: Lisää kontin asetus
+        new_snippet_html: "Asetukset voidaan tehdä ympäristömuuttujina kaikille tätä kuvaa käyttäville konteille tai riippuville (linkitetyille) konteille."
+        form:
+          static: "Käyttäjän määrittämä asetus"
+          default_value: Oletusarvo
+          password: Automaattisesti luotu salasana
+      related:
+        table:
+          title: Vaaditut kontit
+          inverse: Vaatii
+          none: Ei kontteja
+        form:
+          title: Lisää vaadittu kontti
+          select: Valitse kontin kuva
+    new:
+      breadcrumb: Luo kontin kuva
+      title: Luo kontin kuva
+    index:
+      empty: Ei kontin kuvia
+      qty: Konttien määrä
+      reg: Arkisto
+      index:
+        image: Kuva
+    edit:
+      breadcrumb: Muokkaa kuvaa
+    show:
+      overview:
+        title: Yleiskatsaus
+        free: Ilmainen kuva?
+        lb: Kuormantasaus käytössä
+        owner: Omistaja
+        enabled: Käytössä
+        role: Rooli
+        role_class: Kategoria
+        scale: Tukee skaalausta
+        in_use: Käytössä
+        reg: Varasto
+        desc: Kuvaus
+        min: Vähimmäismäärät # Resource minimums (cpu, memory)
+        command: Komento # container command
+    categories:
+      apps: Sovellukset
+      databases: Tietokannat
+      kv: Avain/Arvo & Caching
+      dev: Kehitystyökalut
+      other: Muut

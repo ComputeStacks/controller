@@ -1,0 +1,33 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to "System Alerts", "/admin/system_events"
+      li.active= "Alert: #{@event.id}"
+
+
+
+- content_for :title, "System Events"
+
+.row: .col-md-12: h6= @event.message
+
+.row style="margin-top:15px;"
+  .col-md-4: .panel.panel-default
+    table.table-list
+      tr
+        td Log Level
+        td= @event.log_level.upcase
+      tr
+        td Created
+        td= l @event.created_at.in_time_zone(Time.zone), format: :long
+      - if @event.audit
+        tr
+          td Performed By
+          td= @event.audit.user.nil? ? 'System' : link_to(@event.audit.user.full_name, admin_user_path(@event.audit.user))
+        - unless audit_obj_url(@event.audit).nil?
+          tr
+            td References
+            td= link_to @event.audit.linked_name, audit_obj_url(@event.audit)
+      tr
+        td Event Code
+        td= @event.event_code
+  .col-md-8: .panel.panel-default: .panel-body: pre= @event.data.to_yaml

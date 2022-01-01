@@ -1,0 +1,29 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>Container</th>
+      <th>Node</th>
+      <th>Project</th>
+      <th>User</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if volume_subscribers(@subscribers).empty? %>
+      <tr>
+        <td colspan="4" class="text-center">No containers found.</td>
+      </tr>
+    <% end %>
+    <% volume_subscribers(@subscribers).each do |k,v| %>
+      <tr>
+        <td>
+          <%= v[:link] ? link_to(k, v[:link]) : k %>
+          <%= content_tag(:span, "UNKNOWN", class: 'label label-warning') if v[:container].nil? %>
+        </td>
+        <td><%= link_to(v[:node].label, "/admin/nodes/#{v[:node].id}") if v[:node] %></td>
+        <td><%= link_to(v[:deployment].name, "/admin/deployments/#{v[:deployment].id}") if v[:deployment] %></td>
+        <td><%= link_to(v[:user].full_name, admin_user_path(v[:user])) if v[:user] %></td>
+      </tr>
+    <% end %>
+
+  </tbody>
+</table>

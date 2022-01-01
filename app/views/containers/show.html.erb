@@ -1,0 +1,50 @@
+<% content_for :title, @container.name %>
+
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb <%= current_user.is_admin ? 'pull-left' : '' %>" style="<%= current_user.is_admin ? 'padding-top:10px;' : '' %>">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active"><%= @container.name %></li>
+    </ol>
+    <% if current_user.is_admin %>
+      <ol class="breadcrumb breadcrumb-action text-right">
+        <%= link_to '<i class="fa fa-external-link"></i> View In Admin'.html_safe, "/admin/containers/#{@container.id}", class: 'btn btn-default btn-sm' %>
+      </ol>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="row" style="margin-bottom:20px;">
+  <div class="col-sm-12">
+    <div class="pull-right">
+      <%= link_to "<i class='fa fa-area-chart'></i> All Charts".html_safe, "/containers/#{@container.id}/charts", class: 'btn btn-sm btn-default', style: "margin-right:5px;" %>
+      <%= link_to "<i class='fa fa-table'></i> View Logs".html_safe, "#{container_path(@container)}/container_logs", class: 'btn btn-default btn-sm' %>
+    </div>
+    <small><%= t('obj.container').upcase %></small>
+    <h4 style="margin-top:0px;"><%= @container.name %></h4>
+  </div>
+</div>
+
+<div class="row">
+
+  <div class="col-md-4">
+    <%= render partial: "containers/show/overview", locals: {container: @container} %>
+  </div>
+
+  <div class="col-md-8">
+    <div class="row">
+      <div class="col-md-12">
+        <%= render partial: 'containers/charts/cpu/cpu_usage', locals: { container: @container } %>
+      </div>
+      <div class="col-md-12">
+        <%= render partial: 'containers/charts/memory/usage', locals: { container: @container } %>
+      </div>
+      <div class="col-md-12">
+        <%= render partial: 'containers/charts/disk/usage', locals: { container: @container } %>
+      </div>
+    </div>
+  </div>
+
+</div>

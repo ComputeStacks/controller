@@ -1,0 +1,11 @@
+- content_for :title, t('obj.registries')
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb.pull-left
+      li.active= t('deployments.shared.main_nav.registry')
+    ol.breadcrumb.breadcrumb-action.text-right
+      li= link_to raw("<i class='fa fa-database'></i>&nbsp;&nbsp;&nbsp;#{t('deployments.shared.main_nav.new_reg')}"), "/container_registry/new", class: 'btn btn-sm btn-default'
+
+.row: .col-md-12
+  #container-registry-list.row
+    div style="text-align:center;font-weight:300;font-size:16px;"= "#{t('common.loading')}..."

@@ -1,0 +1,47 @@
+<%= form_tag "/admin/users", method: :get do %>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>STATUS</label>
+    <select name="state" title="Filter by status" class="form-control chosen-select-standard">
+      <option value="">Show All</option>
+      <option value="active" <% if params[:state] == 'active' %>selected="selected"<% end %>>Active</option>
+      <option value="inactive" <% if params[:state] == 'inactive' %>selected="selected"<% end %>>Suspended</option>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>ROLE</label>
+    <select name="role" title="Filter by role" class="form-control chosen-select-standard">
+      <option value="">Show All</option>
+      <option value="admin" <% if params[:role] == 'admin' %>selected="selected"<% end %>>Admin</option>
+      <option value="user" <% if params[:role] == 'user' %>selected="selected"<% end %>>User</option>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>GROUP</label>
+    <select name="group" title="Filter by group" class="form-control chosen-select-standard">
+      <option value="">Show All</option>
+      <% UserGroup.sorted.each do |i| %>
+        <option value="<%= i.id %>" <% if params[:group].to_i == i.id %>selected="selected"<% end %>><%= i.name %></option>
+      <% end %>
+    </select>
+  </div>
+  <div class="col-md-3 col-sm-4 col-col-xs-5">
+    <label>PRODUCTS</label>
+    <select name="product" title="Filter by group" class="form-control chosen-select-standard">
+      <optgroup label="By Status">
+        <option value="">Show All</option>
+        <option value="-1" <% if params[:product].to_i == -1 %>selected="selected"<% end %>>Has Active Services</option>
+        <option value="-2" <% if params[:product].to_i == -2 %>selected="selected"<% end %>>Has No Services</option>
+      </optgroup>
+      <% if Product.exists? %>
+      <optgroup label="By Product">
+        <% Product.sorted.each do |i| %>
+          <option value="<%= i.id %>" <% if params[:product].to_i == i.id %>selected="selected"<% end %>><%= i.name %></option>
+        <% end %>
+      </optgroup>
+      <% end %>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <%= submit_tag "Filter", class: 'btn btn-primary', style: 'margin-top:20px;' %>
+  </div>
+<% end %>

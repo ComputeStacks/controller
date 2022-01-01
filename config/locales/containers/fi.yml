@@ -1,0 +1,43 @@
+fi:
+  containers:
+    attributes:
+      ip: Internal IP
+      status: Status
+      resources: Resources # This is the header for the resource status (e.g. OK, WARN, ALERT)
+    actions:
+      power_actions_title: Power Controls
+      start: Käynnistä
+      stop: Pysäytä
+      restart: Restart
+      rebuild: Rakenna säiliö uudelleen
+      rebuild_short: Rebuild
+    prompts:
+      rebuild: Oletko varma, että haluat rakentaa tämän säiliön uudestaan? Kaikki tiedot jotka eivät ole volyymissä, menetetään. #Any data NOT in a volume will be lost.
+    errors:
+      has_dependents: Tällä säiliöllä on riippuvuuksia. Ole hyvä ja poista ne ensin.
+      stop: "Tämän säiliön pysäyttämisessä oli ongelma."
+      has_failed_event:
+        body: Tämän säiliön viimeisin tapahtuma epäonnistui.
+        link: Katsasta Tapahtumat
+    health:
+      warn: Varoitus
+      alert: Hälytys
+      deg: Rikkoutunut
+      error: Virhe
+      ok: Ok
+    state:
+      running: Käynnissä
+      restarting: Uudelleen käynnistyy
+      stopped: Pysäytetty
+      deleting: Poistetaan
+      pending: Odottaa
+      building: Rakennetaan
+      error: Virhe
+      unknown: Tuntematon
+    high_availability:
+      enabled: HA Enabled
+      disabled: HA Disabled
+      migration:
+        success: Container will be migrated shortly
+        error: Unable to migrate due to local volume constraint.
+        controller_error: Unable to migrate container. Please check that there are no local volumes attached.

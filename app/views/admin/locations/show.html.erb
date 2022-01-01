@@ -1,0 +1,43 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Regions', '/admin/locations' %></li>
+      <li class="active"><%= @location.name %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-md-8 col-xs-6"><p class="lead"><%= @location.name %></p></div>
+  <div class="col-md-4 col-xs-6 text-right">
+    <%= link_to content_tag(:i, nil, class: 'fa fa-wrench'), edit_admin_location_url(@location), class: 'btn btn-default' %>
+    <%= link_to content_tag(:i, nil, class: 'fa fa-trash'), admin_location_url(@location), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
+  </div>
+</div>
+<br />
+<div class="row">
+  <div class="col-md-12">
+    <table id="location-table" class="table table-hover">
+      <thead>
+        <tr>
+          <th>Node</th>
+          <th>Availability Zone</th>
+          <th>Primary IP</th>
+          <th>Public IP</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @location.nodes.each do |i| %>
+          <tr>
+            <td><%= link_to i.label, admin_node_url(i) %></td>
+            <td><%= link_to i.region.name, admin_region_url(i.region) %></td>
+            <td><%= i.primary_ip %></td>
+            <td><%= i.public_ip %></td>
+            <td><%= l i.created_at, format: :short %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

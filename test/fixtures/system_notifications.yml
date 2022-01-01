@@ -1,0 +1,12 @@
+one:
+  label: test
+  notifier: email
+  value: peter@pp.net
+  rules:
+    - NewOrder
+    - UserActivated
+    - UserCreated
+    - UserDeleted
+    - UserSuspended
+    - ContainerCpuUsage
+    - ContainerMemoryUsage

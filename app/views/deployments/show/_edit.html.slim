@@ -1,0 +1,15 @@
+= form_tag("/deployments/#{@deployment.token}", method: :put) do
+  .modal id="edit-deployment"
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close type="button" data-dismiss="modal" aria-label="Close"
+            span aria-hidden="true" &times;
+          h4.modal-title= t 'deployments.form.title'
+        .modal-body
+          .form-group
+            label.control-label= t 'deployments.form.name'
+            input.form-control type="text" name="name" autocorrect='off' value="#{@deployment.name}"
+        .modal-footer
+          button.btn.btn-default data-dismiss="modal" aria-hidden="true"= t 'actions.cancel'
+          button.btn.btn-success type="submit"= t 'actions.update'

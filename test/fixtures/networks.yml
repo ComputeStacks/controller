@@ -1,0 +1,18 @@
+netone:
+  cidr: "10.100.0.0/21"
+  is_public: false
+  is_ipv4: true
+  active: true
+  name: 'net1'
+  label: 'Primary Network'
+  regions:
+    - regionone
+nettwo:
+  cidr: "10.100.0.0/21"
+  is_public: false
+  is_ipv4: true
+  active: true
+  name: 'net2'
+  label: 'Primary Network'
+  regions:
+    - regiontwo

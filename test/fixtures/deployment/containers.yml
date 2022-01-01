@@ -1,0 +1,59 @@
+pma_1:
+  name: pma-something-01
+  status: running
+  built: true
+  cpu: 1
+  memory: 512
+  req_state: running
+  service: pma
+  node: testone
+wordpress_1:
+  name: keen-shannon195-345
+  status: running
+  built: true
+  cpu: 2
+  memory: 1536
+  req_state: running
+  service: wordpress
+  subscription: wordpress
+  node: testone
+wordpress_custom_1:
+  name: mark-shannon200-401
+  status: running
+  built: true
+  cpu: 2
+  memory: 1536
+  req_state: running
+  service: wordpress_custom
+  subscription: wordpress_custom
+  node: testone
+mysql_1:
+  name: fervent-goodall195-346
+  status: running
+  built: true
+  cpu: 1
+  memory: 512
+  req_state: running
+  service: mysql
+  subscription: mysql
+  node: testone
+nginx_1:
+  name: super-faker393-347
+  status: running
+  built: true
+  cpu: 1
+  memory: 512
+  req_state: running
+  service: nginx
+  subscription: nginx
+  node: testone
+user_nginx_1:
+  name: photo-faker593-547
+  status: running
+  built: true
+  cpu: 1
+  memory: 512
+  req_state: running
+  service: user_nginx
+  subscription: user_nginx
+  node: testone

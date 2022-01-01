@@ -1,0 +1,115 @@
+fi:
+  events:
+    link_to: Event Logs
+    singular: Tapahtuma
+    plural: Tapahtumat
+    code: Tapahtuman koodi
+    details: Tapahtuman yksityiskohdat
+    none: Ei tapahtumia
+    status:
+      pending: Odottaa
+      completed: Valmis
+      running: Käynnissä
+      failed: Epäonnistui
+    kind:
+      info: Tietoa
+      notice: Huomautus
+      warn: Varoitus
+      alert: Hälytys
+    messages:
+      unknown: "Error, Unknown event"
+      alert:
+        general: "[%{label}] An alert was generated (%{val})."
+        container:
+          cpu: "[%{label}] CPU usage (%{val}%) threshold hit."
+          mem: "[%{label}] Memory usage (%{val}%) threshold hit."
+        node:
+          offline: Node %{node} is offline
+          cpu: Node %{node} is experiencing high cpu usage
+          memory: Node %{node} is experiencing high memory usage
+          disk:
+            inodes: Node %{node} is out of inodes
+            read_latency: Node %{node} has unusual disk read latency
+            write_latency: Node %{node} has unusual disk write latency
+            full: Node %{node} is out of disk space
+            full_soon: Node %{node} will be out of disk in 4 hours
+        notifications:
+          processing: "Processing notifications for %{name}"
+        prom:
+          config_reload: Prometheus Configuration Reload Error
+          alert_manager_disconnected: Prometheus is not connected to Alert Manager
+          alert_manager_config_reload: Alert Manager Configuration Reload Error
+          exporter_down: A prometheus exporter is offline
+      backup:
+        delete: Poistetaan tallennustilan varmuuskopio
+        sync_volumes: Syncing locally created volumes
+      container:
+        start: "[%{label}] Käynnistetään kontti %{container}."
+        stop: "[%{label}] Pysäytetään kontti %{container}."
+        restart: "[%{label}] Uudelleenkäynnistetään kontti %{container}."
+        rebuild: "[%{label}] Uudelleenrakennetaan kontti %{container}."
+        delete: "[%{label}] Poistetaan kontti %{container}."
+        build: "[%{label}] Rakennetaan kontti %{container}."
+        migrating: "[%{container}] Migrating to new node."
+        errors:
+          general_provision: "[%{label}] Kontin %{container} rakentamisessa tapahtui virhe."
+          resize: "[%{label}] Kontin %{container} koon muutoksessa tapahtui virhe."
+          stay_online: "[%{label}] Recovery attempts have failed for %{container}."
+      deployment:
+        trash: "[%{project}] Deleting project"
+        sftp_init: "[%{project}] Update SFTP containers"
+        errors:
+          fatal: "Käyttöönotossa tapahtui virhe."
+          missing_loadbalancer: "Kuormantasaajaa ei löydetty."
+      lets_encrypt:
+        generate: "Generated LetsEncrypt for %{common_name}"
+        renew: "Renewing LetsEncrypt for %{common_name}"
+        validate: "Validating domain %{domain} for LetsEncrypt"
+      load_balancers:
+        validate_domain: "Validating domain %{domain} for Load Balancer %{load_balancer}"
+        generate_lets_encrypt: "LetsEncrypt setup for Load Balancer %{load_balancer}"
+      node:
+        images:
+          pull: "[%{node}] Updating local images"
+        maintenance:
+          enable: "Noodi %{node} siirretään huoltotilaan."
+          disable: "Noodi %{node} siirretään pois huoltotilasta."
+        evacuating: "Evacuating node %{node}."
+        ports:
+          reload: "[%{node}] Reloading external ports."
+          open: "[%{container}] Generating public port for %{port}."
+          close: "[%{container}] Removing public access for port %{port}."
+        volumes:
+          provision: "Provisioning volume %{volume} on node %{node}."
+      order:
+        provision: Provisioning new order
+      service:
+        autoscale: "[%{label}] AutoScaling Service"
+        building_1: "[%{label}] Luodaan 1 kontti."
+        building: "[%{label}] Luodaan %{count} konttia."
+        removing_1: "[%{label}] Poistetaan 1 kontti."
+        removing: "[%{label}] Poistetaan %{count} konttia."
+        resizing_1: "[%{label}] Muokataan 1 konttia."
+        resizing: "[%{label}] Muokataan %{count} konttia."
+        scaling: "[%{label}] Skaalataan %{from} kontista %{to} konttiin."
+        trash: "[%{label}] Deleting service"
+        errors:
+          scale: "[%{label}] Konttien skaalaus epäonnistui."
+          resize: "[%{label}] Konttien koonmuutos epäonnistui."
+          delete: "[%{label}] Palvelun poisto epäonnistui."
+      snapshots:
+        restore: "Restoring snapshot %{snapshot} to volume %{volume}."
+      system:
+        process_uage: Processing Billing Usage
+        sync_volumes: Syncing locally created volumes
+      users:
+        inactive: "[%{user}] käyttäjä sammutettu."
+        active: "[%{user}] käyttäjä aktivoitu."
+      volumes:
+        clone: "Cloning volume %{volume}"
+        imported: "Imported volume %{volume}"
+      volume:
+        backup: Suoritetaan tallennustilan varmuuskopiointi
+        delete: "Poistetaan tallennustila %{volume}"
+        imported: "Tuotu tallennustila %{volume}"
+        restore: Suoritetaan tallennustilan palautus

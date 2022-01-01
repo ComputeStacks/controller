@@ -1,0 +1,42 @@
+fi:
+  volumes:
+    form:
+      label: Nimi
+      label_help: "Käytä pienaakkosia, ei erikoismerkkejä tai numeroita ja korvaa välilyönnit alaviivalla (_)."
+      enable_sftp: Salli SFTP pääsy
+      enable_sftp_help: Tee tallennustila saataville SFTP/SSH kontin kautta.
+      mount_path: Liitoskohta
+      mount_path_help: Mihin hakemistoon liitetään kontin sisällä
+      destroy: Aikatauluta tallennustilan poisto
+      backups:
+        title: Tallennustilan varmuuskopioasetukset
+        enabled: Varmuuskopiot käytössä
+        schedule: Aikataulu
+        cron: Cron syntaksi
+        data_type: Datan tyyppi  # Kysyy minkä tyyppistä dataa on tallennettuna tallennustilaan (esim. tiedostoja, tietokanta)
+        data_type_help: "Tämä auttaa määrittämään miten varmuuskopioimme tietosi."
+        retention:
+          title: "Säilytysasetukset"
+          subtitle: "Kuinka monta varmuuskopiota tietyllä aikajaksolla haluat meidän säilyttävän?"
+          hourly: Tunneittain
+          daily: Päivittäin
+          weekly: Viikottain
+          monthly: Kuukausittain
+        hooks:
+          custom: Omat koukut
+          custom_help_html: |
+            <p>Ennen- ja jälkeen komennot jotka suoritetaan kontin sisällä</p>
+            <p>Skriptisi täytyy palauttaa exit koodi 0, muuten sen suoritus tulkitaan epäonnistuneeksi.</p>
+          ## Space is intentional ####          
+          pre_backup:
+            continue_on_error: "Jatka virheestä välittämättä?" # If a pre-backup hook fails, should we continue?
+            custom_script:
+              title: "Ennen varmuuskopiota ajettava skripti"
+              help_html: "Esim: <code>bash /path/to/script.sh</code>"
+          post_backup: "Varmuuskopioinnin jälkeen ajettava skripti"
+          pre_restore:
+            title: "Ennen palautusta ajettava skripti"
+            continue: "Jatka virheestä välittämättä?"
+          post_restore: "Palautuksen jälkeen ajettava skripti"
+          rollback: "Rollback skripti"
+          rollback_help: "Tämä suoritetaan jos ennen palautusta ajettava skripti epäonnistuu."

@@ -1,0 +1,12 @@
+.container-fluid
+  .row
+    div class="#{@user.errors.count.zero? ? 'block-center col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8'}"
+      = form_for @user, url: "/register" do |f|
+        = render partial: 'registration/user', locals: {f: f}
+    - unless @user.errors.count.zero?
+      .col-sm-4: .panel.panel-body
+        strong= "#{pluralize(@user.errors.count, "error")} prevented your account from being created:"
+
+        ul.list-unstyled
+          - @user.errors.full_messages.each do |msg|
+            li style="color: red;"= msg

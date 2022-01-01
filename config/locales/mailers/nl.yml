@@ -1,0 +1,17 @@
+nl:
+  mailers:
+    confirmation_instructions:
+      title: 'Welkom, %{email}'
+      l1: 'Je kunt je email adres bevestigen en je account activeren met de onderstaande link:'
+      link_text: 'Bevestig mijn email adres'
+    reset_password_instructions:
+      title: 'Hallo, %{email}'
+      l1: 'Iemand heeft aangevraagd om je wachtwoord te wijzigen. Je kunt dit via de onderstaande link doen.'
+      l2: "Als je dit niet hebt aangevraagd, dan kun je deze email negeren."
+      l3: "Je wachtwoord wijzigt niet zoals je geen nieuw wachtwoord instelt via de onderstaande link."
+      link_text: 'Wijzig mijn wachtwoord'
+    unlock_instructions:
+      title: 'Hallo %{email}'
+      l1: 'Je account is geblokkeerd omdat er te vaak foutief geprobeerd is in te loggen.'
+      l2: 'Klik op de onderstaande link om je account te deblokkeren:'
+      link_text: 'Deblokkeer mijn account'

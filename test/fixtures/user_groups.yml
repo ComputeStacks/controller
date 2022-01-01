@@ -1,0 +1,23 @@
+admin:
+  name: Admin Users
+  is_default: false
+  active: true
+  billing_plan: default
+  regions:
+    - regionone
+
+users:
+  name: Users
+  is_default: true
+  active: true
+  billing_plan: default
+  regions:
+    - regionone
+
+testgroup:
+  name: Test Group
+  is_default: false
+  active: true
+  billing_plan: default
+  regions:
+    - regionone

@@ -1,0 +1,10 @@
+.panel-body
+  .row
+    .col-sm-12: .form-group
+      = label_tag :name, 'Name'
+      = f.text_field :name, required: true, class: 'form-control'
+
+.panel-footer
+  = link_to t('actions.cancel'), "#{@billing_plan.id.nil? ? "/admin/billing_plans" : "/admin/billing_plans/#{@billing_plan.id}"}", class: 'btn btn-default', style: 'margin-right:10px;'
+  = submit_tag t('actions.save'), class: 'btn btn-success'
+  = link_to "Delete", "/admin/billing_plans/#{@billing_plan.id}", method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-danger pull-right' if (controller.action_name == 'edit' || controller.action_name == 'update') && !@billing_plan.is_default

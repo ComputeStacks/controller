@@ -1,0 +1,23 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active"><%= @container.name %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row" style="margin-bottom:20px;">
+  <div class="col-sm-12">
+    <small>MEMORY USAGE FOR CONTAINER</small>
+    <h4 style="margin-top:0px;"><%= @container.name %></h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= render partial: 'containers/charts/memory/usage', locals: { container: @container } %>
+  </div>
+</div>

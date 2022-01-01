@@ -1,0 +1,13 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <p class="text-center">Disk Usage (GB)</p>
+    <%= area_chart "#{container_charts_disk_usage_path(container.id)}.json",
+                   points: false,
+                   download: true,
+                   refresh: 60,
+                   label: "GB",
+                   curve: false,
+                   legend: false
+    %>
+  </div>
+</div>

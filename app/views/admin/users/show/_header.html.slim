@@ -1,0 +1,33 @@
+- content_for :title, @user.full_name
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to t('views.admin.users.show.breadcrumb.users'), "/admin/users"
+      - if request.path =~ /event_logs/
+        li= link_to @user.full_name, admin_user_path(@user)
+        li.active Events
+      - else
+        li.active= @user.full_name
+        li.pull-right.no-spacer= link_to raw("<i class='fa fa-trash'></i>"), "#{@base_url}", method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-sm btn-danger", style: "margin-top:-3px;"
+        li.pull-right.no-spacer= link_to raw("<i class='fa fa-wrench'></i>"), "#{@base_url}/edit", class: "btn btn-sm btn-default", style: "margin-top:-3px;margin-right:5px;"
+        - if @user.has_2fa? || @user.is_support_admin?
+          li.pull-right.no-spacer
+            - if @user.bypass_second_factor
+              = link_to raw("<i class='fa fa-unlock'></i> 2FA Bypassed"), "#{@base_url}/bypass_second_factor", method: :delete, class: 'btn btn-sm btn-danger', style: "margin-top:-3px;margin-right:5px;"
+            - else
+              = link_to raw("<i class='fa fa-lock'></i> 2FA Enabled"), "#{@base_url}/bypass_second_factor", method: :create, data: { confirm: "Are you sure? This will disable 2FA until their next login." }, class: 'btn btn-sm btn-success', style: "margin-top:-3px;margin-right:5px;"
+
+        - if @user != current_user && !@user.is_support_admin?
+          li.pull-right.no-spacer= link_to raw("<i class='fa fa-user-circle'></i>"), "#{@base_url}/become", method: :post, class: 'btn btn-sm btn-default', style: "margin-top: -3px;margin-right:5px;", title: 'Impersonate User', data: { confirm: "Are you sure?" }
+
+
+- unless request.path =~ /event_logs/
+  .row: .col-md-12
+    - if @user.is_support_admin?
+      h5.pull-right.text-right: div class="label label-info" CS Support User
+    - else
+      h5.pull-right.text-right: div class="label label-#{@user.active ? 'success' : 'default'}"= @user.active ? 'Active' : 'Inactive'
+      - if @user.is_admin
+        h5.pull-right.text-right style="margin-right:10px;": div class="label label-warning" Admin
+    = image_tag @user.avatar_url(28), class: 'pull-left img-circle'
+    p.lead style="margin-left:35px;"= @user.full_name

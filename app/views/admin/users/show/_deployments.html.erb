@@ -1,0 +1,35 @@
+<div class="row">
+  <div class="col-sm-12">
+    <div class="panel panel-default">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Owner</th>
+            <th>Region</th>
+            <th>Containers</th>
+            <th>Services</th>
+            <th class="text-right">Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if deployments.empty? %>
+            <tr><td colspan="5" class="text-center">None</td> </tr>
+          <% end %>
+          <% deployments.each do |i| %>
+            <tr>
+              <td><%= link_to i.id, admin_deployments_path(i) %></td>
+              <td><%= link_to i.name, admin_deployments_path(i) %></td>
+              <td><%= i.user.nil? ? '...' : link_to(i.user.full_name, admin_user_path(i.user)) %></td>
+              <td><%= i.regions.map { |region| link_to(region.name, "/admin/regions/#{region.id}") }.join(', ').html_safe %></td>
+              <td><%= i.deployed_containers.count %></td>
+              <td><%= i.services.count %></td>
+              <td class="text-right"><%= l i.created_at, format: :short %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

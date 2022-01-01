@@ -1,0 +1,65 @@
+de:
+  deployments:
+    state:
+      deploying: Bereitstellung
+      deployed: Bereitgestellt
+      working: Arbeitet
+    shared:
+      main_nav:
+        deployments: Projekte
+        images: Meine Images
+        registry: Container Registry
+        new_deployment: Neues Projekt
+        new_image: Neues Image
+        new_reg: Neue Registry
+        new_domain: Domain hinzufügen
+    show:
+      owner: Eigentümer
+      header:
+        price: Voraussichtlicher Preis
+        bandwidth: Genutzte Bandbreite
+        storage: Verwendeter Speicher
+        last_event: Letztes Ereignis
+        new: Neues Projekt
+        new_container: Neue Applikation
+      container:
+        name: Name # Container Name
+        label: Container
+        resources: Resosurcen
+        image: Image
+        ip: Öffentliche IP
+        region: Region
+        regions: Regionen
+        manage: Container verwalten
+        status: Status
+      edit:
+        title: Projekt editieren
+        name: Name
+      loading:
+        containers: Lade Container
+        domains: Lade Domains
+        certs: Lade Zertifikate
+        volumes: Lade Volumes
+      sidebar:
+        overview: Übersicht
+        domains: Domain Routing
+        ssl: SSL
+        volumes: Daten Volumes
+    index:
+      loading: Lade Projekte
+      deployment_list:
+        none: Keine Projekte
+        deployments:
+          pending_order: In Auftragswarteschlange
+          status: Status
+          last_event: Letztes Ereignis
+    form:
+      title: Editiere Projekt
+      name: Name
+    setup:
+      title: Erste Schritte
+    project_notifications:
+      show:
+        title_profile_link: Profil Einstellungen
+        title_help_html: |
+          Alle hier konfigurierten Alarme werden zusätzlich zu den Alarmen ausgelöst, die in Ihrem %{link}.<br>Wenn Sie die gleiche Regel hier und in Ihrem Konto konfigurieren, werden doppelte Benachrichtigungen angezeigt.

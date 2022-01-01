@@ -1,0 +1,14 @@
+<table class="table-list">
+  <tr>
+    <td>Performed By</td>
+    <td><%= performer(audit) %></td>
+  </tr>
+  <tr>
+    <td>IP</td>
+    <td><%= audit.ip_addr.to_s.blank? ? '...' : audit.ip_addr.to_s %></td>
+  </tr>
+  <tr>
+    <td>Date</td>
+    <td><%= l(audit.created_at, format: :short) %></td>
+  </tr>
+</table>

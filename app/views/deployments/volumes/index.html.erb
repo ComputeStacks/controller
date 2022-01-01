@@ -1,0 +1,38 @@
+<div class="row">
+  <div class="col-md-12">
+    <table class="table">
+      <thead>
+        <tr>
+          <th><%= t 'common.label' %></th>
+          <th><%= t 'volumes.list.usage' %></th>
+          <th><%= t 'volumes.list.backups' %></th>
+          <th><%= t 'obj.service' %></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @volumes.empty? %>
+          <tr>
+            <td colspan="6" class="text-center"><%= t 'volumes.list.empty' %></td>
+          </tr>
+        <% end %>
+        <% @volumes.each do |i| %>
+          <tr>
+            <td>
+              <%= link_to truncate(i.label, length: 40), "/volumes/#{i.id}" %>
+              <%= %Q(&nbsp; #{volume_ha_warning(i)}).html_safe if i.region.has_clustered_storage? && !i.uses_clustered_storage? %>
+            </td>
+            <td><%= i.usage %> GB</td>
+            <td><%= i.borg_enabled ? i.list_archives.count : tag.i(nil, class: 'fa fa-ban') %></td>
+            <td><%= link_to(i.container_service.label, container_service_path(i.container_service)) if i.container_service %></td>
+            <td class="text-right">
+              <div class="btn-group">
+                <%= link_to tag.i(nil, class: 'fa fa-wrench fa-fw'), edit_volume_url(i), class: 'btn btn-warning btn-xs' %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

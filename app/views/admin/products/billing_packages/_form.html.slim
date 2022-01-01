@@ -1,0 +1,54 @@
+.panel-body
+
+  .row
+    .col-sm-6: .form-group
+      = label_tag :cpu, 'CPU (CORE)'
+      = f.text_field :cpu, class: 'form-control'
+
+    .col-sm-6: .form-group
+      = label_tag :memory, 'Memory (MB)'
+      = f.text_field :memory, class: 'form-control'
+
+      span.help-block Must be in units of 256MB.
+hr style="border-color:#ccc;"
+.panel-body
+  .row: .col-md-12
+    strong Included Resources
+    br
+    small Any amount over the included amounts listed below will be billed at the current price set in the user's billing plan.
+  hr
+  .row
+    .col-sm-3.col-xs-6: .form-group
+      = label_tag :storage, 'Volume Storage (GB)'
+      = f.text_field :storage, class: 'form-control'
+
+    .col-sm-3.col-xs-6: .form-group
+      = label_tag :local_disk, 'Temporary Disk (GB)'
+      = f.text_field :local_disk, class: 'form-control'
+
+    .col-sm-3.col-xs-6: .form-group
+      = label_tag :bandwidth, 'Bandwidth (GB)'
+      = f.text_field :bandwidth, class: 'form-control'
+
+    .col-sm-3.col-xs-6: .form-group
+      = label_tag :backup, 'Backup Storage (GB)'
+      = f.text_field :backup, class: 'form-control'
+
+hr style="border-color:#ccc;"
+.panel-body
+  .row: .col-md-12
+    strong Memory Swap
+  hr
+  .row
+    .col-xs-6: .form-group
+      = label_tag :memory_swap, 'Swap (MB)'
+      = f.text_field :memory_swap, class: 'form-control'
+      span.help-block Swap must be enabled on the host for this setting to apply. Leave blank for the default (0).
+    .col-xs-6: .form-group
+      = label_tag :memory_swappiness, 'Memory Swappiness'
+      = f.text_field :memory_swappiness, class: 'form-control'
+      span.help-block Value between 0 and 100. Leave blank for the default (60).
+
+.panel-footer
+  = link_to t('actions.cancel'), '/admin/products', class: 'btn btn-default'
+  = submit_tag t('actions.save'), class: 'btn btn-success pull-right'

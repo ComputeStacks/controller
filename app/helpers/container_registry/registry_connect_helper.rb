@@ -1,0 +1,2 @@
+module ContainerRegistry::RegistryConnectHelper
+end

@@ -1,0 +1,153 @@
+de:
+  activerecord:
+    attributes:
+      doorkeeper/application:
+        name: 'Name'
+        redirect_uri: 'URI umleiten'
+    errors:
+      models:
+        doorkeeper/application:
+          attributes:
+            redirect_uri:
+              fragment_present: 'darf kein Fragment enthalten.'
+              invalid_uri: 'muss eine gültige URI sein.'
+              relative_uri: 'muss ein absoluter URI sein.'
+              secured_uri: 'muss eine HTTPS/SSL URI sein.'
+              forbidden_uri: 'ist vom Server untersagt.'
+            scopes:
+              not_match_configured: "nicht mit der Konfiguration auf dem Server übereinstimmt."
+
+  doorkeeper:
+    scopes:
+      public: 'Öffentliche Details zu diesem Server anzeigen'
+      profile_read: 'Ihre Kontodetails anzeigen'
+      profile_update: 'Ihr Konto aktualisieren'
+      project_read: 'Projektdetails anzeigen'
+      project_write: 'Projekte verwalten'
+      images_read: 'Container Image & Registry anzeigen'
+      images_write: 'Erstellen, aktualisieren von Images & Container Registries'
+      admin_read: 'Admin (lesen)'
+      admin_write: 'Admin (schreiben)'
+      dns_read: 'DNS (lesen)'
+      dns_write: 'DNS (schreiben)'
+      order_read: 'Bestellungen (lesen)'
+      order_write: 'Bestellungen (schreiben)'
+      register: 'Neue Benutzer registrieren'
+    applications:
+      confirmations:
+        destroy: 'Sind Sie sicher?'
+      buttons:
+        edit: 'Editieren'
+        destroy: 'Vernichten'
+        submit: 'Absenden'
+        cancel: 'Abbrechen'
+        authorize: 'Authorisieren'
+      form:
+        error: 'Hoppla! Prüfen Sie Ihr Formular auf mögliche Fehler'
+      help:
+        confidential: 'Die Anwendung wird dort eingesetzt, wo das Kundengeheimnis vertraulich behandelt werden kann. Native mobile Apps und Single Page Apps werden als nicht vertraulich betrachtet.'
+        redirect_uri: 'Verwenden Sie eine Zeile pro URI'
+        blank_redirect_uri: "Lassen Sie das Feld leer, wenn Sie Ihren Provider so konfiguriert haben, dass er Client Anmeldeinformationen, Ressource Eigentümer Passwort Anmeldeinformationen oder einen anderen Grant-Typ verwendet, der keine Redirect-URI benötigt."
+        native_redirect_uri: 'Verwenden Sie %{native_redirect_uri} wenn Sie für Entwicklungszwecke localhost-URIs hinzufügen möchten'
+        scopes: 'Wählen Sie, welche Scopes Ihre Anwendung anfordern kann. Wählen Sie nur Scopes aus, die Sie benötigen werden.'
+      edit:
+        title: 'Applikation bearbeiten'
+      index:
+        title: 'Ihre Applikationen'
+        new: 'Neue Applikation'
+        name: 'Name'
+        callback_url: 'Callback URL'
+        confidential: 'Vertraulich?'
+        actions: 'Aktivitäten'
+        confidentiality:
+          'yes': 'Ja'
+          'no': 'Nein'
+      new:
+        title: 'Neue Applikation'
+      show:
+        title: 'Applikation: %{name}'
+        application_id: 'Applikation UID'
+        secret: 'Secret'
+        scopes: 'Scopes'
+        confidential: 'Vertraulich'
+        callback_urls: 'Callback URLs'
+        actions: 'Aktivitäten'
+
+    authorizations:
+      buttons:
+        authorize: 'Autorisieren'
+        deny: 'Verweigern'
+      error:
+        title: 'Ein Fehler ist aufgetreten'
+      new:
+        title: 'Autorisierung erforderlich'
+        prompt: 'Autorisieren Sie %{client_name} Ihr Konto zu verwenden?'
+        able_to: 'Diese Applikation kann'
+      show:
+        title: 'Autorisierungscode'
+
+    authorized_applications:
+      confirmations:
+        revoke: 'Sind Sie sicher?'
+      buttons:
+        revoke: 'Widerrufen'
+      index:
+        title: 'Ihre autorisierten Anwendungen'
+        application: 'Applikation'
+        created_at: 'Erstellt am'
+        date_format: '%Y-%m-%d %H:%M:%S'
+
+    pre_authorization:
+      status: 'Vorab-Autorisierung'
+
+    errors:
+      messages:
+        # Common error messages
+        invalid_request: 'Der Anfrage fehlt ein erforderlicher Parameter, enthält einen nicht unterstützten Parameterwert oder ist anderweitig fehlerhaft.'
+        invalid_redirect_uri: "Die angeforderte Redirect-URI ist fehlerhaft oder stimmt nicht mit der Client-Redirect-URI überein."
+        unauthorized_client: 'Der Client ist nicht berechtigt, diese Anfrage mit dieser Methode durchzuführen.'
+        access_denied: 'Der Eigentümer der Ressource oder der Autorisierungsserver hat die Anfrage abgelehnt.'
+        invalid_scope: 'Der angeforderte Scope ist ungültig, unbekannt oder fehlerhaft.'
+        invalid_code_challenge_method: 'Die Code-Challenge-Methode muss schlicht (plain) oder S256 sein.'
+        server_error: 'Der Autorisierungsserver ist auf eine unerwartete Bedingung gestoßen, die ihn daran hindert, die Anfrage zu erfüllen.'
+        temporarily_unavailable: 'Der Autorisierungsserver ist derzeit nicht in der Lage, die Anfrage aufgrund einer vorübergehenden Überlastung oder Wartung des Servers zu bearbeiten.'
+
+        # Configuration error messages
+        credential_flow_not_configured: 'Ressourcen Eigentümer Anmeldeinformationen Durchlauf fehlgeschlagen weil Doorkeeper.configure.resource_owner_from_credentials scheinen unkonfiguriert zu sein.'
+        resource_owner_authenticator_not_configured: 'Ressourcen Eigentümer Suche fehlgeschlagen weil Doorkeeper.configure.resource_owner_authenticator scheint unkonfiguriert zu sein.'
+        admin_authenticator_not_configured: 'Der Zugriff auf das Admin-Panel ist untersagt weil Doorkeeper.configure.admin_authenticator scheint unkonfiguriert.'
+
+        # Access grant errors
+        unsupported_response_type: 'Der Autorisierungsserver unterstützt diesen Antworttyp nicht.'
+
+        # Access token errors
+        invalid_client: 'Die Client-Authentifizierung ist fehlgeschlagen aufgrund eines unbekannten Clients, keiner enthaltenen Client-Authentifizierung oder einer nicht unterstützten Authentifizierungsmethode.'
+        invalid_grant: 'Die bereitgestellte Autorisierungserlaubnis ist ungültig, abgelaufen, widerrufen, stimmt nicht mit dem in der Autorisierungsanforderung verwendeten Umleitungs-URI überein oder wurde für einen anderen Client ausgestellt.'
+        unsupported_grant_type: 'Der Berechtigungserteilungstyp wird vom Berechtigungsserver nicht unterstützt.'
+
+        invalid_token:
+          revoked: "Das Zugriffstoken wurde widerrufen"
+          expired: "Das Zugriffstoken ist abgelaufen"
+          unknown: "Das Zugriffstoken ist ungültig"
+
+    flash:
+      applications:
+        create:
+          notice: 'Applikation erstellt.'
+        destroy:
+          notice: 'Applikation gelöscht.'
+        update:
+          notice: 'Applikation aktualisiert.'
+      authorized_applications:
+        destroy:
+          notice: 'Applikation widerrufen.'
+
+    layouts:
+      admin:
+        title: 'OAuth Applikationen'
+        nav:
+          oauth2_provider: 'OAuth2 Provider'
+          applications: 'Applikationen'
+          home: 'Startseite'
+      application:
+        title: 'OAuth Autorisierung erforderlich'

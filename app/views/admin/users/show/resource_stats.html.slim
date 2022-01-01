@@ -1,0 +1,20 @@
+table.table-list
+  tbody
+    tr
+      td Run Rate
+      td= link_to format_currency(@user.run_rate), "/admin/subscriptions/?user=#{@user.id}"
+    tr
+      td= link_to "Projects", "/admin/deployments?user=#{@user.id}"
+      td= @user.deployments.count
+    tr
+      td Containers
+      td= @user.deployed_containers.count
+    tr
+      td Container Images
+      td= @user.container_images.count
+    tr
+      td Container Registries
+      td= @user.container_registries.count
+    tr
+      td DNS Zones
+      td= @user.dns_zones.count

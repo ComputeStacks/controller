@@ -1,0 +1,71 @@
+<% if @services.empty? %>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-body text-center">No Containers</div>
+      </div>
+    </div>
+  </div>
+<% end %>
+<% @services.each do |i| %>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <img
+            class="pull-left hidden-xs"
+            style="max-width:25px;max-height:28px;padding-right:5px;margin-right:5px;margin-top:3px;"
+            src="<%= i.container_image.icon_url %>"
+            onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
+            alt="<%= i.container_image.label %>"
+            title="<%= i.container_image.label %>"
+            />
+          <strong><ins><%= link_to i.label, admin_container_service_path(i), style: 'font-size:1.5rem;color:#333;' %></ins></strong>
+          <div class="pull-right">
+            <% unless i.package.nil? %>
+              <%= link_to i.package.product.label, "/admin/products/#{i.package.product.id}/billing_packages/#{i.package.id}/edit", title: %Q(#{pluralize i.package.cpu, 'CORE', 'CORES'} / #{i.package.memory} MB) %> |
+            <% end %>
+            <%= link_to i.container_image.label, admin_container_image_path(i.container_image) %>
+          </div>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Region</th>
+              <th>Node</th>
+              <th>IP</th>
+              <th title="Container usage, excluding volumes" style="cursor: help;text-decoration: underline;">Disk</th>
+              <th>CPU / Memory</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if i.containers.empty? %>
+              <tr>
+                <td colspan="7" class="text-center">No Containers</td>
+              </tr>
+            <% end %>
+            <% i.containers.each do |c| %>
+              <tr>
+                <td><%= link_to c.id, admin_container_path(c) %></td>
+                <td><%= link_to c.name, admin_container_path(c) %></td>
+                <td><%= link_to c.region&.name, admin_regions_url(c.region) %></td>
+                <td><%= link_to c.node&.label, admin_regions_url(c.region) %></td>
+                <td><%= c.local_ip %></td>
+                <td><%= container_current_disk_usage c %></td>
+                <td><%= container_stats c %></td>
+                <td><%= c.current_state&.capitalize %></td>
+                <td><%= l c.created_at.in_time_zone(Time.zone), format: :short %></td>
+                <td class="text-right"><%= render partial: "admin/containers/shared/power_controls", locals: { container: c } %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>

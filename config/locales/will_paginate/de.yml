@@ -1,0 +1,17 @@
+# https://github.com/tigrish/will-paginate-i18n/tree/master/config/locales
+de:
+  will_paginate:
+    next_label: Weiter &#8594;
+    page_entries_info:
+      multi_page: Anzeigen von %{model} %{from} - %{to} bis %{count} insgesamt
+      multi_page_html: Anzeigen von %{model} <b>%{from}&nbsp;-&nbsp;%{to}</b> von <b>%{count}</b> insgesamt
+      single_page:
+        one: Anzeigen 1 %{model}
+        other: Anzeigen aller %{count} %{model}
+        zero: Kein %{model} gefunden
+      single_page_html:
+        one: Anzeigen von <b>1</b> %{model}
+        other: Anzeigen von <b>all&nbsp;%{count}</b> %{model}
+        zero: Kein %{model} gefunden
+    page_gap: "&hellip;"
+    previous_label: "&#8592; Zurück"

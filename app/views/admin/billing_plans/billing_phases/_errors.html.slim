@@ -1,0 +1,6 @@
+.col-sm-4: .panel.panel-body
+  strong= "#{pluralize(@phase.errors.count, "error")} prevented this phase from being saved:"
+
+  ul.list-unstyled
+    - @phase.errors.full_messages.each do |msg|
+      li style="color: red;"= msg

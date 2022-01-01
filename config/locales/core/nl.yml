@@ -1,0 +1,122 @@
+nl:
+  noscript: Error! Javascript required to load content.
+  confirm_prompt: Are you sure?
+  confirm_destructive_prompt: "Are you sure? Any data associated with this %{obj} will be lost."
+  crud:
+    created: "%{resource} created."
+    updated: "%{resource} updated."
+    deleted: "%{resource} deleted."
+    unknown: Unknown %{resource}.
+    queued: "%{resource} has been queued for provisioning."
+    queued_plural: "%{resource} have been queued for provisioning."
+  common:
+    never: Never # as in, 'Never Occured'. Typically used in event lists.
+    free: Free
+    loading: Loading
+    loading_obj: "Loading %{obj}..."
+    error: Error
+    errors: Errors
+    "yes": 'Yes'
+    "no": 'No'
+    warning: Warning
+    please_wait: Please Wait
+    success: Success!
+    general_error: General System Error
+    feature_disabled: "%{resource} is currently not available."
+    updated: Updated
+    created: Created
+    username: Username
+    password: Password
+    name: Name
+    label: Label
+  attributes:
+    mem: Memory
+    disk: Storage
+    local_disk: Temporary Disk
+    transfer: Bandwidth
+  actions:
+    ok: Ok
+    submit: Submit
+    continue: Continue
+    save: Save
+    create: Create
+    cancel: Cancel
+    manage: Manage
+    destroy: Delete
+    edit: Edit
+    confirm: Confirm
+    update: Update
+    show: show
+    selected: Selected
+    choose: Choose
+    register: Register
+    activate: Activate
+    auth: Authenticate
+    invite: Invite
+    approve: Approve
+    reject: Reject
+    accept: Accept
+    deny: Deny
+  header:
+    nav:
+      sr: Toggle navigation
+      apps: Applications
+      dns: DNS
+      support: Support
+      build: Build
+      logout: Logout
+      profile: Profile
+      billing: Billing
+  obj:
+    deployment: Deployment
+    deployments: Deployments
+    container: Container
+    containers: Containers
+    service: Container Service
+    services: Container Services
+    image: Container Image
+    images: Container Images
+    user: User
+    users: Users
+    registry: Container Registry
+    registries: Container Registries
+    lb: Load Balancer
+    lbs: Load Balancers
+    region: Region
+    regions: Regions
+    node: Node
+    nodes: Nodes
+    domain: Domain
+    domains: Domains
+    dns: DNS Zone
+    dnss: DNS Zones
+    volume: Volume
+    volumes: Volumes
+    ip: IP Address
+    ips: IP Addresses
+    port: Port
+    ports: Ports
+  logout_msg: You have successfully loggged out.
+  suspended:
+    title: Account Suspended
+    msg: Your account is currently suspended. Please contact support.
+  billing:
+    package: Package
+    metered: Metered
+    hour: Hourly
+    month: Monthly
+    year: Annually
+  search:
+    title: Search
+    placeholder: "Press enter after typing your search..."
+  system_errors:
+    page_not_found: "Error! Page not found."
+    csrf_html: |
+      <h4>Invalid Form Token</h4>
+      <p>There was an issue with the form you submitted, please <a href="javascript:history.back()">go back</a> and try again.</p>
+    ## intentional line break ##
+    fatal:
+      url_title: Fatal Error
+      title: "Error! We've run into a server side issue"
+      message_html: "<p>We've received this error and are already working to correct it.</p>"
+      link_back: Go Back

@@ -1,0 +1,18 @@
+<%
+  # Render additional price information for container orders.
+  #
+  # Locals:
+  #
+  # @type [Region] region
+  # @type [Product] product
+  # @type [Phase] BillingPhase
+  #
+%>
+<div style="text-align: left;padding:0;border-radius: 0px;">
+  <div class="panel-body">
+    <ul class="list-unstyled" style="margin-bottom: 0px;">
+      <%= render(partial: 'orders/containers/package_price_obj', locals: { price_resource: phases[:trial].first }) unless phases[:trial].empty? %>
+      <%= render(partial: 'orders/containers/package_price_obj', locals: { price_resource: phases[:discount].first }) unless phases[:discount].empty? %>
+    </ul>
+  </div>
+</div>

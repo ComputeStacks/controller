@@ -1,0 +1,121 @@
+<% price_phases = sp.product.price_phases(@subscription.user, @subscription.linked_obj&.region) %>
+<div class="panel panel-default">
+  <div class="panel-body" style="margin-bottom:-25px;">
+    <div class="pull-right btn-group text-right">
+      <%= link_to tag.i(nil, class: 'fa fa-wrench'), "/admin/subscriptions/#{@subscription.id}/subscription_products/#{sp.id}/edit", class: 'btn btn-sm btn-default' %>
+      <%= link_to tag.i(nil, class: 'fa fa-trash'), "/admin/subscriptions/#{@subscription.id}/subscription_products/#{sp.id}", method: :delete, data: { confirm: "Are you sure?" }, class: 'btn btn-sm btn-danger' %>
+    </div>
+    <h5>
+      <%= sp.product&.label %>
+      <% if sp.active %>
+        <span class="label label-success" style="font-size:1rem;vertical-align: text-top;">active</span>
+      <% elsif @subscription.active %>
+        <span class="label label-warning" style="font-size:1rem;vertical-align: text-top;">paused</span>
+      <% else %>
+        <span class="label label-default" style="font-size:1rem;vertical-align: text-top;">inactive</span>
+      <% end %>
+    </h5>
+  </div>
+  <div class="panel-body">
+    <% if @subscription.active %>
+      <div class="row" style="margin-bottom:-10px;">
+        <div class="col-xs-12">
+          <div style="font-size:11px;font-weight:bold;">PRICING</div>
+          <ol class="list-unstyled list-unstyled-mind">
+            <% price_phases.each_key do |phase| %>
+              <% next if price_phases[phase].empty? %>
+              <li>
+                <%= formatted_product_price_resource price_phases[phase].first %>
+                <b class="pull-right"><%= price_resource_time_limit price_phases[phase].first %></b>
+              </li>
+            <% end %>
+          </ol>
+        </div>
+      </div>
+      <% if sp.billing_usages.exists? %>
+      <% usage_item = sp.billing_usages.first %>
+      <div class="row deployment-overview-sub" style="margin-top:15px;margin-bottom:15px;">
+        <div class="col-md-3">
+          <div class="deployment-overview-sub-header">LAST COLLECTION</div>
+          <div class="deployment-overview-sub-content">
+            <%= l sp.current_period.in_time_zone current_user.tz %>
+            <%#l usage_item.created_at %>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="deployment-overview-sub-header">BILLED QTY</div>
+          <div class="deployment-overview-sub-content"><%= usage_item.qty.round(6) %></div>
+        </div>
+        <div class="col-md-3">
+          <div class="deployment-overview-sub-header">TOTAL QTY</div>
+          <div class="deployment-overview-sub-content"><%= usage_item.qty_total.round(6) %></div>
+        </div>
+        <div class="col-md-3">
+          <div class="deployment-overview-sub-header">EFFECTIVE HOURLY RATE</div>
+          <div class="deployment-overview-sub-content" style="cursor:help;" title="Hourly rate using period <%=l usage_item.period_start %> to <%=l usage_item.period_end %>"><%= format_currency usage_item.hourly_run_rate, 6 %></div>
+        </div>
+      </div>
+      <% else %>
+      <hr>
+      <% end %>
+    <% end %>
+    <div class="row">
+      <div class="col-md-6 col-sm-12">
+        <div style="font-size:11px;font-weight:bold;">OVERVIEW</div>
+        <ol class="list-unstyled list-unstyled-min">
+          <li>
+            External ID
+            <b class="pull-right"><%= sp.external_id.blank? ? 'n/a' : sp.external_id %></b>
+          </li>
+          <li>
+            Status
+            <b class="pull-right"><%= sp.active ? 'Active' : 'Inactive' %></b>
+          </li>
+          <li>
+            Created
+            <b class="pull-right">
+              <%= l sp.created_at, format: :short %>
+            </b>
+          </li>
+          <li>
+            Current Phase
+            <b class="pull-right"><%= sp.phase_type.capitalize %></b>
+          </li>
+        </ol>
+      </div>
+      <div class="col-md-6 col-sm-12">
+        <div style="font-size:11px;font-weight:bold;">PRODUCT</div>
+        <ol class="list-unstyled list-unstyled-min">
+          <% unless sp.product.external_id.blank? %>
+          <li>
+            External ID
+            <b class="pull-right"><%= sp.product.external_id %></b>
+          </li>
+          <% end %>
+          <li>
+            Kind
+            <b class="pull-right"><%= sp.product.kind %></b>
+          </li>
+          <% unless sp.product.kind == 'package' %>
+            <li>
+              Resource
+              <b class="pull-right"><%= sp.product.resource_kind %></b>
+            </li>
+            <li>
+              Unit
+              <b class="pull-right"><%= sp.product.unit %></b>
+            </li>
+            <li>
+              Unit Type
+              <b class="pull-right"><%= sp.product.unit_type %></b>
+            </li>
+            <li style="cursor:help;" title="Aggregated means you charge only for the consumed amount.">
+              Aggregated?
+              <b class="pull-right"><%= sp.product.is_aggregated ? 'Yes' : 'No' %></b>
+            </li>
+          <% end %>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>

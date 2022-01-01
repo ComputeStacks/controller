@@ -1,0 +1,23 @@
+<div class="row">
+  <div class="col-xs-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <strong><%= t('events.plural').upcase %></strong>
+        <%= link_to "View all", "#{admin_deployments_path(deployment)}/events", class: 'pull-right' %>
+      </div>
+      <div class="remote-resource refresh" data-url="<%= admin_deployments_path(deployment) %>/events">
+        <div class="text-center" style="padding: 25px 0;">
+          <i class="fa fa-refresh fa-spin"></i><%= t 'common.loading_obj', obj: t('events.plural') %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12 remote-resource refresh" data-url="<%= admin_deployments_path(deployment) %>/services">
+    <div class="panel panel-default">
+      <div class="panel-body text-center"><i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading_obj', obj: t('obj.containers') %></div>
+    </div>
+  </div>
+</div>

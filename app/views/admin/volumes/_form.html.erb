@@ -1,0 +1,54 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label>Label</label>
+        <%= f.text_field :label, class: 'form-control' %>
+        <span class="help-block">What is displayed in the SFTP container.</span>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label>Mount Point</label>
+        <%= f.text_field :container_path, class: 'form-control' %>
+        <span class="help-block">Mount point inside container.</span>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="<%= %w(new create).include?(controller.action_name) || @volume.to_trash ? 'col-md-8' : '' %> col-xs-12">
+      <div class="form-group">
+        <label>Container Service</label>
+        <% if @services.empty? %>
+          <br />
+          There are no container service candidates
+        <% else %>
+          <%= f.collection_select :container_service_id, @services, :id, :label_with_id, { include_blank: true }, { class: 'form-control chosen-select-standard' } %>
+        <% end %>
+      </div>
+    </div>
+    <% if %w(new create).include?(controller.action_name) || @volume.to_trash %>
+      <div class="col-md-4 col-xs-12">
+        <div class="form-group">
+          <%if @volume.to_trash %>
+            <label>Schedule Destruction</label>
+            <%= f.check_box :to_trash, class: 'form-control' %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%= render partial: 'volumes/volume_backend', locals: { f: f } %>
+
+<%= render partial: "container_images/volume_params/borg_form", locals: { f: f, volume: @volume } if Feature.check('backups', current_user) %>
+
+<div class="panel-footer">
+  <% if @back_url == "/admin/volumes" %>
+    <%= link_to t('actions.cancel'), %w(new create).include?(controller.action_name) ? "/admin/volumes" : "/admin/volumes/#{@volume.id}", class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <% else %>
+    <%= link_to t('actions.cancel'), @back_url, class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <% end %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success pull-right' %>
+</div>

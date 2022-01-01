@@ -1,0 +1,10 @@
+<div class="col-sm-4">
+  <div class="panel panel-body">
+    <strong><%= "#{pluralize(@zone.errors.count, "error")} prevented this DNS Zone from being saved:" %></strong>
+    <ul class="list-unstyled">
+      <% @zone.errors.full_messages.each do |msg| %>
+        <li style="color: red;"><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,113 @@
+backup_final:
+  term: hour
+  price: 0.0000684932
+  currency: USD
+  billing_phase: final_backup
+  billing_resource: backup
+  regions:
+    - regionone
+disk_final:
+  term: hour
+  price: 0.0001369863
+  currency: USD
+  billing_phase: final_disk
+  billing_resource: disk
+  regions:
+    - regionone
+local_disk_final:
+  term: hour
+  price: 0.0001369863
+  currency: USD
+  billing_phase: final_local_disk
+  billing_resource: local_disk
+  regions:
+    - regionone
+bw_final:
+  term: month
+  price: 0.09
+  currency: USD
+  billing_phase: final_bandwidth
+  billing_resource: bandwidth
+  regions:
+    - regionone
+containersmall_final:
+  term: hour
+  price: 0.000343
+  currency: USD
+  billing_phase: final_containersmall
+  billing_resource: containersmall
+  regions:
+    - regionone
+containerm_final:
+  term: hour
+  price: 0.00685
+  currency: USD
+  billing_phase: final_containerm
+  billing_resource: containerm
+  regions:
+    - regionone
+containerl_final:
+  term: hour
+  price: 0.0137
+  currency: USD
+  billing_phase: final_containerl
+  billing_resource: containerl
+  regions:
+    - regionone
+
+backup_final_eur:
+  term: hour
+  price: 0.0000684932
+  currency: EUR
+  billing_phase: final_backup
+  billing_resource: backup
+  regions:
+    - regionone
+disk_final_eur:
+  term: hour
+  price: 0.0001369863
+  currency: EUR
+  billing_phase: final_local_disk
+  billing_resource: local_disk
+  regions:
+    - regionone
+local_disk_final_eur:
+  term: hour
+  price: 0.0001369863
+  currency: EUR
+  billing_phase: final_disk
+  billing_resource: disk
+  regions:
+    - regionone
+bw_final_eur:
+  term: month
+  price: 0.09
+  currency: EUR
+  billing_phase: final_bandwidth
+  billing_resource: bandwidth
+  regions:
+    - regionone
+containersmall_final_eur:
+  term: hour
+  price: 0.000343
+  currency: EUR
+  billing_phase: final_containersmall
+  billing_resource: containersmall
+  regions:
+    - regionone
+containerm_final_eur:
+  term: hour
+  price: 0.00685
+  currency: EUR
+  billing_phase: final_containerm
+  billing_resource: containerm
+  regions:
+    - regionone
+containerl_final_eur:
+  term: hour
+  price: 0.0137
+  currency: EUR
+  billing_phase: final_containerl
+  billing_resource: containerl
+  regions:
+    - regionone

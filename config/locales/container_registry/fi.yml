@@ -1,0 +1,26 @@
+fi:
+  container_registry:
+    not_found: Arkistoa ei löytynyt
+    updated: Arkisto päivitetty onnistuneesti
+    created: Arkisto on käyttöönotto jonossa
+    new:
+      breadcrumb: Uusi arkisto
+    edit:
+      breadcrumb: Muokkaa arkistoa
+    form:
+      title_new: Uusi salattu arkisto
+      title_edit: Päivitä arkisto
+      name: Nimi
+    registry_list:
+      empty: Ei arkistoja
+      deploying: Käyttöönotto käynnissä
+      working: Toiminnassa
+    show:
+      delete_confirm: "Oletko varma? Kaikki kuvat ja tiedot poistetaan samalla."
+      url: Arkiston url
+      auth: Authentication
+      images:
+        title: Arkiston kuvat
+        empty: "Kuvia ei löytynyt. Käytä `docker push` komentoa ensimmäisen kuvasi käyttöönottoon."
+        image: Kuvan nimi
+        tags: Tunnisteet

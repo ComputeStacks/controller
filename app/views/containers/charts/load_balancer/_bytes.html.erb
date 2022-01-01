@@ -1,0 +1,13 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <p class="text-center">Public Network (Mbps) </p>
+    <%= area_chart "#{container_charts_load_balancer_path(container.id)}.json",
+                   points: false,
+                   download: true,
+                   refresh: 60,
+                   label: 'Mbps',
+                   curve: false,
+                   legend: 'bottom'
+    %>
+  </div>
+</div>

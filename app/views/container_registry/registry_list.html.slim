@@ -1,0 +1,31 @@
+- if @registries.empty?
+  .col-md-6.col-md-offset-3
+    .text-center style="margin-top:50px;opacity:0.2;"
+      i.fa.fa-database style="font-size:15em;"
+      div style='color:#333;font-size:3em;'= t '.empty'
+- else
+  - @registries.each do |i|
+    .col-md-3.col-sm-6.col-xs-12: .panel class="#{registry_panel_class(i.status)}"
+      .panel-heading
+        .panel-title
+          = i.label
+          .pull-right
+            - if i.is_resource_owner?(current_user)
+              i.fa.fa-user-plus.fa-fw style="margin-right:5px;" title=(pluralize(i.container_registry_collaborators.active.count, 'Collaborator'))
+            - else
+              i.fa.fa-user.fa-fw style="margin-right:5px;" title=(i.user.full_name)
+            - if i.status == t('.deploying') || i.status == t('.working')
+              i.fa.fa-refresh.fa-spin.fa-fw
+            - else
+              i.fa.fa-database.fa-fw
+      .panel-body
+        ul.list-unstyled
+          li
+            = t('container_registry.show.url').upcase
+            br
+            code= "#{Setting.registry_base_url}:#{i.port}"
+          li
+            = "#{t('common.username').upcase} / #{t('common.password').upcase}"
+            br
+            code= link_to "click to view", "/container_registry/#{i.id}/registry_connect"
+        div= link_to raw("<i class='fa fa-cogs'></i> #{t('actions.manage')}"), "/container_registry/#{i.id}-#{i.name.parameterize}", class: "btn btn-default btn-block"

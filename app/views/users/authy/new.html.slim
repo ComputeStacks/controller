@@ -1,0 +1,15 @@
+- content_for :title, t('.title')
+.row: .block-center.col-md-8.col-md-offset-2
+  .panel.panel-default: .panel-body
+    p.lead= t('.title')
+    = form_tag "/users/authy", method: :post do
+      .form-group
+        label= t '.cc'
+        input#authy-countries name="country_code" autocomplete="off" autofocus="autofocus" autocorrect="off" autocapitalize="off" spellcheck="false"
+      .form-group
+        label= t '.phone'
+        input#authy-cellphone.form-control name="cellphone" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" 
+      = link_to t('actions.cancel'), "/users/edit", class: 'btn btn-default'
+      input type="submit" value="#{t('actions.continue')}" class="btn btn-success" style="margin-left:10px;"
+.row: .block-center.col-md-8.col-md-offset-2.text-center style="margin-top:20px;"
+  p= link_to t('.apps'), "https://support.authy.com/hc/en-us/articles/115001945848", target: '_blank'

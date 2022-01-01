@@ -1,0 +1,44 @@
+<% unless request.xhr? %>
+  <% content_for :breadcrumb do %>
+    <div class="row has-breadcrumb">
+      <ol class="breadcrumb">
+        <li><%= link_to 'Projects', "/admin/deployments" %></li>
+        <li><%= link_to @deployment.name, admin_deployments_path(@deployment) %></li>
+        <li><%= link_to @service.label, admin_container_service_path(@service) %></li>
+        <li class="active">Containers</li>
+      </ol>
+    </div>
+  <% end %>
+  <div class="row"><div class="col-md-12">
+<% end %>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Container</th>
+      <th>Node</th>
+      <th>Private IP</th>
+      <th>Status</th>
+      <th>CPU / Memory</th>
+      <th title="Container usage, excluding volumes" style="cursor: help;text-decoration: underline;">Disk</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @containers.each do |i| %>
+      <tr>
+        <td><%= link_to i.name, admin_container_path(i) %></td>
+        <td><%= link_to i.node.label, admin_regions_url(i.node.region) if i.node %></td>
+        <td><%= i.local_ip %></td>
+        <td><%= i.current_state&.capitalize %></td>
+        <td><%= container_stats(i) %></td>
+        <td><%= container_current_disk_usage i %></td>
+        <td class="text-right"><%= render partial: "admin/containers/shared/power_controls", locals: { container: i } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% unless request.xhr? %>
+  </div></div>
+<% end %>

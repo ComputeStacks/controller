@@ -1,0 +1,24 @@
+fi:
+  volumes:
+    list:
+      empty: No Volumes Found
+      edit: "Muokkaa tallennustilaa: %{vol}"
+      new_button: Lisää tallennustila
+      new_button_help: "Tallennustilat ovat pysyviä tallennustiloja kontillesi. Yksi kontti voi käyttää useita tallennustiloja liitettyinä eri hakemistoihin."
+      usage: Käyttö
+      backups: Backups
+    table:
+      title: Pysyvä tallennustila
+      name: Nimi
+      mounted: Liitetty
+      backup: Varmistustapa
+      usage: Käyttö
+      attached_to: Liitetty kohteeseen
+    actions:
+      delete:
+        confirm: Oletko varma?
+        attached: Irroita palvelusta ennen poistoa.
+    path: Polku
+    containers: Attached Containers
+    high_availability:
+      local_disabled: Local volumes will disable HA for this service.

@@ -1,0 +1,10 @@
+<% content_for :title, "System Notifications" %>
+
+<%= render partial: 'admin/layouts/shared/settings_nav' %>
+
+
+<div class="row">
+  <div class="col-lg-10 col-lg-offset-1 col-md-12">
+    <%= render partial: "notifications/list", locals: { notifications: @notifications, base_path: "/admin/system_notifications" } %>
+  </div>
+</div>

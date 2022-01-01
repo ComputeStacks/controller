@@ -1,0 +1,7 @@
+fr:
+  volumes:
+    events:
+      breadcrumb: Events
+      title: "Events for %{volume}"
+      recent: Recent Events
+      item: "Event %{id}"

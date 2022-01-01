@@ -1,0 +1,16 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to "Billing Plans", "/admin/billing_plans"
+      li= link_to @billing_plan.name, "/admin/billing_plans/#{@billing_plan.id}"
+      li= link_to "#{@phase.billing_resource.product.name} - #{@phase.phase_type.capitalize}", @base_url
+      li.active= "Price #{@price.id}"
+
+
+.row: div class="#{@price.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8'}": p.lead Edit Price
+
+.row
+  div class="#{@price.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8'}"
+    = form_for @price, url: @base_price_url do |f|
+      .panel.panel-default= render partial: "admin/billing_plans/billing_phases/billing_resource_prices/form", locals: {f: f, price: @price}
+  = render partial: 'application/model_errors', locals: { obj: 'price', errors: @price.errors } unless @price.errors.count.zero?

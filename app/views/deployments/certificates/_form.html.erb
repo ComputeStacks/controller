@@ -1,0 +1,51 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-md-6">
+      <label for="deployment_id"><%= t 'obj.deployments' %></label>
+      <select name="deployment_id" class="form-control chosen-select-standard" id="ssl_deployment_id">
+        <%= render partial: 'application/project_select', locals: { deployment_id: @deployment.id, deployments: @deployment.user.deployments.sorted } %>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="ssl_container_service_id"><%= t 'obj.service' %></label>
+        <select class="form-control chosen-select-standard" name="deployment_ssl[container_service_id]" id="ssl_container_service_id" <% if @deployment.nil? || @deployment.services.empty? %>disabled="disabled"<% end %>>
+          <%= render partial: 'application/service_select', locals: { services: @deployment.services.web_only.sorted, service_id: @cert.container_service_id } %>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+<hr />
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label><%= t 'container_services.certificates.attributes.cert' %></label>
+        <%= f.text_area :crt, class: 'form-control code-font', style: 'font-size:11px;border:1px solid #e4e6e6;padding: 5px 10px;', rows: 15, required: 'required' %>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label><%= t 'container_services.certificates.attributes.privkey' %></label>
+        <%= f.text_area :pkey, class: 'form-control code-font', style: 'font-size:11px;border:1px solid #e4e6e6;padding: 5px 10px;', rows: 15, required: 'required' %>
+      </div>
+    </div>
+  </div>
+</div>
+<hr />
+<div class="panel-body">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <label><%= t 'container_services.certificates.form.cacert' %></label>
+        <%= f.text_area :ca, class: 'form-control code-font', style: 'font-size:11px;border:1px solid #e4e6e6;padding: 5px 10px;', rows: 10 %>
+        <span class="help-block"><%= t 'container_services.certificates.form.cacert_help' %></span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), :back, class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success pull-right' %>
+</div>

@@ -1,0 +1,23 @@
+- content_for :title, "#{@registry.label} Connection Info"
+
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    .ol.breadcrumb
+      li= link_to t('obj.deployments'), "/deployments"
+      li= link_to t('obj.registry'), "/container_registry"
+      li.active= @registry.label
+
+.row: .block-center.col-md-8.col-md-offset-2
+  .panel.panel-default
+    .panel-heading
+      .panel-title Container Registry Connection Info
+    table.table-list
+      tr
+        td= t('container_registry.show.url').upcase
+        td.code-font= "#{Setting.registry_base_url}:#{@registry.port}"
+      tr
+        td= t('common.username').upcase
+        td.code-font admin
+      tr
+        td= t('common.password').upcase
+        td#registry-password.code-font= link_to t('actions.show'), "/container_registry/#{@registry.id}/registry_connect/password", onclick: "inlineRemoteResource('registry-password');return false;"

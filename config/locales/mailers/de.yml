@@ -1,0 +1,17 @@
+de:
+  mailers:
+    confirmation_instructions:
+      title: 'Willkommen, %{email}'
+      l1: 'Sie können Ihre E-Mail-Adresse bestätigen und Ihr Konto über den unten stehenden Link aktivieren:'
+      link_text: 'Bestätigen Sie meine E-Mail-Adresse'
+    reset_password_instructions:
+      title: 'Hallo, %{email}'
+      l1: 'Jemand hat einen Link angefordert, um Ihr Passwort zu ändern. Sie können dies über den unten stehenden Link tun.'
+      l2: "Wenn Sie dies nicht angefordert haben, ignorieren Sie bitte diese E-Mail."
+      l3: "Ihr Passwort ändert sich erst, wenn Sie den obigen Link aufrufen und ein neues Passwort erstellen."
+      link_text: 'Mein Passwort ändern'
+    unlock_instructions:
+      title: 'Hallo %{email}'
+      l1: 'Ihr Konto wurde aufgrund einer übermäßigen Anzahl von erfolglosen Anmeldeversuchen gesperrt.'
+      l2: 'Klicken Sie auf den unten stehenden Link, um Ihr Konto freizuschalten:'
+      link_text: 'Mein Konto freischalten'

@@ -1,0 +1,75 @@
+<% content_for :breadcrumb do %>
+	<div class="row has-breadcrumb">
+		<ol class="breadcrumb">
+			<% if @deployment %>
+				<li><%= link_to 'Projects', "/admin/deployments" %></li>
+				<li><%= link_to @deployment.name, admin_deployments_path(@deployment) %></li>
+			<% else %>
+				<li><%= link_to "Domains", "/admin/container_domains" %></li>
+			<% end %>
+			<li class="active"><%= @domain.domain %></li>
+		</ol>
+	</div>
+<% end %>
+
+<div class="row">
+	<div class="col-lg-8 col-lg-offset-2 col-sm-12">
+
+		<div class="row">
+
+			<div class="col-md-12">
+				<div class="panel panel-default">
+					<table class="table-list">
+						<tr>
+							<td>Status</td>
+							<td><%= @domain.enabled ? 'Active' : 'Disabled' %></td>
+						</tr>
+						<tr>
+							<td>Container Service</td>
+							<td><%= @domain.container_service.nil? ? '...' : link_to(@domain.container_service.label, admin_deployments_path(@domain.deployment)) %></td>
+						</tr>
+						<tr>
+							<td>User</td>
+							<td><%= @domain.user.nil? ? '...' : link_to(@domain.user.full_name, admin_user_path(@domain.user)) %></td>
+						</tr>
+						<tr>
+							<td>Lets Encrypt</td>
+							<td><%= @domain.lets_encrypt ? 'Enabled' : 'Disabled' %></td>
+						</tr>
+						<tr>
+							<td>Updated</td>
+							<td><%= l @domain.updated_at.in_time_zone(Time.zone), format: :long %></td>
+						</tr>
+						<tr>
+							<td>Created</td>
+							<td><%= l @domain.created_at.in_time_zone(Time.zone), format: :long %></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+		</div>
+
+		<% unless @domain.audits.empty? %>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="panel panel-default">
+						<table class="table">
+							<% @domain.audits.each do |i| %>
+								<tr>
+									<td>
+										<%= admin_audit_description i %>
+										<br>
+										<span style="font-size:0.9em;"><i class="fa fa-dot-circle-o text-success"></i> Performed
+											by: <%= i.user.nil? ? 'System' : link_to(i.user.full_name, admin_user_path(i.user)) %></span>
+									</td>
+									<td class="text-right"><%= l i.created_at.in_time_zone(Time.zone), format: :long %></td>
+								</tr>
+							<% end %>
+						</table>
+					</div>
+				</div>
+			</div>
+		<% end %>
+	</div>
+</div>

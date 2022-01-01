@@ -1,0 +1,42 @@
+mysql_0:
+  container_service: mysql
+  name: mysql_password
+  label: Root Password
+  param_type: password
+  parent_param: mariadb_0
+  value: "<%= Secret.encrypt!(SecureRandom.urlsafe_base64(12)) %>"
+wordpress_0:
+  container_service: wordpress
+  name: wordpress_password
+  label: Password
+  param_type: password
+  parent_param: wordpress_0
+  value: "<%= Secret.encrypt!(SecureRandom.urlsafe_base64(12)) %>"
+wordpress_1:
+  container_service: wordpress
+  name: litespeed_admin_pw
+  label: Litespeed Password
+  param_type: password
+  parent_param: wordpress_1
+  value: "<%= Secret.encrypt!(SecureRandom.urlsafe_base64(12)) %>"
+wordpress_2:
+  container_service: wordpress
+  name: title
+  label: Title
+  param_type: static
+  parent_param: wordpress_2
+  value: My Blog
+wordpress_3:
+  container_service: wordpress
+  name: email
+  label: Email
+  param_type: static
+  parent_param: wordpress_3
+  value: user@example.com
+wordpress_4:
+  container_service: wordpress
+  name: username
+  label: Username
+  param_type: static
+  parent_param: wordpress_4
+  value: admin

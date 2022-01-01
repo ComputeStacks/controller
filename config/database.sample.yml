@@ -1,0 +1,23 @@
+development:
+  adapter: postgresql
+  encoding: unicode
+  database: computestacks
+  host: localhost
+  pool: 50
+  username: user
+
+test:
+  adapter: postgresql
+  encoding: unicode
+  database: computestacks_test
+  host: localhost
+  pool: 50
+  username: user
+
+production:
+  adapter: postgresql
+  encoding: unicode
+  database: computestacks
+  host: localhost
+  pool: 50
+  username: user

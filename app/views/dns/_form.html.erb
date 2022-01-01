@@ -1,0 +1,14 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label><%= t 'dns.show.fields.zone' %></label>
+        <%= f.text_field :name, required: true, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), '/dns', class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success' %>
+</div>

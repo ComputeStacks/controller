@@ -1,0 +1,18 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ul.nav.nav-pills.pull-left.sub-menu-pills
+      li class="#{%w(deployments container_services).include?(controller.controller_name) ? 'active' : ''}"= link_to t('deployments.shared.main_nav.deployments'), "/deployments"
+      li class="#{controller.controller_name == 'container_domains' ? 'active' : ''}"= link_to t('deployments.show.sidebar.domains'), "/container_domains"
+      li class="#{controller.controller_name == 'volumes' ? 'active' : ''}"= link_to t('deployments.show.sidebar.volumes'), "/volumes"
+      li class="#{controller.controller_name == 'alert_notifications' ? 'active' : ''}"= link_to 'Project Alerts', '/alert_notifications'
+    ol.breadcrumb.breadcrumb-action.text-right.hidden-xs
+
+      - case controller.controller_name
+      - when 'deployments'
+        li= link_to raw("<i class='fa #{current_user.deployments.empty? ? 'fa-folder-open-o' : 'fa-folder-open'}'></i>&nbsp;&nbsp;&nbsp;#{t('.new_deployment')}"), "/deployments/orders", class: 'btn btn-sm btn-default'
+      - when 'container_domains'
+        li= link_to t('deployments.shared.main_nav.new_domain'), "/container_domains/new", class: 'btn btn-sm btn-default'
+      - when 'alert_notifications'
+        li= link_to "View Alert Rules", "/user_notifications", class: 'btn btn-sm btn-default'
+      - else
+        li style="line-height:27px;" &nbsp;

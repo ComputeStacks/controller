@@ -1,0 +1,91 @@
+<% content_for :title, "Project: #{@deployment.name}" %>
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/admin/deployments" %></li>
+      <li class="active"><%= @deployment.name %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-sm-6">
+    <p class="lead">
+      <%= @deployment.name %>
+      <% if @deployment.has_clustered_storage? %>
+        <span style="font-size:12px;vertical-align:top;"><%= deployment_ha_label @deployment %></span>
+      <% end %>
+    </p>
+  </div>
+  <div class="text-right col-sm-6">
+    <div class="btn-group" style="margin-right:10px;">
+      <%= link_to '<i class="fa fa-external-link"></i> Project Details'.html_safe, "/deployments/#{@deployment.token}", class: 'btn btn-primary btn-sm' %>
+    </div>
+    <div class="btn-group" style="margin-right:10px;">
+      <%= link_to '<i class="fa fa-refresh"></i> Rebuild SFTP'.html_safe, "/admin/deployments/#{@deployment.id}/sftp", method: :post, class: 'btn btn-default btn-sm' %>
+    </div>
+    <div class="btn-group">
+      <%= link_to raw("<i class='fa fa-wrench'></i>"), "/admin/deployments/#{@deployment.id}/edit", class: "btn btn-sm btn-default" %>
+      <%= link_to raw("<i class='fa fa-trash'></i>"), "/admin/deployments/#{@deployment.id}", method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-sm btn-danger" %>
+    </div>
+
+  </div>
+</div>
+
+<%= render partial: "admin/deployments/show/header" %>
+
+<div class="row">
+  <div class="col-lg-2 col-md-3 col-xs-12">
+    <%= render partial: "admin/deployments/show/sidebar" %>
+  </div>
+  <div class="col-lg-10 col-md-9 col-xs-12">
+    <div class="tab-content" style="padding-top:25px;">
+      <div role="tabpanel" class="tab-pane active" id="overview">
+        <%= render partial: 'admin/deployments/show/overview', locals: {deployment: @deployment} %>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="collaborators">
+        <div class="remote-resource refresh" data-url="<%= admin_deployments_path @deployment %>/collaborators">
+          <div class="text-center" style="padding: 25px 0;">
+            <i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading_obj', obj: 'collaborators' %>
+          </div>
+        </div>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="sftp">
+        <div class="remote-resource refresh" data-url="<%= admin_deployments_path(@deployment) %>/sftp?js=true">
+          <div class="text-center" style="padding: 25px 0;">
+            <i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading_obj', obj: t('obj.containers') %>
+          </div>
+        </div>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="domains">
+        <div class="row">
+          <div class="col-md-12 text-right" style="margin-bottom:15px;">
+            <%= link_to "New Domain", "#{admin_deployments_path(@deployment)}/domains/new", class: 'btn btn-success btn-sm' %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 remote-resource refresh" data-url="<%= admin_deployments_path(@deployment) %>/domains?js=true">
+            <div class="text-center" style="padding: 25px 0;"><i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading_obj', obj: t('obj.domains') %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="subscriptions">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="panel panel-default">
+              <div class="panel-body"><strong>SUBSCRIPTIONS</strong></div>
+              <%= render partial: 'admin/subscriptions/index/list', locals: { subscriptions: @deployment.subscriptions } %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div role="tabpanel" class="tab-pane refresh" id="volumes">
+        <div class="remote-resource" data-url="<%= admin_deployments_path(@deployment) %>/volumes?js=true">
+          <div class="text-center" style="padding: 25px 0;"><i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading_obj', obj: t('obj.volumes') %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

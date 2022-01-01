@@ -1,0 +1,10 @@
+de:
+  project_select:
+    title: Projekt wählen
+    none: Keine Projekte gefunden
+  service_select:
+    title: Dienst auswählen
+    none: Keine Dienste gefunden
+  ingress_rule_select:
+    title: Eingangsregel wählen
+    none: Keine Eingangsregel gefunden

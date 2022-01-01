@@ -1,0 +1,7 @@
+nl:
+  project_select:
+    title: Choose Project
+    none: No Projects Found
+  service_select:
+    title: Select Service
+    none: No Services Found

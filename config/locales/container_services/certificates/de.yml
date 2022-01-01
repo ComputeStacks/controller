@@ -1,0 +1,28 @@
+de:
+  container_services:
+    certificates:
+      breadcrumb:
+        index: SSL Zertifikate
+        new: SSL Zertifikat hinzufügen
+        edit: SSL Zertifikat editieren
+      attributes:
+        expires: Läuft ab
+        issuer: Aussteller
+        cert: Zertifikat
+        privkey: Privater Schlüssel
+      none:
+        custom: Keine benutzerdefinierten Zertifikate gefunden.
+        le: Kein LetsEncrypt Zertifikate gefunden.
+      verify_domain: DNS verifizieren
+      le:
+        title: Kostenlose LetsEncrypt-Zertifikate
+        action: Kostenloses SSL einrichten
+      custom:
+        title: Benutzerdefinierte SSL-Zertifikate
+        action: SSL hochladen
+      form:
+        already_exists:
+          title: Zertifikat bereits installiert
+          help: Um ein bestehendes Zertifikat zu aktualisieren oder zu ersetzen, löschen Sie es bitte und fügen es erneut hinzu.
+        cacert: "Zertifizierungsstelle (optional)"
+        cacert_help: 'Viele Zertifizierungsstellen bieten ein separates "Zertifikats-Bundle" zum einbinden an. Ohne dieses zusätzliche Zertifikat wird Ihr SSL Zertifikat möglicherweise von einigen Browsern nicht erkannt.'

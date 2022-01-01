@@ -1,0 +1,8 @@
+wordpress_mysql:
+  container_image: wordpress
+  dependency: mariadb
+
+custom_mysql:
+  container_image: custom
+  dependency: mariadb
+  

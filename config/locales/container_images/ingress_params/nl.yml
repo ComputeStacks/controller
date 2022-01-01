@@ -1,0 +1,45 @@
+nl:
+  container_images:
+    ingress_rules:
+      obj: Ingress Rule
+      obj_plural: Ingress Rules
+      edit: Edit Ingress Rule
+      new: New Ingress Rule
+      list:
+        empty_description_html: Configure external communication with your container.
+        table:
+          columns:
+            port_nat: Public Port
+            proto: Protocol
+            lb: Load Balancer
+            proxy: TCP Proxy
+            cf_only: CloudFlare Only
+      form:
+        port: Internal Port
+
+        proto: Protocol # tcp,udp,tls
+        proto_help_html: "<code>HTTP</code> will automatically redirect to <code>HTTPS</code> when SSL certificates are added."
+
+        # True will enable it through the load balancer
+        external: Enable External Access?
+
+        # Should the load balancer connect via SSL to the container?
+        # The container _must_ have some kind of local certificate and be accepting ssl.
+        backend_ssl: SSL (Backend)
+        backend_ssl_help_html: Use SSL when connecting from the LoadBalancer to your backend
+
+        # In most cases they will leave this disabled, but this is designed to allow tcp services
+        # to receive extra connection information from the load balancer.
+        tcp_proxy: TCP Proxy Options
+        tcp_proxy_help_html: "Ensure your backend supports the <code>PROXY</code> protocol before enabling this."
+
+        # Whether or not this ingress rule will restrict to only traffic coming from CloudFlare.
+        # This is useful to protect against malicious users, DDoS, or even when using CF Access
+        # to control authorized access to the endpoint.
+        restrict_cf: "Restrict external connections to CloudFlare only?"
+        restrict_cf_help_html: "This will block all traffic that does not originate from Cloudflare. This only applies to the global load balancer (public traffic)."
+
+        # Use iptables or HAProxy to manage external access to a tcp service
+        # if disabled, we create an iptable nat rule
+        tcp_lb: "Enable TCP Load Balancing"
+        tcp_lb_help: "If true and you select TCP as the protocol, the load balancer will reverse proxy your tcp connection to your container. This is required if you wish to use horizontal scaling. If this is unchecked, a standard nat rule will be created on our firewall for your service."

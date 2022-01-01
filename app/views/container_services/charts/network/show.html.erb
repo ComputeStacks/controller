@@ -1,0 +1,16 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active">Charts</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12">
+    <%= render partial: "deployments/services/service_charts/network", locals: { service: @service } %>
+  </div>
+</div>

@@ -1,0 +1,142 @@
+module Containers
+  module ContainerRuntime
+    extend ActiveSupport::Concern
+
+    def runtime_config(audit = nil)
+      # Sanity checks
+      return nil if service.nil?
+      return nil if deployment.nil?
+      return nil if container_image.nil?
+
+      # Ensure we have an ip address
+      if local_ip.blank?
+        generate_container_ip!
+        reload
+        reload_ip_address
+        return nil if local_ip.blank?
+      end
+
+      # Config
+      c = {
+        'name' => name,
+        'Hostname' => name,
+        'Domainname' => "service.internal",
+        'ExposedPorts' => {},
+        'Labels' => {
+          'org.projectcalico.label.token' => deployment.token,
+          'org.projectcalico.label.service' => service.name,
+          'com.computestacks.service_id' => service.id.to_s,
+          'com.computestacks.deployment_id' => deployment.id.to_s,
+          'com.computestacks.image_name' => container_image.full_image_path
+        },
+        'Healthcheck' => {
+          'Test' => ["NONE"]
+        },
+        'Image' => container_image.full_image_path,
+        'HostConfig' => {
+          'PortBindings' => {},
+          'NetworkMode' => ip_address.network.name,
+          'VolumeDriver' => 'local',
+          'LogConfig' => log_driver_config, # Containerized.log_driver_config
+        },
+        'NetworkingConfig' => {
+          'EndpointsConfig' => {
+            ip_address.network.name => {
+              'IPAMConfig' => {
+                'IPv4Address' => local_ip
+              }
+            }
+          }
+        }
+      }
+      runtime_env.each do |k,v|
+        (c['Env'] ||= []) << "#{k}=#{v}"
+      end
+      service.volumes.where(nodes: {id: node.id}).joins(:nodes).each do |v|
+        (c['HostConfig']['Binds'] ||= []) << "#{v.name}:#{v.container_path.strip}"
+      end
+      cmd = parsed_command
+      if cmd
+        if cmd[0..9] == "/bin/sh -c"
+          c['CMD'] = ["/bin/sh", "-c", cmd.gsub("/bin/sh -c", "")]
+        elsif cmd[0..11] == "/bin/bash -c"
+          c['CMD'] = ["/bin/sh", "-c", cmd.gsub("/bin/sh -c", "")]
+        else
+          cmd.split(' ').each do |i|
+            (c['Cmd'] ||= []) << i
+          end
+        end
+      end
+      c['HostConfig']['NanoCPUs'] = cpu ? (cpu * 1e9).to_i : (1 * 1e9).to_i
+      m = memory.nil? ? 256 : memory
+      # Also change `resize_job.rb`.
+      # 1 GiB = 1073741824 on docker inspect
+      # 1073741824 / 1024 = 1048576
+      mem_value = (m * 1048576).to_i
+      mem_swap = mem_value
+      mem_swappiness = nil
+
+      if subscription&.package
+        p = subscription.package
+        mem_swap = mem_value + (p.memory_swap * 1048576).to_i if p.memory_swap
+        mem_swappiness = p.memory_swappiness if p.memory_swappiness
+      end
+      c['HostConfig']['Memory'] = mem_value
+      c['HostConfig']['MemorySwap'] = mem_swap
+      c['HostConfig']['MemorySwappiness'] = mem_swappiness if mem_swappiness
+
+      if Rails.env.production?
+        c['HostConfig']['ExtraHosts'] = ["metadata.internal:#{node.primary_ip}"]
+      else
+        c['HostConfig']['ExtraHosts'] = ["dev.computestacks.net:10.211.55.2", "metadata.internal:#{node.primary_ip}"]
+      end
+      c['HostConfig'].merge! node.container_io_limits
+      c
+    rescue => e
+      ExceptionAlertService.new(e, 'a974dd3087e0cf79').perform
+      l = event_logs.create!(
+        status: 'alert',
+        notice: true,
+        locale: 'deployment.errors.fatal',
+        event_code: 'a974dd3087e0cf79',
+        audit: audit
+      )
+      l.event_details.create!(data: "Error generating runtime config for container #{name}: #{e.message}", event_code: 'a974dd3087e0cf79')
+      l.deployments << deployment if deployment
+      l.users << user if user
+      nil
+    end
+
+    # Service command, parsed
+    def parsed_command
+      return nil if service.command&.strip.blank?
+      raw_command = service.command.strip
+      data = Liquid::Template.parse(raw_command)
+      vars = {'service_name_short' => var_lookup('build.self.service_name_short')}
+      service.setting_params.each do |param|
+        vars[param.name] = var_lookup("build.settings.#{param.name}")
+      end
+      data.render(vars)
+    end
+
+    private
+
+    def runtime_env
+      result = []
+      service.env_params.each do |i|
+        case i.param_type
+        when 'variable'
+          val = var_lookup(i.value)
+          if val.nil?
+            raise "Unknown variable #{i.value}"
+          end
+          result << [i.name, val]
+        when 'static'
+          result << [i.name, i.value]
+        end
+      end
+      result + metadata_env_params
+    end
+
+  end
+end

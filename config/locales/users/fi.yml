@@ -1,0 +1,148 @@
+fi:
+  auth:
+    login: Kirjaudu sisään
+    register: Rekisteröidy
+    pw_reset: Salanan nollaus
+    confirm: Lähetä varmistus
+    unlock: Avaa lukittu tili
+  user_groups:
+    advanced_section: Advanced
+    allow_driver_override:
+      title: Allow forcing local storage when creating a custom container image?
+      help: "If you're using clustered storage for a given region, this will allow users to manually specify local storage as an option when creating a custom image."
+  registration:
+    user:
+      title: Rekisteröidy
+      register_btn: Rekisteröidy
+  users:
+    project_notifications:
+      title: Project Notifications
+      breadcrumb:
+        new: New Notification
+        edit: Update Notification
+      rules:
+        new: Create Rule
+        empty: No Notification Rules Found
+        exhausted: All possible notifications have been created
+        table:
+          alert: Alert Name
+          count: Active Notifiers
+      show:
+        title: Notification Settings
+        title_help_html: |
+          Any alerts configured here will be triggered in addition to alerts configured on individual projects.<br>If you configure the same rule here, and on a project, you will see duplicate notifications.
+        table:
+          service: Service
+          description: Description
+          configuration: Configuration
+      create_services:
+        email: Create Email Notifier
+        google_chat: Create Google Chat Notifier
+        slack: Create Slack Notifier
+        webhook: Create Webhook Notifier
+    developer:
+      nav:
+        legacy_api: API Credentials
+        auth: Authorized Apps
+        apps: Applications
+    profile_sidebar:
+      main: My Profile
+      notifications: Project Notifications
+      sec: Account Security
+      dev: Developer
+    fields:
+      fname: Etunimi
+      lname: Sukunimi
+      email: Sähköposti
+      current_password: Current Password
+      password: Salasana
+      password_confirmation: Varmista salasana
+      password_hint: Salasanan pitää olla 8 merkin pituinen.
+      phone: Puhelin
+      address_1: Katuosoite
+      address_2: '' # Line 2. can optionally be blank
+      city: Kaupunki
+      state: Valtio
+      country: Maa
+      zip: Postinumero
+      vat: VAT
+      company: Yritys
+      currency: Valuutta
+    api:
+      title: API pääsytiedot
+      edit_breadcrumb: Update API Credentials
+      notice: API salaisuutesi näytetään vain kerran. Ole hyvä ja kirjoita se ylös.
+      api_key: API käyttäjätunnus
+      api_secret: API Salasana
+      disabled: API pääsy poistettu käytöstä onnistuneesti
+      error: API pääsytietojen luomisessa tapahtui virhe
+      docs: Näytä API dokumentaatio
+      oauth: 'OAuth settings'
+      api_propose_oauth_html: 'These credentials can be used with HTTP Basic Auth, or OAuth2 Password grant.'
+      list:
+        empty: You have no API credentials
+        create: Generate Credentials
+    edit:
+      title: Muokkaa tiliäni
+      sec_title: Turva-asetukset
+      limits: Tilin rajat
+      api:
+        enable: Ota API pääsy käyttöön
+        disable: Ota API pääsy pois käytöstä
+        regen: Luo uudelleen
+        regen_prompt: Oletko varma? Olemassa oleva avaimesi poistuu saman tien käytöstä.
+      authy:
+        enable: Ota käyttöön Authy 2FA
+        disable: Ota Authy 2FA pois käytöstä
+        help_link: Tutustu lisää Authy 2FA:n käyttöön.
+    authy:
+      new:
+        title: Ota käyttöön Authy 2FA
+        cc: Anna maa
+        phone: Anna puhelinnumerosi
+        apps: Klikkaa asentaaksesi Authy sovellukset
+      edit:
+        title: Aktivoi Authy 2FA
+        token: Authy Tokeni
+        apps: Klikkaa asentaaksesi Authy sovellukset
+    security_key:
+      controller:
+        removed: Turva Avain Poistettu
+        u2f:
+          added: Turva Avain avain lisätty onnistuneesti.
+        errors:
+          removed: "Virhe poistaessa Turva Avainta: %{error}"
+          key_type: Virheellinen avain tyyppi
+          exists: Turva avain on jo käytössä tunnuksellasi.
+      index:
+        title: Turva avaimet
+        add_u2f: 'Lisää Turva Avain'
+        table_empty_html: "Sinulla ei ole turva avaimia.<br>Suojaa tunnuksesi lisäämällä yksi nyt!"
+      new:
+        title: Lisää Turva Avain
+        label: Avaimesi Nimi
+        u2f:
+          placeholder: Pää Turva Avain
+          title: Aseta turva avaimesi tietokoneeseesi.
+          l1: Jos siinä on nappi, paina sitä rekisteröityäksesi.
+    security_key_auth:
+      controller:
+        no_authy: "Tunnustasi ei ole yhdistetty Authy tunnukseen."
+        authy_disabled: "Authy autentikointi on poistettu käytöstä. Ole hyvä ja ota yhteyttä tukeen."
+        invalid_token: Virheellinen Tokeni
+      new:
+        title: Todennus Portti
+        alt_methods: Vaihtoehtoiset kirjautumismenetelmät
+        help_title: Ongelmia kirjautuessa sisään?
+        support: "Ole hyvä ja ota yhteyttä tukeen: %{support_line}"
+        u2f:
+          l1: Jos siinä on nappi, paina sitä autentikoituaksesi.
+          error: "Autentiokinti Virhe!<br>Päivitä sivu ja kokeile uudestaan."
+        authy:
+          title: Autentikoidu sinun Authy 2FA sovelluksella
+    totp:
+      title: Authenticator App
+      setup: Configure Authenticator App
+      form:
+        code: Authenticator App Code
+      apps: Recommended Applications

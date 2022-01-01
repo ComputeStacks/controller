@@ -1,0 +1,66 @@
+<div class="panel-body">
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <%= f.label :name, t('common.name') %>
+        <%= f.text_field :name, class: 'form-control', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false' %>
+        <p class="help-block">
+          <i><%= t 'container_images.params.common.name_help.title' %></i>
+          <%= t 'container_images.params.common.name_help.description' %>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <%= f.label :label, t('common.label') %>
+        <%= f.text_field :label, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <hr >
+
+  <div class="row">
+    <div class="col-md-6 col-sm-12">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <%= f.radio_button :param_type, 'static' %>
+            <label for="container_image_env_param_static">
+              <strong><%= t('container_images.params.common.param_type.static') %></strong>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <%= f.text_field :static_value, class: 'form-control', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false' %>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-md-6 col-sm-12">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <%= f.radio_button :param_type, 'variable' %>
+            <label for="container_image_env_param_variable">
+              <strong><%= t('container_images.params.common.param_type.var') %></strong>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <%= f.select :env_value, options_for_select(@env.container_service.available_vars, @env.value), {}, class: 'form-control' %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

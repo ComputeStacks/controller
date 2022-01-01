@@ -1,0 +1,41 @@
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <span style="font-weight:bold;font-size:0.98rem;"><%= t('search.title').upcase %></span>
+        <div style="margin-top:10px;">
+          <%= form_tag request.path =~ /admin/ && current_user.is_admin ? "/admin/search" : "/search", method: :post do %>
+            <div class="form-group">
+              <input class="form-control" type="text" data-placeholder="<%= t 'search.placeholder' %>" placeholder="<%= t 'search.placeholder' %>" name="q" value="<%= q %>" />
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <% unless controller.action_name == 'new' %>
+        <% if search_params.empty? %>
+          <div class="panel-body text-center">
+            <p class="lead">No results found</p>
+          </div>
+        <% else %>
+          <table class="table table-hover" style="border-top:0;">
+            <thead>
+            <tr>
+              <th>Resource</th>
+              <th class="text-right">Created</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% search_params.each do |i| %>
+              <tr>
+                <td><%= i[:label].html_safe %> <%= link_to i[:title].html_safe, i[:link] %></td>
+                <td class="text-right"><%= l i[:created_at] %></td>
+              </tr>
+            <% end %>
+            </tbody>
+          </table>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

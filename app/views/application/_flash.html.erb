@@ -1,0 +1,8 @@
+<% flash.each do |name, msg| %>
+  <% next if msg.blank? %>
+  <% next unless %w(alert info notice warning success).include?(name) %>
+  <div class="alert alert-<%= flash_class(name) %> app-flash">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    <%= msg %>
+  </div>
+<% end %>

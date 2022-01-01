@@ -1,0 +1,23 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active">Active Sessions</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row" style="margin-bottom:20px;">
+  <div class="col-sm-12">
+    <small>LOAD BALANCER ACTIVE SESSIONS</small>
+    <h4 style="margin-top:0px;"><%= @service.label %></h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= render partial: 'container_services/charts/load_balancer/sessions', locals: { service: @service } %>
+  </div>
+</div>

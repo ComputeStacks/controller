@@ -1,0 +1,5 @@
+---
+:timeout: 300
+:concurrency: <%= ENV['QUEUE_LE'] || 2 %>
+:queues:
+  - letsencrypt

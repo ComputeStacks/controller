@@ -1,0 +1,75 @@
+fr:
+  container_images:
+    clone: Clone # Duplicate an image and create a new one.
+    params:
+      common:
+        name_help:
+          title: Format Guide
+          description: "No special characters or numbers, and replaces spaces with underscores."
+        param_type:
+          title: Type
+          static: Static Value
+          var: Variable
+          pass: Password
+        value: Value
+      env:
+        table:
+          title: Environmental Parameters
+        breadcrumb:
+          edit: "Edit %{name}"
+          new: Add Environmental Parameter
+        new_button: Add Environmental Variable
+        new_snippet_html: "Environmental variables are passed directly to your container.<br>They can be either static values, or variables that reference settings from this, or linked, containers."
+        static_var_hint_html: "<b>Tip:</b> Create a setting instead and reference it as a variable."
+      settings:
+        table:
+          title: Variables
+        breadcrumb:
+          edit: "Editing %{setting}"
+          new: Add Setting
+        new_button: Add Image Setting
+        new_snippet_html: "Settings can be supplied as environmental variables to all containers built using this image, or dependent (linked) containers."
+        form:
+          static: "User-defined setting"
+          default_value: Default Value
+          password: Auto-generated Password
+      related:
+        table:
+          title: Required Containers
+          inverse: Required By
+          none: No containers
+        form:
+          title: Add Required Container
+          select: Choose Container Image
+    new:
+      breadcrumb: Create Container Image
+      title: Create Container Image
+    index:
+      empty: No Container Images
+      qty: Number of Containers
+      reg: Registry
+      index:
+        image: Image
+    edit:
+      breadcrumb: Edit Image
+    show:
+      overview:
+        title: Overview
+        free: Free Image?
+        lb: Load Balancer Enabled
+        owner: Owner
+        enabled: Enabled
+        role: Role
+        role_class: Category
+        scale: Supports Scaling
+        in_use: In Use By
+        reg: Repository
+        desc: Description
+        min: Minimums # Resource minimums (cpu, memory)
+        command: Command # container command
+    categories:
+      apps: Apps
+      databases: Databases
+      kv: Key/Value & Caching
+      dev: Development Tools
+      other: Other

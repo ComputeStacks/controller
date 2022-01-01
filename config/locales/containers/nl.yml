@@ -1,0 +1,43 @@
+nl:
+  containers:
+    attributes:
+      ip: Internal IP
+      status: Status
+      resources: Resources # This is the header for the resource status (e.g. OK, WARN, ALERT)
+    actions:
+      power_actions_title: Power Controls
+      start: Start
+      stop: Stop
+      restart: Restart
+      rebuild: Rebuild Container
+      rebuild_short: Rebuild
+    prompts:
+      rebuild: Are you sure you want to rebuild this container? Any data NOT in a volume will be lost.
+    errors:
+      has_dependents: This container has dependents. Please delete those first.
+      stop: "There was a problem trying to stop this container."
+      has_failed_event:
+        body: The most recent event failed for this container.
+        link: Review Activity
+    health:
+      warn: Warn
+      alert: Alert
+      deg: Degraded
+      error: Error
+      ok: Ok
+    state:
+      running: Running
+      restarting: Restarting
+      stopped: Stopped
+      deleting: Removing
+      pending: Pending
+      building: Building
+      error: Error
+      unknown: Unknown
+    high_availability:
+      enabled: HA Enabled
+      disabled: HA Disabled
+      migration:
+        success: Container will be migrated shortly
+        error: Unable to migrate due to local volume constraint.
+        controller_error: Unable to migrate container. Please check that there are no local volumes attached.

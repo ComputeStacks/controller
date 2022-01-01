@@ -1,0 +1,9 @@
+<% if services.empty? %>
+  <option><%= t 'service_select.none' %></option>
+<% else %>
+  <option><%= t 'service_select.title' %></option>
+  <% services.each do |i| %>
+    <option value="<%= i.id %>" <% if service_id == i.id %>selected="selected"<% end %>><%= i.label %> (<%= i.container_image.label %>)</option>
+  <% end %>
+<% end %>
+

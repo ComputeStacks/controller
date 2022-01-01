@@ -1,0 +1,15 @@
+- content_for :title, "Edit #{@user.email}"
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to 'Users', "/admin/users"
+      li= link_to @user.full_name, @base_url
+      li.active= "Edit #{@user.full_name}"
+
+
+.row: .col-md-10.col-md-offset-1: p.lead= @user.full_name
+
+.row
+  .col-md-10.col-md-offset-1
+    = form_for @user, url: "/admin/users/#{@user.id}" do |f|
+      .panel.panel-default= render partial: "admin/users/form", locals: {f: f}

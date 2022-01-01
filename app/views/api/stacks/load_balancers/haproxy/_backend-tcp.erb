@@ -1,0 +1,17 @@
+<% load_balancer.container_services.each do |service| %>
+	<% next if service.containers.empty? %>
+  <% service.lb_tcp_ingress_rules.each do |ingress| %>
+backend <%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %>
+  mode tcp
+  timeout client 10m
+  timeout server 10m
+    <% service.containers.each do |container| %>
+      <% next if container.ip_address.nil? %>
+      <% if !load_balancer.direct_connect && (node != container.node) %>
+  server <%= container.name %> <%= container.node.primary_ip %>:<%= ingress.port_nat %> maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %> check <%= ingress.tcp_proxy_opt == 'none' ? '' : ingress.tcp_proxy_opt %>
+      <% else %>
+  server <%= container.name %> <%= container.ip_address.ipaddr %>:<%= ingress.port %> maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %> check <%= ingress.tcp_proxy_opt == 'none' ? '' : ingress.tcp_proxy_opt %><% if ingress.backend_ssl %> ssl verify none<% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

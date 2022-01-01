@@ -1,0 +1,38 @@
+<table class="table">
+  <thead>
+  <tr>
+    <th><%= t 'obj.port' %></th>
+    <th><%= t 'container_images.ingress_rules.list.table.columns.proto' %></th>
+    <th><%= is_public ? 'Public Access' : t('container_images.ingress_rules.list.table.columns.port_nat') %></th>
+    <% unless is_public %>
+      <th><%= t 'container_images.ingress_rules.list.table.columns.lb' %></th>
+    <% end %>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% if ingress_rules.empty? %>
+    <tr>
+      <td colspan="<%= is_public ? '4' : '5' %>" class="text-center"><%= link_to "Add Rule", "ingress/new" %></td>
+    </tr>
+  <% end %>
+  <% ingress_rules.each do |i| %>
+    <tr>
+      <td><%= i.port %></td>
+      <td><%= ingress_backend_proto i %></td>
+      <td><%= ingress_toggle_btn i %></td>
+      <% unless is_public %>
+        <td><%= ingress_load_balancer i %></td>
+      <% end %>
+      <td class="text-right">
+        <% if return_to == 'service' %>
+          <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, "#{edit_ingress_rule_path(i)}?return_to=service", class: 'btn btn-sm btn-default' %>
+        <% else %>
+          <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, "#{edit_ingress_rule_path(i)}", class: 'btn btn-sm btn-default' %>
+        <% end %>
+        <%= link_to tag.i(nil, class: 'fa fa-trash'), ingress_rule_path(i), method: :delete, class: 'btn btn-sm btn-danger', data: { confirm: "Are you sure? This will also delete any associated domains." } %>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

@@ -1,0 +1,10 @@
+<div class="col-sm-4">
+  <div class="panel panel-body">
+    <strong>Available Variables</strong>
+    <ul class="list-unstyled">
+      <% settings_avail_vars(setting).each do |i| %>
+        <li><code><%= "{{ #{i} }}" %></code></li>
+      <% end %>
+    </ul>
+  </div>
+</div>

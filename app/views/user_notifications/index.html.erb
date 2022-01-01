@@ -1,0 +1,65 @@
+<% content_for :title, t('users.project_notifications.title') %>
+
+<div class="row">
+
+  <div class="col-lg-2 col-md-3 col-sm-12">
+    <%= render partial: 'users/sidebar', locals: { active_tab: 'notifications' } %>
+  </div>
+
+  <div class="col-lg-10 col-md-9 col-sm-12">
+    <div class="tab-content">
+      <div class="tab-pane active">
+
+        <div class="row">
+          <div class="col-sm-12">
+            <%= render partial: "notifications/list", locals: { notifications: @notifications, base_path: "/user_notifications" } %>
+          </div>
+        </div>
+
+        <% unless @project_notifications.empty? %>
+          <hr>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <strong>Project Notifications</strong>
+                </div>
+                <table class="table">
+                  <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Notifier</th>
+                    <th>Service</th>
+                    <th>Value</th>
+                    <th colspan="2">Rules</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <% @project_notifications.each do |d| %>
+                    <% base_path = "/deployments/#{d.id}/notification_rules" %>
+                    <% d.project_notifiers.each do |i| %>
+                      <tr>
+                        <td><%= link_to d.name, "/deployments/#{d.token}" %></td>
+                        <td><%= link_to i.label, "#{base_path}/#{i.id}" %></td>
+                        <td><%= i.notifier_name %></td>
+                        <td><%= i.notifier_formatted_value %></td>
+                        <td><%= notifier_rule_table_list i, base_path %></td>
+                        <td class="text-right">
+                          <%= link_to tag.i(nil, class: 'fa fa-wrench'), "#{base_path}/#{i.id}/edit", class: 'btn btn-sm btn-default' %>
+                          <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{base_path}/#{i.id}", method: :delete, class: 'btn btn-sm btn-danger', data: { confirm: t('confirm_prompt') } %>
+                        </td>
+                      </tr>
+                    <% end %>
+                  <% end %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+
+</div>

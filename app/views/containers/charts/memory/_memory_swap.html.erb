@@ -1,0 +1,13 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <p class="text-center">Swap Usage (MB)</p>
+    <%= area_chart "#{container_charts_memory_swap_path(container.id)}.json",
+                   points: false,
+                   download: true,
+                   refresh: 60,
+                   label: 'MB',
+                   curve: false,
+                   legend: false
+    %>
+  </div>
+</div>

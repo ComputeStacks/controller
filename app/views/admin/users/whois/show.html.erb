@@ -1,0 +1,15 @@
+<% content_for :title, "IP: #{@ip}" %>
+<div class="row has-breadcrumb">
+  <ol class="breadcrumb">
+    <li><a href="/admin/users">Users</a></li>
+    <li><a href="/admin/users/<%= "#{@user.id}-#{@user.full_name.parameterize}" %>"><%= @user.full_name %></a></li>
+    <!--<li><a href="/admin/users/<%= @user.id %>/whois">IP Addresses</a></li>-->
+    <li class="active"><%= @ip %></li>
+  </ol>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <pre><%= @ip_data %></pre>
+  </div>
+</div>

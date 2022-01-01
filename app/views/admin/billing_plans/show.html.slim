@@ -1,0 +1,30 @@
+- content_for :title, @billing_plan.name
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to 'Billing Plans', "/admin/billing_plans"
+      li.active= @billing_plan.name
+
+.row
+  .col-lg-8.col-xs-6: p.lead= @billing_plan.name
+  .col-lg-4.col-xs-6.text-right
+    = link_to raw("<i class='fa fa-shopping-basket'></i> Add Product"), "/admin/billing_plans/#{@billing_plan.id}/billing_resources/new", class: "btn btn-sm btn-primary", style: "margin-right:10px;"
+    .btn-group
+      = link_to raw("<i class='fa fa-wrench'></i>"), "#{@base_url}/edit", class: "btn btn-sm btn-default"
+      = link_to raw("<i class='fa fa-trash'></i>"), "#{@base_url}", method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-sm btn-danger"
+
+- if @billing_plan.billing_resources.empty?
+  .row style="margin-top:25px;": .col-md-12.text-center: h4
+    | No resources
+    br
+    br
+    = link_to raw("<i class='fa fa-shopping-basket'></i> Add Product"), "/admin/billing_plans/#{@billing_plan.id}/billing_resources/new", class: 'btn btn-default'
+
+
+.row
+  - @packages.each do |resource|
+    = render partial: "admin/billing_plans/billing_resources/item", locals: { resource: resource, base_url: @base_url }
+hr
+.row
+  - @products.each do |resource|
+    = render partial: "admin/billing_plans/billing_resources/item", locals: { resource: resource, base_url: @base_url }

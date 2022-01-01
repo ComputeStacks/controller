@@ -1,0 +1,27 @@
+<% content_for :title, @service.label %>
+
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb pull-left" style="padding-top:10px;">
+      <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li class="active"><%= @service.label %></li>
+    </ol>
+    <ol class="breadcrumb breadcrumb-action text-right">
+      <% if current_user.is_admin %>
+        <%= link_to '<i class="fa fa-external-link"></i> View In Admin'.html_safe, "/admin/deployments/#{@service.deployment.id}/services/#{@service.id}", class: 'btn btn-default btn-sm' %>
+      <% end %>
+      <% if (show_error_page?(@service) || @service.container_image.service_container? || @service.is_load_balancer) %>
+        <li>&nbsp;</li>
+      <% else %>
+        <%= link_to %Q(<i class="fa fa-life-ring"></i> #{t('container_services.header.connect')}).html_safe, container_service_connect_index_path(@service), class: 'btn btn-success btn-sm' %>
+      <% end %>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row"><%= render partial: "container_services/show/top" %></div>
+
+<%=
+  render partial: (show_error_page?(@service) ? 'container_services/show/fatal_error' : 'container_services/show'), locals: { service: @service }
+%>

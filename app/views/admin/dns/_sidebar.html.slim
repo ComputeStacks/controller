@@ -1,0 +1,5 @@
+.list-group
+  a href="/admin/dns" class=(@zone_filter.nil? ? 'active list-group-item' : 'list-group-item') All Zones
+  a href="/admin/dns/filter/User" class=(@zone_filter == 'User' ? 'active list-group-item' : 'list-group-item') User Zones
+  a href="/admin/dns/filter/System" class=(@zone_filter == 'System' ? 'active list-group-item' : 'list-group-item') System Zones
+  a href="/admin/dns/filter/Unlinked" class=(@zone_filter == 'Unlinked' ? 'active list-group-item' : 'list-group-item') Unlinked Zones

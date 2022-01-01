@@ -1,0 +1,26 @@
+<div class="row">
+  <div class="col-md-12">
+    <label for="domains_deployment_id"><%= t 'obj.deployment' %></label>
+    <select name="deployment_id" class="form-control chosen-select-standard" id="domains_deployment_id">
+      <%= render partial: 'application/project_select', locals: { deployment_id: deployment&.id, deployments: container_domain_project_list(domain) } %>
+    </select>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="domain_container_service_id"><%= t 'obj.service' %></label>
+      <select class="form-control chosen-select-standard" id="domain_container_service_id" <% if deployment.nil? || deployment.services.empty? %>disabled="disabled"<% end %>>
+        <%= render partial: 'application/service_select', locals: { services: services, service_id: domain.container_service&.id } %>
+      </select>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="domain_ingress_rule_id"><%= t 'container_images.ingress_rules.obj' %></label>
+      <select class="form-control chosen-select-standard" id="domain_ingress_rule_id" name="deployment_container_domain[ingress_rule_id]" <% if ingress_rules.empty? %>disabled="disabled"<% end %>>
+        <%= render partial: 'application/service_ingress_select', locals: { ingress_rules: ingress_rules, ingress_rule_id: domain.ingress_rule_id } %>
+      </select>
+    </div>
+  </div>
+</div>

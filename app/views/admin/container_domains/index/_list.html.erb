@@ -1,0 +1,39 @@
+<div class="col-md-12">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Domain</th>
+        <th>Enabled?</th>
+        <th>Container Service</th>
+        <th>Created</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @domains.each do |i| %>
+        <tr>
+          <td><%= link_to i.id, admin_container_domains_path(i) %></td>
+          <td>
+            <%= link_to i.domain, admin_container_domains_path(i) %>
+            <%= domain_le_badge(i) unless i.system_domain? %>
+          </td>
+          <td><%= i.enabled ? 'Yes' : 'No' %></td>
+          <td><%= i.container_service.nil? ? '...' : link_to(i.container_service.label, "#{admin_deployments_path(i.deployment)}/services/#{i.container_service.id}") %></td>
+          <td><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
+          <td class="text-right">
+            <div class="btn-group">
+              <%= link_to "#{tag.i(nil, class: 'fa fa-refresh fa-fw')} #{t('container_services.certificates.verify_domain')}".html_safe, "#{admin_deployments_path(i.deployment)}/domains/#{i.id}/verify_dns", method: :post, class: 'btn btn-sm btn-success' if i.deployment && i.le_require_verify? %>
+              <%= link_to tag.i(nil, class: 'fa fa-wrench fa-fw'), admin_edit_container_domains_path(i), class: 'btn btn-default btn-sm' %>
+              <% if i.system_domain? %>
+                <%= link_to tag.i(nil, class: 'fa fa-trash fa-fw'), "#", disabled: 'disabled', class: 'btn btn-danger btn-sm' %>
+              <% else %>
+                <%= link_to tag.i(nil, class: 'fa fa-trash fa-fw'), admin_container_domains_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-danger btn-sm' %>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,18 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Content Blocks", "/admin/blocks" %></li>
+      <li class="active">Create Content Block</li>
+    </ol>
+  </div>
+<% end %>
+
+
+<div class="row">
+  <div class="<%= @block.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @block, url: "/admin/blocks", method: :post do |f| %>
+      <div class="panel panel-default"><%= render partial: 'admin/blocks/form', locals: { f: f } %></div>
+    <% end %>
+  </div>
+  <%= render partial: 'admin/blocks/errors' unless @block.errors.count.zero? %>
+</div>

@@ -1,0 +1,25 @@
+.panel.panel-default
+  .panel-body
+    - if @container.can_edit?(current_user)
+      a.btn.btn-xs.btn-default.pull-right href="#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{@container.id}/image_relationships/new" style="margin-top:-3px;margin-right:-7px;"
+        i.fa.fa-plus
+    p: strong= t 'container_images.params.related.table.title'
+    - if @container.dependencies.empty?
+      p.text-center= t 'container_images.params.related.table.none'
+
+  - unless @container.dependencies.empty?
+    table.table
+      - @container.dependencies.each do |i|
+        tr
+          td= link_to i.label, container_image_path(i)
+          td.text-right= link_to raw('<i class="fa fa-trash"></i>'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{@container.id}/image_relationships/#{i.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: "btn btn-xs btn-danger" if current_user.is_admin? || @container.user == current_user
+
+- unless @container.parent_containers.empty?
+  - if @container.can_edit?(current_user)
+    .panel.panel-default
+      .panel-body
+        p: strong= t 'container_images.params.related.table.inverse'
+      table.table
+        - @container.parent_containers.each do |i|
+          tr
+            td= link_to i.label, container_image_path(i)

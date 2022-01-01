@@ -1,0 +1,41 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://192.168.173.10:2376/networks/net1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Swipely/Docker-API 2.0.0.pre.1
+      Accept:
+      - "*/*"
+      Content-Type:
+      - text/plain
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Api-Version:
+      - '1.41'
+      Content-Type:
+      - application/json
+      Docker-Experimental:
+      - 'false'
+      Ostype:
+      - linux
+      Server:
+      - Docker/20.10.8 (linux)
+      Date:
+      - Wed, 20 Oct 2021 22:28:51 GMT
+      Content-Length:
+      - '932'
+    body:
+      encoding: ASCII-8BIT
+      string: '{"Name":"net1","Id":"ad81d28064d453bec49198aa29c3851f330ab507306b1376ef7b40846f197a2c","Created":"2020-12-22T16:15:59.389533949-08:00","Scope":"global","Driver":"calico","EnableIPv6":false,"IPAM":{"Driver":"calico-ipam","Options":{},"Config":[{"Subnet":"10.100.0.0/24"}]},"Internal":false,"Attachable":false,"Ingress":false,"ConfigFrom":{"Network":""},"ConfigOnly":false,"Containers":{"220b5a37742d41cfa486ded31a309b3e0720175de31975661651e7b353eebaa3":{"Name":"stupefied-johnson152","EndpointID":"7473bfda1c41332ae025f119e96a98f92e713cb289cc4114801688a9f852cadb","MacAddress":"ee:ee:ee:ee:ee:ee","IPv4Address":"10.100.0.252/32","IPv6Address":""},"2dda37279b00ee01bca612b2ebc81613e723158bc6063063387fe8b01b394e9d":{"Name":"silly-easley152-219","EndpointID":"74c16ae572d825c0a02cc5976f426750b4122fb50b244d677d4b9de8ef352082","MacAddress":"ee:ee:ee:ee:ee:ee","IPv4Address":"10.100.0.15/32","IPv6Address":""}},"Options":{},"Labels":{}}
+
+        '
+  recorded_at: Wed, 20 Oct 2021 22:28:51 GMT
+recorded_with: VCR 6.0.0

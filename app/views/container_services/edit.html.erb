@@ -1,0 +1,20 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active">Edit Service</li>
+    </ol>
+  </div>
+<% end %>
+
+
+<div class="row">
+  <div class="<%= @service.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @service, url: container_service_path(@service) do |f| %>
+      <div class="panel panel-default"><%= render partial: 'container_services/form', locals: {f: f} %></div>
+    <% end %>
+  </div>
+  <%= render partial: 'container_services/errors' unless @service.errors.count.zero? %>
+</div>

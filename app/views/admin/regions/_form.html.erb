@@ -1,0 +1,176 @@
+<div class="panel-body">
+
+  <div class="row">
+    <div class="col-sm-8">
+      <div class="form-group">
+        <label>Name</label>
+        <%= f.text_field :name, required: true, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label>Enabled?</label>
+        <%= f.check_box :active, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 col-sm-12">
+      <div class="form-group">
+        <label>Fill To</label>
+        <%= f.text_field :fill_to, class: 'form-control' %>
+        <span class="help-block">Max number of resources provisioned before moving to next availability zone. Resources may still be provisioned beyond this value if no other zones exist.</span>
+      </div>
+    </div>
+    <div class="col-md-6 col-sm-12">
+      <div class="form-group">
+        <label>Region</label>
+        <%= f.collection_select :location_id, Location.sorted, :id, :name, {}, { class: 'form-control chosen-select-standard'} %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="form-group">
+        <%= f.label :metric_client_id, 'Metric Client' %>
+        <%= f.collection_select :metric_client_id, MetricClient.all, :id, :endpoint, {}, { class: 'form-control chosen-select-standard'} %>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <div class="row">
+    <div class="col-xs-12">
+      <h5>Container Log Settings</h5>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 col-xs-12">
+      <div class="form-group">
+        <%= f.label :loki_endpoint, 'Logging Endpoint' %>
+        <%= f.text_field :loki_endpoint , class: 'form-control'%>
+      </div>
+    </div>
+    <div class="col-md-6 col-xs-12">
+      <div class="form-group">
+        <%= f.label :log_client_id, 'Log Client' %>
+        <%= f.collection_select :log_client_id, LogClient.all, :id, :endpoint, {}, { class: 'form-control chosen-select-standard'} %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 col-xs-12">
+      <div class="form-group">
+        <%= f.label :loki_retries, 'Log Retry Attempts' %>
+        <%= f.text_field :loki_retries, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-md-6 col-xs-12">
+      <div class="form-group">
+        <%= f.label :loki_batch_size, 'Log Batch Size' %>
+        <%= f.text_field :loki_batch_size, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <%= render partial: 'volumes/volume_backend', locals: { f: f } %>
+
+  <hr>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h5>NFS Storage Options</h5>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <%= f.label :nfs_remote_host, 'NFS Server IP' %>
+      <%= f.text_field :nfs_remote_host, class: 'form-control' %>
+      <span class="help-block">IP accessible from the node. This is typically a private IP for the NFS server.</span>
+    </div>
+    <div class="col-sm-6">
+      <%= f.label :nfs_controller_ip, 'NFS Server (Controller) IP' %>
+      <%= f.text_field :nfs_controller_ip, class: 'form-control' %>
+      <span class="help-block">IP accessible from the controller. This is typically a public IP.</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <%= f.label :nfs_remote_path, 'NFS Remote Path' %>
+      <%= f.text_field :nfs_remote_path, class: 'form-control' %>
+      <span class="help-block">Path to parent directory on NFS Server.</span>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <h5>Container Limits</h5>
+      <em>Only supported by nodes running Debian 11+</em>
+      <br><br>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :disable_oom, 'Disable OomKiller' %>
+        <%= f.check_box :disable_oom, class: 'form-control' %>
+        <span class="help-block">Disable OomKiller. Warning, can result in frozen container and may require manual intervention to recover.</span>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :pid_limit, 'PID Limit' %>
+        <%= f.text_field :pid_limit, class: 'form-control' %>
+        <span class="help-block">Maximum number of processes inside the container</span>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :ulimit_nofile_soft, 'Max Open Files (soft)' %>
+        <%= f.text_field :ulimit_nofile_soft, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :ulimit_nofile_hard, 'Max Open Files (hard)' %>
+        <%= f.text_field :ulimit_nofile_hard, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <h5>Uptime Settings</h5>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-6">
+      <%= f.label :offline_window, 'Offline Window' %>
+      <%= f.text_field :offline_window, class: 'form-control' %>
+      <span class="help-block">In seconds, how long do we wait after the last heartbeat before consider this node offline?</span>
+    </div>
+    <div class="col-sm-6">
+      <%= f.label :failure_count, 'Failure Count' %>
+      <%= f.text_field :failure_count, class: 'form-control' %>
+      <span class="help-block">How many times do we attempt to connect back to the node to verify it's really offline before migrating it's containers to other nodes.</span>
+    </div>
+  </div>
+
+</div>
+<div class="panel-footer text-right">
+  <%= link_to "Delete", "/admin/regions/#{@region.id}", method: :delete, data: { confirm: 'Are you sure? This is destructive and irreversible.' }, class: 'btn btn-danger pull-left' if (controller.action_name == 'edit' || controller.action_name == 'update') %>
+  <%= link_to t('actions.cancel'), "/admin/regions/#{@region.id}", class: 'btn btn-default', style: 'margin-right: 10px;' if (controller.action_name == 'edit' || controller.action_name == 'update') %>
+  <%= link_to t('actions.cancel'), "/admin/locations", class: 'btn btn-default', style: 'margin-right: 10px;' if (controller.action_name == 'new' || controller.action_name == 'create') %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success' %>
+</div>

@@ -1,0 +1,26 @@
+.row.has-breadcrumb
+  ol.breadcrumb
+    li= link_to t('obj.images'), "#{request.path =~ /admin/ && current_user.is_admin ? '/admin' : ''}/container_images"
+    li= link_to @container.label, container_image_path(@container)
+    li.active= t 'container_images.params.related.form.title'
+
+.row: .col-md-8.col-md-offset-2: p.lead
+  = t 'container_images.params.related.form.title'
+.row
+  .col-md-8.col-md-offset-2
+    = form_tag("#{container_image_path(@container)}/image_relationships", method: :post) do
+      .panel.panel-default
+        .panel-body
+          .form-group
+            label.control-label= t 'obj.image'
+            select.chosen-select-standard.form-control name='container' data-placeholder=(t 'container_images.params.related.form.select')
+              option
+              - @containers.each do |i|
+                - next if @container_dependencies.include?(i)
+                - next if i == @container
+                - next if @container_roles.include?(i.role)
+                option value="#{i.id}"= i.label
+
+        .panel-footer.text-right
+          a.pull-left.btn.btn-default href="#{container_image_path(@container)}"= t 'actions.cancel'
+          button.btn.btn-success type="submit"= t 'actions.save'

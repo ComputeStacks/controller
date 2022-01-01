@@ -1,0 +1,12 @@
+<%= render partial: 'admin/layouts/shared/settings_nav' %>
+<div class="row"><div class="col-lg-8 col-lg-offset-2 col-md-12"><h4>Settings</h4></div></div>
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <% @setting_groups.each_pair do |k,v| %>
+      <% if k == 'authy' %>
+        <% next unless Setting.authy %>
+      <% end %>
+      <%= render partial: 'admin/settings/index/setting_group', locals: { group: k, items: v } %>
+    <% end %>
+  </div>
+</div>

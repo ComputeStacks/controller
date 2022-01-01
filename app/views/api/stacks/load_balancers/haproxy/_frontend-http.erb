@@ -1,0 +1,89 @@
+<% index = 1 %>
+<% if load_balancer.has_ssl_certs? %>
+frontend https
+  bind :443 ssl <% if load_balancer.has_shared_cert? %>crt /etc/haproxy/shared_cert.pem<% end %> crt /etc/haproxy/certs/ <%= load_balancer.haproxy_http_proto %>
+  mode http
+  maxconn <%= load_balancer.maxconn %>
+  option httplog
+  option http-server-close
+  option forwardfor if-none
+  <% if load_balancer.proxy_ipaddrs.empty? %>
+  http-request del-header X-Forwarded-For
+  http-request set-header X-Forwarded-Proto https
+  <% else %>
+  acl existing-proto-header req.hdr(X-Forwarded-Proto) -m found
+  acl proxied_conn src <%= load_balancer.proxy_ipaddrs.map { |i| "#{i.to_s}/#{i.prefix}" }.join(' ') %>
+  http-request del-header X-Forwarded-For if !proxied_conn
+  http-request set-header X-Forwarded-Proto https if !proxied_conn
+  <% end %>
+  <% unless load_balancer.cloudflare_ipaddrs.empty? %>
+  acl cloudflare_only src <%= load_balancer.cloudflare_ipaddrs.map { |i| "#{i.to_s}/#{i.prefix}" }.join(' ') %>
+  acl restricted_url hdr(host) -i cloudflare-dummy.local
+  <% end %>
+  acl is_letsencrypt path_beg -i /.well-known/acme-challenge/
+  use_backend letsencrypt if is_letsencrypt
+  acl enable_hsts hdr(hosts) -i hsts-dummy.local
+  <% load_balancer.container_services.each do |service| %>
+    <% next if service.containers.empty? %>
+    <% service.ingress_rules.where(external_access: true, proto: 'http').each do |ingress| %>
+      <% ingress.global_container_domains.each do |domain| %>
+  acl host_rule_<%= index %> hdr(host) -i <%= domain.domain %>
+  <% if ingress.restrict_cf %>
+  acl restricted_url hdr(host) -i <%= domain.domain %>
+  <% end %>
+  <% if domain.enable_hsts_header? %>
+  http-response set-header Strict-Transport-Security "max-age=16000000; includeSubDomains; preload;" if { var(txn.domain) -i <%= domain.domain %> }
+  <% end %>
+  use_backend <%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %> if host_rule_<%= index %>
+        <% index += 1 %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+  <% unless load_balancer.cloudflare_ipaddrs.empty? %>
+  http-request deny if restricted_url !cloudflare_only
+  <% end %>
+
+frontend http
+  bind :80
+  mode http
+  maxconn <%= load_balancer.maxconn %>
+  <% if load_balancer.proxy_ipaddrs.empty? %>
+  http-request del-header X-Forwarded-For
+  http-request set-header X-Forwarded-Proto http
+  <% else %>
+  acl existing-proto-header req.hdr(X-Forwarded-Proto) -m found
+  acl proxied_conn src <%= load_balancer.proxy_ipaddrs.map { |i| "#{i.to_s}/#{i.prefix}" }.join(' ') %>
+  http-request del-header X-Forwarded-For if !proxied_conn
+  http-request set-header X-Forwarded-Proto http if !proxied_conn
+  <% end %>
+  option forwardfor if-none
+  option httplog
+  option http-server-close
+  acl is_letsencrypt path_beg -i /.well-known/acme-challenge/
+  use_backend letsencrypt if is_letsencrypt
+  <% unless load_balancer.cloudflare_ipaddrs.empty? %>
+  acl cloudflare_only src <%= load_balancer.cloudflare_ipaddrs.map { |i| "#{i.to_s}/#{i.prefix}" }.join(' ') %>
+  acl restricted_url hdr(host) -i cloudflare-dummy.local
+  <% end %>
+  <% load_balancer.container_services.each do |service| %>
+    <% next if service.containers.empty? %>
+    <% service.ingress_rules.where(external_access: true, proto: 'http').each do |ingress| %>
+      <% ingress.global_container_domains.each do |domain| %>
+  acl host_rule_<%= index %> hdr(host) -i <%= domain.domain %>
+  <% if ingress.restrict_cf %>
+  acl restricted_url hdr(host) -i <%= domain.domain %>
+  <% end %>
+        <% if domain.force_ssl? %>
+  redirect scheme https code 301 if host_rule_<%= index %>
+        <% else %>
+  use_backend <%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %> if host_rule_<%= index %>
+        <% end %>
+        <% index += 1 %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <% unless load_balancer.cloudflare_ipaddrs.empty? %>
+  http-request deny if restricted_url !cloudflare_only
+  <% end %>
+

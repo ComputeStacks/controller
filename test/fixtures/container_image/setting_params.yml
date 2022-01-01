@@ -1,0 +1,44 @@
+mariadb_0:
+  container_image: mariadb
+  name: mysql_password
+  label: root password
+  param_type: password
+
+wordpress_0:
+  container_image: wordpress
+  name: wordpress_password
+  label: Password
+  param_type: password
+
+wordpress_1:
+  container_image: wordpress
+  name: litespeed_admin_pw
+  label: Litespeed Password
+  param_type: password
+
+wordpress_2:
+  container_image: wordpress
+  name: title
+  label: Title
+  param_type: static
+  value: My Blog
+  
+wordpress_3:
+  container_image: wordpress
+  name: email
+  label: Email
+  param_type: static
+  value: "user@example.com"
+
+wordpress_4:
+  container_image: wordpress
+  name: username
+  label: Username
+  param_type: static
+  value: admin
+
+custom_0:
+  container_image: custom
+  name: username
+  param_type: static
+  value: admin

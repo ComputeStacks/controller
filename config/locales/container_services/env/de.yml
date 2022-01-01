@@ -1,0 +1,12 @@
+de:
+  container_services:
+    env:
+      breadcrumb: Umgebungsparameter
+      title: "Verwalten der Container Umgebung für: %{service}"
+      subtitle: 'Wenn Sie hier Änderungen vornehmen, müssen Sie einen "Neuaufbau" aller zugehörigen Container veranlassen.'
+      table:
+        name: Name
+        type: Typ
+        value: Wert
+      new: Umgebungsparameter hinzufügen
+      edit: "Editieren: %{env}"

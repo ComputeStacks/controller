@@ -1,0 +1,27 @@
+<div id="volumeCreateBackup" class="modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title"><%= t 'volumes.backups.new' %></h4>
+      </div>
+      <%= form_tag "#{volume_path(volume)}/backups", method: :post do  %>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="backupName"><%= t 'volumes.backups.name' %></label>
+                <input id="backupName" type="text" name="name" class="form-control">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input type="submit" value="<%= t 'actions.create' %>" class="btn btn-sm btn-success">
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

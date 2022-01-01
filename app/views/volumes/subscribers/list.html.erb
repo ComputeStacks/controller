@@ -1,0 +1,25 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>Container</th>
+      <th>Project</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if volume_subscribers(@subscribers).empty? %>
+      <tr>
+        <td colspan="2" class="text-center">No containers found.</td>
+      </tr>
+    <% end %>
+    <% volume_subscribers(@subscribers).each do |k,v| %>
+      <tr>
+        <td>
+          <%= v[:link] ? link_to(k, v[:link]) : k %>
+          <%= content_tag(:span, "UNKNOWN", class: 'label label-warning') if v[:container].nil? %>
+        </td>
+        <td><%= link_to(v[:deployment].name, "/deployments/#{v[:deployment].id}") if v[:deployment] %></td>
+      </tr>
+    <% end %>
+
+  </tbody>
+</table>

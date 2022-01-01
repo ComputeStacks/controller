@@ -1,0 +1,23 @@
+<% content_for :title, t('obj.images') %>
+<%= render partial: 'admin/layouts/shared/images_nav' %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <p class="lead">
+      Container Images <%= "for: #{link_to(@user.full_name, admin_user_path(@user))}".html_safe if @user %>
+    </p>
+  </div>
+</div>
+
+<div class="row"><%= render partial: "admin/container_images/index/filter" %></div>
+
+<hr />
+<div class="row">
+  <div class="col-xs-12"><%= render partial: "admin/container_images/index/list", locals: { containers: @containers } %></div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @containers %>
+  </div>
+</div>

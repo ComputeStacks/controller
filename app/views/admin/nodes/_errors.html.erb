@@ -1,0 +1,10 @@
+<div class="col-sm-4">
+  <div class="panel panel-body">
+    <strong><%= "#{pluralize(@node.errors.count, "error")} prevented this Node from being saved:" %></strong>
+    <ul class="list-unstyled">
+      <% @node.errors.full_messages.each do |msg| %>
+        <li style="color: red;"><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>

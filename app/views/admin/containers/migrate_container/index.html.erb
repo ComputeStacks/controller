@@ -1,0 +1,35 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <% if @container.deployment %>
+        <li><%= link_to "Projects", "/admin/deployments" %></li>
+        <li><%= link_to @container.deployment.name, admin_deployments_path(@container.deployment) %></li>
+      <% else %>
+        <li><%= link_to 'Containers', '/admin/containers' %></li>
+      <% end %>
+      <li><%= link_to @container.label, admin_container_path(@container) %></li>
+      <li class="active">Migrate Off Node</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-sm-12">
+
+    <div class="row">
+
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-body text-center">
+            <h4>Are you sure you want to migrate this container off the current node?</h4>
+          </div>
+          <div class="panel-footer">
+            <%= link_to "Cancel", admin_container_path(@container), class: 'btn btn-danger' %>
+            <%= link_to "Yes, migrate container off current node", "migrate_container", method: :post, class: 'btn btn-success pull-right' %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

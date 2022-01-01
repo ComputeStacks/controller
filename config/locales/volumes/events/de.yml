@@ -1,0 +1,7 @@
+de:
+  volumes:
+    events:
+      breadcrumb: Ereignisse
+      title: "Ereignisse für %{volume}"
+      recent: Letzte Ereignisse
+      item: "Ereignis %{id}"

@@ -1,0 +1,6 @@
+.col-sm-4: .panel.panel-body
+  strong= "#{pluralize(@package.errors.count, "error")} prevented this package from being saved:"
+
+  ul.list-unstyled
+    - @package.errors.full_messages.each do |msg|
+      li style="color: red;"= msg

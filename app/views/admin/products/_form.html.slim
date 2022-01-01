@@ -1,0 +1,53 @@
+.panel-body
+  .row
+    .col-sm-4: .form-group
+      = label_tag :label, 'Name'
+      = f.text_field :label, required: true, class: 'form-control'
+
+    .col-sm-4: .form-group
+      = label_tag :group, 'Group'
+      = f.text_field :group, class: 'form-control'
+
+    .col-sm-4: .form-group
+      = label_tag :external_id, 'External ID'
+      = f.text_field :external_id, class: 'form-control'
+
+      span.help-block Reference for external billing system
+  - if @product.kind == 'package' && %w(edit update).include?(controller.action_name)
+    .row
+      .col-xs-12: .form-group
+        = label_tag :kind, 'Kind'
+        = select(:product, :kind, [['Package', 'package']], {}, { class: 'form-control', disabled: 'disabled' })
+  - else
+    .row
+      .col-sm-6: .form-group
+        = label_tag :kind, 'Kind'
+        - if %w(edit update).include?(controller.action_name)
+          = select(:product, :kind, [['Metered Resource', 'resource']], {}, { class: 'form-control', disabled: 'disabled' })
+        - else
+          = select(:product, :kind, [['Package', 'package'], ['Metered Resource', 'resource']], {}, { class: 'form-control' })
+
+      .col-sm-6: .form-group
+        = label_tag :resource_kind, 'Resource'
+        = select(:product, :resource_kind, Product.resource_kinds, { include_blank: true }, { class: 'form-control' })
+        span.help-block Only when Kind is Metered Resource.
+
+    hr style="border-color:#ccc;"
+    .row: .col-md-12 Metered Resources Only
+    hr
+    .row
+      .col-sm-6: .form-group
+        = label_tag :unit, 'Unit'
+        = f.number_field :unit, class: 'form-control'
+
+        span.help-block For most situations, this should always be 1.
+
+      .col-sm-6: .form-group
+        = label_tag :unit_type, 'Unit Type'
+        = f.text_field :unit_type, class: 'form-control'
+
+        span.help-block Examples: GB, MB
+
+.panel-footer
+  = link_to t('actions.cancel'), '/admin/products', class: 'btn btn-default', style: 'margin-right:10px;'
+  = submit_tag t('actions.save'), class: 'btn btn-success pull-right'

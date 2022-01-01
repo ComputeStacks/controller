@@ -1,0 +1,93 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Container Registries", admin_registries_path %></li>
+      <li class="active"><%= @registry.label %></li>
+      <li class="pull-right no-spacer">
+        <%= link_to(raw("<i class='fa fa-user-plus'></i> Collaborate"), "#{admin_registry_collaborators_path(@registry)}", class: 'btn btn-sm btn-default', title: 'Manage collaborations') %>
+      </li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-md-3 col-sm-4">
+
+    <div class="panel panel-default">
+
+      <div class="panel-body">
+        <%= link_to '<i class="fa fa-trash fa-inverse"></i>'.html_safe, edit_admin_registry_path(@registry), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger pull-right' %>
+        <%= link_to "<i class='fa fa-wrench'></i>".html_safe, edit_admin_registry_path(@registry), class: 'btn btn-sm btn-default pull-right', style: "margin-right:10px;" %>
+        <strong><%= @registry.label %></strong>
+      </div>
+
+      <hr>
+      <div class="panel-body" style="padding-top:0px;padding-bottom: 0px;">
+        <small><%= t('container_registry.show.url').upcase %></small>
+        <br>
+        <code>
+          <%= "#{Setting.registry_base_url}:#{@registry.port}" %>
+        </code>
+      </div>
+
+      <hr>
+      <div class="panel-body" style="padding-top:0px;<% unless @registry.user.nil? %>padding-bottom: 0px;<% end %>">
+        <small><%= "#{t('common.username').upcase} / #{t('common.password').upcase}" %></small>
+        <br>
+        <code>
+          <%= "admin / #{@registry.registry_password}" %>
+        </code>
+      </div>
+
+      <% unless @registry.user.nil? %>
+        <hr>
+        <div class="panel-body" style="padding-top:0px;">
+          <small>OWNER</small>
+          <br>
+          <code>
+            <%= link_to(@registry.user.full_name, admin_user_path(@registry.user)) %>
+          </code>
+        </div>
+      <% end %>
+
+    </div>
+  </div>
+
+  <div class="col-md-9 col-sm-8">
+    <div class="panel panel-default">
+      <% if @registry.repositories.empty? %>
+        <div class="panel-body text-center"><p>No resources found.</p></div>
+      <% else %>
+        <table class="table">
+          <thead>
+          <tr>
+            <th><%= t 'container_registry.show.images.image' %></th>
+            <th class="text-right"><%= t 'container_registry.show.images.tags' %></th>
+          </tr>
+          </thead>
+          <tbody>
+          <% @registry.repositories.each do |image| %>
+            <tr>
+              <td><%= image[:image] %></td>
+              <td class="text-right">
+                <% image[:tags].each do |tag| %>
+                  <% if tag[:container].nil? %>
+                    <a class="btn btn-sm btn-default" style="margin-left:5px;" href="<%= link_reg_to_image_path(@registry, image[:image], tag[:tag]) %>">
+                      <i class="fa fa-chain-broken"></i> <%= tag[:tag] %>
+                    </a>
+                  <% else %>
+                    <a class="btn btn-sm btn-success" style="margin-left:5px;" href="<%= container_registry_image_path(tag[:container][:id], tag[:container][:name]) %>">
+                      <i class="fa fa-link"></i> <%= tag[:tag] %>
+                    </a>
+                  <% end %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+  </div>
+
+</div>

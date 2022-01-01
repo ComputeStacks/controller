@@ -1,0 +1,3 @@
+wordpress_mysql:
+  service: wordpress
+  service_resource: mysql

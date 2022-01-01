@@ -1,0 +1,13 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <p class="text-center">CPU Usage (%)</p>
+    <%= area_chart "#{container_service_charts_cpu_path(service.id)}.json",
+                   points: false,
+                   download: true,
+                   refresh: 60,
+                   label: "CPU %",
+                   curve: false,
+                   legend: service.containers.count > 6 ? false : 'bottom'
+    %>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to @node.location.name, "/admin/locations/#{@node.location.id}" %></li>
+      <li><%= link_to @node.region.name, "/admin/regions/#{@node.region.id}" %></li>
+      <li><%= link_to @node.label, "/admin/regions/#{@node.region.id}" %></li>
+      <li class="active">Event: <%= @log.id %></li>
+    </ol>
+  </div>
+<% end %>
+
+<%= render partial: "admin/event_logs/show", locals: { log: @log, subscribers: @subscribers } %>

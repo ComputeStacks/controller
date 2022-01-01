@@ -1,0 +1,63 @@
+de:
+  volumes:
+    form:
+      cron:
+        modal:
+          title: Backup Zeitplan Syntax
+          help_html: |
+            <p>Mittels Cron Syntax können Sie definieren, wie oft ein bestimmter Job ausgeführt werden soll. Dadurch können Sie individuell anpassen, wann Ihre Backup Aufträge ausgeführt werden.</p>
+
+            <p>Wir haben euch einige hilfreiche Beispiele beigefügt, die wir für die meisten Benutzer empfehlen:</p>
+            <pre style="background-color: #fff;border:none;">
+            @hourly
+            @daily (or @midnight)
+            @weekly
+            @monthly
+            @yearly (or @annually)
+            </pre>
+
+            <p>
+              Für erweiterte Anpassungen finden Sie hier die vollständige Syntax:
+            </p>
+            <pre style="background-color: #fff;border:none;">
+            * * * * * *
+            | | | | | |
+            | | | | | +-- Jahr              (range: 1900-3000) (optional field)
+            | | | | +---- Wochentag         (range: 0-6, 0 standing for Sunday)
+            | | | +------ Monat             (range: 1-12, 1 standing for Jan)
+            | | +-------- Datum             (range: 1-31)
+            | +---------- Stunde            (range: 0-23)
+            +------------ Minute            (range: 0-59)
+            </pre>
+            <strong>Note</strong>:Die maximale Frequenz ist alle <b>15 Minuten</b> für persistente Volumes und <b>stündlich</b> für alles andere.
+          #
+          help_example_table_html: |
+            <table class="table">
+              <thead>
+              <tr><th colspan="2"></th></tr>
+              <tr>
+                <th colspan="2">Examples</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Alle 30 Minuten</td>
+                <td class="code-font" style="font-size:12px;">
+                  */30 * * * *
+                </td>
+              </tr>
+              <tr>
+                <td>Alle 4 Stunden</td>
+                <td class="code-font" style="font-size:12px;">
+                  0 */4 * * *
+                </td>
+              </tr>
+              <tr>
+                <td>Jeden Dienstag, Donnerstag, Samstag um Mitternacht</td>
+                <td class="code-font" style="font-size:12px;">
+                  0 0 * * 2,4,6
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          #

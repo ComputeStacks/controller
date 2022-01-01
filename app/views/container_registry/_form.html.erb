@@ -1,0 +1,28 @@
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <%= controller.action_name == 'new' ? t('.title_new') : t('.title_edit') %>
+        </h4>
+      </div>
+      <table class="table">
+        <tbody>
+          <tr>
+            <td>
+              <label>
+                <%= t('.name').upcase %>
+                <span style="color:red;">*</span>
+              </label>
+              <%= registry.text_field :label, class: 'form-control', required: true %>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="panel-footer text-right">
+        <%= link_to t('actions.cancel'), controller.action_name == 'edit' ? container_registry_path(@registry) : "/container_registry", class: 'btn btn-default pull-left' %>
+        <input class="btn btn-success" type="submit" value="<%= controller.action_name == 'new' ? t('actions.continue') : t('actions.update') %>" />
+      </div>
+    </div>
+  </div>
+</div>

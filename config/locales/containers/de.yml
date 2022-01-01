@@ -1,0 +1,43 @@
+de:
+  containers:
+    attributes:
+      ip: Interne IP
+      status: Status
+      resources: Ressourcen # This is the header for the resource status (e.g. OK, WARN, ALERT)
+    actions:
+      power_actions_title: Container Steuerung
+      start: Start
+      stop: Stop
+      restart: Neustart
+      rebuild: Container wiederherstellen
+      rebuild_short: Wiederherstellung
+    prompts:
+      rebuild: Möchten Sie den Container wiederherstellen? Sämtliche Daten die nicht auf einem Volume vorgehalten werden gehen sonst verloren.
+    errors:
+      has_dependents: Dieser Container hat Abhängigkeiten, bitte löschen Sie diese zuerst.
+      stop: "Es gab ein Problem beim Versuch, diesen Container zu stoppen."
+      has_failed_event:
+        body: Das letzte Ereignis ist für diesen Container fehlgeschlagen.
+        link: Aktivität überprüfen
+    health:
+      warn: Warnung
+      alert: Alarm
+      deg: Verschlechtert
+      error: Fehler
+      ok: Ok
+    state:
+      running: Läuft
+      restarting: Neu starten
+      stopped: Gestoppt
+      deleting: Entfernen
+      pending: Ausstehend
+      building: Wird erstellt
+      error: Fehler
+      unknown: Unbekannt
+    high_availability:
+      enabled: Hochverfügbarkeit Aktiviert
+      disabled: Hochverfügbarkeit Deaktiviert
+      migration:
+        success: Container wird in Kürze migriert.
+        error: Migration aufgrund lokaler Datenträgerbeschränkung nicht möglich.
+        controller_error: Container kann nicht migriert werden. Bitte prüfen Sie, dass keine lokalen Volumes angehängt sind.

@@ -1,0 +1,44 @@
+<%= render partial: 'admin/layouts/shared/settings_nav' %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <p class="lead">Networks</p>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <table class="table">
+        <thead>
+          <tr>
+            <th colspan="2">Name</th>
+            <th>Network</th>
+            <th>In Use</th>
+            <th>Regions</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @networks.empty? %>
+            <tr>
+              <td colspan="6" class="text-center">No Networks</td>
+            </tr>
+          <% end %>
+          <% @networks.each do |net| %>
+            <tr>
+              <td><%= link_to net.name, admin_network_url(net) %></td>
+              <td><%= link_to net.label, admin_network_url(net) %></td>
+              <td><%= link_to net.cidr, admin_network_url(net) %> <%= net.is_public ? tag.span('Public', class: 'label label-warning') : tag.span('Private', class: 'label label-primary') %></td>
+              <td><%= link_to net.addresses.count, admin_network_url(net) %></td>
+              <td><%= raw net.regions.map {|i| link_to(i.name, "/admin/regions?filter=#{i.id}") }.join(', ') %></td>
+              <td class="text-right">
+                <%= link_to content_tag(:i, nil, class: 'fa fa-wrench fa-fw'), edit_admin_network_url(net), class: 'btn btn-default btn-sm' %>
+                <%= link_to content_tag(:i, nil, class: 'fa fa-fw fa-trash'), admin_network_url(net), method: :delete, data: { confirm: 'Are you sure?' },class: 'btn btn-danger btn-sm' %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

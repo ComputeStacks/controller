@@ -1,0 +1,41 @@
+<table class="table">
+  <tbody>
+    <% if logs.empty? %>
+      <tr>
+        <td class="text-center"><%= t 'events.none' %></td>
+      </tr>
+    <% end %>
+    <% logs.each do |log| %>
+      <tr class="log <%= log.table_class %>">
+        <td>
+          <%= link_to time_ago_in_words(log.created_at), "#{root_path}/#{log.id}" %>
+          <%= content_tag(:i, nil, class: 'fa fa-file-text-o', style: 'margin-left:5px;') if log.event_details.exists? %>
+        </td>
+        <% unless defined?(@deployment) %>
+          <td>
+            <% log.deployments.each do |d| %>
+              <%= link_to d.name, admin_deployments_path(d) %>
+            <% end %>
+          </td>
+        <% end %>
+        <td>
+          <b>
+            <%= defined?(@deployment) ? deployment_event(log).html_safe : log.description %>
+          </b>
+        </td>
+        <td class="text-right"><%= format_event_log(log.status) %></td>
+      </tr>
+      <% if log.audit %>
+        <tr style="font-size:0.9em;">
+          <td style="border:0; line-height:11px;"></td>
+          <% unless defined?(@deployment) %><td style="border:0; line-height:11px;">&nbsp;</td><% end %>
+          <td style="border:0; line-height:11px;">
+            <i class="fa fa-dot-circle-o text-success"></i>
+            <%= t 'audit.performed_by_html', user: performer(log.audit) %>
+          </td>
+          <td style="border:0; line-height:11px;" class="text-right"><%= l log.audit.created_at, format: :short %></td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>

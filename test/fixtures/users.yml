@@ -1,0 +1,51 @@
+admin:
+  fname: Peter
+  lname: Pettigrew
+  email: peter@pp.net
+  encrypted_password: <%= User.new.send(:password_digest, 'mypass1!1@') %>
+  is_admin: true
+  currency: USD
+  country: US
+  city: Portland
+  state: OR
+  address1: PO BOX 2391
+  address2:
+  zip: 97208
+  user_group: admin
+  company_name: Death Eater Inc.
+  confirmed_at: <%= 1.week.ago %>
+  token: <%= SecureRandom.uuid %>
+user:
+  fname: Astrud
+  lname: Spencer
+  email: a@example.local
+  encrypted_password: <%= User.new.send(:password_digest, 'myp4ss1!1@') %>
+  currency: USD
+  country: US
+  city: Portland
+  state: OR
+  address1: PO BOX 2391
+  address2:
+  zip: 97208
+  user_group: users
+  confirmed_at: <%= 1.week.ago %>
+  token: <%= SecureRandom.uuid %>
+whmcsuser:
+  fname: Jim
+  lname: Jones
+  email: a@whmcs.local
+  encrypted_password: <%= User.new.send(:password_digest, 'myp4ss1!1@') %>
+  currency: USD
+  country: US
+  city: Portland
+  state: OR
+  address1: PO BOX 2391
+  address2:
+  zip: 97208
+  user_group: users
+  confirmed_at: <%= 1.day.ago %>
+  token: <%= SecureRandom.uuid %>
+  labels:
+    whmcs:
+      service_id: 33
+      client_id: 26

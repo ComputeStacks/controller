@@ -1,0 +1,79 @@
+# Additional translations at https://github.com/plataformatec/devise/wiki/I18n
+fi:
+  devise:
+    login: Kirjaudu sisään
+    register: Luo tunnus
+    email_placeholder: käyttäjä@domain.com
+    forms:
+      password:
+        reset_title: Aseta salasana uudelleen
+        req_title: Pyydä salasanan nollausta
+      unlock:
+        title: Uudelleenlähetä avausohjeet
+      confirm:
+        title: Varmista sähköpostiosoitteesi
+    confirmations:
+      confirmed: "Tunnuksesi on nyt vahvistettu. Olet kirjautuneena sisälle."
+      send_instructions: "Saat hetken kuluttua sähköpostiisi ohjeet tunnuksen vahvistamiseen."
+      send_paranoid_instructions: "Jos sähköpostiosoitteesi on tietokannassamme, saat hetken kuluttua sähköpostiisi ohjeet tunnuksen vahvistamiseen."
+    failure:
+      already_authenticated: "Olet jo kirjautuneena sisälle."
+      inactive: "Tunnustasi ei ole vielä aktivoitu."
+      invalid: "Väärä sähköpostiosoite tai salasana."
+      invalid_token: "Invalid authentication token."
+      locked: "Tunnuksesi on lukittu."
+      last_attempt: "Sinulla on vielä yksi yritys ennen kuin tunnuksesi lukitaan."
+      not_found_in_database: "Väärä sähköpostiosoite tai salasana."
+      timeout: "Istuntosi on vanhentunut, ole hyvä ja kirjaudu sisään jatkaaksesi."
+      unauthenticated: '' #"Sinun pitää kirjautua sisään tai rekisteröityä ennen kuin voit jatkaa."
+      unconfirmed: ”Sinun täytyy vahvistaa sähköpostiosoitteesi ennen kuin voit jatkaa.”
+      invalid_email: "Invalid email address"
+      email_exists: "An account with that email address already exists."
+      sso_secondfactor: "2FA on käytössä tunnuksellasi. Kirjaudu sisään täällä, aukaistaksesi tunnuksesi."
+    mailer:
+      confirmation_instructions:
+        subject: "Vahvistusohjeet"
+      reset_password_instructions:
+        subject: "Ohjeet salasanan nollaukseen"
+      unlock_instructions:
+        subject: "Ohjeet tunnuksen lukituksen poistoon"
+      email_changed:
+        subject: "Email Changed"
+      password_change:
+        subject: "Salasana vaihdettu"
+    omniauth_callbacks:
+      failure: "Valtuutus käyttäen palvelua %{kind} epäonnistui, koska '%{reason}'."
+      success: "Onnistuneesti valtuutettu käyttäen palvelua %{kind}."
+    passwords:
+      no_token: "Et voi nollata salasanaasi ilman linkkiä jonka sait sähköpostitse. Jos kuitenkin tulit tälle sivulle linkin kautta, varmista että käytät kokonaista linkkiä."
+      send_instructions: "Saat hetken kuluttua sähköpostiisi ohjeet salasanan nollaukseen."
+      send_paranoid_instructions: "Jos sähköpostiosoitteesi on tietokannassamme, saat hetken kuluttua sähköpostiisi ohjeet salasanan nollaukseen."
+      updated: "Salasanasi on nyt vaihdettu. Olet kirjautuneena sisälle."
+      updated_not_active: "Salasanasi on nyt vaihdettu."
+    registrations:
+      destroyed: "Näkemiin! Tunnuksesi on nyt poistettu. Toivottavasti näemme sinut vielä uudelleen."
+      signed_up: "Tervetuloa! Rekisteröintisi onnistui."
+      signed_up_but_inactive: "Rekisteröintisi onnistui. Emme kuitenkaan voineet kirjata sinua sisään koska tunnuksesi on vielä vahvistamaton."
+      signed_up_but_locked: "Rekisteröintisi onnistui. Emme kuitenkaan voineet kirjata sinua sisään koska tunnuksesi on lukittu."
+      signed_up_but_unconfirmed: "Vahvistusohjeet on lähetetty sähköpostiosoitteeseesi. Avaathan sähköpostissa olevan linkin vahvistaaksesi tunnuksen."
+      update_needs_confirmation: "Tunnuksesi on päivitetty, mutta sinun täytyy vahvistaa uusi sähköpostiosoitteesi. Tarkistathan sähköpostisi ja avaat saamasi vahvistuslinkin."
+      updated: "Tunnuksesi on päivitetty."
+      updated_but_not_signed_in: "Your account has been updated successfully, but since your password was changed, you need to sign in again"
+    sessions:
+      signed_in: "Sisäänkirjautuminen onnistui."
+      signed_out: "Uloskirjautuminen onnistui."
+      already_signed_out: "Uloskirjautuminen onnistui."
+    unlocks:
+      send_instructions: "Saat hetken kuluttua sähköpostiisi ohjeet tunnuksesi lukituksen poistoon."
+      send_paranoid_instructions: "Jos tunnuksesi on olemassa, saat hetken kuluttua sähköpostiisi ohjeet tunnuksesi lukituksen poistoon."
+    unlocked: "Tunnuksesi on nyt avattu. Olet kirjautuneena sisälle."
+  errors:
+    messages:
+      already_confirmed: "on jo vahvistettu, yritä kirjautua sisään uudelleen"
+      confirmation_period_expired: "täytyy vahvistaa aikarajan %{period} sisällä, pyydä uutta vahvistuslinkkiä"
+      expired: "on vanhentunut. Pyydä uusi."
+      not_found: "ei löytynyt"
+      not_locked: "ei ollut lukittu"
+      not_saved:
+        one: "1 virhe esti %{resource} tallentamisen:"
+        other: "%{count} virhettä esti %{resource} tallentamisen:"

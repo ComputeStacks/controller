@@ -1,0 +1,13 @@
+export LOCALE=en
+export CURRENCY=USD
+export CS_DOCKER_CERT_PATH=/path/to/app/lib/dev/ssl/docker
+export CS_SSH_KEY=/path/to/keys/id_rsa
+export CS_PROJECT_PATH=/path/to/app
+export CS_BUILD_PATH=/path/to/build
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+export GITHUB_GEM_PULL_USER=changme
+export GITHUB_GEM_PULL_TOKEN=changme
+export RUBYOPT='-W:no-deprecated'
+export SENTRY_AUTH_TOKEN=changme
+export SENTRY_ORG=changme
+export SENTRY_DSN=

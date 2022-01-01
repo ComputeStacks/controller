@@ -1,0 +1,51 @@
+<% content_for :title, "#{@container.name} Logs" %>
+<% if request.xhr? %>
+  <% if @logs.is_a?(Array) # loki! %>
+    <table class="table terminal-view">
+      <tbody>
+      <% if @logs.empty? %>
+        <tr><td class="text-center"><%= "[#{l(Time.now, format: :month_time_with_year)}] This container has not returned any logs." %></td></tr>
+      <% end %>
+      <% @logs.each do |i| %>
+        <tr>
+          <td><%=l Time.at(i[0]), format: :month_time_without_year %></td>
+          <td><%= i[2] %></td>
+        </tr>
+      <% end%>
+      </tbody>
+    </table>
+  <% else # non-loki %>
+    <pre class="terminal-view"><%= @logs.blank? ? "[#{l(Time.now, format: :month_time_with_year)}] This container has not returned any logs." : raw(@logs) %></pre>
+  <% end %>
+
+<% else %>
+  <% content_for :breadcrumb do %>
+    <div class="row has-breadcrumb">
+      <ol class="breadcrumb">
+        <li><%= link_to 'Projects', "/deployments" %></li>
+        <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+        <li><%= link_to @service.label, container_service_path(@service) %></li>
+        <li><%= link_to @container.name, container_path(@container) %></li>
+        <li class="active"><%= t 'container_services.containers.logs.breadcrumb' %></li>
+      </ol>
+    </div>
+  <% end %>
+
+  <% if @service.containers.count > 1 %>
+    <div class="row">
+      <div class="col-lg-4 col-md-5 col-sm-6 col-xs-12">
+        <small><%= t('container_services.containers.logs.description').upcase %></small>
+        <select id="container_log_container_select" name="container_id" class="form-control chosen-select-standard" data-deployment="<%= @deployment.token %>" data-service="<%= @service.id %>">
+          <% @service.containers.sorted.each do |i| %>
+            <option value="<%= i.id %>" <% if @container == i %>selected="selected"<% end %>><%= i.name %></option>
+          <% end %>
+        </select>
+      </div>
+    </div>
+    <hr />
+  <% end %>
+  <div class="row" <% if @service.containers.count > 1 %>style="margin-top:25px;"<% end %>>
+    <div class="col-xs-12"><%= render partial: "containers/container_logs/log", locals: {container: @container} %></div>
+  </div>
+<% end %>
+

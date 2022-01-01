@@ -1,0 +1,27 @@
+.col-md-4
+  .panel.panel-default style="margin-bottom:15px;"
+    .panel-body
+      ol.list-unstyled.list-unstyled-min
+        li
+          | Status
+          b.pull-right= @order.status.gsub("_"," ").capitalize
+        li
+          | User
+          b.pull-right= link_to @order.user.full_name, "/admin/users/#{@order.user.id}-#{@order.user.full_name.parameterize}" if @order.user
+        li
+          | Created
+          b.pull-right= l @order.created_at.in_time_zone(Time.zone), format: :long
+        - if @order.ip_addr
+          li
+            | IP Address
+            b.pull-right= @order.ip_addr
+        - if @order.deployment
+          li
+            | Project
+            b.pull-right= link_to @order.deployment.name, "/deployments/#{@order.deployment.token}"
+
+  - @order.audits.each do |audit|
+    .panel.panel-default style="margin-bottom:5px;"= render partial: "admin/audit/overview", locals: { audit: audit }
+
+
+.col-md-8: .panel.panel-default: .panel-body: pre= @order_details

@@ -1,0 +1,62 @@
+<% @pending_orders.each do |i| %>
+  <% next if i.order_data.dig('deployment','name').nil? %>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading" style="padding:1px;"></div>
+        <div class="panel-body" style="cursor: pointer;" onclick='window.location="/orders/<%= i.id %>";'>
+          <span style="cursor: pointer;padding-right:10px;" onclick='window.location="/orders/<%= i.id %>";'>
+            <strong><%= i.order_data['deployment']['name'] %></strong>
+          </span>
+          <span>
+            <%= t 'deployments.index.deployment_list.deployments.pending_order' %>
+          </span>
+          <div class="pull-right hidden-xs">
+            <i class="fa fa-clock-o"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<% end %>
+
+<% @deployments.each do |i| %>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel <%= deployment_panel_header(i) %>">
+        <div class="panel-heading" style="padding:1px;"></div>
+        <div class="panel-body" style="cursor: pointer;" onclick='window.location="/deployments/<%= i.token %>";'>
+          <div id="project-<%= i.id %>" style="display:inline;">
+            <span style="cursor: pointer;padding-right:10px;" onclick='window.location="/deployments/<%= i.token %>";' title="<%= i.name %>">
+              <strong><%= truncate i.name.upcase, length: 35 %></strong>
+            </span>
+            <span style="padding-right:10px;">
+              <%= pluralize i.services.where(is_load_balancer: false).count, t('obj.service'), t('obj.services') %>
+              &nbsp;&nbsp;|&nbsp;&nbsp;<%= deployment_last_event(i) %>
+              <% if !i.is_resource_owner?(current_user) %>
+                &nbsp;&nbsp;|&nbsp;&nbsp;<i class="fa fa-users fa-fw"></i> <%= i.user.full_name %>
+              <% elsif i.deployment_collaborators.active.exists? %>
+                &nbsp;&nbsp;|&nbsp;&nbsp;<i class="fa fa-user-plus fa-fw"></i> <%= pluralize i.deployment_collaborators.active.count, 'Collaborator' %>
+              <% end %>
+            </span>
+            <div class="pull-right hidden-xs">
+              <% if %w(working deleting).include?(i.current_state) %>
+                <i class="fa fa-refresh fa-spin"></i> &nbsp;&nbsp; | &nbsp;&nbsp;
+              <% elsif i.current_state != 'ok' %>
+                <%= deployment_status i %> &nbsp;&nbsp; | &nbsp;&nbsp;
+              <% end %>
+              <% deployment_icons(i).each_with_index do |c,k| %>
+                <img style="width:20px;height:20px;"
+                     title="<%= c.label %>"
+                     onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
+                     src="<%= c.icon_url %>">
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

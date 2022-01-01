@@ -1,0 +1,40 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <%= link_to t('collaborators.actions.add'), "#{base_path}/new", class: 'btn btn-primary btn-sm pull-right' if resource.can_administer?(current_user) %>
+        <p class="lead"><%= t('collaborators.collaborator.plural').capitalize %></p>
+      </div>
+      <table class="table">
+        <tbody>
+        <% if resource.user %>
+          <tr>
+            <td>
+              <img src="<%= resource.user.avatar_url 28 %>" class="img-circle" />              &nbsp;&nbsp;
+              <%= current_user.is_admin? ? link_to(resource.user.full_name, admin_user_path(resource.user)) : resource.user.full_name %> <span class="label label-primary" style="vertical-align: text-top;"><%= t 'collaborators.role.resource_owner' %></span>
+            </td>
+            <td></td>
+          </tr>
+        <% elsif resource.user.nil? && collaborators.empty? %>
+          <tr><td colspan="2" class="text-center"><%= t 'collaborators.list.empty_short' %></td></tr>
+        <% end %>
+        <% collaborators.each do |collab| %>
+          <tr>
+            <td>
+              <img src="<%= collab.collaborator.avatar_url 28 %>" class="img-circle" />              &nbsp;&nbsp;
+              <%= current_user.is_admin? ? link_to(collab.collaborator.full_name, admin_user_path(collab.collaborator)) : collab.collaborator.full_name %><% unless collab.active %> <span class="label label-warning" style="vertical-align: text-top;"><%= t 'collaborators.role.pending' %></span><% end %>
+            </td>
+            <td class="text-right">
+              <% if collab.can_administer? current_user %>
+                <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{base_path}/#{collab.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-danger btn-sm', title: t('collaborators.actions.delete') %>
+              <% else %>
+                <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{base_path}/#{collab.id}", disabled: 'disabled', title: t('collaborators.actions.delete_denied'), class: 'btn btn-danger btn-sm' %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

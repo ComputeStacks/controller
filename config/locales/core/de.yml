@@ -1,0 +1,122 @@
+de:
+  noscript: Fehler! Javascript zum Laden des Inhalts erforderlich.
+  confirm_prompt: Sind Sie sicher?
+  confirm_destructive_prompt: "Sind Sie sicher? Alle Daten, die mit diesem %{obj} verbunden sind, gehen verloren."
+  crud:
+    created: "%{resource} erstellt."
+    updated: "%{resource} aktualisiert."
+    deleted: "%{resource} gelöscht."
+    unknown: Unbekannt %{resource}.
+    queued: "%{resource} in die Warteschlange für die Bereitstellung gestellt."
+    queued_plural: "%{resource} wurde in die Warteschlange für die Bereitstellung gestellt."
+  common:
+    never: Niemals # as in, 'Never Occured'. Typically used in event lists.
+    free: Kostenlos
+    loading: Laden
+    loading_obj: "Laden %{obj}..."
+    error: Fehler
+    errors: Fehler
+    "yes": 'Ja'
+    "no": 'Nein'
+    warning: Warnung
+    please_wait: Bitte warten
+    success: Erfolgreich!
+    general_error: Allgemeiner System-Fehler
+    feature_disabled: "%{resource} ist derzeit nicht verfügbar."
+    updated: Aktualisiert
+    created: Erstellt
+    username: Benutzername
+    password: Passwort
+    name: Name
+    label: Bezeichnung
+  attributes:
+    mem: Arbeitsspeicher
+    disk: Speicher
+    local_disk: Temporärer Speicher
+    transfer: Bandbreite
+  actions:
+    ok: Ok
+    submit: Absenden
+    continue: Fortsetzen
+    save: Speichern
+    create: Erstellen
+    cancel: Abbrechen
+    manage: Verwalten
+    destroy: Löschen
+    edit: Editieren
+    confirm: Bestätigen
+    update: Aktualisieren
+    show: Anzeigen
+    selected: Ausgewählte
+    choose: Wählen Sie
+    register: Registrieren
+    activate: Aktivieren
+    auth: Authentifizieren
+    invite: Invite
+    approve: Approve
+    reject: Reject
+    accept: Accept
+    deny: Deny
+  header:
+    nav:
+      sr: Navigation umschalten
+      apps: Applikationen
+      dns: DNS
+      support: Support
+      build: Build
+      logout: Abmelden
+      profile: Profil
+      billing: Abrechnung
+  obj:
+    deployment: Projekt
+    deployments: Projekte
+    container: Container
+    containers: Containers
+    service: Container Dienst
+    services: Container Dienste
+    image: Container Image
+    images: Container Images
+    user: Benutzer
+    users: Benutzer
+    registry: Container Registry
+    registries: Container Registries
+    lb: Load Balancer
+    lbs: Load Balancers
+    region: Region
+    regions: Regions
+    node: Node
+    nodes: Nodes
+    domain: Domain
+    domains: Domains
+    dns: DNS Zone
+    dnss: DNS Zonen
+    volume: Volume
+    volumes: Volumes
+    ip: IP Addresse
+    ips: IP Addressen
+    port: Port
+    ports: Ports
+  logout_msg: Sie haben sich erfolgreich abgemeldet.
+  suspended:
+    title: Konto gesperrt
+    msg: Ihr Konto ist derzeit gesperrt. Bitte kontaktieren Sie den Support.
+  billing:
+    package: Paket
+    metered: Gemessen
+    hour: Stündlich
+    month: Monatlich
+    year: Jährlich
+  search:
+    title: Suche
+    placeholder: "Drücken Sie die Eingabetaste, nachdem Sie Ihre Suche eingegeben haben..."
+  system_errors:
+    page_not_found: "Fehler! Seite nicht gefunden."
+    csrf_html: |
+      <h4>Ungültiger Formular-Token</h4>
+      <p>Es gab ein Problem mit dem Formular, das Sie eingereicht haben. Bitte gehen Sie <a href="javascript:history.back()">zurück</a> und versuchen Sie es erneut.</p>
+    ## intentional line break ##
+    fatal:
+      url_title: Schwerwiegender Fehler
+      title: "Fehler! Wir sind auf ein serverseitiges Problem gestoßen."
+      message_html: "<p>Wir haben diesen Fehler erhalten und arbeiten bereits daran, ihn zu lösen.</p>"
+      link_back: Zurück

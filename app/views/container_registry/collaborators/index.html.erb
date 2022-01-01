@@ -1,0 +1,14 @@
+<% unless request.xhr? %>
+  <% content_for :breadcrumb do %>
+    <div class="row has-breadcrumb">
+      <ol class="breadcrumb">
+        <li><%= link_to t('obj.registry'), "/container_registry" %></li>
+        <li><%= link_to @registry.label, "/container_registry/#{@registry.id}" %></li>
+        <li class="active"><%= t('collaborators.collaborator.plural').capitalize %></li>
+      </ol>
+    </div>
+  <% end %>
+<% end %>
+
+<%= render partial: 'collaborators/index', locals: { resource: @registry, collaborators: @collaborators, base_path: "/container_registry/#{@registry.id}/collaborators" } %>
+

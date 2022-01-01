@@ -1,0 +1,225 @@
+<div class="panel-body">
+
+  <div class="row">
+    <div class="<%= (current_user.is_admin? && request.path =~ /admin/) ? 'col-sm-7 col-xs-8' : 'col-sm-9 col-xs-12' %>">
+      <div class="form-group">
+        <%= f.label :label, t('container_images.form.label') %>
+        <%= tag.span '*', style: 'color:red;' %>
+        <%= f.text_field :label, class: 'form-control', required: true %>
+      </div>
+    </div>
+
+    <% if current_user.is_admin? && request.path =~ /admin/ %>
+      <div class="col-sm-2 col-xs-4">
+        <div class="form-group">
+          <%= f.label :is_free, t('container_images.form.free') %>
+          <%= f.check_box :is_free, class: 'form-control' %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="col-sm-3 col-xs-6">
+      <div class="from-group">
+        <%= f.label :active, t('container_images.form.active') %>
+        <%= f.check_box :active, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <% if current_user.is_admin %>
+  <hr>
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="form-group">
+        <%= f.label :override_autoremove, 'Prevent AutoRemove?' %>
+        <%= f.check_box :override_autoremove, class: 'form-control' %>
+        <span class="help-block">
+          Override the User Group setting and prevent automatically removing this stopped container from the node.
+        </span>
+      </div>
+    </div>
+    <div class="col-sm-8">
+      <div class="form-group">
+        <%= f.label :is_load_balancer, "Is this a Load Balancer image?" %>
+        <% if image.id.blank? %>
+          <%= f.check_box :is_load_balancer, class: 'form-control' %>
+        <% else %>
+          <%= f.check_box :is_load_balancer, class: 'form-control', disabled: true %>
+        <% end %>
+        <span class="help-block">Load Balancer images allow you to build your own custom load balancer, instead of using the global load balancer. <b>This can not be changed later.</b></span>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <% end %>
+
+  <div class="row">
+    <div class="col-sm-6 col-xs-12">
+      <div class="form-group">
+        <%= f.label :role, t('container_images.form.role') %>
+        <%= tag.span '*', style: 'color:red;' %>
+        <%= f.text_field :role, class: 'form-control', placeholder: 'some-app', required: true %>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xs-12">
+      <div class="form-group">
+        <%= f.label :role_class, t('container_images.form.role_class') %>
+        <%= f.select :role_class, options_for_select([[t('container_images.categories.apps'), 'web'], [t('container_images.categories.databases'), 'database'], [t('container_images.categories.kv'), 'cache'], [t('container_images.categories.dev'), 'dev'], [t('container_images.categories.other'), 'misc']], @container.role_class), {}, class: 'form-control'  %>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4 col-xs-6">
+      <div class="form-group">
+        <%= f.label :min_cpu, t('container_images.form.min_cpu') %>
+        <%= f.text_field :min_cpu, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-4 col-xs-6">
+      <div class="form-group">
+        <%= f.label :min_memory, t('container_images.form.min_mem') %>
+        <%= f.text_field :min_memory, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-4 col-xs-6">
+      <div class="form-group">
+        <%= f.label :can_scale, t('container_images.form.scaling') %>
+        <%= f.check_box :can_scale, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <% if current_user.can_force_local_storage? %>
+    <hr>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <%= f.label :force_local_volume, t('container_images.form.volume_override.title') %>
+          <%= f.check_box :force_local_volume, class: 'form-control' %>
+          <span class="help-block"><%= t 'container_images.form.volume_override.help' %></span>
+        </div>
+      </div>
+    </div>
+
+  <% end %>
+  <hr>
+
+  <div class="row">
+    <div class="col-sm-5 col-xs-12">
+      <div class="form-group">
+        <%= f.label :container_image_provider_id, t('container_images.form.registry.source') %>
+        <%= f.collection_select :container_image_provider_id, available_image_providers, :id, (request.path =~ /admin/ && current_user.is_admin ? :name_with_user : :name_with_url), {include_blank: true}, {class: 'form-control'}  %>
+        <br>
+        <%= f.text_field :registry_custom, class: 'form-control', placeholder: t('container_images.form.registry.source_custom_placeholder') %>
+        <%= tag.span t('container_images.form.registry.source_custom_help'), class: 'help-block' %>
+      </div>
+    </div>
+
+    <div class="col-sm-4 col-xs-7">
+      <div class="form-group">
+        <%= f.label :registry_image_path, t('container_images.form.registry.image') %>
+        <%= tag.span '*', style: 'color:red;' %>
+        <%= f.text_field :registry_image_path, class: 'form-control', placeholder: 'my/image' %>
+      </div>
+    </div>
+
+    <div class="col-sm-3 col-xs-5">
+      <div class="form-group">
+        <%= f.label :registry_image_tag, t('container_images.form.registry.tag') %>
+        <%= tag.span '*', style: 'color:red;' %>
+        <%= f.text_field :registry_image_tag, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <% if request.path =~ /admin/ && current_user.is_admin %>
+
+    <hr>
+
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="form-group">
+          <%= f.label :user_id, t('container_images.form.owner') %>
+          <%= f.collection_select :user_id, User.all, :id, :full_name, {include_blank: true}, {class: 'form-control chosen-select-standard'}  %>
+        </div>
+      </div>
+    </div>
+
+    <%= render partial: "container_images/blocks/form", locals: { f: f } %>
+
+  <% end %>
+
+  <hr>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h4><%= t 'container_images.form.command.title' %></h4>
+      <%= t 'container_images.form.command.help_html' %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <%= f.text_field :command, class: 'form-control' %>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h4><%= t 'container_images.form.registry.auth.title' %></h4>
+      <p><%= t 'container_images.form.registry.auth.subtitle_html' %></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-4">
+      <div class="form-group">
+        <%= f.label :registry_auth, t('container_images.form.registry.auth.enabled') %>
+        <%= f.check_box :registry_auth, class: 'form-control' %>
+      </div>
+    </div>
+
+    <div class="col-xs-8">
+      <div class="form-group">
+        <%= f.label :registry_username, t('common.username') %>
+        <%= f.text_field :registry_username, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="form-group">
+        <%= f.label :registry_password, t('common.password') %><br>
+        <%= f.text_area :registry_password,
+                       rows: 10,
+                       class: 'form-control code-font',
+                       autocomplete: 'off',
+                       autocorrect: 'off',
+                       autocapitalize: 'off',
+                       spellcheck: 'false',
+                       style: "font-size:12px;"
+        %>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="form-group">
+        <label>Description</label>
+        <%= f.hidden_field :description, id: "image_description_body" %>
+        <trix-editor input="image_description_body" class="trix-editor-format"></trix-editor>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,44 @@
+<% if @sftp_containers.empty? %>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-body text-center">No Containers</div>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Region</th>
+              <th>Node</th>
+              <th>IP</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @sftp_containers.each do |c| %>
+              <tr>
+                <td><%= link_to c.id, admin_sftp_path(c) %></td>
+                <td><%= link_to c.name, admin_sftp_path(c) %></td>
+                <td><%= link_to c.region.name, admin_regions_url(c.region) %></td>
+                <td><%= link_to c.node.label, admin_regions_url(c.region) %></td>
+                <td><%= c.local_ip %></td>
+                <td><%= c.status.capitalize %></td>
+                <td><%= l c.created_at.in_time_zone(Time.zone), format: :short %></td>
+                <td class="text-right"><%= render partial: "admin/containers/shared/power_controls", locals: { container: c } %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>

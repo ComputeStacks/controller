@@ -1,0 +1,20 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ul.nav.nav-pills.sub-menu-pills.pull-left
+      li class="#{controller.class == Admin::UsersController ? 'active' : ''}"= link_to "Users", "/admin/users"
+      li class="#{controller.class == Admin::UserGroupsController ? 'active' : ''}"= link_to "Groups", "/admin/user_groups"
+      li class="#{controller.class == Admin::OrdersController ? 'active' : ''}"= link_to "Orders", "/admin/orders"
+
+    - if controller.class == Admin::UserGroupsController
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to "Add User Group", "/admin/user_groups/new", class: 'btn btn-sm btn-default'
+
+    - elsif controller.class == Admin::UsersController
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to "Create User", "/admin/users/new", class: 'btn btn-sm btn-default'
+
+    - else
+
+      ol.breadcrumb.breadcrumb-action.text-right style="height:45px;"
+        li
+          | &nbsp;

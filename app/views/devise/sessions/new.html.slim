@@ -1,0 +1,58 @@
+= form_for(resource, :as => resource_name, :url => session_path(resource_name), :html => { :role => 'form', :class => 'visible-xs'}) do |f|
+  .row: .col-xs-11: .col-xs-offset-1
+    .row: .col-xs-12
+      h6= Setting.app_name
+    .row: .col-xs-12: .panel.panel-primary
+      .panel-body
+        .form-group
+          .input-group
+            span.input-group-addon
+              i.fa.fa-envelope
+            = f.text_field :email, class: 'form-control', placeholder: t('devise.email_placeholder')
+        .form-group
+          .input-group
+            span.input-group-addon
+              i.fa.fa-lock
+            = f.password_field :password, class: 'form-control', autocomplete: 'current-password'
+        div style="margin: 0 auto;text-align:center;"
+          small
+            = link_to t('auth.pw_reset'), @reset_path.nil? ? "/users/password/new" : @reset_path
+            | &nbsp;//&nbsp;
+            = link_to t('auth.confirm'), "/users/confirmation/new"
+            | &nbsp;//&nbsp;
+            = link_to t('auth.unlock'), new_unlock_path(resource_name)
+      .panel-footer
+        = link_to t('devise.register'), "/register", class: "btn btn-sm btn-default" if Setting.enable_signup_form?
+        = submit_tag t('devise.login'), class: "btn btn-primary #{Setting.enable_signup_form? ? 'pull-right btn-sm' : 'btn-block'}", id: "session-login-form-btn", data: { locale: t('common.please_wait') }
+
+= form_for(resource, :as => resource_name, :url => session_path(resource_name), :html => { role: 'form', class: 'hidden-xs' }) do |f|
+  #loginModal.modal
+    .modal-dialog
+      .modal-content
+        .modal-header style='text-align:center;'
+          - if Setting.branding_img_login.nil?
+            h4= Setting.app_name
+          - else
+            = image_tag "/assets/custom/#{Setting.branding_img_login}"
+        .modal-body
+          div style="max-width:500px;margin:0 auto;text-align:center;padding-top:40px;"
+            .form-group
+              .input-group
+                span.input-group-addon
+                  i.fa.fa-envelope
+                = f.text_field :email, class: 'form-control', placeholder: t('devise.email_placeholder')
+            .form-group
+              .input-group
+                span.input-group-addon
+                  i.fa.fa-lock
+                = f.password_field :password, class: 'form-control', autocomplete: 'current-password'
+          div style="margin: 0 auto;text-align:center;"
+            small
+              = link_to t('auth.pw_reset'), @reset_path.nil? ? "/users/password/new" : @reset_path
+              | &nbsp;//&nbsp;
+              = link_to t('auth.confirm'), "/users/confirmation/new"
+              | &nbsp;//&nbsp;
+              = link_to t('auth.unlock'), new_unlock_path(resource_name)
+        .modal-footer
+          = link_to t('devise.register'), "/register", class: "btn btn-default pull-left" if Setting.enable_signup_form?
+          = submit_tag t('devise.login'), class: "btn btn-primary #{Setting.enable_signup_form? ? '' : 'btn-block'}", id: "session-login-form-btn", data: { locale: t('common.please_wait') }

@@ -1,0 +1,79 @@
+# Additional translations at https://github.com/plataformatec/devise/wiki/I18n
+de:
+  devise:
+    login: Anmelden
+    register: Registrieren
+    email_placeholder: user@domain.com
+    forms:
+      password:
+        reset_title: Passwort zurücksetzen
+        req_title: Passwort zurücksetzen anfordern
+      unlock:
+        title: Anweisungen zum Entsperren erneut senden
+      confirm:
+        title: Bestätigen Sie Ihre E-Mail Adresse
+    confirmations:
+      confirmed: "Ihre E-Mail Adresse wurde erfolgreich bestätigt."
+      send_instructions: "Sie erhalten in wenigen Minuten eine E-Mail mit Anweisungen, wie Sie Ihre E-Mail-Adresse bestätigen können."
+      send_paranoid_instructions: "Wenn Ihre E-Mail-Adresse in unserer Datenbank vorhanden ist, erhalten Sie in wenigen Minuten eine E-Mail mit Anweisungen, wie Sie Ihre E-Mail-Adresse bestätigen können."
+    failure:
+      already_authenticated: "Sie sind bereits angemeldet."
+      inactive: "Ihr Konto ist noch nicht aktiviert."
+      invalid: "Ungültige E-Mail oder ungültiges Passwort."
+      invalid_token: "Ungültiger Authentifizierungs-Token."
+      locked: "Ihr Konto ist derzeit gesperrt."
+      last_attempt: "Sie haben noch einen Versuch, bevor Ihr Konto gesperrt wird."
+      not_found_in_database: "Ungültige E-Mail-Adresse oder ungültiges Passwort."
+      timeout: "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an, um fortzufahren."
+      unauthenticated: '' #"You need to sign in or sign up before continuing."
+      unconfirmed: "Sie müssen Ihre E-Mail-Adresse bestätigen, bevor Sie fortfahren können."
+      invalid_email: "Ungültige E-Mail Adresse."
+      email_exists: "Es existiert bereits ein Konto mit dieser E-Mail-Adresse."
+      sso_secondfactor: "2FA ist für Ihr Konto aktiviert. Bitte melden Sie sich hier an, um Ihr Konto freizuschalten."
+    mailer:
+      confirmation_instructions:
+        subject: "Hinweise zur Bestätigung"
+      reset_password_instructions:
+        subject: "Anweisungen zum Zurücksetzen des Passworts"
+      unlock_instructions:
+        subject: "Anweisungen zum Entsperren"
+      email_changed:
+        subject: "E-Mail Geändert"
+      password_change:
+        subject: "Passwort geändert"
+    omniauth_callbacks:
+      failure: "Konnte Sie nicht von %{kind} authentifizieren, weil \"%{reason}\"."
+      success: "Erfolgreich authentifiziert vom %{kind} Konto."
+    passwords:
+      no_token: "Sie können nicht auf diese Seite zugreifen, wenn Sie nicht von einer E-Mail zum Zurücksetzen des Passworts kommen. Wenn Sie von einer E-Mail zum Zurücksetzen des Passworts kommen, stellen Sie bitte sicher, dass Sie die vollständige URL verwendet haben."
+      send_instructions: "Sie erhalten in wenigen Minuten eine E-Mail mit Anweisungen, wie Sie Ihr Passwort zurücksetzen können."
+      send_paranoid_instructions: "Wenn Ihre E-Mail-Adresse in unserer Datenbank vorhanden ist, erhalten Sie in wenigen Minuten einen Link zur Passwortwiederherstellung an Ihre E-Mail-Adresse."
+      updated: "Ihr Passwort wurde erfolgreich geändert. Sie sind nun angemeldet."
+      updated_not_active: "Ihr Passwort wurde erfolgreich geändert."
+    registrations:
+      destroyed: "Auf Wiedersehen! Ihr Konto wurde erfolgreich gelöscht. Wir hoffen, Sie bald wieder zu sehen."
+      signed_up: "Willkommen! Sie haben sich erfolgreich angemeldet."
+      signed_up_but_inactive: "Sie haben sich erfolgreich angemeldet. Wir konnten Sie jedoch nicht anmelden, da Ihr Konto noch nicht aktiviert ist."
+      signed_up_but_locked: "Sie haben sich erfolgreich angemeldet. Wir konnten Sie jedoch nicht anmelden, da Ihr Konto gesperrt ist."
+      signed_up_but_unconfirmed: "Es wurde eine Nachricht mit einem Bestätigungslink an Ihre E-Mail-Adresse gesendet. Bitte folgen Sie dem Link, um Ihr Konto zu aktivieren."
+      update_needs_confirmation: "Sie haben Ihr Konto erfolgreich aktualisiert, aber wir müssen Ihre neue E-Mail-Adresse verifizieren. Bitte prüfen Sie Ihre E-Mail und folgen Sie dem Bestätigungslink, um Ihre neue E-Mail-Adresse zu bestätigen."
+      updated: "Ihr Konto wurde erfolgreich aktualisiert."
+      updated_but_not_signed_in: "Ihr Konto wurde erfolgreich aktualisiert, aber da Ihr Passwort geändert wurde, müssen Sie sich erneut anmelden."
+    sessions:
+      signed_in: "Erfolgreich eingeloggt."
+      signed_out: "Erfolgreich abgemeldet."
+      already_signed_out: "Erfolgreich abgemeldet."
+    unlocks:
+      send_instructions: "Sie erhalten in wenigen Minuten eine E-Mail mit Anweisungen, wie Sie Ihr Konto freischalten können."
+      send_paranoid_instructions: "Wenn Ihr Konto existiert, erhalten Sie in wenigen Minuten eine E-Mail mit Anweisungen, wie Sie es freischalten."
+      unlocked: "Ihr Konto wurde erfolgreich freigeschaltet. Bitte melden Sie sich an, um fortzufahren."
+  errors:
+    messages:
+      already_confirmed: "wurde bereits bestätigt, bitte versuchen Sie sich anzumelden"
+      confirmation_period_expired: "muss innerhalb von %{period} bestätigt werden, bitte fordern Sie einen neuen an"
+      expired: "ist abgelaufen, bitte fordern Sie ein neues an"
+      not_found: "nicht gefunden"
+      not_locked: "war nicht gesperrt"
+      not_saved:
+        one: "1 Fehler hat das Speichern dieser %{resource} verhindert:"
+        other: "%{count} Fehler haben das Speichern dieser %{resource} verhindert:"

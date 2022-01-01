@@ -1,0 +1,1 @@
+attributes :id, :cert_serial, :issuer, :subject, :not_before, :not_after, :created_at, :updated_at

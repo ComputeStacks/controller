@@ -1,0 +1,15 @@
+<ul class="list-unstyled">
+  <% if audits.empty? %>
+    <li class="text-center">
+      No Events
+    </li>
+  <% end %>
+  <% audits.each do |i| %>
+    <li>
+      <%= audit_description(i) %>
+      <b class="pull-right">
+        <%=l i.created_at.in_time_zone(Time.zone), format: :long %>
+      </b>
+    </li>
+  <% end %>
+</ul>

@@ -1,0 +1,69 @@
+## Configure System Alerts.
+# Service = Slack Notifications
+# Service: => Accounts: == Who will be notified. [user] Provider's Slack account [system] ComputeStacks Slack Account [both] Both Accounts [none] No Notifications.
+# Service: => Type: == Slack Color Notification. Possible Values are: [alert, notice, success]
+#
+signup:
+  service:
+    message: "%{user} Signed Up"
+    accounts: user
+    type: success
+  analytics: Signed Up
+updated_profile:
+  analytics: Updated Profile
+new_computestack:
+  service:
+    message: "%{user} Created a New ComputeStack"
+    accounts: user
+    type: success
+  analytics: New ComputeStack
+suspended:
+  service:
+    message: "%{current_user} Suspended %{user}"
+    accounts: user
+    type: notice
+  analytics: Suspended User
+activated:
+  service:
+    message: "%{current_user} Activated %{user}"
+    accounts: user
+    type: success
+  analytics: Activated User
+billing_chargeback:
+  service:
+    message: "A chargeback has been received"
+    accounts: user
+    type: alert
+##
+# Errors -- no analytics
+##
+error_order0:
+  service:
+    message: "Error processing Order. Service Response: %{message}"
+    accounts: both
+    type: alert
+error_region0:
+  service:
+    message: "Region %{region} is unable to accept new Container Deployments."
+    accounts: user
+    type: alert
+error_node0:
+  service:
+    message: "Error! Node %{node} is offline."
+    accounts: user
+    type: alert
+error_node1:
+  service:
+    message: "Node %{node} is online."
+    accounts: user
+    type: success
+error_pd0:
+  service:
+    message: "Error! Provision Driver %{endpoint} is offline."
+    accounts: user
+    type: alert
+error_pd1:
+  service:
+    message: "Provision Driver %{endpoint} is online."
+    accounts: user
+    type: success

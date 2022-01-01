@@ -1,0 +1,46 @@
+de:
+  dns:
+    obj: DNS
+    server_error: "Fehler beim Verbinden mit dem DNS-Server"
+    zone_error: "Fehler beim laden der Zone File"
+    index:
+      breadcrumb: DNS Zonen Einträge
+      new_btn: Neue Domain
+      empty: Keine Domains gefunden
+    records:
+      new:
+        title: Erstelle %{type} Record
+      edit:
+        title: Editiere %{type} Record
+    reverse:
+      title: "PTR Records für: %{addr}"
+      hostname: Hostname
+    show:
+      empty: Keine %{field} Records
+      actions:
+        discard: Änderungen verwerfen
+        commit: Änderungen übernehmen
+        last_updated: Letzte Aktualisierung
+        new: Neue Domain
+      fields:
+        zone: Zone Name
+        primary_dns: Primärer DNS
+        email: E-Mail
+        refresh: Aktualisieren
+        retry: Wiederholung
+        expire: Läuft ab
+        ttl: TTL
+        ns: Name Server
+        hostname: Hostname
+        mx: Mail Server
+        priority: Priorität
+        target: Ziel
+        weight: Weight
+        domain: Domain
+        name: Name
+        value: Wert
+        dns_sec:
+          key_tag: Schlüssel Tag
+          algo: Algorithmus Typ
+          digest_type: Digest Type
+          digest: Digest

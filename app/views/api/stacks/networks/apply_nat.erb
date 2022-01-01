@@ -1,0 +1,20 @@
+#!/bin/bash
+SECONDS=0
+echo "Applying rules..."
+<% @rules['remove'].each do |acl| %>
+iptables -t nat -C expose-ports -p <%= acl.proto %> --dport <%= acl.port_nat %> -j DNAT --to <%= acl.destination_cidr.split('/').first %>:<%= acl.port %>
+
+if [ $? -eq 0 ]; then
+  echo "Removing NAT Rule: <%= acl.port_nat %>/<%= acl.proto %> to <%= acl.destination_cidr.split('/').first %>:<%= acl.port %>"
+  iptables -t nat -D expose-ports -p <%= acl.proto %> --dport <%= acl.port_nat %> -j DNAT --to <%= acl.destination_cidr.split('/').first %>:<%= acl.port %>
+fi
+<% end %>
+<% @rules['add'].each do |acl| %>
+iptables -t nat -C expose-ports -p <%= acl.proto %> --dport <%= acl.port_nat %> -j DNAT --to <%= acl.destination_cidr.split('/').first %>:<%= acl.port %>
+
+if [ $? -eq 1 ]; then
+  echo "Applying NAT Rule: <%= acl.port_nat %>/<%= acl.proto %> to <%= acl.destination_cidr.split('/').first %>:<%= acl.port %>"
+  iptables -t nat -A expose-ports -p <%= acl.proto %> --dport <%= acl.port_nat %> -j DNAT --to <%= acl.destination_cidr.split('/').first %>:<%= acl.port %>
+fi
+<% end %>
+echo "Completed in $SECONDS seconds."

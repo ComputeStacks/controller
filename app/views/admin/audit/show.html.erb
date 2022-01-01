@@ -1,0 +1,123 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Audit', '/admin/audit' %></li>
+      <li class="active"><%= "Audit Event ##{@audit.id}" %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-sm-12">
+
+    <div class="row">
+
+      <div class="col-md-12">
+        <div class="panel panel-default"><%= render partial: "admin/audit/overview", locals: {audit: @audit} %></div>
+      </div>
+
+    </div>
+
+    <% unless @audit.system_events.empty? %>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th colspan="3">Related Alerts</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @audit.system_events.sorted.each do |log| %>
+                  <tr>
+                    <td>
+                      <span class="label <%= sys_event_label(log) %>"><%= log.log_level.upcase %></span>
+                    </td>
+                    <td><%= link_to log.message, "/admin/system_events/#{log.id}" %></td>
+                    <td class="text-right">
+                      <%= time_ago_in_words(log.created_at) %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% unless @audit.event_logs.empty? %>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th colspan="3">Related Events</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @audit.event_logs.each do |log| %>
+                  <tr class="log <%= log.table_class %>">
+                    <td>
+                      <%= link_to time_ago_in_words(log.created_at), "/admin/event_logs/#{log.id}" %>
+                      <%= content_tag(:i, nil, class: 'fa fa-file-text-o', style: 'margin-left:5px;') if log.event_details.exists? %>
+                    </td>
+                    <td><%= deployment_event(log).html_safe %></td>
+                    <td class="text-right"><%= format_event_log(log.status) %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% unless @audit.billing_events.empty? %>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th colspan="2">Related Billing Events</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @audit.billing_events.each do |log| %>
+                  <tr>
+                    <td>
+                      <% if log.subscription %>
+                        <%= link_to billing_event_title(log, 'subscription_product'), "/admin/subscriptions/#{log.subscription.id}" %>
+                      <% else %>
+                        <%= billing_event_title(log, 'subscription_product') %>
+                      <% end %>
+                    </td>
+                    <td class="text-right">
+                      <%= l log.created_at, format: :short %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% unless @audit.raw_data.blank? %>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <pre style="white-space:pre-wrap; word-wrap:break-word;"><%= @audit.raw_formatter %></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+</div>

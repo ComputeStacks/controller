@@ -1,0 +1,31 @@
+<% nodes.each do |node| %>
+<div class="col-lg-4 col-md-6 col-xs-12">
+  <div class="panel <%= node_status_header(node) %>">
+    <div class="panel-heading">
+      <div class="panel-title">
+        <%= node.label %>
+      </div>
+    </div>
+    <div class="panel-body">
+      <ul class="list-unstyled">
+        <li>
+          Primary IP
+          <b class="pull-right"><%= node.primary_ip %></b>
+        </li>
+        <li>
+          Public IP
+          <b class="pull-right"><%= node.public_ip %></b>
+        </li>
+      </ul>
+      <hr />
+      <ul class="list-unstyled">
+        <%= render partial: "admin/nodes/index/metrics_overview", locals: { node: node } %>
+      </ul>
+      <div>
+        <hr>
+        <%= link_to raw("<i class='fa fa-wrench'></i> #{t('actions.edit')}"), "/admin/nodes/#{node.id}/edit", class: "btn btn-default pull-right" %>
+      </div>
+    </div>
+  </div>
+</div>
+<% end %>

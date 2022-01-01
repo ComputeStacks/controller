@@ -1,0 +1,31 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Volumes", "/admin/volumes" %></li>
+      <li><%= link_to "Volume: #{@volume.id}", "/admin/volumes/#{@volume.id}" %></li>
+      <li class="active">Events</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12">
+    <p class="lead">
+      Events for <%= @volume.name %>
+    </p>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="row">
+      <div class="col-md-12">
+        <%= render partial: "admin/event_logs/list", locals: { logs: @logs, root_path: "/admin/volumes/#{@volume.id}/logs" } %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <%= will_paginate @logs %>
+      </div>
+    </div>
+  </div>
+</div>

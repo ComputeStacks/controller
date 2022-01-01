@@ -1,0 +1,116 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-5">
+      <div class="form-group">
+        <label>Label</label>
+        <%= f.text_field :label, required: true, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-7">
+      <div class="form-group">
+        <label>Hostname</label>
+        <%= f.text_field :hostname, required: true, class: 'form-control' %>
+        <span class="help-block">Must match actual hostname. Used for metrics.</span>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-9">
+      <label>Region</label>
+      <%= collection_select(:node, :region_id, Region.all, :id, :name, {}, { class: 'form-control chosen-select-standard',name: 'node[region_id]' }) %>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label>Enabled?</label>
+        <%= f.check_box :active, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label>Primary IP</label>
+        <%= f.text_field :primary_ip, required: true, class: 'form-control' %>
+        <span class="help-block">ComputeStacks to node connections.</span>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label>Public IP</label>
+        <%= f.text_field :public_ip, required: true, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+</div>
+<hr>
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-12">
+      <h5>Disk IO Limits</h5>
+      <p class="lead">A value of <code>0</code>, or a blank block device path, will disable the limit.</p>
+      <em>Only supported by nodes running Debian 11+</em>
+      <br><br>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :block_write_bps, 'Write Bytes Per Second' %>
+        <%= f.text_field :block_write_bps, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :block_read_bps, 'Read Bytes Per Second' %>
+        <%= f.text_field :block_read_bps, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :block_write_iops, 'Write Operations Per Second' %>
+        <%= f.text_field :block_write_iops, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :block_read_iops, 'Read Operations Per Second' %>
+        <%= f.text_field :block_read_iops, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <%= f.label :volume_device, 'Block device path' %>
+        <%= f.text_field :volume_device, class: 'form-control' %>
+        <span class="help-block">
+        The full path to the block device on the host.<br>
+        Examples: <code>/dev/sda</code>, or <code>/dev/mapper/centos--7-root</code><br>
+        <b>Warning:</b> <em>An incorrect value will prevent containers from starting.</em>
+      </span>
+      </div>
+    </div>
+  </div>
+</div>
+<hr>
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>Maintenance Mode</label>
+        <%= f.check_box :maintenance, class: 'form-control' %>
+        <% unless @node.maintenance %>
+          <span class="help-block"><b>Warning:</b> This will place the node in offline mode and attempt to migrate all containers elsewhere in the AZ. Containers with locally mounted volumes will not be migrated.</span>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), "/admin/regions/#{@node.region.id}", class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success' %>
+  <%= link_to "Delete", "/admin/nodes/#{@node.id}", method: :delete, data: { confirm: 'Are you sure? This is destructive and irreversible.' }, class: 'btn btn-danger pull-right' if (controller.action_name == 'edit' || controller.action_name == 'update') %>
+</div>

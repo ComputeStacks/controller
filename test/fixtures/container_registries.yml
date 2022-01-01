@@ -1,0 +1,6 @@
+default:
+  name: test-generated-registry
+  label: "My Registry"
+  status: "deployed"
+  user: admin
+  password_encrypted: "<%= Secret.encrypt!(SecureRandom.urlsafe_base64(7).gsub("_","").gsub("-","")) %>"

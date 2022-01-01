@@ -1,0 +1,49 @@
+<% if data.empty? %>
+  <table class="table">
+    <tbody>
+    <tr>
+      <td class="text-center">
+        <%= link_to t('container_images.ingress_rules.new'), new_container_image_ingress_param_path(image) %>
+        <br>
+        <%= t 'container_images.ingress_rules.list.empty_description_html' %>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+<% else %>
+  <table class="table">
+    <thead>
+    <tr>
+      <th><%= t 'obj.port' %></th>
+      <th><%= t 'container_images.ingress_rules.list.table.columns.proto' %></th>
+      <th><%= t 'container_images.ingress_rules.list.table.columns.lb' %></th>
+      <th><%= t 'container_images.ingress_rules.list.table.columns.proxy' %></th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <% data.each do |i| %>
+      <tr>
+        <td><%= i.port %></td>
+        <td>
+          <% if i.backend_ssl %>
+            <small><%= ingress_backend_proto i %></small>
+          <% else %>
+            <%= i.proto %>
+          <% end %>
+        </td>
+        <td><%= ingress_param_load_balancer i %></td>
+        <td><%= i.tcp_proxy_opt %></td>
+        <td class="text-right">
+          <% if @container.can_edit?(current_user) %>
+            <div class="btn-group">
+              <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_image_ingress_param_path(i), class: 'btn btn-xs btn-default' %>
+              <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_ingress_param_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+            </div>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+<% end %>

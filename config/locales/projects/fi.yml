@@ -1,0 +1,65 @@
+fi:
+  deployments:
+    state:
+      deploying: Otetaan käyttöön
+      deployed: Käyttöönotettu
+      working: Toiminnassa
+    shared:
+      main_nav:
+        deployments: Käyttöönotot
+        images: Kuvani
+        registry: Oma Arkisto
+        new_deployment: Uusi käyttöönotto
+        new_image: Uusi kuva
+        new_reg: Uusi arkisto
+        new_domain: Lisää verkkotunnus
+    show:
+      owner: Omistaja
+      header:
+        price: Hinta
+        bandwidth: Käytettävä kaista
+        storage: Käytettävä levytila
+        last_event: Viimeinen tapahtuma
+        new: Uusi käyttöönotto
+        new_container: Uusi sovellus
+      container:
+        name: Nimi # Säiliön nimi
+        label: Säiliö
+        resources: Resurssit
+        image: Kuva
+        ip: Julkinen IP
+        region: Alue
+        regions: Alueet
+        manage: Hallitse säiliötä
+        status: Tila
+      edit:
+        title: Muokkaa käyttöönottoa
+        name: Nimi
+      loading:
+        containers: Ladataan kontteja
+        domains: Ladataan verkkotunnuksia
+        certs: Ladataan verkkotunnuksia
+        volumes: Ladataan tallennustiloja
+      sidebar:
+        overview: Yleiskatsaus
+        domains: Verkkotunnusten reititys
+        ssl: SSL
+        volumes: Tallennustilat
+    index:
+      loading: Ladataan käyttöönottoja
+      deployment_list:
+        none: Ei käyttöönottoja
+        deployments:
+          pending_order: Tilaus on jonossa
+          status: Tila
+          last_event: Viimeinen tapahtuma
+    form:
+      title: Muokkaa projektia
+      name: Nimi
+    setup:
+      title: Getting Started
+    project_notifications:
+      show:
+        title_profile_link: profile settings
+        title_help_html: |
+          Any alerts configured here will be triggered in addition to alerts configured in your %{link}.<br>If you configure the same rule here, and on your account, you will see duplicate notifications.

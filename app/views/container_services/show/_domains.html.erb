@@ -1,0 +1,53 @@
+<div class="panel panel-primary">
+  <div class="panel-heading" style="padding:2px;"></div>
+  <div class="panel-body">
+    <% if service.allow_custom_domains? %>
+    <div class="pull-right"><%= link_to t('container_services.domains.breadcrumb.new'), "/container_domains/new?service_id=#{service.id}" %></div>
+    <% end %>
+    <strong><%= t('container_services.domains.breadcrumb.routing').upcase %></strong>
+  </div>
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Domain</th>
+      <th>Internal Port</th>
+      <th>Protocol</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <% if service.domains.empty? %>
+      <tr>
+        <td colspan="4" class="text-center">No domains found</td>
+      </tr>
+    <% end %>
+    <% service.domains.each do |i| %>
+      <tr>
+        <td>
+          <%= i.system_domain ? link_to(i.domain, "#{i.force_ssl? ? 'https' : 'http'}://#{i.domain}", target: '_blank') : link_to(i.domain, "/container_domains/#{i.id}/edit") %>
+          <%= domain_le_badge i %>
+        </td>
+        <td>
+          <%= i.ingress_rule.port if i.ingress_rule %>
+        </td>
+        <td>
+          <%= ingress_domain_proto(i) if i.ingress_rule %>
+        </td>
+        <td class="text-right">
+          <% if i.system_domain %>
+            <div class="btn-group">
+              <%= link_to raw("<i class='fa fa-wrench'></i>"), '', disabled: 'disabled', class: 'btn btn-xs btn-default' %>
+              <%= link_to "<i class='fa fa-trash'></i>".html_safe, '', disabled: 'disabled', class: 'btn btn-xs btn-danger' %>
+            </div>
+          <% else %>
+            <div class="btn-group">
+              <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_container_domain_path(i), class: 'btn btn-xs btn-default' %>
+              <%= link_to "<i class='fa fa-trash'></i>".html_safe, container_domain_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-xs btn-danger' %>
+            </div>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>

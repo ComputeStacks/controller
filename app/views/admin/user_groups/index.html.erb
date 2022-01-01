@@ -1,0 +1,39 @@
+<%= render partial: 'admin/layouts/shared/accounts_nav' %>
+<div class="row">
+  <div class="col-xs-12"><p class="lead">User Groups</p></div>
+</div>
+<br/>
+<div class="col-xs-12">
+  <table id="user-group-list" class="table table-hover">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Default</th>
+        <th>Billing Plan</th>
+        <th>Users</th>
+        <th>Created</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @groups.each do |i| %>
+        <tr>
+          <td><%= link_to i.id, admin_user_group_path(i) %></td>
+          <td><%= link_to i.name, admin_user_group_path(i) %></td>
+          <td><%= i.is_default ? 'Yes' : 'No' %></td>
+          <td><%= link_to(i.billing_plan.name, admin_billing_plan_path(i.billing_plan)) if i.billing_plan %></td>
+          <td><%= i.users.count %></td>
+          <td><%= l i.created_at, format: :short %></td>
+          <td class="text-right">
+            <%= link_to raw("<i class='fa fa-clone'></i> Clone"), "#{new_admin_user_group_url}?clone=#{i.id}", title: 'Clone Group', class: 'btn btn-sm btn-default', style: 'margin-right:10px;' %>
+            <div class="btn-group">
+              <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_admin_user_group_path(i), class: 'btn btn-sm btn-default' %>
+              <%= link_to raw("<i class='fa fa-trash'></i>"), admin_user_group_path(i), method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-sm btn-danger' %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

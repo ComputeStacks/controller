@@ -1,0 +1,28 @@
+.panel-body
+  .row
+    .col-sm-12: .form-group
+      = label_tag :phase_type, 'Phase'
+      = select(:phase, :phase_type, selectable_phases(@phase.billing_resource, (controller.action_name == 'new' || controller.action_name == 'create' ? nil : @phase.phase_type)), {}, { class: 'form-control chosen-select-standard', name: 'billing_phase[phase_type]' })
+      span.help-block Phases flow from Trial, to Discount, and then to Final.
+
+  hr style='border-color:#ccc;'
+  .row: .col-md-12: strong Only used for 'Trial' & 'Discount' phases. 'Final' phase will ignore these values.
+  hr
+  .row: .col-md-12
+    .row
+      .col-sm-6: .form-group
+        = label_tag :duration_qty, 'Duration'
+        = f.number_field :duration_qty, :class => "form-control"
+
+
+      .col-sm-6: .form-group
+        = label_tag :duration_unit, 'Period'
+        = select(:phase, :duration_unit, phase_durations, { include_blank: true }, { class: 'form-control chosen-select-standard', name: 'billing_phase[duration_unit]' })
+    .row: .col-md-12
+      span.help-block How long will a user stay in this phase before transitioning to the next? (Either Discount or Final)
+
+
+.panel-footer
+  = link_to t('actions.cancel'), @base_url, class: 'btn btn-default', style: 'margin-right:10px;'
+  = submit_tag t('actions.save'), class: 'btn btn-success'
+  = link_to "Delete", "#{@base_url}/billing_phases/#{@phase.id}", method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-danger pull-right' if (controller.action_name == 'edit' || controller.action_name == 'update') && @phase.phase_type != 'final'

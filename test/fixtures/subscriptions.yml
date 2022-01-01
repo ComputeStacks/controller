@@ -1,0 +1,20 @@
+wordpress_custom:
+  label: "mark-shannon200"
+  active: true
+  user: admin
+wordpress:
+  label: "keen-shannon195"
+  active: true
+  user: admin
+mysql:
+  label: "fervent-goodall195"
+  active: true
+  user: admin
+nginx:
+  label: "super-faker393"
+  active: true
+  user: admin
+user_nginx:
+  label: "photo-faker593"
+  active: true
+  user: user

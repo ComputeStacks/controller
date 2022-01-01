@@ -1,0 +1,12 @@
+Metrics/LineLength:
+  Max: 100
+Style/TernaryParentheses:
+  Enabled: false
+Layout/FirstParameterIndentation:
+  Enabled: false
+Style/StringLiterals:
+  Enabled: false
+Layout/TrailingWhitespace:
+  Enabled: false
+Style/RescueStandardError:
+  Enabled: false

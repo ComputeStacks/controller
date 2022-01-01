@@ -1,0 +1,24 @@
+<%= render partial: 'admin/layouts/shared/billing_nav' %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <p class="lead">
+      Subscriptions <%= "for: #{link_to(@user.full_name, admin_user_path(@user))}".html_safe if @user %>
+    </p>
+  </div>
+</div>
+
+<div class="row"><%= render partial: "admin/subscriptions/index/filter" %></div>
+
+<hr />
+<div class="row">
+  <div class="col-xs-12">
+    <%= render partial: "admin/subscriptions/index/list", locals: { subscriptions: @subscriptions } %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @subscriptions %>
+  </div>
+</div>

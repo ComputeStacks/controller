@@ -1,0 +1,22 @@
+= render partial: 'admin/layouts/shared/activity_nav'
+
+.row
+  .col-md-12
+    h4 System Alerts
+.row
+  .col-md-12
+    table.table
+      thead
+        tr
+          th Level
+          th Event
+          th Time
+      - if @events.empty?
+        tr: td colspan='3' style='text-align:center;' No Events
+      - @events.each do |i|
+        tr
+          td: span.label class="#{sys_event_label(i)}"= i.log_level.upcase
+          td= link_to truncate(i.message, length: 75), "/admin/system_events/#{i.id}"
+          td= l i.created_at.in_time_zone(Time.zone), format: :long
+
+    = will_paginate @events

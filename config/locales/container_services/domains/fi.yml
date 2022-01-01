@@ -1,0 +1,25 @@
+fi:
+  container_services:
+    domains:
+      attributes:
+        service: Palvelu
+        endpoint: Osoittaa
+        created: Luotu
+        hsts: HSTS Enabled
+        status: Tila
+      table:
+        none: Ei löydettyjä verkkotunnuksia.
+      breadcrumb:
+        new: Lisää verkkotunnus
+        routing: Domain Routing
+      enable_le_html: '<a href="%{link}">Klikkaa tästä</a> ottaaksesi käyttöön LetsEncrypt sertifikaatit nykyisillä verkkotunnuksilla.'
+      form:
+        enabled: "Käytössä?"
+        enabled_help:
+          system: "Järjestelmän verkkotunnukset voidaan vain sallia tai estää. Muut toiminnot eivät ole mahdollisia."
+          user: "Rastin poistaminen tästä laatikosta pysäyttää verkkotunnuksen reitityksen konttiin välittömästi."
+        le: Ota käyttöön LetsEncrypt ilmainen SSL
+        hsts: Enable HSTS Header
+        hsts_help: This will add the HSTS header to the load balancer. Only works with SSL connections.
+        # For LetsEncrypt, we will automatically enable this. This is the message they will see in that situation.
+        hsts_auto_help: Automatically enabled for domains with LetsEncrypt enabled.

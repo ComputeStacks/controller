@@ -1,0 +1,10 @@
+en:
+  project_select:
+    title: Choose Project
+    none: No Projects Found
+  service_select:
+    title: Select Service
+    none: No Services Found
+  ingress_rule_select:
+    title: Select Ingress Rule
+    none: No Ingress rules found

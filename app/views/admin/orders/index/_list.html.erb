@@ -1,0 +1,32 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>Order ID</th>
+      <th>Status</th>
+      <th>User</th>
+      <th>Created</th>
+      <th>Last Updated</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if orders.empty? %>
+      <tr><td class="text-center" colspan="6">No Orders</td></tr>
+    <% end %>
+    <% orders.each do |i| %>
+      <tr>
+        <td><%= link_to i.id, "/admin/orders/#{i.id}" %></td>
+        <td><%= i.status.gsub("_", " ").capitalize %></td>
+        <td><%= i.user ? link_to(i.user.full_name, admin_user_path(i.user)) : '...' %></td>
+        <td><%= l i.created_at.in_time_zone(Time.zone), format: :long %></td>
+        <td><%= l i.updated_at.in_time_zone(Time.zone), format: :long %></td>
+        <td class="text-right">
+          <div class="btn-group">
+            <%= link_to tag.i(class: 'fa fa-gear'), "/admin/orders/#{i.id}", class: 'btn btn-default btn-sm' %>
+            <%= link_to tag.i(class: 'fa fa-trash'), "/admin/orders/#{i.id}", method: :delete, data: {confirm: "Are you sure?"}, class: 'btn btn-danger btn-sm' %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -1,0 +1,47 @@
+bandwidth:
+  name: bandwidth
+  label: Bandwidth
+  kind: resource
+  unit: 1
+  unit_type: GB
+  is_aggregated: true
+  resource_kind: bandwidth
+disk:
+  name: storage
+  label: Storage
+  kind: resource
+  unit: 1
+  unit_type: GB
+  is_aggregated: false
+  resource_kind: storage
+local_disk:
+  name: local_disk
+  label: Temporary Disk
+  kind: resource
+  unit: 1
+  unit_type: GB
+  is_aggregated: false
+  resource_kind: local_disk
+backup:
+  name: backups
+  label: 'Backup & Template Storage'
+  kind: resource
+  unit: 1
+  unit_type: GB
+  is_aggregated: false
+  resource_kind: backup
+containersmall:
+  name: containersmall
+  label: ContainerSmall
+  kind: package
+  group: default
+containerm:
+  name: containerm
+  label: ContainerM
+  kind: package
+  group: default
+containerl:
+  name: containerl
+  label: ContainerL
+  kind: package
+  group: default

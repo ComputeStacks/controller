@@ -1,0 +1,49 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Networks', '/admin/networks' %></li>
+      <li class="active"><%= @network.name %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-md-8 col-xs-6">
+    <p><span class="lead"><%= @network.name %></span><br /><%= @network.label %></p>
+  </div>
+  <div class="col-md-4 col-xs-6 text-right">
+    <%= link_to content_tag(:i, nil, class: 'fa fa-wrench'), edit_admin_network_url(@network), class: 'btn btn-sm btn-default' %>
+    <%= link_to content_tag(:i, nil, class: 'fa fa-trash'), admin_network_url(@network), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger' %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Address</th>
+            <th>In Use By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @addr.empty? %>
+            <tr>
+              <td colspan="2" class="text-center">No Addresses Found</td>
+            </tr>
+          <% end %>
+          <% @addr.each do |i| %>
+            <tr>
+              <td><%= i.ipaddr %></td>
+              <td><%= cidr_obj(i) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <div class="panel-body">
+        <%= will_paginate @addr %>
+      </div>
+    </div>
+  </div>
+</div>

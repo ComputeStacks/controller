@@ -1,0 +1,75 @@
+wordpress_custom_package:
+  product: containerl
+  subscription: wordpress_custom
+  phase_type: final
+  active: true
+wordpress_custom_bandwidth:
+  product: bandwidth
+  subscription: wordpress_custom
+  phase_type: final
+  active: true
+wordpress_custom_disk:
+  product: disk
+  subscription: wordpress_custom
+  phase_type: final
+  active: true
+wordpress_package:
+  product: containerl
+  subscription: wordpress
+  phase_type: final
+  active: true
+wordpress_bandwidth:
+  product: bandwidth
+  subscription: wordpress
+  phase_type: final
+  active: true
+wordpress_disk:
+  product: disk
+  subscription: wordpress
+  phase_type: final
+  active: true
+mysql_package:
+  product: containersmall
+  subscription: mysql
+  phase_type: final
+  active: true
+mysql_bandwidth:
+  product: bandwidth
+  subscription: mysql
+  phase_type: final
+  active: true
+mysql_disk:
+  product: disk
+  subscription: mysql
+  phase_type: final
+  active: true
+nginx_package:
+  product: containersmall
+  subscription: nginx
+  phase_type: final
+  active: true
+nginx_bandwidth:
+  product: bandwidth
+  subscription: nginx
+  phase_type: final
+  active: true
+nginx_disk:
+  product: disk
+  subscription: nginx
+  phase_type: final
+  active: true
+user_nginx_package:
+  product: containersmall
+  subscription: user_nginx
+  phase_type: final
+  active: true
+user_nginx_bandwidth:
+  product: bandwidth
+  subscription: user_nginx
+  phase_type: final
+  active: true
+user_nginx_disk:
+  product: disk
+  subscription: user_nginx
+  phase_type: final
+  active: true

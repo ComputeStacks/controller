@@ -1,0 +1,31 @@
+<div class="row" id="s_<%= group %>">
+  <div class="col-sm-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <strong><%= normalize_setting_group group %></strong>
+        <% if group == 'billing_module' %>
+          <div class="remote-resource pull-right" data-url="/admin/settings/billing_module"></div>
+        <% end %>
+      </div>
+      <table class="table table-list">
+        <tbody>
+        <% items.each do |i| %>
+          <tr>
+            <td>
+              <strong><%= normalize_setting_title i.name %></strong><br>
+              <span style="font-size:1.2rem;"><%= i.description %></span>
+            </td>
+            <td style="font-family: monospace;vertical-align: middle;">
+              <% if i.is_boolean? %>
+                <%= link_to admin_setting_value(i), "/admin/settings/#{i.id}", method: :put, data: {confirm: 'Are you sure you want to toggle this value?'} %>
+              <% else %>
+                <%= link_to admin_setting_value(i), "/admin/settings/#{i.id}/edit" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

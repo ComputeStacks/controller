@@ -1,0 +1,44 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Value</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  <% unless service.setting_params.exists? %>
+    <tr>
+      <td colspan="4" class="text-center">No Settings Found</td>
+    </tr>
+  <% end %>
+  <% service.setting_params.each do |s| %>
+    <tr>
+      <td>
+        <strong><%= s.label.nil? ? s.name.gsub("_", " ").capitalize : s.label %></strong><br>
+        <span class="code-font-minimal" style="font-size:1.1rem;"><%= s.name %></span>
+      </td>
+      <td id="setting_<%= s.id %>" style="overflow:hidden;text-overflow: ellipsis; white-space: nowrap;max-width: 200px; vertical-align: middle;">
+        <% if s.param_type == 'password' %>
+          <%= link_to(t('actions.show'), service_param_path(s), onclick: "inlineRemoteResource('setting_#{s.id}');return false;") %>
+        <% elsif s.value.blank? %>
+          ...
+        <% else %>
+          <% if s.value.length >= 30 %>
+            <a href="#" data-toggle="modal" data-target="#view-setting-<%= s.id %>"><%= truncate s.value, length: 30 %></a>
+            <%= render partial: 'container_services/show/setting', locals: {setting: s} %>
+          <% else %>
+            <%= s.value %>
+          <% end %>
+        <% end %>
+      </td>
+      <td class="text-right">
+        <div class="btn-group">
+          <%= link_to tag.i(nil, class: 'fa fa-wrench'), "#{service_param_path(s)}/edit", class: 'btn btn-default btn-sm' %>
+          <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{service_param_path(s)}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
+        </div>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

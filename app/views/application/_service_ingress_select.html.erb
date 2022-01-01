@@ -1,0 +1,8 @@
+<% if ingress_rules.empty? %>
+  <option><%= t 'ingress_rule_select.none' %></option>
+<% else %>
+  <option><%= t 'ingress_rule_select.title' %></option>
+  <% ingress_rules.each do |i| %>
+    <option value="<%= i.id %>" <% if ingress_rule_id == i.id || ingress_rules.count == 1 %>selected="selected"<% end %>><%= i.port %> (<%= i.proto %>)</option>
+  <% end %>
+<% end %>

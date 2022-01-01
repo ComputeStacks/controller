@@ -1,0 +1,8 @@
+.row.has-breadcrumb
+  ol.breadcrumb
+    li= link_to t('obj.deployments'), "/deployments"
+    li= link_to t('obj.registry'), "/container_registry"
+    li.active= t '.breadcrumb'
+
+= form_for @registry, url: "/container_registry/#{@registry.id}" do |registry|
+  = render partial: 'container_registry/form', locals: {registry: registry}

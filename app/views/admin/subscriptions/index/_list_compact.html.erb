@@ -1,0 +1,20 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Container</th>
+      <th>Status</th>
+      <th>Created</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% subscriptions.each do |i| %>
+      <tr>
+        <td><%= link_to i.id, admin_subscription_path(i) %></td>
+        <td><%= i.linked_obj.nil? ? '...' : link_to(i.linked_obj.name, admin_containers_path(i.linked_obj)) %></td>
+        <td><%= i.active ? 'Active' : 'Inactive' %></td>
+        <td><%= l i.created_at, format: :short %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

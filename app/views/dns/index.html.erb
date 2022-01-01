@@ -1,0 +1,54 @@
+<% content_for :title, "DNS" %>
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li class="active"><%= t '.breadcrumb' %></li>
+      <li class="pull-right no-spacer"><%= link_to t('.new_btn'), new_dn_url, class: "btn btn-sm btn-default", style: "margin-top:-3px;" %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <div class="panel panel-default">
+      <% if @zones.empty? %>
+        <div class="panel-body text-center"><strong><%= t '.empty' %></strong></div>
+      <% else %>
+        <table class="table">
+          <thead>
+            <tr>
+              <th><%= t 'obj.domain' %></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @zones.each do |i| %>
+              <tr>
+                <td>
+                  <strong><%= link_to i.name, "/dns/#{i.id}-#{i.name.parameterize}" %></strong>
+                  <span style="padding-right:10px;">
+                    <% if !i.is_resource_owner?(current_user) %>
+                      &nbsp;&nbsp;|&nbsp;&nbsp;<i class="fa fa-users fa-fw"></i> <%= i.user.full_name %>
+                    <% elsif i.dns_zone_collaborators.active.exists? %>
+                      &nbsp;&nbsp;|&nbsp;&nbsp;<i class="fa fa-user-plus fa-fw"></i> <%= pluralize i.dns_zone_collaborators.active.count, 'Collaborator' %>
+                    <% end %>
+                  </span>
+                </td>
+                <td class="text-right">
+                  <div class="btn-group">
+                    <%= link_to raw("<i class='fa fa-wrench'></i>"), "/dns/#{i.id}-#{i.name.parameterize}", class: 'btn btn-sm btn-default' %>
+                    <% if i.can_administer?(current_user) %>
+                      <%= link_to raw("<i class='fa fa-trash'></i>"), "/dns/#{i.id}-#{i.name.parameterize}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
+                    <% else %>
+                      <%= link_to raw("<i class='fa fa-trash'></i>"), "/dns", disabled: 'disabled', class: 'btn btn-sm btn-danger', title: 'Only resource owner can delete' %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+  </div>
+</div>

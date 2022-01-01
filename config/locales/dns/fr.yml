@@ -1,0 +1,46 @@
+fr:
+  dns:
+    obj: DNS
+    server_error: "Error connecting to DNS Server"
+    zone_error: "Error loading Zone File"
+    index:
+      breadcrumb: DNS Zone Records
+      new_btn: New Domain
+      empty: No domains found
+    records:
+      new:
+        title: Create %{type} Record
+      edit:
+        title: Edit %{type} Record
+    reverse:
+      title: "PTR Records for: %{addr}"
+      hostname: Hostname
+    show:
+      empty: No %{field} Records
+      actions:
+        discard: Discard Changes
+        commit: Commit Changes
+        last_updated: Last Updated
+        new: New Domain
+      fields:
+        zone: Zone Name
+        primary_dns: Primary DNS
+        email: Email
+        refresh: Refresh
+        retry: Retry
+        expire: Expire
+        ttl: TTL
+        ns: Name Server
+        hostname: Hostname
+        mx: Mail Server
+        priority: Priority
+        target: Target
+        weight: Weight
+        domain: Domain
+        name: Name
+        value: Value
+        dns_sec:
+          key_tag: Key Tag
+          algo: Algorithm Type
+          digest_type: Digest Type
+          digest: Digest

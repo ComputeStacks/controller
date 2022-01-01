@@ -1,0 +1,125 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://localhost:14000/dir
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Acme::Client v2.0.9 (https://github.com/unixcharles/acme-client)
+      Content-Type:
+      - application/jose+json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - public, max-age=0, no-cache
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 20 Oct 2021 22:29:50 GMT
+      Content-Length:
+      - '406'
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+           "keyChange": "https://localhost:14000/rollover-account-key",
+           "meta": {
+              "externalAccountRequired": false,
+              "termsOfService": "data:text/plain,Do%20what%20thou%20wilt"
+           },
+           "newAccount": "https://localhost:14000/sign-me-up",
+           "newNonce": "https://localhost:14000/nonce-plz",
+           "newOrder": "https://localhost:14000/order-plz",
+           "revokeCert": "https://localhost:14000/revoke-cert"
+        }
+  recorded_at: Wed, 20 Oct 2021 22:29:50 GMT
+- request:
+    method: head
+    uri: https://localhost:14000/nonce-plz
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Acme::Client v2.0.9 (https://github.com/unixcharles/acme-client)
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - public, max-age=0, no-cache
+      Link:
+      - <https://localhost:14000/dir>;rel="index"
+      Replay-Nonce:
+      - FuqKxQCER_39v8FAy9MMFg
+      Date:
+      - Wed, 20 Oct 2021 22:29:50 GMT
+    body:
+      encoding: UTF-8
+      string: ''
+  recorded_at: Wed, 20 Oct 2021 22:29:50 GMT
+- request:
+    method: post
+    uri: https://localhost:14000/sign-me-up
+    body:
+      encoding: UTF-8
+      string: '{"protected":"eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsIm5vbmNlIjoiRnVxS3hRQ0VSXzM5djhGQXk5TU1GZyIsInVybCI6Imh0dHBzOi8vbG9jYWxob3N0OjE0MDAwL3NpZ24tbWUtdXAiLCJqd2siOnsiY3J2IjoiUC0yNTYiLCJrdHkiOiJFQyIsIngiOiJyTlhvVzJpdWxPRjVCUlNfRnRTVVVkOWxwR3kxVDYyamY5c1ZHWUxtM213IiwieSI6Ikx4MlVySlM2NWRNelpWNWpvLTVZWmZ0NkdGbnpwbEFobjF1ckphTng1OFUifX0","payload":"eyJjb250YWN0IjpbIm1haWx0bzphZG1pbkBjb21wdXRlc3RhY2tzLmNvbSJdLCJ0ZXJtc09mU2VydmljZUFncmVlZCI6dHJ1ZX0","signature":"-r2x2S9ll7PlnRW8_YO7IG9cwLMj6WhG7TKchxvAGXYWcqr5NHq-FVJp0mwp3eyBf1Ue6T5sM2OyxSQofdGhkg"}'
+    headers:
+      User-Agent:
+      - Acme::Client v2.0.9 (https://github.com/unixcharles/acme-client)
+      Content-Type:
+      - application/jose+json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Cache-Control:
+      - public, max-age=0, no-cache
+      Content-Type:
+      - application/json; charset=utf-8
+      Link:
+      - <https://localhost:14000/dir>;rel="index"
+      Location:
+      - https://localhost:14000/my-account/1
+      Replay-Nonce:
+      - i-VuB8TnQrn5vB7HrspNfA
+      Date:
+      - Wed, 20 Oct 2021 22:29:50 GMT
+      Content-Length:
+      - '313'
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+           "status": "valid",
+           "contact": [
+              "mailto:admin@computestacks.com"
+           ],
+           "orders": "https://localhost:14000/list-orderz/1",
+           "key": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "rNXoW2iulOF5BRS_FtSUUd9lpGy1T62jf9sVGYLm3mw",
+              "y": "Lx2UrJS65dMzZV5jo-5YZft6GFnzplAhn1urJaNx58U"
+           }
+        }
+  recorded_at: Wed, 20 Oct 2021 22:29:50 GMT
+recorded_with: VCR 6.0.0

@@ -1,0 +1,21 @@
+<div class="<%= ssh_key.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+  <%= form_for ssh_key, url: base_path, method: :post do |f| %>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="form-group">
+              <label>SSH Public Key</label>
+              <%= f.text_area :pubkey, rows: 7, style: 'font-size:12px;font-family:monospace;border:1px solid #ddd;padding:10px; display:block; width: 100%;' %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-footer">
+        <%= link_to t('actions.cancel'), base_path, class: 'btn btn-default' %>
+        <%= f.submit t('actions.save'), class: 'btn btn-success' %>
+      </div>
+    </div>
+  <% end %>
+</div>
+<%= render(partial: 'application/model_errors', locals: { errors: ssh_key.errors, obj: 'ssh key' }) unless ssh_key.errors.count.zero? %>

@@ -1,0 +1,3 @@
+nl:
+  audit:
+    performed_by_html: "Performed by: %{user}" 

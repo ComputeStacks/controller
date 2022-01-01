@@ -1,0 +1,65 @@
+nl:
+  deployments:
+    state:
+      deploying: Deploying
+      deployed: Deployed
+      working: Working
+    shared:
+      main_nav:
+        deployments: Projects
+        images: My Images
+        registry: Container Registry
+        new_deployment: New Project
+        new_image: New Image
+        new_reg: New Registry
+        new_domain: Add Domain
+    show:
+      owner: Owner
+      header:
+        price: Estimated Price
+        bandwidth: Bandwidth Used
+        storage: Storage Used
+        last_event: Last Event
+        new: New Project
+        new_container: New App
+      container:
+        name: Name # Container Name
+        label: Containers
+        resources: Resources
+        image: Image
+        ip: Public IP
+        region: Region
+        regions: Regions
+        manage: Manage Container
+        status: Status
+      edit:
+        title: Edit Project
+        name: Name
+      loading:
+        containers: Loading Containers
+        domains: Loading Domains
+        certs: Loading Certificates
+        volumes: Loading Volumes
+      sidebar:
+        overview: Overview
+        domains: Domain Routing
+        ssl: SSL
+        volumes: Data Volumes
+    index:
+      loading: Loading Projects
+      deployment_list:
+        none: No Projects
+        deployments:
+          pending_order: In Order Queue
+          status: Status
+          last_event: Last Event
+    form:
+      title: Edit Project
+      name: Name
+    setup:
+      title: Getting Started
+    project_notifications:
+      show:
+        title_profile_link: profile settings
+        title_help_html: |
+          Any alerts configured here will be triggered in addition to alerts configured in your %{link}.<br>If you configure the same rule here, and on your account, you will see duplicate notifications.

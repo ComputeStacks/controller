@@ -1,0 +1,55 @@
+<% Location.active.each do |location| %>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <strong><%= link_to location.name.upcase, "/admin/locations/#{location.id}", style: "color:#333;" %></strong>
+        </div>
+
+        <table class="table">
+          <tbody>
+          <% location.regions.joins(:nodes).distinct.each do |region| %>
+            <tr class="remote-resource" data-url="/admin/regions/<%= region.id %>">
+              <td style="vertical-align: middle;">
+                <%= link_to region.name, "/admin/regions/#{region.id}" %>
+              </td>
+              <td style="vertical-align: middle; text-align: center;">
+                <small>CPU</small><br>
+                <i class="fa fa-refresh fa-spin"></i>
+              </td>
+              <td style="vertical-align: middle; text-align: center;">
+                <small>MEM</small><br>
+                <i class="fa fa-refresh fa-spin"></i>
+              </td>
+              <td style="vertical-align: middle; text-align: center;">
+                <small>DISK</small><br>
+                <i class="fa fa-refresh fa-spin"></i>
+              </td>
+              <td style="vertical-align: middle; text-align: center;">
+                <small>CONTAINERS</small><br>
+                <i class="fa fa-refresh fa-spin"></i>
+              </td>
+            </tr>
+            <% if region.load_balancer %>
+              <tr>
+                <td colspan="5" style="border-top: 1px dotted #e4e6e6;">
+                  <small>
+                    <%= link_to region.load_balancer.public_ip, "/admin/load_balancers/#{region.load_balancer.id}/edit" %>
+                    &nbsp;&nbsp;&middot;&nbsp;&nbsp;
+                    <%= link_to region.load_balancer.domain, "/admin/load_balancers/#{region.load_balancer.id}/edit" unless region.load_balancer.domain.blank? %>
+                  </small>
+                  <div class="pull-right">
+                    <small class="remote-resource refresh" data-url="<%= "/admin/load_balancers/#{region.load_balancer.id}?js=true" %>">
+                      <%= l region.load_balancer.job_performed %>
+                    </small>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>

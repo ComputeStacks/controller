@@ -1,0 +1,35 @@
+<%= form_tag "/admin/container_domains", method: :get do %>
+  <div class="col-md-e col-sm-3 col-col-xs-4">
+    <label>STATUS</label>
+    <select name="status" title="Filter by status" class="form-control chosen-select-standard">
+      <option value="" <% if params[:status].blank? %>selected="selected"<% end %>>Active Domains</option>
+      <option value="disabled" <% if params[:status] == 'disabled' %>selected="selected"<% end %>>Disabled Domains</option>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>TYPE</label>
+    <select name="kind" title="Filter by custom or system" class="form-control chosen-select-standard">
+      <option value="" <% if params[:kind].blank? %>selected="selected"<% end %>>Custom Domains</option>
+      <option value="system" <% if params[:kind] == 'system'%>selected="selected"<% end %>>System Domains</option>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>SERVICE</label>
+    <select name="service" title="Filter by service" class="form-control chosen-select-standard">
+      <option value="">Show All</option>
+      <option value="linked" <% if params[:service] == 'linked' %>selected="selected"<% end %>>Show Linked</option>
+      <option value="unlinked" <% if params[:service] == 'unlinked' %>selected="selected"<% end %>>Show Unlinked</option>
+    </select>
+  </div>
+  <div class="col-md-3 col-sm-3 col-col-xs-4">
+    <label>LETS ENCRYPT</label>
+    <select name="le" title="Filter by lets encrypt" class="form-control chosen-select-standard">
+      <option value="">Show All</option>
+      <option value="active" <% if params[:le] == 'active' %>selected="selected"<% end %>>Show Active</option>
+      <option value="pending" <% if params[:le] == 'pending' %>selected="selected"<% end %>>Show Pending</option>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <%= submit_tag "Filter", class: 'btn btn-primary', style: 'margin-top:20px;' %>
+  </div>
+<% end %>

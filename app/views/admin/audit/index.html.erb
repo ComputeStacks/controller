@@ -1,0 +1,49 @@
+<%= render partial: 'admin/layouts/shared/activity_nav' %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table">
+          <thead>
+            <tr>
+              <td>ID</td>
+              <th>User</th>
+              <th>Action</th>
+              <th>Object</th>
+              <th>Ref</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @events.each do |i| %>
+              <tr>
+                <td><%= link_to i.id, "/admin/audit/#{i.id}" %></td>
+                <td>
+                  <%= i.user.nil? ? 'System' : link_to(i.user.full_name, "/admin/users/#{i.user.id}") %>
+                </td>
+                <td><%= i.event %></td>
+                <td><%= i.rel_model&.gsub("Deployment::","") %></td>
+                <td>
+                  <% if i.linked.nil?  %>
+                    <em>...</em>
+                  <% elsif audit_obj_url(i).nil? %>
+                    <%= i.linked_name %>
+                  <% else %>
+                    <%= link_to i.linked_name, audit_obj_url(i) %>
+                  <% end %>
+                </td>
+                <td><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <%= will_paginate @events %>
+      </div>
+    </div>
+  </div>
+</div>

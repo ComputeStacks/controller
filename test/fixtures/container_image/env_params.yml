@@ -1,0 +1,72 @@
+mysql_0:
+  container_image: mariadb
+  name: MYSQL_ROOT_PASSWORD
+  label: MYSQL_ROOT_PASSWORD
+  param_type: variable
+  value: build.settings.mysql_password
+
+wordpress_0:
+  container_image: wordpress
+  name: LS_ADMIN_PW
+  param_type: variable
+  value: "build.settings.litespeed_admin_pw"
+
+wordpress_1:
+  container_image: wordpress
+  name: WORDPRESS_DB_PASSWORD
+  param_type: variable
+  value: "dep.mysql.parameters.settings.mysql_password"
+
+wordpress_2:
+  container_image: wordpress
+  name: WORDPRESS_DB_HOST
+  param_type: variable
+  value: "dep.mysql.self.ip"
+
+wordpress_3:
+  container_image: wordpress
+  name: WORDPRESS_DB_NAME
+  param_type: variable
+  value: "build.self.service_name_short"
+
+wordpress_4:
+  container_image: wordpress
+  name: WORDPRESS_URL
+  param_type: variable
+  value: "build.self.default_domain"
+
+wordpress_5:
+  container_image: wordpress
+  name: WORDPRESS_TITLE
+  param_type: variable
+  value: "build.settings.title"
+
+wordpress_6:
+  container_image: wordpress
+  name: WORDPRESS_USER
+  param_type: variable
+  value: "build.settings.username"
+
+wordpress_7:
+  container_image: wordpress
+  name: WORDPRESS_PASSWORD
+  param_type: variable
+  value: "build.settings.wordpress_password"
+
+wordpress_8:
+  container_image: wordpress
+  name: WORDPRESS_EMAIL
+  param_type: variable
+  value: "build.settings.email"
+  
+wordpress_9:
+  container_image: wordpress
+  name: WORDPRESS_DB_USER
+  param_type: static
+  value: root
+
+custom_0:
+  container_image: custom
+  name: USERNAME
+  param_type: variable
+  value: "build.settings.username"

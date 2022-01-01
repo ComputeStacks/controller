@@ -1,0 +1,53 @@
+<%= render partial: 'admin/layouts/shared/images_nav' %>
+
+<div class="row">
+  <div class="col-md-12">
+    <% if @registries.empty? %>
+      <div class="text-center"><p class="lead">No registries found</p></div>
+    <% else %>
+      <table class="table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>User</th>
+          <th>URL</th>
+          <th>Credentials</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <% @registries.each do |i| %>
+          <tr>
+            <td><%= link_to i.id, admin_registry_path(i) %></td>
+            <td>
+              <%= link_to i.label, admin_registry_path(i) %>
+              <%= " (#{i.name})" if i.label != i.name %>
+            </td>
+            <td><%= i.status %></td>
+            <td><%= i.user.nil? ? '...' : link_to(i.user.full_name, admin_users_path(i.user)) %></td>
+            <td class="code-font" style="font-size:12px;"><%= "#{Setting.registry_base_url}:#{i.port}" %></td>
+            <td class="code-font" style="font-size:12px;">
+              admin / <%= i.registry_password %>
+            </td>
+            <td class="text-right">
+              <%= link_to tag.i(nil, class: 'fa fa-user-plus fa-fw'), admin_registry_collaborators_path(i), class: 'btn btn-sm btn-default' %>
+              <div class="btn-group">
+                <%= link_to tag.i(nil, class: 'fa fa-wrench fa-fw'), edit_admin_registry_path(i), class: 'btn btn-sm btn-default' %>
+                <%= link_to tag.i(nil, class: 'fa fa-trash fa-fw'), admin_registry_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @registries %>
+  </div>
+</div>

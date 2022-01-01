@@ -1,0 +1,24 @@
+<div class="panel-body">
+
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="form-group">
+        <%= f.label :label, "Name" %>
+        <%= tag.span '*', style: 'color:red;' %>
+        <%= f.text_field :label, class: 'form-control', required: true %>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="form-group">
+        <%= f.label :user_id, "Owner" %>
+        <%= f.collection_select :user_id, User.all, :id, :full_name, {include_blank: true}, {class: 'form-control chosen-select-standard'}  %>
+      </div>
+    </div>
+  </div>
+
+</div>

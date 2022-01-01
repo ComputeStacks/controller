@@ -1,0 +1,30 @@
+<% unless request.xhr? %>
+  <% content_for :breadcrumb do %>
+    <div class="row has-breadcrumb">
+      <ol class="breadcrumb">
+        <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+        <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+        <li class="active">SSH Keys</li>
+      </ol>
+    </div>
+  <% end %>
+<% end %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= link_to t('actions.create'), "#{deployments_path(@deployment)}/ssh_keys/new", class: 'pull-right btn btn-success btn-sm' %>
+    <h5>Project SSH Keys</h5>
+    <div class="panel panel-default">
+      <%= render partial: "ssh_keys/table", locals: { show_owner: false, ssh_keys: @ssh_keys, base_path: "/deployments/#{@deployment.token}/ssh_keys", editable: true } %>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <h5>Included User SSH Keys</h5>
+    <div class="panel panel-default">
+      <%= render partial: "ssh_keys/table", locals: { show_owner: true, ssh_keys: @user_ssh_keys, editable: false } %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,31 @@
+<div class="panel panel-default">
+  <table class="table-list">
+    <tr>
+      <td><%= t 'obj.deployment' %></td>
+      <td><%= volume.deployment.nil? ? '...' : link_to(volume.deployment.name, "/deployments/#{volume.deployment.token}") %></td>
+    </tr>
+    <tr>
+      <td><%= t 'obj.service' %></td>
+      <td><%= volume.container_service.nil? ? '...' : link_to(volume.container_service.label, container_service_path(volume.container_service)) %></td>
+    </tr>
+    <tr>
+      <td><%= t 'volumes.path' %></td>
+      <td><%= volume.container_path %></td>
+    </tr>
+    <tr>
+      <td><%= t 'volumes.table.usage' %></td>
+      <td><%= volume.usage %> GB</td>
+    </tr>
+    <tr>
+      <td><%= t 'obj.region' %></td>
+      <td><%= volume_region(volume) %></td>
+    </tr>
+    <tr>
+      <td><%= t 'common.created' %></td>
+      <td><%=l volume.created_at.in_time_zone(Time.zone) %></td>
+    </tr>
+  </table>
+  <div class="panel panel-footer text-center">
+    <span class="code-font-minimal" style="font-size:0.9em;word-wrap: break-word;"><%= volume.name %></span>
+  </div>
+</div>

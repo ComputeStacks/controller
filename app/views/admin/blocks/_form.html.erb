@@ -1,0 +1,14 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>Title</label>
+        <%= f.text_field :title, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), :back, class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag 'Continue', class: 'btn btn-success pull-right' %>
+</div>

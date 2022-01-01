@@ -1,0 +1,10 @@
+<% unless @logs.empty? %>
+  <div style="margin-top:25px;">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <strong>Recent Events</strong>
+      </div>
+      <%= render partial: "event_logs/list", locals: { logs: @logs, root_path: "/admin/volumes/#{@volume.id}/logs" } %>
+    </div>
+  </div>
+<% end %>

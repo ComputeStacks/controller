@@ -1,0 +1,13 @@
+<div id="logoutModal" class="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <%= Setting.branding_img_login.nil? ? tag.h4(Setting.app_name) : image_tag("/assets/custom/#{Setting.branding_img_login}") %>
+      </div>
+      <div class="modal-body text-center">
+        <%= tag.p(t('devise.sessions.signed_out'), class: 'lead', style: 'padding-top:35px;') %>
+      </div>
+      <div class="modal-footer"><%= link_to t('auth.login'), "/login", class: "btn btn-primary" %></div>
+    </div>
+  </div>
+</div>

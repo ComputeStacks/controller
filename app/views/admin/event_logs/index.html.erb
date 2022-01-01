@@ -1,0 +1,52 @@
+<% if defined?(@user) && @user %>
+  <%= render partial: 'admin/users/show/header' %>
+<% else %>
+  <%= render partial: 'admin/layouts/shared/activity_nav' %>
+<% end %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <p class="lead">
+      <% if defined?(@user) && @user %>
+      Events for <%= @user.full_name %>
+      <% else %>
+      Events
+      <% end %>
+    </p>
+  </div>
+</div>
+<div class="row">
+  <%= form_tag "/admin/event_logs", method: :get do %>
+    <% unless params[:status].blank? %><input type="hidden" name="status" value="<%= params[:status] %>"><% end %>
+    <div class="col-md-2 col-sm-3 col-col-xs-4">
+      <label>STATUS</label>
+      <select name="status" title="Filter by status" class="form-control chosen-select-standard">
+        <option value="">Show All</option>
+        <option value="active" <% if params[:status] == 'active' %>selected="selected"<% end %>>All Active</option>
+        <option value="pending" <% if params[:status] == 'pending' %>selected="selected"<% end %>>Pending</option>
+        <option value="running" <% if params[:status] == 'running' %>selected="selected"<% end %>>Running</option>
+        <option value="completed" <% if params[:status] == 'completed' %>selected="selected"<% end %>>Completed</option>
+        <option value="cancelled" <% if params[:status] == 'cancelled' %>selected="selected"<% end %>>Cancelled</option>
+        <option value="failed" <% if params[:status] == 'failed' %>selected="selected"<% end %>>Failed</option>
+      </select>
+    </div>
+    <div class="col-md-2 col-sm-3 col-col-xs-4">
+      <%= submit_tag "Filter", class: 'btn btn-primary', style: 'margin-top:20px;' %>
+    </div>
+  <% end %>
+</div>
+<hr>
+<div class="row">
+  <div class="col-md-12">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <%= render partial: "admin/event_logs/list", locals: { logs: @logs, root_path: "/admin/event_logs" } %>
+          <div class="panel-body text-center" style="padding-bottom:0; padding-top:0;">
+            <%= will_paginate @logs %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

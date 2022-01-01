@@ -1,0 +1,21 @@
+bandwidth:
+  billing_plan: default
+  product: bandwidth
+backup:
+  billing_plan: default
+  product: backup
+disk:
+  billing_plan: default
+  product: disk
+local_disk:
+  billing_plan: default
+  product: local_disk
+containersmall:
+  billing_plan: default
+  product: containersmall
+containerm:
+  billing_plan: default
+  product: containerm
+containerl:
+  billing_plan: default
+  product: containerl

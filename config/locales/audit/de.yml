@@ -1,0 +1,3 @@
+de:
+  audit:
+    performed_by_html: "Durchgeführt von: %{user}" 

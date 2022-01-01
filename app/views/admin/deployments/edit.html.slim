@@ -1,0 +1,32 @@
+- content_for :title, "Edit #{@deployment.name}"
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to 'Projects', "/admin/deployments"
+      li= link_to @deployment.name, "/admin/deployments/#{@deployment.id}"
+      li.active= "Edit #{@deployment.name}"
+
+
+.row: .col-md-8.col-md-offset-2: p.lead= @deployment.name
+
+.row
+  .col-md-8.col-md-offset-2
+    = form_for @deployment, url: "/admin/deployments/#{@deployment.id}" do |f|
+      .panel.panel-default
+        .panel-body
+          .form-group
+            .row
+              .col-md-10.col-sm-12
+                = label_tag :name, 'Project Name'
+                = f.text_field :name, :class => "form-control", required: true
+              .col-md-2.col-sm-12
+                = label_tag :skip_ssh, 'Disable SSH'
+                = f.check_box :skip_ssh, class: 'form-control'
+          .form-group
+            .row: .col-xs-12
+              = label_tag :name, 'User'
+              = collection_select(:deployment, :user_id, User.all, :id, :full_name_with_id, { include_blank: false }, {class: 'form-control chosen-select-standard'})
+
+        .panel-footer
+          = link_to t('actions.cancel'), "/admin/deployments/#{@deployment.id}", class: 'btn btn-default'
+          = submit_tag t('actions.save'), class: 'btn btn-success pull-right'

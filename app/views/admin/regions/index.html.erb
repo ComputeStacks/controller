@@ -1,0 +1,44 @@
+<%= render partial: 'admin/layouts/shared/settings_nav' %>
+
+<div class="row">
+  <div class="col-xs-12"><p class="lead">Availability Zones</p></div>
+</div>
+<br />
+<% if @regions.empty? %>
+  <div class="row">
+    <div class="col-sm-12 text-center">
+      <p class="lead">No Availability Zones Found.</p>
+    </div>
+  </div>
+<% else %>
+  <div class="row">
+    <div class="col-xs-12">
+      <table id="regions-table" class="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Max Fill</th>
+            <th>Enabled</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @regions.each do |i| %>
+            <tr>
+              <td><%= link_to i.id, admin_region_url(i) %></td>
+              <td><%= link_to i.name, admin_region_url(i) %></td>
+              <td><%= link_to i.location.name, admin_location_url(i.location) %></td>
+              <td><%= i.fill_to %></td>
+              <td><%= i.active ? 'Yes' : 'No' %></td>
+              <td><%= l i.created_at, format: :short %></td>
+              <td class="text-right"><%= link_to "<i class='fa fa-wrench'></i>".html_safe, "/admin/regions/#{i.id}/edit", class: 'btn btn-xs btn-default' %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% end %>

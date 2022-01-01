@@ -1,0 +1,57 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label>Label</label>
+        <%= f.text_field :label, required: true, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label>External ID</label>
+        <%= f.text_field :external_id, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label>Active</label>
+        <%= f.check_box :active, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <% if !@users.empty? && @subscription.user.nil? %>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>User</label>
+        <% if @users.empty? %>
+          <input type="text" class="form-control" value="<%= @subscription.user.full_name %>" disabled="disabled" name="nothing">
+        <% else %>
+          <%= collection_select(:subscription, :user_id, @users, :id, :full_name, {}, { class: 'form-control chosen-select-standard' }) %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <% end %>
+</div>
+<% if @subscription.user && @subscription.container %>
+<hr />
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <% if @subscription.container %>
+          <label>Container</label>
+          <%= f.fields_for :container do |c| %>
+            <%= c.collection_select :id, @subscription.user.deployed_containers.order(:name), :id, :name, {}, { class: 'form-control chosen-select-standard' } %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+<% end %>
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), admin_subscription_path(@subscription), class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success pull-right' %>
+</div>

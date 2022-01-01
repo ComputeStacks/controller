@@ -1,0 +1,54 @@
+= content_tag :div, class: system_alert_header(@system_ok, @system_warning), style: 'margin-bottom: 20px;' do
+  .panel-heading style="padding:2px;"
+  .panel-body
+    - if @system_ok && !@system_warning
+      ul.list-unstyled.list-unstyled-min: li.text-center No active alerts.
+    - else
+      ul.list-unstyled.list-unstyled-min
+        - @bypassed_users.each do |i|
+          li
+            b= link_to i.full_name, "/admin/users/#{i.id}-#{i.full_name.parameterize}"
+            | &nbsp;
+            | has 2FA temporarily bypassed.
+        - unless @offline_drivers.empty?
+          = content_tag :hr unless @bypassed_users.empty?
+          ul.list-unstyled.list-unstyled-min
+            - @offline_drivers.each do |i|
+              li
+                b= i.module_name
+                | &nbsp;
+                | is offline.
+                span.pull-right: small= l i.offline_at.in_time_zone(Time.zone), format: :long
+                br
+                small= i.endpoint
+      - unless @offline_nodes.empty? && @maintenance_nodes.empty? && @warning_nodes.empty?
+        = content_tag :hr unless @bypassed_users.empty? && @offline_drivers.empty?
+        ul.list-unstyled.list-unstyled-min
+          - @offline_nodes.each do |i|
+            li
+              b= "(#{i.region.name}) #{i.label}"
+              | &nbsp;
+              | is offline.
+              span.pull-right: small= l i.disconnected_at.in_time_zone(Time.zone), format: :long
+          - @maintenance_nodes.each do |i|
+            li
+              b= "(#{i.region.name}) #{i.label}"
+              | &nbsp;
+              | in maintenance mode.
+              span.pull-right: small= l i.maintenance_updated.in_time_zone(Time.zone), format: :long
+          - @warning_nodes.each do |i|
+            li
+              b= "(#{i.region.name}) #{i.label}"
+              | &nbsp;
+              | is experiencing connection issues.
+              spann.pull-right: small= "Failed #{pluralize(i.failed_health_checks, 'time', 'times') }."
+  - if !@system_ok || @system_warning
+    table.table-list
+      - unless @events.zero?
+        tr
+          td= link_to 'Recent Failed Events', '/admin/event_logs?status=failed'
+          td= @events
+      - unless @alerts.zero?
+        tr
+          td= link_to 'Active System Alerts', '/admin/alert_notifications'
+          td= @alerts

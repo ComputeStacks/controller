@@ -1,0 +1,52 @@
+<% # Local backups (borg / cs-agent) %>
+
+<div class="panel panel-default">
+  <div class="panel-body">
+    <%= link_to '<i class="fa fa-cogs"></i>'.html_safe, "#{volume_path(volume)}/edit", class: 'pull-right' %>
+    <strong><%= t 'volumes.backups.title' %></strong>
+    <% unless volume.borg_enabled %>
+      <div class="alert alert-warning" style="margin-top:25px;margin-bottom:0;">
+        <strong>Backups Disabled</strong>
+      </div>
+    <% end %>
+  </div>
+  <table class="table-list">
+    <tbody>
+    <tr>
+      <td><%= t 'volumes.backups.size.disk' %></td>
+      <td><%= volume_borg_stats(volume)[:size_on_disk] %> GB</td>
+    </tr>
+    <tr>
+      <td><%= t 'volumes.backups.size.total' %></td>
+      <td><%= volume_borg_stats(volume)[:total_size] %> GB</td>
+    </tr>
+    <tr>
+      <td><%= t 'volumes.backups.schedule' %></td>
+      <td class="code-font" style="font-size:12px;"><%= volume.borg_freq %></td>
+    </tr>
+    </tbody>
+  </table>
+  <table class="table">
+    <thead>
+    <tr>
+      <th colspan="4"></th>
+    </tr>
+    <tr>
+      <th colspan="4">
+        <%= t 'volumes.backups.retention_html' %>
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td style="text-align: center;"><%= volume.borg_keep_hourly %> <span style="font-size:11px;font-weight:300;vertical-align: top;">:<%= t('volumes.backups.retention_periods.h').upcase %></span></td>
+      <td style="text-align: center;"><%= volume.borg_keep_daily %> <span style="font-size:11px;font-weight:300;vertical-align: top;">:<%= t('volumes.backups.retention_periods.d').upcase %></span></td>
+      <td style="text-align: center;"><%= volume.borg_keep_weekly %> <span style="font-size:11px;font-weight:300;vertical-align: top;">:<%= t('volumes.backups.retention_periods.w').upcase %></span></td>
+      <td style="text-align: center;"><%= volume.borg_keep_monthly %> <span style="font-size:11px;font-weight:300;vertical-align: top;">:<%= t('volumes.backups.retention_periods.m').upcase %></span></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div class="panel panel-default remote-resource refresh" data-url="<%= request.path %>/backups">
+  <div class="text-center"><i class="fa fa-refresh fa-spin"></i></div>
+</div>

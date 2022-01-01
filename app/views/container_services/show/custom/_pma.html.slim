@@ -1,0 +1,24 @@
+.panel.panel-default
+  .panel-heading: .panel-title-small= t 'deployments.services.show.custom.pma.title'
+  table.table
+    thead
+      tr
+        th= t 'obj.container'
+        th.text-right= t 'deployments.services.show.custom.pma.pass'
+    tbody
+      - if service_mysql_containers(@deployment).empty?
+        tr: td colspan="2": .text-center= t 'deployments.services.show.custom.pma.empty'
+      - service_mysql_containers(@deployment).each do |i|
+        - setting = service_mysql_password(i)
+        tr
+          td
+            = link_to i.label, "/container_services/#{i.id}"
+            br
+            small= i.containers&.first&.local_ip
+          - if setting.nil?
+            td= t 'common.error'
+          - else
+            td.text-right
+              div id="setting_#{setting.id}"
+                = link_to(t('actions.show'), service_param_path(setting), onclick: "inlineRemoteResource('setting_#{setting.id}');return false;")
+              div: small root

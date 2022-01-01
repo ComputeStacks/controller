@@ -1,0 +1,52 @@
+<div class="panel-body">
+
+  <div class="row">
+    <div class="col-sm-10 col-xs-8">
+      <div class="form-group">
+        <%= f.label :name %>
+        <%= tag.span '*', style: 'color:red;' %>
+        <% if @provider.is_dockerhub? %>
+          <%= f.text_field :name, class: 'form-control', disabled: 'disabled' %>
+        <% else %>
+          <%= f.text_field :name, class: 'form-control', required: true %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="col-sm-2 col-xs-4">
+      <div class="form-group">
+        <%= f.label :is_default, 'Default?' %>
+        <% if @provider.is_default %>
+          <%= f.check_box :is_default, class: 'form-control', disabled: 'disabled' %>
+        <% else %>
+          <%= f.check_box :is_default, class: 'form-control' %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <% unless @provider.is_dockerhub? %>
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="form-group">
+          <%= f.label :hostname %>
+          <%= f.text_field :hostname, class: 'form-control' %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% unless ContainerRegistry.all.empty? || @provider.is_dockerhub? %>
+    <hr>
+
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="form-group">
+          <%= f.label :container_registry_id, "Container Registry" %>
+          <%= f.collection_select :container_registry_id, ContainerRegistry.all, :id, :name_with_user, {include_blank: true}, {class: 'form-control chosen-select-standard'}  %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+</div>

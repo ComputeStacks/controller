@@ -1,0 +1,8 @@
+-o ./doc/rdoc
+--private
+--protected
+--markup markdown
+--readme README.md
+app/models/**/*.rb
+app/services/**/*.rb
+app/workers/**/*.rb

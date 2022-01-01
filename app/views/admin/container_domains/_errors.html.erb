@@ -1,0 +1,10 @@
+<div class="col-sm-4">
+  <div class="panel panel-body">
+    <strong><%= "#{pluralize(@domain.errors.count, "error")} prevented this domain from being saved:" %></strong>
+    <ul class="list-unstyled">
+      <% @domain.errors.full_messages.each do |msg| %>
+        <li style="color: red;"><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>

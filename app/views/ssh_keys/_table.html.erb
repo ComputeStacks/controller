@@ -1,0 +1,47 @@
+<table class="table">
+  <thead>
+  <tr>
+    <% if show_owner %>
+      <th>User</th>
+    <% end %>
+    <th>Name</th>
+    <% if editable %>
+      <th>Created</th>
+      <th></th>
+    <% else %>
+      <th class="text-right">Created</th>
+    <% end %>
+  </tr>
+  </thead>
+  <tbody>
+  <% if ssh_keys.empty? %>
+    <tr>
+      <td colspan="3" class="text-center">No SSH Public Keys</td>
+    </tr>
+  <% end %>
+  <% ssh_keys.each do |i| %>
+    <tr>
+      <% if show_owner %>
+        <td>
+          <% if i.is_a?(UserSshKey) %>
+            <img src="<%= i.user.avatar_url(28) %>" class="img-circle" />              &nbsp;&nbsp;
+            <%= current_user.is_admin? ? link_to(i.user.full_name, admin_user_path(i.user)) : i.user.full_name %>
+          <% end %>
+        </td>
+      <% end %>
+      <td>
+        <%= i.label %>
+        <%= ssh_key_algo_badge i %>
+      </td>
+      <% if editable %>
+        <td><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
+        <td class="text-right">
+          <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{base_path}/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
+        </td>
+      <% else %>
+        <td class="text-right"><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
+      <% end %>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

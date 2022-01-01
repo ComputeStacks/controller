@@ -1,0 +1,57 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to t('users.profile_sidebar.main'), "/users/edit" %></li>
+      <li><%= link_to t('users.profile_sidebar.sec'), "/users/security" %></li>
+      <li class="active"><%= t 'users.totp.setup' %></li>
+    </ol>
+  </div>
+<% end %>
+
+
+<div class="row">
+  <div class="<%= current_user.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for current_user, url: "/users/totp", method: :post do |f| %>
+      <%= f.hidden_field :otp_secret, value: @otp_secret %>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-xs-12">
+              <h5><%= t 'users.totp.setup' %></h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <%= f.label :current_password, t('users.fields.current_password') %>
+                <%= f.password_field :current_password, class: 'form-control' %>
+              </div>
+              <div class="form-group" style="margin-top:10%;">
+                <%= f.label :otp_setup_code, t('users.totp.form.code') %>
+                <%= f.text_field :otp_setup_code, class: 'form-control' %>
+              </div>
+              <div class="form-group">
+                <%= f.submit t('actions.activate'), class: 'btn btn-success btn-block' %>
+              </div>
+            </div>
+            <div class="col-sm-6 text-right">
+              <%= image_tag @qr_code %>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <div class="panel-body">
+          <strong><%= t 'users.totp.apps' %></strong><br>
+          <ul class="list-inline text-center" style="margin-top:25px;">
+            <li><%= link_to '1Password', 'https://1password.com', target: '_blank' %></li>
+            <li>&middot;</li>
+            <li>Google Authenticator (<%= link_to 'iOS', 'https://apps.apple.com/us/app/google-authenticator/id388497605', target: '_blank' %>) (<%= link_to 'Android', 'https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2', target: '_blank' %>)</li>
+            <li>&middot;</li>
+            <li>Microsoft Authenticator (<%= link_to 'iOS', 'https://apps.apple.com/us/app/microsoft-authenticator/id983156458', target: '_blank' %>) (<%= link_to 'Android', 'https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=en', target: '_blank' %>)</li>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <%= render(partial: 'application/model_errors', locals: { errors: current_user.errors, obj: 'account' }) unless current_user.errors.count.zero? %>
+</div>

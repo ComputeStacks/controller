@@ -1,0 +1,100 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-9">
+      <div class="form-group">
+        <label>Name</label>
+        <%= f.text_field :name, required: true, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label>Default</label>
+        <%= f.check_box :is_default, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>Billing Plan</label>
+        <%= f.collection_select(:billing_plan_id, BillingPlan.all, :id, :name, {}, { class: 'form-control chosen-select-standard' }) %>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>Regions</label>
+        <%= f.collection_select(:region_ids, Region.sorted, :id, :name, {}, { class: 'form-control chosen-select-standard', multiple: true, name: 'user_group[region_ids][]' }) %>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="form-group">
+        <%= f.label :bill_offline, 'Bill Offline Containers?' %>
+        <%= f.check_box :bill_offline, class: 'form-control' %>
+        <span class="help-block">Continue to bill for packages when the container is offline? Volumes & Backup storage will still continue to be billed for the resources used on disk.</span>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="form-group">
+        <%= f.label :bill_suspended, 'Bill While Suspended?' %>
+        <%= f.check_box :bill_suspended, class: 'form-control' %>
+        <span class="help-block">When you suspend a user, do you want billing to continue?</span>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="form-group">
+        <%= f.label :remove_stopped, 'Remove Stopped Containers?' %>
+        <%= f.check_box :remove_stopped, class: 'form-control' %>
+        <span class="help-block">Do you want to remove stopped containers from the node? Persistent volumes will not be deleted.</span>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-12"><h4>User Quotas</h4></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label>Containers</label>
+        <%= f.text_field :q_containers, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label>Container Registries</label>
+        <%= f.text_field :q_cr, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label>DNS Zones</label>
+        <%= f.text_field :q_dns_zones, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <% if Feature.using_clustered_storage? %>
+    <hr>
+    <div class="row">
+      <div class="col-md-12"><h4><%= t 'user_groups.advanced_section' %></h4></div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <%= f.label :allow_local_volume, t('user_groups.allow_driver_override.title') %>
+          <%= f.check_box :allow_local_volume, class: 'form-control' %>
+          <span class="help-block"><%= t 'user_groups.allow_driver_override.help' %></span>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+<div class="panel-footer">
+  <%= link_to "Delete", "/admin/user_groups/#{@group.id}", method: :delete, data: { confirm: 'Are you sure? This is destructive and irreversible.' }, class: 'btn btn-danger' if (controller.action_name == 'edit' || controller.action_name == 'update') %>
+  <%= link_to t('actions.cancel'), '/admin/user_groups', class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success pull-right' %>
+</div>

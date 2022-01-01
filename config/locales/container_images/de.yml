@@ -1,0 +1,75 @@
+de:
+  container_images:
+    clone: Klonen # Duplicate an image and create a new one.
+    params:
+      common:
+        name_help:
+          title: Format Anleitung
+          description: "Keine Sonderzeichen oder Zahlen und ersetzen Sie Leerzeichen durch Unterstriche."
+        param_type:
+          title: Typ
+          static: Statischer Wert
+          var: Variable
+          pass: Passwort
+        value: Wert
+      env:
+        table:
+          title: Umgebungsparameter
+        breadcrumb:
+          edit: "Bearbeiten %{name}"
+          new: Umgebungsparameter hinzufügen
+        new_button: Umgebungsparameter hinzufügen
+        new_snippet_html: "Umgebungsvariablen werden direkt an Ihren Container übergeben.<br>Dies können entweder statische Werte oder Variablen sein, die auf Einstellungen aus diesem oder verknüpften Containern verweisen."
+        static_var_hint_html: "<b>Hinweis:</b> Erstellen Sie stattdessen eine Einstellung und referenzieren Sie sie als Variable."
+      settings:
+        table:
+          title: Variablen
+        breadcrumb:
+          edit: "Bearbeiten %{setting}"
+          new: Einstellung hinzufügen
+        new_button: Bildeinstellung hinzufügen
+        new_snippet_html: "Einstellungen können als Umgebungsvariablen für alle Container bereitgestellt werden, die mit diesem Image erstellt wurden, oder für abhängige (verknüpfte) Container."
+        form:
+          static: "Benutzerdefinierte Einstellung"
+          default_value: Standardwert
+          password: Automatisch generiertes Passwort
+      related:
+        table:
+          title: Benötigte Container
+          inverse: Benötigt von
+          none: Keine Container
+        form:
+          title: Erforderlichen Container hinzufügen
+          select: Container Image auswählen
+    new:
+      breadcrumb: Container Image erstellen
+      title: Container Image erstellen
+    index:
+      empty: Keine Container Images
+      qty: Anzahl der Container
+      reg: Registry
+      index:
+        image: Image
+    edit:
+      breadcrumb: Image bearbeiten
+    show:
+      overview:
+        title: Übersicht
+        free: Kostenloses Image?
+        lb: Load Balancer aktiviert
+        owner: Eigentümer
+        enabled: Aktiviert
+        role: Rolle
+        role_class: Kategorie
+        scale: Unterstützt Skalierung
+        in_use: In Gebrauch von
+        reg: Quelle
+        desc: Beschreibung
+        min: Minimum # Resource minimums (cpu, memory)
+        command: Befehl # container command
+    categories:
+      apps: Apps
+      databases: Datenbanken
+      kv: KeyValue & Caching
+      dev: Entwicklerwerkzeuge
+      other: Sonstige

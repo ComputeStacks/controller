@@ -1,0 +1,54 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Content Blocks", "/admin/blocks" %></li>
+      <li class="active"><%= truncate(@block.title, length: 30) %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="pull-right"><%= link_to "Add Language", "#{@base_url}/block_contents/new", class: 'btn btn-primary btn-sm' %></div>
+    <p class="lead"><%= @block.title %></p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Language</th>
+          <th>Body</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @block_contents.empty? %>
+          <tr><td colspan="3" class="text-center">No Content</td></tr>
+        <% end %>
+        <% @block_contents.each do |i| %>
+          <tr>
+            <td><%= i.locale %></td>
+            <td><%= truncate sanitize(i.body, tags: []), length: 50 %></td>
+            <td class="text-right">
+              <div class="btn-group">
+                <%= link_to "<i class='fa fa-clone'></i> clone".html_safe, "#{@base_url}/block_contents/new?from=#{i.id}", class: 'btn btn-sm btn-default' %>
+                <%= link_to "<i class='fa fa-cogs'></i>".html_safe, "#{@base_url}/block_contents/#{i.id}", class: 'btn btn-sm btn-default' %>
+                <%= link_to "<i class='fa fa-wrench'></i>".html_safe, "#{@base_url}/block_contents/#{i.id}/edit", class: 'btn btn-sm btn-default' %>
+                <%= link_to "<i class='fa fa-trash'></i>".html_safe, "#{@base_url}/block_contents/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') },  class: 'btn btn-sm btn-danger' %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @block_contents %>
+  </div>
+</div>

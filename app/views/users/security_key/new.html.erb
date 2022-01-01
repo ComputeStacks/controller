@@ -1,0 +1,31 @@
+<% content_for :title, t('.title') %>
+
+<%= form_for @key, url: "/users/security_key", method: :post do |f| %>
+  <div class="row">
+    <div class="block-center col-md-8 col-md-offset-2">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <strong>Add Security Key</strong>
+        </div>
+        <div class="panel-body">
+          <input type="hidden" id="publicKeyCredential" name="publicKeyCredential">
+          <input type="hidden" id="requestData" name="requestData" value="<%= @request_data %>">
+          <div class="form-group">
+            <%= f.label :label, "Label" %>
+            <%= f.text_field :label, class: 'form-control', required: true %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="block-center col-md-8 col-md-offset-2">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <%= link_to t('actions.cancel'), "/users/security_key", class: 'btn btn-default '  %>
+          <%= submit_tag t('actions.register'), class: 'btn btn-success pull-right'  %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

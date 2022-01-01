@@ -1,0 +1,9 @@
+<div class="row">
+  <div class="col-md-6"><%= render partial: 'admin/dashboard/index/regions' %></div>
+  <div class="col-md-6">
+    <div class="remote-resource refresh" data-url="/admin/dashboard">
+      <%= render partial: 'admin/dashboard/index/health' unless @events.zero? && @alerts.zero? %>
+    </div>
+    <%= render partial: "admin/dashboard/index/users_new" %>
+  </div>
+</div>

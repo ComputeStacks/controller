@@ -1,0 +1,22 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>Volume</th>
+      <th>Name</th>
+      <th>Service</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @volumes.each do |i| %>
+      <%
+        service = Deployment::ContainerService.find_by(name: i['service'])
+        volume = Volume.find_by(name: i['volume'])
+      %>
+      <tr>
+        <td><%= volume ? link_to(i['volume'], "/admin/volumes/#{volume.id}") : i['volume'] %></td>
+        <td><%= i['label'] %></td>
+        <td><%= service ? link_to(i['service'], admin_deployments_path(service.deployment)) : i['service'] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

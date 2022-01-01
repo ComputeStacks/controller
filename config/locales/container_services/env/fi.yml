@@ -1,0 +1,12 @@
+fi:
+  container_services:
+    env:
+      breadcrumb: Ympäristönmuuttujat
+      title: "Muokkaa kontin ympäristömuuttujia palvelulle: %{service}"
+      subtitle: "Muutokset täällä edellyttävät että käynnistät kaikkien liitettyjen konttien uudelleenrakennuksen."
+      table:
+        name: Nimi
+        type: Tyyppi
+        value: Arvo
+      new: Lisää ympäristömuuttuja
+      edit: "Muokkaa: %{env}"

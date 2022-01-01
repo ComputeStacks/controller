@@ -1,0 +1,89 @@
+<% content_for :title, @container.label %>
+<% content_for :breadcrumb do %>
+
+  <div class="row has-breadcrumb">
+
+    <ol class="breadcrumb">
+      <li><%= link_to t('obj.images'), request.path =~ /admin/ ? "/admin/container_images" : "/container_images" %></li>
+      <li class="active"><%= @container.label %></li>
+    </ol>
+
+  </div>
+
+<% end %>
+<div class="row" style="margin-bottom:15px;">
+
+  <div class="<%= @container.can_edit?(current_user) ? 'col-sm-6' : 'col-sm-12' %>">
+    <h4><%= @container.label %></h4>
+    <% if @container.is_load_balancer %>
+      <div class="label label-warning"><%= t 'obj.lb' %></div>
+      <br>
+    <% end %>
+    <% if @container.can_edit? current_user %>
+      <div class="remote-resource refresh refresh-always" data-url="<%= "#{request.path =~ /admin/ ? '/admin/container_images' : '/container_images'}/#{@container.id}" %>">
+        <%= t 'common.loading' %> <i class="fa fa-refresh fa-fw fa-spin"></i>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @container.can_edit?(current_user) %>
+    <div class="col-sm-6">
+      <div class="pull-right">
+        <% if @container.can_administer?(current_user) %>
+          <%= link_to raw("<i class='fa fa-user-plus'></i> #{t('collaborators.collaborate').capitalize}"), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{@container.id}/collaborators", class: 'btn btn-sm btn-default', title: 'Manage collaborations', style: "margin-right:5px;" %>
+        <% end %>
+        <%= link_to(raw("<i class='fa fa-download'></i> Pull Image"), "/admin/container_images/#{@container.id}/pull", method: :post, class: 'btn btn-sm btn-default', title: 'Force update of image on all nodes', style: "margin-right:5px;") if current_user.is_admin %>
+        <%= link_to raw("<i class='fa fa-clone'></i> #{t('container_images.clone')}"), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/new?container_image[parent_image_id]=#{@container.id}", class: 'btn btn-sm btn-primary', style: "margin-right:5px;" %>
+        <%= link_to raw('<i class="fa fa-wrench"></i>'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{@container.id}/edit", class: 'btn btn-sm btn-default', style: "margin-right:5px;" %>
+        <% if @container.can_administer?(current_user) %>
+          <%= link_to raw('<i class="fa fa-trash"></i>'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{@container.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+</div>
+
+<div class="row">
+  <div class="col-md-4 col-sm-6 col-xs-12">
+    <%= render partial: 'container_images/show/overview' %>
+    <div class="panel <%= @container.ingress_params.empty? ? 'panel-warning' : 'panel-default' %>">
+      <%= @container.ingress_params.empty? ? tag.div(class: 'panel-heading', style: 'padding:2px;') : '' %>
+      <div class="panel-body">
+        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_ingress_param_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
+        <strong><%= t 'container_images.ingress_rules.obj_plural' %></strong>
+      </div>
+      <%= render partial: 'container_images/ingress_params/list', locals: {data: @container.ingress_params.sorted, image: @container} %>
+    </div>
+    <%= render partial: 'container_images/show/related' unless @container.is_load_balancer %>
+  </div>
+
+  <div class="col-md-8 col-sm-6 col-xs-12">
+
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_setting_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
+        <strong><%= t 'container_images.params.settings.table.title' %></strong>
+      </div>
+      <%= render partial: 'container_images/setting_params/list', locals: {data: @container.setting_params.sorted, image: @container} %>
+    </div>
+
+    <div class="panel <%= @container.volumes.empty? ? 'panel-warning' : 'panel-default' %>">
+      <%= @container.volumes.empty? ? tag.div(class: 'panel-heading', style: 'padding:2px;') : '' %>
+      <div class="panel-body">
+        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_volume_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
+        <strong><%= t 'volumes.table.title' %></strong>
+      </div>
+      <%= render partial: 'container_images/volume_params/list', locals: {data: @container.volumes, image: @container} %>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_env_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
+        <strong><%= t 'container_images.params.env.table.title' %></strong>
+      </div>
+      <%= render partial: 'container_images/env_params/list', locals: {data: @container.env_params.sorted, image: @container} %>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,66 @@
+mysql_0:
+  name: MYSQL_ROOT_PASSWORD
+  label: MYSQL_ROOT_PASSWORD
+  value: "build.settings.mysql_password"
+  parent_param: mysql_0
+  param_type: variable
+wordpress_0:
+  name: LS_ADMIN_PW
+  label: LS_ADMIN_PW
+  param_type: variable
+  value: "build.settings.litespeed_admin_pw"
+  parent_param: wordpress_0
+wordpress_1:
+  name: WORDPRESS_DB_PASSWORD
+  label: WORDPRESS_DB_PASSWORD
+  value: "dep.mysql.parameters.settings.mysql_password"
+  parent_param: wordpress_1
+  param_type: variable
+wordpress_2:
+  name: WORDPRESS_DB_HOST
+  label: WORDPRESS_DB_HOST
+  value: "dep.mysql.self.ip"
+  parent_param: wordpress_2
+  param_type: variable
+wordpress_3:
+  name: WORDPRESS_DB_NAME
+  label: WORDPRESS_DB_NAME
+  value: "build.self.service_name_short"
+  parent_param: wordpress_3
+  param_type: variable
+wordpress_4:
+  name: WORDPRESS_URL
+  label: WORDPRESS_URL
+  value: "build.self.default_domain"
+  parent_param: wordpress_4
+  param_type: variable
+wordpress_5:
+  name: WORDPRESS_TITLE
+  label: WORDPRESS_TITLE
+  value: "build.settings.title"
+  parent_param: wordpress_5
+  param_type: variable
+wordpress_6:
+  name: WORDPRESS_USER
+  label: WORDPRESS_USER
+  value: "build.settings.username"
+  parent_param: wordpress_6
+  param_type: variable
+wordpress_7:
+  name: WORDPRESS_PASSWORD
+  label: WORDPRESS_PASSWORD
+  value: "build.settings.wordpress_password"
+  parent_param: wordpress_7
+  param_type: variable
+wordpress_8:
+  name: WORDPRESS_EMAIL
+  label: WORDPRESS_EMAIL
+  value: "build.settings.email"
+  parent_param: wordpress_8
+  param_type: variable
+wordpress_9:
+  name: WORDPRESS_DB_USER
+  label: WORDPRESS_DB_USER
+  value: root
+  parent_param: wordpress_9
+  param_type: static

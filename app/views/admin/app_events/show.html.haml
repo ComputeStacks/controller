@@ -1,0 +1,37 @@
+- content_for :title, "Activity Log"
+.row.has-breadcrumb
+  .breadcrumb
+    %li= link_to "Activity Log", "/admin/app_events"
+    %li.active= "Activity Log ID:#{@event.id}"
+
+.row
+  .col-md-12
+    %table.table
+      %thead
+        %tr
+          %th Description
+          %th Value
+      %tbody
+        - if @event.user
+          %tr
+            %th User
+            %td= link_to @event.user.full_name, "/admin/users/#{@event.user.id}-#{@event.user.full_name.parameterize}"
+        %tr
+          %th Action
+          %td= @event.action
+        - if @event.ip_address
+          %tr
+            %th IP Address
+            %td= link_to @event.ip_address, "/admin/users/#{@event.user.id}-#{@event.user.full_name.parameterize}/whois/#{@event.ip_address.to_s.gsub(".", "-")}"
+        %tr
+          %th Timestamp
+          %td= l @event.created_at.in_time_zone(Time.zone), format: :long
+        - if @event.linked
+          %tr
+            %th Object
+            %td= link_to @event.description, @event.url
+        - unless @event.details.nil? || @event.details.empty?
+          - @event.details.each_key do |k|
+            %tr
+              %th= k
+              %td= @event.details[k]

@@ -1,0 +1,17 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to "Billing Plans", "/admin/billing_plans"
+      li= link_to @billing_plan.name, "/admin/billing_plans/#{@billing_plan.id}"
+      li.active New Billing Resource
+
+
+.row: div class="#{@billing_resource.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8'}"
+  p.lead New Billing Resource
+
+.row
+  div class="#{@billing_resource.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8'}"
+    = form_for @billing_resource, url: "#{@plan_base_url}/billing_resources" do |f|
+      .panel.panel-default= render partial: "admin/billing_plans/billing_resources/form", locals: {f: f}
+
+  = render partial: 'admin/billing_plans/billing_resources/errors' unless @billing_resource.errors.count.zero?

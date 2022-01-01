@@ -1,0 +1,73 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-8">
+      <div class="form-group">
+        <label>Name</label>
+        <%= f.text_field :name, required: true, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label>Enabled?</label>
+        <%= f.check_box :active, class: 'form-control' %>
+        <span class="help-block">Disabling will hide from the order screen.</span>
+      </div>
+    </div>
+  </div>
+  <hr />
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="row">
+        <div class="col-sm-12">
+          <p class="lead">Region Fill Strategy</p>
+          <div style="font-size:13px; margin-top:-25px;">
+            How ComputeStacks will distribute virtual machines or containers across the availability zones.
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:25px;margin-bottom: 12px;">
+        <div class="col-md-5 col-md-offset-1 col-sm-12">
+          <div class="form-group">
+            <%= f.radio_button :fill_strategy, 'least' %><label for="location_fill_strategy_least"><strong>Balance</strong></label><br />
+            <p>Evenly distribute resources across all availability zones within the regions.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-sm-12">
+          <div class="form-group">
+            <%= f.radio_button :fill_strategy, 'full' %><label for="location_fill_strategy_full"><strong>Fill</strong></label><br />
+            <p>Fill each availability zone up until it's max fill value. If filling by resource, then this will stop when either memory or cpu is fully allocated.</p>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="form-group">
+            <%= f.label :fill_by_qty, 'Fill By Qty?' %>
+            <%= f.check_box :fill_by_qty, class: 'form-control' %>
+            <span class="help-block">If true, we will allocate by container count. If false, we will allocate based on the package resources.</span>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="form-group">
+            <%= f.label :overcommit_cpu, 'Allow CPU Overcommitment? ' %>
+            <%= f.check_box :overcommit_cpu, class: 'form-control' %>
+            <span class="help-block">If unchecked, we will not place containers on a node that has already allocated all its cpu cores.</span>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="form-group">
+            <%= f.label :overcommit_memory, 'Allow Memory Overcommitment? ' %>
+            <%= f.check_box :overcommit_memory, class: 'form-control' %>
+            <span class="help-block">If unchecked, we will not place containers on a node that has already allocated all its memory.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), '/admin/locations', class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success' %>
+  <%= link_to "Delete", "/admin/location/#{@location.id}", method: :delete, data: { confirm: 'Are you sure? This is destructive and irreversible.' }, class: 'btn btn-danger pull-right' if (controller.action_name == 'edit' || controller.action_name == 'update') %>
+</div>

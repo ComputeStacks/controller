@@ -1,0 +1,10 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <label>User</label>
+        <%= f.collection_select :user_id, User.sorted, :id, :full_name, {}, { class: 'form-control chosen-select-standard' } %>
+      </div>
+    </div>
+  </div>
+</div>

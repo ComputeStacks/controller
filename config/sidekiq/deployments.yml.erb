@@ -1,0 +1,7 @@
+---
+:timeout: 90
+:concurrency: <%= ENV['QUEUE_DEPLOYMENTS'] || 25 %>
+:queues:
+  - [dep_critical, 2]
+  - dep
+  - dep_low

@@ -1,0 +1,24 @@
+de:
+  volumes:
+    list:
+      empty: Keine Volumes gefunden
+      edit: "Volume editieren: %{vol}"
+      new_button: Volume hinzufügen
+      new_button_help: "Volumes sind persistenter Speicher für Ihren Container. Sie können mehrere Volumes pro Container haben, die an verschiedenen Stellen eingehängt sind."
+      usage: Verwendung
+      backups: Backups
+    table:
+      title: Persistenter Speicher
+      name: Name
+      mounted: Mounted unter
+      backup: Backup Methode
+      usage: Verwendung
+      attached_to: Angehängt an
+    actions:
+      delete:
+        confirm: Sind Sie sicher?
+        attached: Trennen Sie den Dienst vor dem Löschen.
+    path: Pfad
+    containers: Angehängte Container
+    high_availability:
+      local_disabled: Lokale Volumes deaktivieren HA für diesen Dienst.

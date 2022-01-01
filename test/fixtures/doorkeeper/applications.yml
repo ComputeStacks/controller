@@ -1,0 +1,21 @@
+admin:
+  name: admin
+  uid: "<%= Doorkeeper::OAuth::Helpers::UniqueToken.generate %>"
+  secret: "<%= Doorkeeper::OAuth::Helpers::UniqueToken.generate %>"
+  redirect_uri: "urn:ietf:wg:oauth:2.0:oob"
+  scopes: "profile_read profile_update project_read project_write images_read images_write order_read order_write dns_read dns_write public admin_read admin_write"
+  confidential: true
+user:
+  name: user
+  uid: "<%= Doorkeeper::OAuth::Helpers::UniqueToken.generate %>"
+  secret: "<%= Doorkeeper::OAuth::Helpers::UniqueToken.generate %>"
+  redirect_uri: "urn:ietf:wg:oauth:2.0:oob"
+  scopes: "profile_read profile_update project_read project_write images_read images_write order_read order_write dns_read dns_write public register"
+  confidential: false
+cpanel_test:
+  name: cpanel
+  uid: "<%= Doorkeeper::OAuth::Helpers::UniqueToken.generate %>"
+  secret: "<%= Doorkeeper::OAuth::Helpers::UniqueToken.generate %>"
+  redirect_uri: "https://cpanel.computestacks.net/:token/my/plugin/torii/redirect.html"
+  scopes: "public"
+  confidential: true

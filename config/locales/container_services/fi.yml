@@ -1,0 +1,85 @@
+fi:
+  container_services:
+    auto_scale:
+      enabled: AutoScale Active
+      disabled: AutoScale Disabled
+      menu_action: AutoScale
+      form:
+        enable:
+          label: Enable AutoScale
+          help: "Enable or Disable AutoScale for this application."
+        price:
+          title: AutoScale Limit
+          help_html: |
+            <p> With a <strong>value of 0.0</strong>, AutoScale will continually resize your application as you hit memory or cpu limits, and stay at those limits for at least 1 minute.</p>
+            <p>To limit how far your application is automatically scaled, or resized, please enter the maximum total amount you wish to spend, less any bandwidth and storage fees.</p>
+          help_quote_html: |
+            <p>If you choose to place a limit on AutoScale, <strong>we recommend a value of at least %{price}</strong>.<br>This will allow for scaling by either memory, or cpu.</p>
+          label: Max Hourly Spend
+        horizontal:
+          title: Horizontal Scaling
+          label: Enable Horizontal Scaling
+          help_html: |
+            <p>Once all packages have been exhausted, AutoScale will no longer be able to scale your application. In order to provide additional capacity, you have the ability to horizontally scale your application, which will increase your overall capacity.</p>
+            <p>With this option enabled, you're telling AutoScale to add 1 container each time your cpu or memory limit is hit.</p>
+    containers:
+      logs:
+        breadcrumb: Container Logs
+        description: Viewing Container Logs For
+    sidebar:
+      overview: Yleiskatsaus
+      domains: "Domainit & SSL"
+      remote: Etäyhteys
+      logs: Sovellusten lokitiedot
+      settings: Asetukset
+      events: Aktiivisuus
+    actions:
+      resize: Resize
+      scale: Scale
+    header:
+      app: Kuva
+      price: Hinta
+      plan: Suunnitelma # i.e. Package
+      connect: Setup
+      env: Environment
+    controller:
+      resize:
+        queued: Säiliön koko muutetaan pikapuoliin.
+        success: Säiliön kokomuutos onnistui.
+        error: Säiliön koon muutoksessa oli ongelma.
+  deployments:
+    services:
+      edit:
+        name: Sovelluksen nimi
+        resize_package:
+          title: Muokkaa kokoa
+        scale:
+          title: Skaalaa vaakasuunnassa
+      domains:
+        index:
+          empty: Ei domaineja
+          new: Lisää domain
+          title: Domainit
+        form:
+          title: Lisää domain
+          label: Domainin nimi
+      show:
+        containers:
+          name: Säiliön nimi
+          status: Tila
+          health: Terveys
+          region: Alue
+          ip: IP osoite
+        linked:
+          title: Linkitetyt säiliöt
+        custom:
+          pma:
+            title: MySQL säiliöt
+            pass: Salasana
+            empty: Säiliöitä ei löydetty
+      events:
+        show:
+          title: Aktiivisuus
+        event_list:
+          title: Tapahtuma loki
+          empty: Ei tapahtumia

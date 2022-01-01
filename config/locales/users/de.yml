@@ -1,0 +1,148 @@
+de:
+  auth:
+    login: Login
+    register: Registrieren
+    pw_reset: Passwort zurücksetzen
+    confirm: Sendebestätigung
+    unlock: Konto freischalten
+  user_groups:
+    advanced_section: Erweitert
+    allow_driver_override:
+      title: Erlauben, dass beim Erstellen eines benutzerdefinierten Container-Abbilds lokale Speicherung erzwungen wird?
+      help: "Wenn Sie geclusterten Speicher für eine bestimmte Region verwenden, ermöglicht dies den Benutzern, beim Erstellen eines benutzerdefinierten Abbilds manuell lokalen Speicher als Option anzugeben."
+  registration:
+    user:
+      title: Anmeldung
+      register_btn: Registrieren
+  users:
+    project_notifications:
+      title: Projekt Benachrichtigungen
+      breadcrumb:
+        new: Neue Benachrichtigung
+        edit: Update Benachrichtigung
+      rules:
+        new: Regel erstellen
+        empty: Keine Benachrichtigungsregeln gefunden
+        exhausted: Alle möglichen Benachrichtigungen wurden erstellt
+        table:
+          alert: Alarm Name
+          count: Aktiver Melder
+      show:
+        title: Benachrichtigungseinstellungen
+        title_help_html: |
+          Alle hier konfigurierten Alarme werden zusätzlich zu den in den einzelnen Projekten konfigurierten Alarmen ausgelöst.<br>Wenn Sie hier die gleiche Regel konfigurieren und auf einem Projekt, werden Sie doppelte Benachrichtigungen sehen.
+        table:
+          service: Dienst
+          description: Beschreibung
+          configuration: Konfiguration
+      create_services:
+        email: E-Mail-Benachrichtigung erstellen
+        google_chat: Google Chat-Benachrichtigung erstellen
+        slack: Slack-Benachrichtigung erstellen
+        webhook: Webhook-Benachrichtigung erstellen
+    developer:
+      nav:
+        legacy_api: API Berechtigungen
+        auth: Autorisierte Applikationen
+        apps: Applikationen
+    profile_sidebar:
+      main: Mein Profil
+      notifications: Projekt Benachrichtigungen
+      sec: Konto Sicherheit
+      dev: Entwickler
+    fields:
+      fname: Vorname
+      lname: Nachname
+      email: E-Mail
+      current_password: Aktuelles Passwort
+      password: Passwort
+      password_confirmation: Passwort bestätigen
+      password_hint: Das Passwort muss 8 Zeichen lang sein.
+      phone: Telefon
+      address_1: Straße und Hausnummer
+      address_2: '' # Line 2. can optionally be blank
+      city: Stadt
+      state: Bundesland
+      country: Land
+      zip: Postleitzahl
+      vat: VAT
+      company: Unternehmen
+      currency: Meine Währung
+    api:
+      title: API Berechtigungen
+      edit_breadcrumb: API Berechtigungen aktualisieren
+      notice: 'Ihr API Passwort wird nicht mehr angezeigt. Bitte notieren Sie es.'
+      api_key: API Benutzername
+      api_secret: API Passwort
+      disabled: API Zugriff erfolreich deaktiviert
+      error: Fehler beim Generieren von API Berechtigungen
+      docs: API Dokumentation anzeigen
+      oauth: 'OAuth Einstellungen'
+      api_propose_oauth_html: 'Diese Anmeldeinformationen können mit HTTP Basic Auth oder OAuth2 Password Grant verwendet werden.'
+      list:
+        empty: Sie haben keine API Berechtigungen.
+        create: Zugangsdaten generieren
+    edit:
+      title: Mein Konto editieren
+      sec_title: Sicherheitseinstellungen
+      limits: Konto Limits
+      api:
+        enable: Aktivieren des API Zugriffs
+        disable: API Zugriff deaktivieren
+        regen: Regenerieren
+        regen_prompt: Sind Sie sicher? Dadurch wird Ihr vorhandenes Token sofort ungültig.
+      authy:
+        enable: Authy 2FA aktivieren
+        disable: Authy 2FA deaktivieren
+        help_link: Klicken Sie hier, um mehr über die Verwendung von Authy 2FA zu erfahren.
+    authy:
+      new:
+        title: Authy 2FA aktivieren
+        cc: Ländercode
+        phone: Mobiltelefon
+        apps: Klicken Sie hier, um die Authy-Apps zu installieren
+      edit:
+        title: Authy 2FA aktivieren
+        token: Authy Token
+        apps: Klicken Sie hier, um die Authy-Apps zu installieren
+    security_key:
+      controller:
+        removed: Sicherheitsschlüssel entfernt
+        u2f:
+          added: Sicherheitsschlüssel erfolgreich hinzugefügt.
+        errors:
+          removed: "Fehler beim Entfernen des Sicherheitsschlüssels: %{error}"
+          key_type: Ungültiger Schlüsseltyp
+          exists: Sicherheitsschlüssel, der bereits mit Ihrem Konto verknüpft ist.
+      index:
+        title: Sicherheits-Schlüssel
+        add_u2f: 'Sicherheitsschlüssel hinzufügen'
+        table_empty_html: "Sie haben keine Sicherheitsschlüssel.<br>Schützen Sie Ihr Konto, indem Sie jetzt einen hinzufügen!"
+      new:
+        title: Hinzufügen eines Sicherheitsschlüssels
+        label: Ihr Schlüsselname
+        u2f:
+          placeholder: Primärer Sicherheitsschlüssel
+          title: Bitte stecken Sie Ihren fido u2f security key in Ihren Computer.
+          l1: Wenn es eine Taste hat, drücken Sie diese bitte, um sich zu registrieren.
+    security_key_auth:
+      controller:
+        no_authy: "Kein Authy-Konto mit Ihrem Benutzerkonto verknüpft."
+        authy_disabled: "Die Authy-Authentifizierung ist deaktiviert. Bitte kontaktieren Sie den Support."
+        invalid_token: Ungültiger Token
+      new:
+        title: Sicherheitstor
+        alt_methods: Alternative Anmeldemethoden
+        help_title: Probleme beim Einloggen?
+        support: "Bitte kontaktieren Sie den Support unter: %{support_line}"
+        u2f:
+          l1: Wenn es eine Taste hat, drücken Sie diese bitte zur Authentifizierung.
+          error: Authentifizierungsfehler! Bitte aktualisieren Sie die Seite und versuchen Sie es erneut.
+        authy:
+          title: Authentifizierung mit Ihrer Authy 2FA App
+    totp:
+      title: Authenticator App
+      setup: Authenticator App konfigurieren
+      form:
+        code: Authenticator App Code
+      apps: Empfohlene Applikationen

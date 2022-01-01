@@ -1,0 +1,8 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Content Blocks", "/admin/blocks" %></li>
+      <li class="active"><%= @block.title %></li>
+    </ol>
+  </div>
+<% end %>

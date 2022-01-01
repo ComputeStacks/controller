@@ -1,0 +1,25 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ul.nav.nav-pills.pull-left.sub-menu-pills
+      li class=(controller.controller_name == 'deployments' ? 'active' : '')
+        = link_to 'Overview', admin_deployments_url
+      li class=(controller.controller_name == 'container_domains' ? 'active' : '')
+        = link_to "Domains", "/admin/container_domains"
+      li class=(controller.controller_name == 'volumes' ? 'active' : '')
+        = link_to "Volumes", admin_volumes_url
+
+    - if controller.controller_name == 'volumes'
+
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to raw("<i class='fa fa-database'></i>&nbsp;&nbsp;&nbsp;New Volume"), "/admin/volumes/new", class: 'btn btn-sm btn-default'
+
+    - elsif controller.controller_name == 'container_domains'
+
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to "Add Domain", "/admin/container_domains/new", class: "btn btn-sm btn-default"
+
+    - else
+
+      ol.breadcrumb.breadcrumb-action.text-right style="height:45px;"
+        li
+          | &nbsp;

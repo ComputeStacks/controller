@@ -1,0 +1,24 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to t('users.profile_sidebar.main'), '/users/edit' %></li>
+      <li><%= link_to t('users.profile_sidebar.notifications'), '/user_notifications' %></li>
+      <li class="active"><%= t 'users.project_notifications.breadcrumb.edit' %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @notification.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-md-8' %>">
+    <%= form_for @notification, method: :patch do |f| %>
+      <div class="panel panel-default">
+        <%= render partial: 'notifications/form', locals: { f: f, rule_base: "user_notification_rules", rules: UserNotification.available_alerts, notification: @notification } %>
+        <div class="panel-footer">
+          <%= link_to t('actions.cancel'), "/user_notifications", class: 'btn btn-default' %>
+          <%= submit_tag t('actions.update'), class: 'btn btn-success pull-right' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <%= render partial: 'application/model_errors', locals: { errors: @notification.errors, obj: 'notification' } unless @notification.errors.count.zero? %>
+</div>

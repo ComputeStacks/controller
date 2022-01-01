@@ -1,0 +1,16 @@
+<div class="btn-group">
+  <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <i class="fa fa-power-off"></i>
+    <span class="caret"></span>
+    <span class="sr-only"><%= t 'containers.actions.power_actions_title' %></span>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-right">
+    <% if container.can_power? %>
+      <li><%= link_to(t('containers.actions.start'), container_start_path(container), method: :put, data: {confirm: t('confirm_prompt')}) %></li>
+      <li><%= link_to(t('containers.actions.stop'), container_stop_path(container), method: :put, data: {confirm: t('confirm_prompt')}) %></li>
+      <li><%= link_to(t('containers.actions.restart'), container_restart_path(container), method: :put, data: {confirm: t('confirm_prompt')}) %></li>
+      <li role="separator" class="divider"></li>
+    <% end %>
+    <li><%= link_to(t('containers.actions.rebuild_short'), container_rebuild_path(container), method: :put, data: {confirm: t('confirm_prompt')}) %></li>
+  </ul>
+</div>

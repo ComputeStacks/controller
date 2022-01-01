@@ -1,0 +1,35 @@
+<% content_for :breadcrumb do %>
+
+  <div class="row has-breadcrumb">
+    <ul class="nav nav-pills pull-left sub-menu-pills">
+      <li class="<%= controller.controller_name == 'container_images' ? 'active' : '' %>">
+        <%= link_to "Overview", admin_container_images_url %>
+      </li>
+      <li class="<%= controller.controller_name == 'container_registry' ? 'active' : '' %>">
+        <%= link_to "Container Registries", admin_registries_path %>
+      </li>
+      <li class="<%= controller.controller_name == 'providers' ? 'active' : '' %>">
+        <%= link_to "Image Providers", admin_container_images_providers_url %>
+      </li>
+    </ul>
+    <% if controller.controller_name == 'container_images' %>
+      <ol class="breadcrumb breadcrumb-action text-right">
+        <li>
+          <a href="/admin/container_images/new" class="btn btn-sm btn-default">
+            <i class="fa fa-cube"></i> Create Image
+          </a>
+        </li>
+      </ol>
+    <% elsif controller.is_a? Admin::ContainerImages::ProvidersController %>
+      <ol class="breadcrumb breadcrumb-action text-right">
+        <li><%= link_to "Add Provider", new_admin_container_images_provider_url, class: "btn btn-sm btn-default" %></li>
+      </ol>
+    <% elsif controller.controller_name == 'container_registry' %>
+      <ol class="breadcrumb breadcrumb-action text-right">
+        <li><%= link_to "Add Registry", new_admin_registry_path, class: "btn btn-sm btn-default" %></li>
+      </ol>
+    <% else %>
+      <ol class="breadcrumb breadcrumb-action text-right" style="height:45px;"><li>&nbsp;</li></ol>
+    <% end %>
+  </div>
+<% end %>

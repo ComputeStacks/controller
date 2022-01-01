@@ -1,0 +1,14 @@
+<table class="table-list">
+  <tr>
+    <td>Performed By</td>
+    <td><%= audit.user.nil? ? 'System' : link_to(audit.user.full_name, admin_user_path(audit.user)) %></td>
+  </tr>
+  <tr>
+    <td>IP</td>
+    <td><%= audit.ip_addr.to_s.blank? ? '...' : audit.ip_addr.to_s %></td>
+  </tr>
+  <tr>
+    <td>Audit Date</td>
+    <td><%= link_to l(audit.created_at, format: :short), "/admin/audit/#{audit.id}" %></td>
+  </tr>
+</table>

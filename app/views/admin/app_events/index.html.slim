@@ -1,0 +1,17 @@
+.row
+  .col-md-12
+    h4 Activity Log
+.row
+  .col-md-12
+    table.table
+      - if @events.empty?
+        tr: td colspan='2' style='text-align:center;' No Events
+      - @events.each do |i|
+        tr: td
+          span.label class="#{i.label_class}"= i.category
+          | &nbsp;
+          = link_to billing_event_title(i), "/admin/app_events/#{i.id}"
+          td style="text-align:right;": small
+            = l i.created_at.in_time_zone(Time.zone), format: :long
+
+    = will_paginate @events

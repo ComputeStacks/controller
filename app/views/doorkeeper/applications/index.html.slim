@@ -1,0 +1,32 @@
+.row
+  .col-lg-2.col-md-3.col-sm-12= render partial: 'users/sidebar', locals: { active_tab: 'developer' }
+  .col-lg-10.col-md-9.col-sm-12: .tab-content: .tab-pane.active
+    .row: .col-sm-12
+      = render partial: 'users/developer/shared_nav', locals: { active_tab: 'oauth_apps' }
+    .row style="margin-top:10px;"
+      .col-sm-12: .tab-content: .tab-pane.active
+        .row: .col-xs-12
+          = link_to t('.new'), new_oauth_application_path, class: 'btn btn-success btn-sm pull-right'
+          h5= t '.title'
+        .row: .col-xs-12: table.table
+          thead: tr
+            th= t '.name'
+            - if current_user.is_admin
+              th Owner
+            th= t '.callback_url'
+            th
+          tbody
+            - if @applications.empty?
+              tr: td.text-center colspan=(current_user.is_admin ? '4' : '3')
+                = "There are no #{link_to 'applications', new_oauth_application_path}.".html_safe
+            - @applications.each do |application|
+              tr id="application_#{application.id}"
+                td.align-middle= link_to application.name, oauth_application_path(application)
+                - if current_user.is_admin
+                  td.align-middle=application.owner_id.blank? ? 'Public' : oauth_application_owner(application)
+                td.align-middle= simple_format(application.redirect_uri)
+                td.align-middle.text-right
+                  = render 'delete_form', application: application, submit_btn_css: 'btn btn-danger btn-sm pull-right'
+                  .btn-group style="margin-right:10px;"
+                    = link_to tag.i(nil, class: 'fa fa-cogs'), oauth_application_path(application), class: 'btn btn-primary btn-sm'
+                    = link_to tag.i(nil, class: 'fa fa-wrench'), edit_oauth_application_path(application), class: 'btn btn-default btn-sm'

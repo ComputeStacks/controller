@@ -1,0 +1,28 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>Language</label>
+        <select name="block_content[locale]" class="form-control">
+          <% I18n.available_locales.each do |i| %>
+            <% next if @existing_locale.include?(i.to_s) %>
+            <option value="<%= i %>" <% if i.to_s == @block_content.locale %>selected="selected"<% end %>><%= i %></option>
+          <% end %>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>Content</label>
+        <%= f.hidden_field :body, id: "block_content_body" %>
+        <trix-editor input="block_content_body" class="trix-editor-format"></trix-editor>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), @base_url, class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag 'Save', class: 'btn btn-success pull-right' %>
+</div>

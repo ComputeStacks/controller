@@ -1,0 +1,17 @@
+<% 2.times do |i| %>
+
+  <div class="tabbable <%= i.zero? ? 'tabs-left hidden-xs hidden-sm' : 'visible-xs visible-sm' %>">
+    <ul class="nav nav-tabs" <% if i.zero? %>style="width:100%;text-align:right;"<% end %>>
+      <li class="<%= active == 'overview' ? 'active' : '' %>" onclick="window.location='/containers/<%= @container.id %>';">
+        <%= link_to t('container_services.sidebar.overview'), "/containers/#{@container.id}" %>
+      </li>
+      <li class="<%= active == 'access' ? 'active' : '' %>" onclick="window.location='/containers/<%= @container.id %>/ports';">
+        <%= link_to t('container_services.sidebar.remote'), "/containers/#{@container.id}/ports" %>
+      </li>
+      <li class="<%= active == 'logs' ? 'active' : '' %>" onclick="window.location='/containers/<%= @container.id %>/logs';">
+        <%= link_to t('container_services.sidebar.logs'), "/containers/#{@container.id}/logs" %>
+      </li>
+    </ul>
+  </div>
+
+<% end %>

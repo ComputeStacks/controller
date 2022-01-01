@@ -1,0 +1,27 @@
+<ul class="list-unstyled">
+  <% if audits.empty? %>
+    <li class="text-center">
+      No Events
+    </li> 
+  <% end %>
+  <% audits.each do |i| %>
+    <li>
+      <%= admin_audit_description(i) %>
+      <b class="pull-right">
+        <%=l i.created_at.in_time_zone(Time.zone), format: :long %>
+      </b>
+      <% unless i.system_events.empty? %>
+        <ul>
+          <% i.system_events.each do |ii| %>
+            <li>
+              <%= link_to ii.message, "/admin/system_events/#{ii.id}" %>
+              <small class="pull-right">
+                <%= l ii.created_at, format: :long %>
+              </small>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

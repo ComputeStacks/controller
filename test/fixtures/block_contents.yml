@@ -1,0 +1,29 @@
+system:
+  locale: en
+  body: |
+    <h4>Connecting Your Domain</h4><div><br>All services are given a default URL to access your site.<br><br></div><div>To configure your own domain, please create A records for the following IP's:</div><div><br></div>
+  block: system
+
+custom:
+  locale: en
+  body: |
+    <p>My sample text.</p>
+  block: custom
+
+email_unlock:
+  block: email_unlock
+  locale: en
+  body: |
+    <div>Your account has been locked due to an excessive number of unsuccessful sign in attempts.<br>Click the link below to unlock your account:</div>
+
+email_password:
+  block: email_password
+  locale: en
+  body: |
+    <div>Someone has requested a link to change your password. You can do this through the link below.<br>If you didn't request this, please ignore this email.<br>Your password won't change until you access the link above and create a new one.</div>
+
+email_confirmation:
+  block: email_confirmation
+  locale: en
+  body: |
+    <div>You can confirm your email address and activate your account through the link below:</div>

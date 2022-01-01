@@ -1,0 +1,38 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Subscriptions', '/admin/subscriptions' %></li>
+      <li><%= link_to "Subscription ##{@subscription.id}", "/admin/subscriptions/#{@subscription.id}" %></li>
+      <li class="active">Subscription Events</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <ol class="list-unstyled list-unstyled-min">
+          <% if @events.empty? %>
+            <li class="text-center">No events</li>
+          <% end %>
+          <% @events.each do |i| %>
+            <li>
+              <%= billing_event_title(i, 'subscription_product') %>
+              <div style="font-size:11px;text-transform:uppercase;"><%= l i.created_at, format: :short %></div>
+            </li>
+            <% if @events.count > 1 && @events[-1] != i %><hr style="margin-top:10px;margin-bottom:10px;" /><% end %>
+          <% end %>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @events.total_pages > 1 %>
+<div class="row">
+  <div class="col-md-12 text-center">
+    <%= will_paginate @events %>
+  </div>
+</div>
+<% end %>

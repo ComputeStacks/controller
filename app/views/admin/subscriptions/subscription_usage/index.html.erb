@@ -1,0 +1,24 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Subscriptions', '/admin/subscriptions' %></li>
+      <li><%= link_to "Subscription ##{@subscription.id}", "/admin/subscriptions/#{@subscription.id}" %></li>
+      <li class="active">Billing Usage</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row"><%= render partial: "admin/subscriptions/subscription_usage/index/filter" %></div>
+
+<hr />
+<div class="row">
+  <div class="col-xs-12">
+    <%= render partial: "admin/subscriptions/subscription_usage/index/list", locals: { usages: @billing_usages } %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @billing_usages %>
+  </div>
+</div>

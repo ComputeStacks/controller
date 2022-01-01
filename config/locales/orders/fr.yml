@@ -1,0 +1,7 @@
+fr:
+  orders:
+    show:
+      title:
+        confirmation: Order Confirmation
+        detail: Order Details
+      estimate_warning: All prices are estimates and can fluctuate with overage, free trials, and discounts that may end during your billing period.

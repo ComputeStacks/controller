@@ -1,0 +1,23 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @service.deployment.name, deployments_path(@service.deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active"><%= t 'container_images.ingress_rules.obj_plural' %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <%= link_to "Create Rule", "ingress/new", class: "btn btn-primary btn-sm pull-right" %>
+        <small>INGRESS RULES</small>
+        <p class="lead"><%= @service.label %></p>
+        <%= render partial: 'container_services/ingress/index', locals: { return_to: 'list', ingress_rules: @ingress_rules, is_public: @service.public_network? } %>
+      </div>
+    </div>
+  </div>
+</div>

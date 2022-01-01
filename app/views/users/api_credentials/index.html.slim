@@ -1,0 +1,30 @@
+.row
+  .col-lg-2.col-md-3.col-sm-12= render partial: 'users/sidebar', locals: { active_tab: 'developer' }
+  .col-lg-10.col-md-9.col-sm-12: .tab-content: .tab-pane.active
+    .row: .col-sm-12
+      = render partial: 'users/developer/shared_nav', locals: { active_tab: 'api' }
+    .row style="margin-top:10px;"
+      .col-sm-12: .tab-content: .tab-pane.active
+        .row: .col-sm-12
+          = link_to t('users.api.list.create'), "/users/api_credentials/new", class: 'btn btn-sm btn-success pull-right'
+          h5= t 'users.api.title'
+        .row: .col-sm-12
+          table.table style="margin-top:20px;"
+            thead: tr
+              th= t 'common.name'
+              th= t 'common.username'
+              th= t 'common.created'
+              th
+            tbody
+              - if @api_credentials.empty?
+                tr: td.text-center colspan="3"
+                  = t 'users.api.list.empty'
+              - @api_credentials.each do |i|
+                tr
+                  td= i.name.blank? ? '...' : i.name
+                  td= i.username
+                  td= l i.created_at.in_time_zone(Time.zone), format: :long
+                  td.text-right
+                    .btn-group
+                      = link_to '<i class="fa fa-wrench"></i>'.html_safe, "/users/api_credentials/#{i.id}/edit", class: 'btn btn-sm btn-default'
+                      = link_to '<i class="fa fa-trash"></i>'.html_safe, "/users/api_credentials/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger'

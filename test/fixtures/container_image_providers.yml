@@ -1,0 +1,13 @@
+one:
+  name: GitHub
+  is_default: false
+  hostname: ""
+dockerhub:
+  name: Dockerhub
+  is_default: true
+  hostname: ""
+registry_default:
+  name: My Registry Provider
+  is_default: false
+  hostname: ""
+  container_registry: default

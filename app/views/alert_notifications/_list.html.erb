@@ -1,0 +1,49 @@
+<% unless alerts.empty? %>
+  <div class="panel panel-danger">
+    <div class="panel-heading" style="padding:2px;"></div>
+    <div class="panel-body">
+      <strong>ACTIVE ALERTS</strong>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Alert Kind</th>
+          <th>Container</th>
+          <th>Description</th>
+          <th>Value</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      <% alerts.each do |i| %>
+        <tr>
+          <td><%= link_to i.fingerprint, alert_notification_path(i) %></td>
+          <td><%= i.name %></td>
+          <td>
+            <% if i.container %>
+              <%= link_to i.container.name, container_path(i.container) %>
+            <% elsif i.sftp_container %>
+              <%= link_to i.sftp_container.name, "/deployments/#{i.sftp_container.deployment.token}" %>
+            <% elsif i.labels.dig('container') %>
+              <%= i.labels['container'] %>
+            <% else %>
+              ...
+            <% end %>
+          </td>
+          <td>
+            <%= i.description.blank? ? '...' : i.description %>
+          </td>
+          <td><%= i.value.blank? ? 0.0 : i.value.round(4) %></td>
+          <td><%= l i.last_event %></td>
+          <td>
+            <%= link_to 'Resolve', alert_notification_path(i), method: :put, data: { confirm: t('confirm_prompt') } %>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+
+<% end %>

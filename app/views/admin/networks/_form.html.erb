@@ -1,0 +1,53 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label>Name</label>
+        <%= f.text_field :name, required: true, class: 'form-control' %>
+        <span class="help-block">Lowercase and no special characters or spaces.</span>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label>Label</label>
+        <%= f.text_field :label, required: true, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-8 col-sm-10 col-xs-12">
+      <div class="form-group">
+        <label>Network (IPv4)</label>
+        <%= f.text_field :cidr, required: true, class: 'form-control' %>
+        <span class="help-block">Recommend at least a /24, but supports networks as small as a /29.</span>
+      </div>
+    </div>
+    <div class="col-md-4 col-sm-2 col-xs-12">
+      <div class="form-group">
+        <label>Public IP Range</label>
+        <%= f.check_box :is_public, class: 'form-control' %>
+        <span class="help-block">Is this a public IP Range?</span>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="form-group">
+        <label>Regions</label>
+        <%= collection_select(:network, :region_ids, Region.sorted, :id, :name, {}, { class: 'form-control chosen-select-standard', multiple: true, name: 'network[region_ids][]' }) %>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12 text-center">
+      <span class="help-block">
+        <b>Note:</b> Any change to the network in ComputeStacks also requires changes on the container hosts. <br />
+        <em><a href="mailto:support@computestacks.com">Please contact support for assistance.</a></em>
+      </span>
+    </div>
+  </div>
+</div>
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), '/admin/networks', class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success' %>
+</div>

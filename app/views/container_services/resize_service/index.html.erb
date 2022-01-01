@@ -1,0 +1,62 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active">Resize</li>
+    </ol>
+  </div>
+<% end %>
+
+<%= form_tag "#{container_service_path(@service)}/resize_service", method: :post do %>
+  <div class="row">
+    <div class="col-xs-12">
+
+      <div class="row">
+        <div class="col-md-12">
+          <%= link_to t('actions.cancel'), container_service_path(@service), class: 'btn btn-sm btn-default pull-right' %>
+          <small>RESIZE SERVICE</small>
+          <h4 style="margin-top:0px;"><%= @service.label %></h4>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <hr/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12 container-package-selector-wrap" style="margin-left:-15px;">
+          <input id="p0" class='container-package-input' data-index="0" type="hidden" name="package[0]" value="<%= @service.package.product_id %>">
+          <% order_packages_for_resources(@service.container_image.min_cpu, @service.container_image.min_memory).each do |group,packages| %>
+            <% unless group.blank? %>
+              <div style="color:#333; text-align: left;padding-left:15px;border-radius: 0px;">
+                <div class="panel-body"><%= group %></div>
+              </div>
+            <% end %>
+            <div class="panel-body">
+              <% packages.each do |p| %>
+                <%= render partial: 'orders/containers/package', locals: { project_owner: @project_owner, package: p, region: @service.region, container: { container_id: 0 } } %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <hr/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <%= submit_tag t('actions.save'), class: 'btn btn-success btn-block' %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<% end %>

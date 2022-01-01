@@ -1,0 +1,26 @@
+<div class="row">
+  <div class="col-md-12 text-right">
+    <%= link_to t('container_services.certificates.le.action'), "/container_domains/new?deployment_id=#{deployment.token}", class: 'btn btn-success btn-sm' %>
+    <%= link_to t('container_services.certificates.custom.action'), "/deployments/#{deployment.token}/certificates/new", class: 'btn btn-default btn-sm', style: "margin-left:5px;" %>
+  </div>
+</div>
+<div class="row" style="margin-top:20px;">
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-title" style="font-size:0.9em;"><%= t 'container_services.certificates.le.title' %></div>
+      </div>
+      <%= render partial: "deployments/certificates/list/lets_encrypt", locals: { domains: le_domains } %>
+    </div>
+  </div>
+</div>
+<div class="row" style="margin-top:20px;">
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-title" style="font-size:0.9em;"><%= t 'container_services.certificates.custom.title' %></div>
+      </div>
+      <%= render partial: "deployments/certificates/list/custom", locals: { certs: certs } %>
+    </div>
+  </div>
+</div>

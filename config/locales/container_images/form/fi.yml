@@ -1,0 +1,40 @@
+fi:
+  container_images:
+    form:
+      label: Nimi
+      free: "On vapaa?"
+      active: "Mahdollinen?" # If it's available for new orders.
+      role: Rooli
+      role_class: Kategoria
+      min_cpu: Minimi CPU
+      min_mem: Minimi muisti
+      scaling: Vaakasuuntainen skaalaus? # Asking if this image can scale
+      volume_override:
+        title: Use local storage for volume backend
+        help: "Enabling this will create all volumes locally on the node. This has the advantage of increased disk performance, at the expense of no high-availability."
+      registry:
+        source: Kuvan lähde
+        source_custom_placeholder: "my.custom-registry.com"
+        source_custom_help: Voit halutessasi syöttää oman arkiston URL:n
+        image: Kuva # esim. mysql
+        tag: Tagi # esim. viimeisin
+        auth:
+          title: Arkiston autentikointi
+          enabled: Ota käyttöön autentikointi
+          subtitle_html: |
+            Näitä asetuksia <em>ei käytetä</em> jos käytät sisäänrakennettua konttiarkistoa.
+      ## Blank line intentional ####
+      owner: Omistaja
+      command: # Override the default command for an image
+        title: Ohita kontin komento
+        help_html: |
+          <p>Voit halutessasi syöttää komennon jota käytetään kontissa. Esim:</p>
+          <p><code>npm start</code>, <em>MySQL:lle</em> <code>--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci</code></p>
+      content_blocks:
+        title: Content Blocks
+        description_html: Link specific content blocks to this image, otherwise the standard default ones will be displayed.
+        sections:
+          general: General Information
+          ssh: SSH Connection Info
+          domain: Domain Information
+          remote: Remote Access Information

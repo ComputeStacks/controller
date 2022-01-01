@@ -1,0 +1,4 @@
+- if @order_session
+  = "Order ID: #{@order_session.id}"
+  br
+  = "Project: #{@order_session.project&.id} #{@order_session.project&.name}"

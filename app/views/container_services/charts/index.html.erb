@@ -1,0 +1,69 @@
+<% content_for :title, "#{@service.label} Charts" %>
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active">Charts</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row" style="margin-bottom:20px;">
+  <div class="col-sm-12">
+    <small>SERVICE</small>
+    <h4 style="margin-top:0px;"><%= @service.name %></h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6 col-sm-12">
+    <%= render partial: 'container_services/charts/cpu/cpu_usage', locals: { service: @service } %>
+  </div>
+  <div class="col-md-6 col-sm-12">
+    <%= render partial: 'container_services/charts/cpu/cpu_throttle', locals: { service: @service } %>
+  </div>
+</div>
+
+<% if @service.subscription&.package&.memory_swap.nil? %>
+<div class="row">
+  <div class="col-md-6 col-sm-12">
+    <%= render partial: 'container_services/charts/memory/usage', locals: { service: @service } %>
+  </div>
+  <div class="col-md-6 col-sm-12">
+    <%= render partial: 'container_services/charts/memory/memory_throttled', locals: { service: @service } %>
+  </div>
+</div>
+<% else %>
+<div class="row">
+  <div class="col-sm-12">
+    <%= render partial: 'container_services/charts/memory/usage', locals: { service: @service } %>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6 col-sm-12">
+    <%= render partial: 'container_services/charts/memory/memory_swap', locals: { service: @service } %>
+  </div>
+  <div class="col-md-6 col-sm-12">
+    <%= render partial: 'container_services/charts/memory/memory_throttled', locals: { service: @service } %>
+  </div>
+</div>
+<% end %>
+
+<% if @service.current_load_balancer %>
+  <div class="row">
+    <div class="col-md-6 col-sm-12">
+      <%= render partial: 'container_services/charts/load_balancer/bytes', locals: { service: @service } %>
+    </div>
+    <div class="col-md-6 col-sm-12">
+      <%= render partial: 'container_services/charts/load_balancer/sessions', locals: { service: @service } %>
+    </div>
+  </div>
+<% end %>
+<div class="row">
+  <div class="col-sm-12">
+    <%= render partial: 'container_services/charts/network/bytes', locals: { service: @service } %>
+  </div>
+</div>
+

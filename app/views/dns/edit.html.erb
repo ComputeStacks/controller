@@ -1,0 +1,17 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to t('dns.obj'), dns_url %></li>
+      <li class="active"><%= @zone.name %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @zone.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @zone, url: dn_url(@zone) do |f| %>
+      <div class="panel panel-default"><%= render partial: 'dns/form', locals: { f: f } %></div>
+    <% end %>
+  </div>
+  <%= render partial: 'dns/errors' unless @zone.errors.count.zero? %>
+</div>

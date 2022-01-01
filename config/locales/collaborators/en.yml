@@ -1,0 +1,28 @@
+en:
+  collaborators:
+    collaborate: collaborate # verb: 'to collaborate on'.
+    collaboration:
+      singular: collaboration
+      plural: collaborations
+    collaborator:
+      singular: collaborator
+      plural: collaborators
+    role:
+      resource_owner: Owner
+      pending: Pending Invitation
+    list:
+      empty: "No %{resource} Collaborations"
+      empty_short: No Collaborators
+    actions:
+      add: Add # Add Collaborator
+      delete: Remove Collaborator
+      delete_denied: Only owner can remove collaborators
+    events:
+      accept_invite: Collaboration Authorized
+      remove_invite: Collaboration Removed
+    mailer:
+      subject:
+        dns: "[%{app}] Domain Collaboration Invitation: %{zone}"
+        image: "[%{app}] Image Collaboration Invitation: %{image}"
+        project: "[%{app}] Project Collaboration Invitation: %{project}"
+        registry: "[%{app}] Registry Collaboration Invitation: %{registry}"

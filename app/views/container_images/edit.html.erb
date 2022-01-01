@@ -1,0 +1,25 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to link_to t('obj.images'), "/container_images" %></li>
+      <li><%= link_to @container.label, container_image_path(@container) %></li>
+      <li class="active"><%= t 'container_images.edit.breadcrumb' %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @container.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @container, url: "/container_images/#{@container.id}" do |f| %>
+      <%= f.hidden_field :parent_image_id %>
+      <div class="panel panel-default">
+        <%= render partial: "container_images/form", locals: { f: f, image: @container } %>
+        <div class="panel-footer text-right">
+          <%= link_to t('actions.cancel'), container_image_path(@container), class: 'btn btn-default pull-left' %>
+          <%= submit_tag t('actions.update'), class: 'btn btn-success' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <%= render(partial: 'application/model_errors', locals: { errors: @container.errors, obj: t('obj.image') }) unless @container.errors.count.zero? %>
+</div>

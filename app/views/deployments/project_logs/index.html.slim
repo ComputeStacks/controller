@@ -1,0 +1,33 @@
+- content_for :title, "#{@deployment.name} Logs"
+
+- if request.xhr?
+
+  .row
+    .col-xs-12.text-right
+      =l Time.now.in_time_zone(current_user.tz), format: :month_time_with_year
+
+  .row: .col-xs-12
+    table.table.terminal-view: tbody
+      - if @logs.empty?
+        tr: td.text-center No logs received yet
+      - @logs.each do |i|
+        tr
+          td.hidden-xs.hidden-sm= l Time.at(i[0]).in_time_zone(current_user.tz), format: :month_time_without_year
+          td.hidden-xs.hidden-sm.text-primary= i[1].gsub('/','')
+          td= i[2]
+
+- else
+
+  - content_for :breadcrumb do
+    .row.has-breadcrumb: ol.breadcrumb
+      li= link_to "Projects", "/deployments"
+      li= link_to @deployment.name, deployments_path(@deployment)
+      li.active Project Logs
+
+  .remote-resource.refresh data-url="/deployments/#{@deployment.token}/project_logs"
+    .row: .col-xs-12
+      noscript= t 'noscript'
+      .text-center style="padding: 25px 0;"
+        i.fa.fa-refresh.fa-spin
+        | &nbsp;
+        = t 'common.loading'

@@ -1,0 +1,16 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to 'Billing Plans', "/admin/billing_plans"
+      li= link_to @billing_plan.name, "/admin/billing_plans/#{@billing_plan.id}"
+      li= link_to @phase.product.label, "#{@base_url}/billing_phases/#{@phase.id}"
+      li.active= @phase.phase_type.capitalize
+
+
+.row: div class="#{@phase.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8'}"
+  p.lead= "Edit Phase #{@phase.phase_type}"
+
+.row
+  .col-md-8.col-md-offset-2
+    = form_for @phase, url: "#{@base_url}/billing_phases/#{@phase.id}" do |f|
+      .panel.panel-default= render partial: "admin/billing_plans/billing_phases/form", locals: {f: f}

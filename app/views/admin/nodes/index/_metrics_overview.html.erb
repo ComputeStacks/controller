@@ -1,0 +1,42 @@
+<li>
+  Containers
+  <b class="pull-right"><%= node.container_count %></b>
+</li>
+<li>
+  Status
+  <b class="pull-right"><%= node_current_state(node) %></b>
+</li>
+<li>
+  Online Since
+  <b class="pull-right"><%= node_uptime_in_words node %></b>
+</li>
+<hr />
+<li>
+  Memory
+  <b class="pull-right"><%= node.metric_memory_usage %>%</b>
+</li>
+<li>
+  CPU
+  <b class="pull-right"><%= node.metric_cpu_usage %>%</b>
+</li>
+<% if node.metric_disk_usage.count == 1 %>
+  <li>
+    Disk
+    <b class="pull-right"><%= node.metric_disk_usage.empty? ? '...' : node.metric_disk_usage[0][:usage] %>%</b>
+  </li>
+<% end %>
+<li>
+  Load (5m)
+  <b class="pull-right"><%= node.metric_load %>
+  </b>
+</li>
+<% if node.metric_disk_usage.count > 1 %>
+  <hr>
+  <li><strong>STORAGE</strong></li>
+  <% node.metric_disk_usage.each do |i| %>
+    <li>
+      <%= i[:mountpoint] %>
+      <b class="pull-right"><%= i[:usage] %>%</b>
+    </li>
+  <% end %>
+<% end %>

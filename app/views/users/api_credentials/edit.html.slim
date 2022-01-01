@@ -1,0 +1,16 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to t('users.profile_sidebar.main'), '/profile'
+      li= link_to t('users.profile_sidebar.dev'), '/users/api_credentials'
+      li.active= t('users.api.edit_breadcrumb')
+
+.row
+  div class=(@api_credential.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8')
+    = form_for @api_credential, url: "/users/api_credentials/#{@api_credential.id}", method: :put do |f|
+      .panel.panel-default
+        = render partial: 'users/api_credentials/form', locals: { f: f }
+        .panel-footer
+          = link_to t('actions.cancel'), "/users/api_credentials", class: 'btn btn-default', style: 'margin-right: 10px;'
+          = submit_tag t('actions.update'), class: 'btn btn-success pull-right'
+  = render partial: 'application/model_errors', locals: { errors: @api_credential.errors, obj: 'credential' } unless @api_credential.errors.count.zero?

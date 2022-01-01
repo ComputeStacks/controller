@@ -1,0 +1,37 @@
+<%= render partial: 'admin/layouts/shared/settings_nav' %>
+
+<div class="row">
+  <div class="col-xs-12"><p class="lead">Regions</p></div>
+</div>
+<br />
+<% if @locations.empty? %>
+  <div class="row">
+    <div class="col-sm-12 text-center">
+      <p class="lead">No Regions Found.</p>
+    </div>
+  </div>
+<% else %>
+<% @locations.each do |location| %>
+  <div class="row">
+    <div class="col-xs-12">
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <div class="pull-right text-right">
+            <%= link_to content_tag(:i, nil, class: 'fa fa-wrench'), edit_admin_location_url(location), class: 'btn btn-default btn-sm' %>
+            <%= link_to content_tag(:i, nil, class: 'fa fa-trash'), admin_location_url(location), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-danger btn-sm' %>
+          </div>
+          <p class="panel-title"><%= location.name %></p>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+            <%= render partial: 'admin/regions/list', collection: location.regions, as: :region %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<% end %>
+<% end %>
+

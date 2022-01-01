@@ -1,0 +1,24 @@
+fi:
+  deployments:
+    logs:
+      attr:
+        alert: Varoitus
+        event: Tapahtuma
+      show:
+        breadcrumb:
+          deployments: Käyttöönotot
+          log: Loki
+      log:
+        title: "Tarkastellaan lokia: %{log}"
+        type: Loki tyyppi
+        status: Tila
+        started: Aloitettu
+        finished: Lopetettu
+        last_updated: Viimeksi päivitetty
+        relates_to: Liittyy
+        log_data: Loki tiedot
+      list:
+        empty: Ei tapahtumia
+      index:
+        title: "Käyttöönoton lokitiedot: %{deployment}"
+        log: Käyttöönottoloki

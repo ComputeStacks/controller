@@ -1,0 +1,13 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <p class="text-center">Load Balancer Sessions </p>
+    <%= area_chart "#{container_charts_load_balancer_sessions_path(container.id)}.json",
+                   points: false,
+                   download: true,
+                   refresh: 60,
+                   label: '',
+                   curve: false,
+                   legend: false
+    %>
+  </div>
+</div>

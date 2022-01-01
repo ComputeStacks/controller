@@ -1,0 +1,93 @@
+<% content_for :title, t('deployments.shared.main_nav.new_deployment') %>
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <%= tag.li link_to(t('header.nav.apps'), "/deployments/orders") %>
+      <%= tag.li t('orders.projects.container_params.app_settings'), class: 'active' %>
+      <li class="pull-right no-spacer">
+        <%= link_to "<i class='fa fa-ban'></i>  #{t('orders.projects.cancel')}".html_safe, "/deployments/orders/cancel", class: "btn btn-sm btn-warning", style: "margin-top:-3px;" %>
+      </li>
+    </ol>
+  </div>
+<% end %>
+
+<%= form_tag "/deployments/orders/containers", method: :put do %>
+
+  <% @order_session.images.each do |container| %>
+    <% next if container[:free] == 'yes' && container[:params].empty? %>
+    <input id="image-<%= container[:container_id] %>" type="hidden" name="image_map[<%= container[:container_id] %>]" value="<%= container[:container_id] %>">
+    <% unless container[:free] == 'yes' %>
+    <input id="p<%= container[:container_id] %>" class='container-package-input' data-index="<%= container[:container_id] %>" type="hidden" name="package[<%= container[:container_id] %>]" value="<%= container['free'] == 'yes' ? 0 : container[:package_id] %>">
+    <% end %>
+    <div class="row"><div class="col-sm-12">
+      <div class="panel panel-primary">
+        <div class="panel-body" >
+          <div class="pull-right hidden-xs hidden-sm">
+            <img style="width:60px;position:absolute;margin-left:-65px;"
+                 onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
+                 src="<%= container[:icon] %>"
+              />
+          </div>
+          <div style="text-transform: uppercase;font-size:18px;font-weight:300;text-indent: 5px;letter-spacing: 1.5px">
+            <%= container[:container_name] %>
+          </div>
+        </div>
+        <% unless container[:params].empty? %>
+          <div class="panel-body">
+            <div class="row">
+              <% container[:params].each_key do |p| %>
+                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label><%= container[:params][p][:label] %></label>
+                    <input type="text"
+                           class="form-control"
+                           name="service[container-<%= container[:container_id] %>-param-<%= p %>]"
+                           value="<%= container[:params][p][:value].nil? ? container[:params][p][:default_value] : container[:params][p][:value] %>"
+                      />
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        <%= content_tag(:hr, nil) unless container[:params].empty? %>
+        <% unless container[:free] == 'yes' %>
+          <div class="panel-body">
+            <div class="row">
+              <% if order_packages_for_resources(container[:min_cpu], container[:min_mem]).empty? %>
+              <div class="col-md-12 text-center">
+                <p>
+                  <%= t('orders.projects.container_params.no_packages.resources_html', cpu: container['cpu'], memory: container['mem']) %>
+                </p>
+              </div>
+              <% end %>
+            </div>
+          </div>
+          <% order_packages_for_resources(container[:min_cpu], container[:min_mem]).each do |group,packages| %>
+            <% unless group.blank? %>
+              <div style="color:#333; text-align: left;padding-left:15px;border-radius: 0px;">
+                <div class="panel-body"><%= group %></div>
+              </div>
+            <% end %>
+            <div class="panel-body">
+              <% packages.each do |p| %>
+                <%= render partial: 'orders/containers/package', locals: { project_owner: @project_owner, package: p, region: @region, container: container } %>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div></div>
+  <% end %>
+  <div class="row"><div class="col-sm-12">
+    <%= submit_tag t('actions.continue'), class: "btn btn-success btn-block" %>
+  </div></div>
+
+<% end %>
+<% if current_user.is_support_admin? %>
+  <div class="row" style="margin-top:10px;">
+    <div class="col-md-12" style="color:#ccc;font-size:12px;">
+      <%= render partial: 'deployments/orders/admin_header' %>
+    </div>
+  </div>
+<% end %>

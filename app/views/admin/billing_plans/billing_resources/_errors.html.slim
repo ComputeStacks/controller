@@ -1,0 +1,6 @@
+.col-sm-4: .panel.panel-body
+  strong= "#{pluralize(@billing_resource.errors.count, "error")} prevented this resource from being saved:"
+
+  ul.list-unstyled
+    - @billing_resource.errors.full_messages.each do |msg|
+      li style="color: red;"= msg

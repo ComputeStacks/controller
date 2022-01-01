@@ -1,0 +1,18 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Subscriptions', '/admin/subscriptions' %></li>
+      <li><%= link_to "#{@subscription.id}", admin_subscription_path(@subscription) %></li>
+      <li class="active">Edit Subscription</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @subscription.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @subscription, url: admin_subscription_path(@subscription) do |f| %>
+      <div class="panel panel-default"><%= render partial: 'admin/subscriptions/form', locals: { f: f } %></div>
+    <% end %>
+  </div>
+  <%= render partial: 'admin/subscriptions/errors' unless @subscription.errors.count.zero? %>
+</div>

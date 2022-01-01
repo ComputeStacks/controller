@@ -1,0 +1,11 @@
+project_test:
+  name: test
+  status: deployed
+  token: "1b01a6c2-65e8-4d01-86d2-fd411f867c61"
+  user: admin
+
+user_project_test:
+  name: foo
+  status: deployed
+  token: "1b01a6c2-65e8-4d01-86d2-fd411f867c62"
+  user: user

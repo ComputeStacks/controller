@@ -1,0 +1,14 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to t('users.profile_sidebar.main'), "/users/edit" %></li>
+      <li><%= link_to "SSH Keys", "/users/ssh_keys" %></li>
+      <li class="active">Add SSH Public Key</li>
+    </ol>
+  </div>
+<% end %>
+
+
+<div class="row">
+  <%= render partial: "ssh_keys/form", locals: { ssh_key: @ssh_key, base_path: "/users/ssh_keys" } %>
+</div>

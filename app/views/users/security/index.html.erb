@@ -1,0 +1,18 @@
+<div class="row">
+  <div class="col-lg-2 col-md-3 col-sm-12"><%= render partial: 'users/sidebar', locals: { active_tab: 'twofactor' } %></div>
+  <div class="col-lg-10 col-md-9 col-sm-12">
+    <div class="tab-content">
+      <div class="tab-pane active">
+
+        <h5>Update Password</h5>
+        <%= render partial: 'users/security/password' %>
+
+        <hr>
+
+        <h5>Two-Factor Authentication</h5>
+        <%= render partial: 'users/security/two_factor' %>
+
+      </div>
+    </div>
+  </div>
+</div>

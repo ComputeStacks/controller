@@ -1,0 +1,17 @@
+<div class="panel panel-danger" style="margin-bottom: 20px;">
+  <div class="panel-heading" style="padding:2px;"></div>
+  <table class="table-list">
+    <% unless @events.zero? %>
+      <tr>
+        <td><%= link_to 'Recent Failed Events', '/admin/event_logs?status=failed' %></td>
+        <td><%= @events %></td>
+      </tr>
+    <% end %>
+    <% unless @alerts.zero? %>
+      <tr>
+        <td><%= link_to 'Active System Alerts', '/admin/alert_notifications' %></td>
+        <td><%= @alerts %></td>
+      </tr>
+    <% end %>
+  </table>
+</div>

@@ -1,0 +1,21 @@
+containersmall:
+  product: containersmall
+  cpu: 1
+  memory: 512
+  storage: 10
+  bandwidth: 3000
+  local_disk: 5
+containerm:
+  product: containerm
+  cpu: 1
+  memory: 1024
+  storage: 15
+  bandwidth: 3000
+  local_disk: 10
+containerl:
+  product: containerl
+  cpu: 2
+  memory: 1536
+  storage: 25
+  bandwidth: 3000
+  local_disk: 15

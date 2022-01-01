@@ -1,0 +1,122 @@
+fi:
+  noscript: Virhe! Sisällön lataaminen vaatii Javascriptin.
+  confirm_prompt: Oletko varma?
+  confirm_destructive_prompt: "Oletko varma? Kaikki  %{obj} liittyvä tieto poistetaan."
+  crud:
+    created: "%{resource} luotu."
+    updated: "%{resource} päivitetty."
+    deleted: "%{resource} poistettu."
+    unknown: Tuntematon %{resource}.
+    queued: "%{resource} on jonossa resurssien määritystä varten."
+    queued_plural: "%{resource} ovat jonossa resurssien määritystä varten."
+  common:
+    never: Ei ikinä # as in, 'Never Occured'. Typically used in event lists.
+    free: Vapaa
+    loading: Ladataan
+    loading_obj: "Ladataan %{obj}..."
+    error: Virhe
+    errors: Virheitä
+    "yes": 'Kyllä'
+    "no": 'Ei'
+    warning: Varoitus
+    please_wait: Ole hyvä ja odota
+    success: Onnistui!
+    general_error: Yleinen järjestelmä virhe
+    feature_disabled: "%{resource} ei ole tällä hetkellä vapaana."
+    updated: Päivitetty
+    created: Luotu
+    username: Käyttäjätunnus
+    password: Salasana
+    name: Nimi
+    label: Selite
+  attributes:
+    mem: Muisti
+    disk: Tallennustila
+    local_disk: Temporary Disk
+    transfer: Kaistanleveys
+  actions:
+    ok: Ok
+    submit: Lähetä
+    continue: Jatka
+    save: Tallenna
+    create: Luo
+    cancel: Peru
+    manage: Hallinnoi
+    destroy: Poista
+    edit: Muokkaa
+    confirm: Varmista
+    update: Päivitä
+    show: Näytä
+    selected: Valitut
+    choose: Valitse
+    register: Rekisteröi
+    activate: Aktivoi
+    auth: Autentikoi
+    invite: Invite
+    approve: Approve
+    reject: Reject
+    accept: Accept
+    deny: Deny
+  header:
+    nav:
+      sr: Vaihda navigaatiota
+      apps: Sovellukset
+      dns: DNS
+      support: Tuki
+      build: Rakenna
+      logout: Kirjaudu ulos
+      profile: Profiili
+      billing: Laskutus
+  obj:
+    deployment: Käyttöönotto
+    deployments: Käyttöönotot
+    container: Säiliö
+    containers: Säiliöt
+    service: Säiliön palvelu
+    services: Säiliön palvelut
+    image: Säiliön kuva
+    images: Säiliön kuvat
+    user: Käyttäjä
+    users: Käyttäjät
+    registry: Oma arkisto
+    registries: Omat arkistot
+    lb: Kuormantasaaja
+    lbs: Kuormantasaajat
+    region: Alue
+    regions: Alueet
+    node: Node
+    nodes: Nodet
+    domain: Verkkotunnus
+    domains: Verkkotunnukset
+    dns: DNS Alue
+    dnss: DNS Alueet
+    volume: Tallennustila
+    volumes: Tallennustilat
+    ip: IP osoite
+    ips: IP Addresses
+    port: Portti
+    ports: Ports
+  logout_msg: Olet kirjautunut ulos.
+  suspended:
+    title: Tili lukittu
+    msg: Tilisi on tällä hetkellä lukittu. Ole hyvä ja ole yhteydessä tukeen.
+  billing:
+    package: Paketti
+    metered: Mitattu
+    hour: Tunneittain
+    month: Kuukausittain
+    year: Vuosittain
+  search:
+    title: Search
+    placeholder: "Press enter after typing your search..."
+  system_errors:
+    page_not_found: "Virhe! Sivua ei löydetty."
+    csrf_html: |
+      <h4>Virheellinen lomakkeen vahvistus</h4>
+      <p>Lähettämässäsi lomakkeessa oli virhe, ole hyvä ja <a href="javascript:history.back()">go back</a> yritä uudestaan.</p>
+    ## intentional line break ##
+    fatal:
+      url_title: Fatal Error
+      title: "Error! We've run into a server side issue"
+      message_html: "<p>We've received this error and are already working to correct it.</p>"
+      link_back: Go Back

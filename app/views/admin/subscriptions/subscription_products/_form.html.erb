@@ -1,0 +1,42 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label>Phase</label>
+
+        <select name="subscription_product[phase_type]" class="form-control chosen-select-standard">
+          <% [['trial', 'Trial'], ['discount', 'Discount'], ['final', 'Final']].each do |k,v| %>
+            <option value="<%= k %>" <% if @subscription_product.phase_type == k %>selected="selected"<% end %>><%= v %></option>
+          <% end %>
+        </select>
+
+        <span class="help-block">Ensure phase exists in billing plan first.</span>
+
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label>External ID</label>
+        <%= f.text_field :external_id, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label>Active</label>
+        <%= f.check_box :active, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>Product</label>
+        <%= collection_select(:subscription_product, :product_id, @products, :id, :label, {}, { class: 'form-control chosen-select-standard' }) %>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), admin_subscription_path(@subscription), class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success pull-right' %>
+</div>

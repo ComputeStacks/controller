@@ -1,0 +1,38 @@
+<% unless @alerts.empty? %>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="panel panel-danger">
+        <div class="panel-heading" style="padding:1px;"></div>
+        <div class="panel-body" style="font-size:0.9em;padding-bottom:0.85em;padding-top:0.85em;">
+          <strong>ACTIVE ALERTS</strong>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Resource</th>
+              <th>Description</th>
+              <th class="text-right">Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @alerts.each do |alert| %>
+              <tr>
+                <td>
+                  <% if alert.sftp_container && current_user.is_admin %>
+                    <%= link_to alert.sftp_container.name, "/admin/sftp/#{alert.sftp_container.id}" %>
+                  <% elsif alert.sftp_container %>
+                    <%= alert.sftp_container.name %>
+                  <% elsif alert.container %>
+                    <%= link_to alert.container.name, "/containers/#{alert.container.id}" %>
+                  <% end %>
+                </td>
+                <td><%= link_to alert.description, "/alert_notifications/#{alert.id}" %></td>
+                <td class="text-right">Active since <%= time_ago_in_words alert.created_at %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>

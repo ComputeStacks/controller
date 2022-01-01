@@ -1,0 +1,47 @@
+testone:
+  label: 'test01'
+  hostname: 'test01'
+  public_ip: '192.168.173.10'
+  primary_ip: '192.168.173.10'
+  region: regionone
+  active: true
+
+testtwo:
+  label: 'test02'
+  hostname: 'test02'
+  public_ip: '192.168.173.11'
+  primary_ip: '192.168.173.11'
+  region: regionone
+  active: true
+
+testthree:
+  label: 'test03'
+  hostname: 'test03'
+  public_ip: '192.168.173.12'
+  primary_ip: '192.168.173.12'
+  region: regionone
+  active: true
+
+testfour:
+  label: 'test04'
+  hostname: 'test04'
+  public_ip: '192.168.173.13'
+  primary_ip: '192.168.173.13'
+  region: regiontwo
+  active: true
+
+testfive:
+  label: 'test05'
+  hostname: 'test05'
+  public_ip: '192.168.173.14'
+  primary_ip: '192.168.173.14'
+  region: regiontwo
+  active: true
+
+testsixth:
+  label: 'test06'
+  hostname: 'test06'
+  public_ip: '192.168.173.15'
+  primary_ip: '192.168.173.15'
+  region: regiontwo
+  active: true

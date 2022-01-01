@@ -1,0 +1,24 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Image Providers", admin_container_images_providers_url %></li>
+      <li><%= link_to @provider.name, admin_container_images_provider_url(@provider) %></li>
+      <li class="active">Edit</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @provider.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @provider, url: admin_container_images_provider_url(@provider) do |f| %>
+      <div class="panel panel-default">
+        <%= render partial: "admin/container_images/providers/form", locals: {f: f} %>
+        <div class="panel-footer text-right">
+          <%= link_to t('actions.cancel'), admin_container_images_provider_url(@provider), class: 'btn btn-default pull-left' %>
+          <%= submit_tag t('actions.update'), class: 'btn btn-success' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <%= render(partial: 'application/model_errors', locals: { errors: @provider.errors, obj: "Image Provider" }) unless @provider.errors.count.zero? %>
+</div>

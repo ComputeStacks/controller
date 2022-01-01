@@ -1,0 +1,9 @@
+one:
+  load_balancer_id:
+  ip_addr:
+  role: MyString
+
+two:
+  load_balancer_id:
+  ip_addr:
+  role: MyString

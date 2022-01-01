@@ -1,0 +1,29 @@
+<div class="row">
+  <div class="col-sm-12">
+    <div class="panel panel-default">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Owner</th>
+          <th class="text-right">Created</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% if zones.empty? %>
+          <tr><td colspan="5" class="text-center">None</td> </tr>
+        <% end %>
+        <% zones.each do |i| %>
+          <tr>
+            <td><%= link_to i.id, "/admin/dns/#{i.id}" %></td>
+            <td><%= link_to i.name, "/admin/dns/#{i.id}" %></td>
+            <td><%= i.user.nil? ? '...' : link_to(i.user.full_name, admin_user_path(i.user)) %></td>
+            <td class="text-right"><%= l i.created_at, format: :short %></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

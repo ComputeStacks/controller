@@ -1,0 +1,19 @@
+<?php
+$cfg['blowfish_secret'] = '<%= SecureRandom.urlsafe_base64(32) %>';
+$cfg['ShowChgPassword'] = false;
+$cfg['ZeroConf'] = false;
+<% if @container %>
+$cfg['ForceSSL'] = true;
+$cfg['PmaAbsoluteUri'] = 'https://<%= @container.service.default_domain %>';
+<% end %>
+$i = 0;
+<% @mysql_servers.each do |server| %>
+$i++;
+$cfg['Servers'][$i]['auth_type'] = 'cookie';
+$cfg['Servers'][$i]['host'] = '<%= server.local_ip %>';
+$cfg['Servers'][$i]['port'] = "3306";
+$cfg['Servers'][$i]['connect_type'] = 'tcp';
+$cfg['Servers'][$i]['compress'] = false;
+$cfg['Servers'][$i]['AllowNoPassword'] = false;
+<% end %>
+//?>

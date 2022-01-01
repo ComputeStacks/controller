@@ -1,0 +1,12 @@
+.panel.panel-default
+  .panel-body
+    strong RECENT USERS
+  table.table
+    - if @new_users.empty?
+      tr
+        td colspan='2' style='text-align:center;' No Users Found
+    - @new_users.each do |i|
+      tr
+        td= link_to i.full_name, "/admin/users/#{i.id}-#{i.full_name.parameterize}"
+        td.text-right
+          small= i.created_at.in_time_zone.strftime(t('time.formats.long'))

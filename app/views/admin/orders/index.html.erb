@@ -1,0 +1,23 @@
+<%= render partial: 'admin/layouts/shared/accounts_nav' %>
+
+
+<div class="row">
+  <div class="col-xs-12">
+    <p class="lead">
+      Orders <%= "for: #{link_to(@user.full_name, admin_user_path(@user))}".html_safe if @user %>
+    </p>
+  </div>
+</div>
+
+<div class="row"><%= render partial: "admin/orders/index/filter" %></div>
+
+<hr />
+<div class="row">
+  <div class="col-xs-12"><%= render partial: "admin/orders/index/list", locals: { orders: @orders } %></div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @orders %>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ol.breadcrumb
+      li= link_to "Products", "/admin/products"
+      li.activ Edit Package
+
+.row: div class="#{@package.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8'}"
+  p.lead= "Edit Package for: #{@product.label}"
+
+.row
+  div class="#{@package.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8'}"
+    = form_for @package, url: "/admin/products/#{@product.id}/billing_packages/#{@package.id}" do |f|
+      .panel.panel-default= render partial: "admin/products/billing_packages/form", locals: {f: f}
+
+  - if !@package.errors.count.zero?
+    = render partial: 'admin/products/billing_packages/errors'

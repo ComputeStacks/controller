@@ -1,0 +1,14 @@
+<div class="panel panel-default">
+  <% count = 0 %>
+  <% events.sorted.each do |i| %>
+    <% unless count.zero? %><hr /><% end %>
+    <% count += 1 %>
+    <div class="panel-body">
+      <div class="pull-right"><%= l i.created_at, format: :short %></div>
+      <div><%= link_to i.message, "/admin/system_events/#{i.id}" %></div>
+    </div>
+    <div class="panel-body">
+      <pre><%= i.data.to_yaml %></pre>
+    </div>
+  <% end %>
+</div>

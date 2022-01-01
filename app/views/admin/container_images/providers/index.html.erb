@@ -1,0 +1,46 @@
+<%= render partial: 'admin/layouts/shared/images_nav' %>
+
+<div class="row">
+  <div class="col-md-12">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Hostname</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @providers.each do |i| %>
+      <tr>
+        <td>
+          <%= i.name %>
+          <%= content_tag(:span, 'Default', class: 'label label-primary') if i.is_default %>
+        </td>
+        <td>
+
+          <% if i.container_registry %>
+            <%= link_to "#{i.container_registry.label} (#{i.hostname})", admin_registry_path(i.container_registry) %>
+          <% else %>
+            <%= i.hostname.blank? ? '_' : i.hostname %>
+          <% end %>
+
+        </td>
+        <td class="text-right">
+          <div class="btn-group">
+            <%= link_to raw("<i class='fa fa-wrench fa-fw'></i>"), edit_admin_container_images_provider_path(i), class: 'btn btn-sm btn-default' %>
+            <%= link_to raw("<i class='fa fa-trash fa-fw'></i>"), admin_container_images_provider_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' unless i.is_dockerhub? %>
+          </div>
+        </td>
+      </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @providers %>
+  </div>
+</div>

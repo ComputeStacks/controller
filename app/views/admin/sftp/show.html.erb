@@ -1,0 +1,86 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <% if @container.deployment %>
+        <li><%= link_to "Projects", "/admin/deployments" %></li>
+        <li><%= link_to @container.deployment.name, admin_deployments_path(@container.deployment) %></li>
+      <% else %>
+        <li><%= link_to 'SFTP Containers', '/admin/sftp' %></li>
+      <% end %>
+      <li class="active"><%= @container.name %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-sm-12">
+
+    <div class="row">
+
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <table class="table-list">
+            <tr>
+              <td>Project</td>
+              <td><%= @container.deployment.nil? ? '...' : link_to(@container.deployment.name, admin_deployments_path(@container.deployment)) %></td>
+            </tr>
+            <tr>
+              <td>Status</td>
+              <td><%= @container.status.capitalize %></td>
+            </tr>
+            <tr>
+              <td>Node</td>
+              <td><%= link_to(@container.node.label, admin_regions_url(@container.node.region)) if @container.node %></td>
+            </tr>
+            <tr>
+              <td>IP</td>
+              <td><%= @container.ip_addr %></td>
+            </tr>
+            <tr>
+              <td>Port</td>
+              <td><%= @container.public_port.zero? ? '...' : @container.public_port %></td>
+            </tr>
+            <tr>
+              <td>Username</td>
+              <td>sftpuser</td>
+            </tr>
+            <tr>
+              <td>Password</td>
+              <td id="sftp-password">
+                <%= link_to t('actions.show'), "#{admin_sftp_path(@container)}/password", onclick: "inlineRemoteResource('sftp-password');return false;" %>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading"><div class="panel-title">Attached Volumes</div></div>
+          <div class="remote-resource" data-url="<%= admin_sftp_path(@container) %>/remote_volumes">
+            <div style="padding:25px 0;" class="text-center">
+              <i class="fa fa-refresh fa-spin"></i>
+              <%= t 'common.loading_obj', obj: t('obj.volumes') %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="remote-resource refresh" data-url="<%= admin_sftp_path(@container) %>/events">
+            <div class="text-center" style="padding: 25px 0;">
+              <i class="fa fa-refresh fa-spin"></i>
+              <%= t 'common.loading_obj', obj: t('events.plural') %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

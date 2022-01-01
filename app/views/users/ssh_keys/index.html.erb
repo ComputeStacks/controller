@@ -1,0 +1,20 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to t('users.profile_sidebar.main'), "/users/edit" %></li>
+      <li class="active">SSH Keys</li>
+    </ol>
+  </div>
+<% end %>
+
+
+<div class="row">
+  <div class="col-lg-2 col-md-3 col-sm-12"><%= render partial: 'users/sidebar', locals: { active_tab: 'ssh' } %></div>
+  <div class="col-lg-10 col-md-9 col-sm-12">
+    <%= link_to t('actions.create'), "/users/ssh_keys/new", class: 'pull-right btn btn-success btn-sm' %>
+    <h5>My SSH Keys</h5>
+    <div class="panel panel-default">
+      <%= render partial: "ssh_keys/table", locals: { show_owner: false, ssh_keys: @ssh_keys, base_path: "/users/ssh_keys", editable: true } %>
+    </div>
+  </div>
+</div>

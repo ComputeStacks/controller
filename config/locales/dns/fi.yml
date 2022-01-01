@@ -1,0 +1,46 @@
+fi:
+  dns:
+    obj: DNS
+    server_error: "DNS serveriin yhdistämisessä tapahtui virhe"
+    zone_error: "Zone tiedoston lataamisessa tapahtui virhe"
+    index:
+      breadcrumb: DNS Zone tiedot
+      new_btn: Uusi domain
+      empty: Domaineja ei löytynyt
+    records:
+      new:
+        title: Luo %{type} tiedot
+      edit:
+        title: Muokkaa %{type} tietoja
+    reverse:
+      title: "PTR tiedot: %{addr}"
+      hostname: Koneennimi
+    show:
+      empty: Ei %{field} tietoja
+      actions:
+        discard: Hylkää muutokset
+        commit: Tallenna muutokset
+        last_updated: Viimeksi päivitetty
+        new: Uusi domain
+      fields:
+        zone: Zone Name
+        primary_dns: Ensisijainen DNS
+        email: Sähköposti
+        refresh: Päivitä
+        retry: Yritä uudelleen
+        expire: Vanhentuu
+        ttl: TTL
+        ns: Nimipalvelin
+        hostname: Koneennimi
+        mx: Sähköposti serveri
+        priority: Tärkeys
+        target: Kohde
+        weight: Paino
+        domain: Verkkotunnus
+        name: Nimi
+        value: Arvo
+        dns_sec:
+          key_tag: Key Tag
+          algo: Algorithm Type
+          digest_type: Digest Type
+          digest: Digest

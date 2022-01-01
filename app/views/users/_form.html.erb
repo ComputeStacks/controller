@@ -1,0 +1,170 @@
+<div class="row">
+  <div class="col-sm-6">
+    <div class="form-group">
+      <%= label_tag :name, t('users.fields.fname') %><span class="text-danger">*</span>
+      <%= f.text_field :fname, :class => "form-control", required: true %>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="form-group">
+      <%= label_tag :lname, t('users.fields.lname') %><span class="text-danger">*</span>
+      <%= f.text_field :lname, class: "form-control", required: true %>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <% if Setting.billing_phone %>
+    <div class="col-sm-6 col-xs-12">
+      <div class="form-group">
+        <%= label_tag :email, t('users.fields.email') %><span class="text-danger">*</span>
+        <%= f.email_field :email, class: 'form-control', required: true %>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xs-12">
+      <div class="form-group">
+        <%= label_tag :phone, t('users.fields.phone') %><span class="text-danger">*</span>
+        <%= f.text_field :phone, class: 'form-control' %>
+      </div>
+    </div>
+  <% else %>
+    <div class="col-xs-12">
+      <div class="form-group">
+        <%= label_tag :email, t('users.fields.email') %><span class="text-danger">*</span>
+        <%= f.email_field :email, class: 'form-control', required: true %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if Setting.billing_address %>
+  <hr>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= label_tag :address1, t('users.fields.address_1') %><span class="text-danger">*</span>
+        <%= f.text_field :address1, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= label_tag :address2, t('users.fields.address_2').to_s.strip.length.zero? ? raw("&nbsp;") : t('users.fields.address_2') %>
+        <%= f.text_field :address2, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="form-group">
+        <%= label_tag :city, t('users.fields.city') %><span class="text-danger">*</span>
+        <%= f.text_field :city, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <%= label_tag :state, t('users.fields.state') %><span class="text-danger">*</span>
+        <%= f.text_field :state, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <%= label_tag :zip, t('users.fields.zip') %><span class="text-danger">*</span>
+        <%= f.text_field :zip, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-8 col-sm-6 col-xs-12">
+      <div class="form-group">
+        <%= label_tag :company_name, t('users.fields.company') %>
+        <%= f.text_field :company_name, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-md-8 col-sm-6 col-xs-12">
+      <div class="form-group">
+        <%= label_tag :vat, 'VAT' %>
+        <%= f.text_field :vat, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="form-group">
+        <%= label_tag :company_name, t('users.fields.company') %>
+        <%= f.text_field :company_name, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="form-group">
+        <%=  %><span class="text-danger">*</span>
+        <% if defined?(current_user) && current_user == @user && !current_user.country.blank? %>
+          <%= country_select :user, :country, { selected: current_user.country }, {class: 'form-control chosen-select-standard'} %>
+        <% else %>
+          <%= country_select :user, :country, {selected: country_by_ip(request.remote_ip)}, {class: 'form-control chosen-select-standard'} %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<hr>
+<div class="row">
+  <div class="col-md-12">
+    <p class="lead">Preferences</p>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="form-group">
+      <%= f.label :c_sftp_pass, "SFTP Password Authentication" %>
+      <%= f.check_box :c_sftp_pass, class: 'form-control' %>
+      <span class="help-block">Enable or Disable Password Authentication by default on all new projects.</span>
+    </div>
+  </div>
+</div>
+
+<% unless selectable_currency_list.count < 2 %>
+  <hr>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <%= label_tag :currency, t('users.fields.currency')  %>
+        <select class="form-control chosen-select-standard" name="user[currency]" id="user_currency">
+          <% selectable_currency_list.each do |v, k| %>
+            <option value="<%= k %>" <% if @user.currency == k %>selected="selected"<% end %>><%= v %></option>
+          <% end %>
+        </select>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% unless request.path == '/users/edit' %>
+  <hr>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= label_tag :password, t('users.fields.password')  %>
+        <% if current_user %>
+          <%= f.password_field :password, class: 'form-control' %>
+        <% else %>
+          <span class="text-danger">*</span>
+          <%= f.password_field :password, class: 'form-control', required: true %>
+        <% end %>
+        <span class="help-block"><%= t('users.fields.password_hint') %></span>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= label_tag :password_confirmation, t('users.fields.password_confirmation') %>
+        <% if current_user %>
+          <%= f.password_field :password_confirmation, class: 'form-control' %>
+        <% else %>
+          <span class="text-danger">*</span>
+          <%= f.password_field :password_confirmation, class: 'form-control', required: true %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

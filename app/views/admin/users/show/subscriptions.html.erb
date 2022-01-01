@@ -1,0 +1,37 @@
+<div class="row">
+  <div class="col-sm-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <div class="pull-right">
+          <%= link_to "See All", "/admin/subscriptions/?user=#{@user.id}", style: 'margin-top:-14px;' %>
+        </div>
+        <strong>ACTIVE SUBSCRIPTIONS</strong>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Run Rate</th>
+            <th>Service</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @subscriptions.empty? %>
+            <tr><td colspan="6" class="text-center">None</td> </tr>
+          <% end %>
+          <% @subscriptions.each do |i| %>
+            <tr>
+              <td><%= link_to i.id, admin_subscriptions_path(i) %></td>
+              <td><%= link_to i.label, admin_subscriptions_path(i) %></td>
+              <td><%= format_currency i.run_rate %></td>
+              <td><%= subscription_obj_link(i).html_safe %></td>
+              <td><%= l i.created_at, format: :short %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

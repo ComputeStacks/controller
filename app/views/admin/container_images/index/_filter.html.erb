@@ -1,0 +1,30 @@
+<%= form_tag "/admin/container_images", method: :get do %>
+	<% unless params[:user].to_i.zero? %><input type="hidden" name="user" value="<%= params[:user] %>"><% end %>
+	<div class="col-md-2 col-sm-3 col-col-xs-4">
+		<label>OWNERSHIP</label>
+		<select name="state" title="Filter by status." class="form-control chosen-select-standard">
+			<option value="">Show All</option>
+			<option value="public" <% if params[:state] == 'public' %>selected="selected"<% end %>>Public</option>
+			<option value="private" <% if params[:state] == 'private' %>selected="selected"<% end %>>Private</option>
+		</select>
+	</div>
+	<div class="col-md-2 col-sm-3 col-xs-4">
+		<label>KIND</label>
+		<select name="kind" title="Filter by status." class="form-control chosen-select-standard">
+			<option value="">Show All</option>
+			<option value="containers" <% if params[:kind] == 'containers' %>selected="selected"<% end %>>Containers</option>
+			<option value="loadbalancers" <% if params[:kind] == 'loadbalancers' %>selected="selected"<% end %>>Load Balancers</option>
+		</select>
+	</div>
+	<div class="col-md-2 col-sm-3 col-xs-4">
+		<label>ACCESSIBLE?</label>
+		<select name="regvalid" title="Filter by status." class="form-control chosen-select-standard">
+			<option value="">Show All</option>
+			<option value="yes" <% if params[:regvalid] == 'yes' %>selected="selected"<% end %>>Yes</option>
+			<option value="no" <% if params[:regvalid] == 'no' %>selected="selected"<% end %>>No</option>
+		</select>
+	</div>
+	<div class="col-md-2 col-sm-3 col-col-xs-4">
+		<%= submit_tag "Filter", class: 'btn btn-primary', style: 'margin-top:20px;' %>
+	</div>
+<% end %>

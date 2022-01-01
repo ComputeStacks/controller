@@ -1,0 +1,23 @@
+<%= render partial: 'admin/layouts/shared/containers_nav' %>
+
+<div class="row">
+  <div class="col-md-12">
+    <p class="lead">Volumes</p>
+  </div>
+</div>
+
+<div class="row"><%= render partial: "admin/volumes/index/filter" %></div>
+
+<hr />
+
+<div class="row">
+  <div class="col-xs-12">
+      <%= render partial: "admin/volumes/index/index", locals: { volumes: @volumes } %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @volumes %>
+  </div>
+</div>

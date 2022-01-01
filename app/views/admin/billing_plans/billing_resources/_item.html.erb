@@ -1,0 +1,80 @@
+<div class="col-lg-6 col-md-12">
+  <div class="panel panel-default">
+    <div class="panel-body" <% if resource.package %>style="padding-bottom: 0;"<% end %>>
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="pull-right text-right">
+            <div class="btn-group">
+               <%= link_to tag.i(nil, class: 'fa fa-wrench'), "/admin/billing_plans/#{resource.billing_plan_id}/billing_resources/#{resource.id}/edit", class: 'btn btn-default btn-sm' %>
+              <%= link_to tag.i(nil, class: 'fa fa-trash-o'), "/admin/billing_plans/#{resource.billing_plan_id}/billing_resources/#{resource.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
+            </div>
+          </div>
+          <span style="font-size:2rem;"><%= resource.product.label %></span>
+        </div>
+      </div>
+    </div>
+    <% if resource.package %>
+      <hr style="margin-bottom: 15px;margin-top: 15px;">
+      <div class="panel-body" style="padding-bottom: 0;padding-top:0;">
+        <div class="row">
+          <div class="col-sm-6">
+            <ul class="list-unstyled">
+              <li>
+                CPU
+                <b class="pull-right"><%= pluralize resource.package.cpu, 'Core' %></b>
+              </li>
+              <li>
+                <%= t('attributes.disk').upcase %>
+                <b class="pull-right"><%= resource.package.storage %> GB</b>
+              </li>
+              <li>
+                BANDWIDTH
+                <b class="pull-right"><%= resource.package.bandwidth %> GB</b>
+              </li>
+            </ul>
+          </div>
+          <div class="col-sm-6">
+            <ul class="list-unstyled">
+              <li>
+                MEMORY
+                <b class="pull-right"><%= resource.package.memory %> MB</b>
+              </li>
+              <li>
+                <%= t('attributes.local_disk').upcase %>
+                <b class="pull-right"><%= resource.package.local_disk %> GB</b>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    <table class="table">
+      <thead>
+      <tr>
+        <th class="text-uppercase text-muted">Phase</th>
+        <th class="text-uppercase text-muted">Duration</th>
+        <th class="text-uppercase text-muted">Default Price</th>
+        <th class="text-uppercase text-muted">Regions</th>
+        <th class="text-uppercase text-muted">Pricing Tiers</th>
+        <th class="text-uppercase text-muted">Currencies</th>
+        <th class="text-right">
+          <%= link_to raw("<i class='fa fa-plus'></i> Phase"), "#{@base_url}/billing_phases/new?billing_resource_id=#{resource.id}", class: 'btn btn-xs btn-primary' if resource.available_phases.count < 3 %>
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <% resource.available_phases.each do |phase| %>
+        <tr onclick="window.location='<%= "#{base_url}/billing_phases/#{phase.id}" %>'" style="cursor: pointer;">
+          <td><%= link_to phase.phase_type.capitalize, "#{base_url}/billing_phases/#{phase.id}", style: "text-decoration:underline;color:#333;" %></td>
+          <td><%= phase.phase_type == 'final' ? "&infin;".html_safe : "#{phase.duration_qty} #{phase.duration_unit}" %></td>
+          <td><%= phase_default_price(phase) %></td>
+          <td><%= phase.regions.count %></td>
+          <td><%= phase.prices.count %></td>
+          <td><%= phase.available_currencies.count > 1 ? link_to("multiple", "#{base_url}/billing_phases/#{phase.id}", style: "text-decoration:underline;color:#333;") : phase.available_currencies.first %></td>
+          <td class="text-right"><%= link_to tag.i(nil, class: 'fa fa-cogs'), "#{base_url}/billing_phases/#{phase.id}" %></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

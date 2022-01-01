@@ -1,0 +1,32 @@
+fi:
+  orders:
+    projects:
+      errors:
+        missing_name: Ole hyvä ja anna käyttöönotolle nimi.
+        missing_package: Ole hyvä ja valitse paketti jokaiselle sovellukselle.
+        general: "Käyttöönotossasi on virhe. Ole hyvä ja ota yhteys tukeen."
+        general_restart: "Virhe! Tilauksesi käsittelyssä tapahtui virhe. Ole hyvä ja yritä uudelleen."
+        degraded: "Käyttöönoton muokkaus ei onnistu hajonneessa tilassa."
+        working: "Ole hyvä ja odota alkukäyttöönottoa ennen muutosten tekoa."
+        session_error: "Virhe! Tilauksen käsittelyn aloituksessa tapahtui virhe. Ole hyvä ja yritä uudelleen."
+        missing_app: Ole hyvä ja valitse sovellus.
+        missing_data: Virhe! Tilauksesta puuttuu tietoja.
+      cancel: Peruuta tilaus
+      containers:
+        choose_apps: Valitse sovelluksesi
+        custom_app: Luo mukautettu sovellus
+        my_images: Kuvani
+        public_apps: Julkiset sovellukset
+        deployment_name: Nimeä käyttöönottosi
+        existing_html: "Lisää kontteja projektiin: <b>%{project}</b>"
+      container_params:
+        app_settings: Sovelluksen asetukset
+        review: Tarkastele & ota käyttöön
+        no_packages:
+          none: Ei saatavilla olevia paketteja. Ota yhteyttä tukipalveluumme. # no packages in their billing plan
+          resources_html: | # If no packages fit the min requirements for the image
+            Paketteja jotka vastaavat tämän kuvan vaatimuksia ei ole saatavilla.<br>
+            Tarvitaan vähintään %{cpu} CPU ydintä ja %{memory} MB muistia.
+      ## Intentionally left blank ####
+      shared_containers:
+        name: Säiliön nimi

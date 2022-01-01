@@ -1,0 +1,30 @@
+<div class="panel panel-default">
+  <table class="table-list">
+    <tr>
+      <td><%= t 'containers.attributes.status' %></td>
+      <td><%= container.current_state&.capitalize %></td>
+    </tr>
+    <tr>
+      <td><%= t 'containers.attributes.ip' %></td>
+      <td><%= container.local_ip %></td>
+    </tr>
+    <tr>
+      <td><%= t 'container_services.setup.domains.ip' %></td>
+      <td><%= container.public_ip %></td>
+    </tr>
+    <tr>
+      <td><%= t 'obj.image' %></td>
+      <td><%= container.container_image&.label %></td>
+    </tr>
+    <tr>
+      <td><%= t 'obj.region' %></td>
+      <td><%= container.location&.name %> (<%= container.region&.name %>)</td>
+    </tr>
+    <% if current_user.is_admin || container.region.has_clustered_storage? %>
+      <tr>
+        <td><%= t 'obj.node' %></td>
+        <td><%= container.node&.label %></td>
+      </tr>
+    <% end %>
+  </table>
+</div>

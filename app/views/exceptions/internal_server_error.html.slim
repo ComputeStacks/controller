@@ -1,0 +1,8 @@
+- content_for :title, t('system_errors.fatal.url_title')
+= render partial: "exceptions/sentry_dialog", locals: { event_id: @sentry_event_id }
+
+.row: .block-center.col-md-8.col-md-offset-2
+  .panel.panel-primary: .panel-body
+		p.lead= t 'system_errors.fatal.title'
+		= t 'system_errors.fatal.message_html'
+		= link_to t('system_errors.fatal.link_back'), :back, class: 'btn btn-success'

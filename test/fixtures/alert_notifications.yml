@@ -1,0 +1,10 @@
+alert_one:
+  name: ContainerCpuUsage
+  status: firing
+  fingerprint: 67b7142bef0940e9
+  container: mysql_1
+  severity: warning
+  description: Container CPU usage is above 85%
+  value: 0.9020
+  last_event: <%= Time.now %>
+  event_count: 1

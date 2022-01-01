@@ -1,0 +1,6 @@
+.form-group
+  label.control-label= t 'dns.show.fields.name'
+  input.form-control type="text" name="name" value="#{record.name}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+.form-group
+  label.control-label= t 'dns.show.fields.value'
+  textarea.code-font.form-control name="value" style="font-size:12px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" rows='6'= record.value

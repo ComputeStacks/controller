@@ -1,0 +1,117 @@
+en:
+  events:
+    link_to: Event Logs
+    singular: Event
+    plural: Events
+    code: Event Code
+    details: Event Details
+    none: No Events
+    status:
+      pending: Pending
+      completed: Completed
+      running: Running
+      failed: Failed
+    kind:
+      info: Info
+      notice: Notice
+      warn: Warning
+      alert: Alert
+    messages:
+      unknown: "Error, Unknown event"
+      alert:
+        general: "[%{label}] An alert was generated (%{val})."
+        container:
+          cpu: "[%{label}] CPU usage (%{val}%) threshold hit."
+          mem: "[%{label}] Memory usage (%{val}%) threshold hit."
+        node:
+          offline: Node %{node} is offline
+          cpu: Node %{node} is experiencing high cpu usage
+          memory: Node %{node} is experiencing high memory usage
+          disk:
+            inodes: Node %{node} is out of inodes
+            read_latency: Node %{node} has unusual disk read latency
+            write_latency: Node %{node} has unusual disk write latency
+            full: Node %{node} is out of disk space
+            full_soon: Node %{node} will be out of disk in 4 hours
+        notifications:
+          processing: "Processing notifications for %{name}"
+        prom:
+          config_reload: Prometheus Configuration Reload Error
+          alert_manager_disconnected: Prometheus is not connected to Alert Manager
+          alert_manager_config_reload: Alert Manager Configuration Reload Error
+          exporter_down: A prometheus exporter is offline
+      backup:
+        delete: Removing volume backup
+        sync_volumes: Syncing locally created volumes
+      container:
+        start: "[%{label}] Starting Container %{container}."
+        stop: "[%{label}] Stopping Container %{container}."
+        restart: "[%{label}] Restarting Container %{container}."
+        rebuild: "[%{label}] Rebuilding Container %{container}."
+        delete: "[%{label}] Deleting Container %{container}."
+        build: "[%{label}] Building Container %{container}."
+        migrating: "[%{container}] Migrating to new node."
+        errors:
+          general_provision: "[%{label}] A provision error occurred for %{container}."
+          resize: "[%{label}] Failed to resize container: %{container}."
+          stay_online: "[%{label}] Recovery attempts have failed for %{container}."
+      deployment:
+        trash: "[%{project}] Deleting project"
+        sftp_init: "[%{project}] Update SFTP containers"
+        errors:
+          fatal: "Fatal error during provisioning."
+          missing_loadbalancer: "Unable to find load balancer."
+      lets_encrypt:
+        generate: "Generated LetsEncrypt for %{common_name}"
+        renew: "Renewing LetsEncrypt for %{common_name}"
+        validate: "Validating domain %{domain} for LetsEncrypt"
+      load_balancers:
+        validate_domain: "Validating domain %{domain} for Load Balancer %{load_balancer}"
+        generate_lets_encrypt: "LetsEncrypt setup for Load Balancer %{load_balancer}"
+      node:
+        images:
+          pull: "[%{node}] Updating local images"
+        maintenance:
+          enable: "Enabling maintenance mode on node %{node}."
+          disable: "Disabling maintenance mode on node %{node}."
+        evacuating: "Evacuating node %{node}."
+        ports:
+          reload: "[%{node}] Reloading external ports."
+          open: "[%{container}] Generating public port for %{port}."
+          close: "[%{container}] Removing public access for port %{port}."
+        volumes:
+          provision: "Provisioning volume %{volume} on node %{node}."
+      order:
+        provision: Provisioning new order
+      service:
+        autoscale: "[%{label}] AutoScaling Service"
+        building_1: "[%{label}] Provisioning 1 Container."
+        building: "[%{label}] Provisioning %{count} Containers."
+        removing_1: "[%{label}] Removing 1 Container."
+        removing: "[%{label}] Removing %{count} Containers."
+        resizing_1: "[%{label}] Resizing 1 Container."
+        resizing: "[%{label}] Resizing %{count} Containers."
+        scaling: "[%{label}] Scaling from %{from} to %{to} containers."
+        trash: "[%{label}] Deleting service"
+        errors:
+          scale: "[%{label}] Failed to scale containers."
+          resize: "[%{label}] Failed to resize containers."
+          delete: "[%{label}] Failed to delete service."
+      sftp:
+        reload_ssh_keys: "[%{container}] Reload User SSH Keys"
+      snapshots:
+        restore: "Restoring snapshot %{snapshot} to volume %{volume}."
+      system:
+        process_uage: Processing Billing Usage
+        sync_volumes: Syncing locally created volumes
+      users:
+        inactive: "[%{user}] User suspended."
+        active: "[%{user}] User un-suspended."
+      volumes:
+        clone: "Cloning volume %{volume}"
+        imported: "Imported volume %{volume}"
+      volume:
+        backup: Performing volume backup
+        delete: Removing volume
+        imported: "Imported volume %{volume}"
+        restore: Performing volume restore

@@ -1,0 +1,25 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <% if @deployment %>
+        <li><%= link_to 'Projects', "/admin/deployments" %></li>
+        <li><%= link_to @deployment.name, admin_deployments_path(@deployment) %></li>
+      <% else %>
+        <li><%= link_to "Domains", "/admin/container_domains" %></li>
+      <% end %>
+      <li class="active">Add Domain</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @domain.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @domain, url: "/admin/container_domains", method: :post do |f| %>
+      <div class="panel panel-default">
+        <%= render(partial: 'admin/container_domains/form', locals: { f: f }) %>
+        <%= render(partial: 'container_domains/form', locals: { f: f }) %>
+      </div>
+    <% end %>
+  </div>
+  <%= render partial: 'admin/container_domains/errors' unless @domain.errors.count.zero? %>
+</div>

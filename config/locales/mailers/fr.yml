@@ -1,0 +1,17 @@
+fr:
+  mailers:
+    confirmation_instructions:
+      title: 'Welcome, %{email}'
+      l1: 'You can confirm your email address and activate your account through the link below:'
+      link_text: 'Confirm my Email Address'
+    reset_password_instructions:
+      title: 'Hello, %{email}'
+      l1: 'Someone has requested a link to change your password. You can do this through the link below.'
+      l2: "If you didn't request this, please ignore this email."
+      l3: "Your password won't change until you access the link above and create a new one."
+      link_text: 'Change my password'
+    unlock_instructions:
+      title: 'Hello %{email}'
+      l1: 'Your account has been locked due to an excessive number of unsuccessful sign in attempts.'
+      l2: 'Click the link below to unlock your account:'
+      link_text: 'Unlock my account'

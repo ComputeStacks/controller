@@ -1,0 +1,15 @@
+<%= form_tag "/admin/orders", method: :get do %>
+  <% unless params[:user].to_i.zero? %><input type="hidden" name="user" value="<%= params[:user] %>"><% end %>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>STATUS</label>
+    <select name="state" title="Filter By Status" class="form-control chosen-select-standard">
+      <option value="">Open</option>
+      <option value="completed" <% if params[:state] == 'completed' %>selected="selected"<% end %>>Completed</option>
+      <option value="failed" <% if params[:state] == 'failed' %>selected="selected"<% end %>>Failed</option>
+      <option value="all" <% if params[:state] == 'all' %>selected="selected"<% end %>>Show All</option>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <%= submit_tag "Filter", class: 'btn btn-primary', style: 'margin-top:20px;' %>
+  </div>
+<% end %>

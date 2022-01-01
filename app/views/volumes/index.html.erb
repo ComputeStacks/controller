@@ -1,0 +1,40 @@
+<% content_for :title, t('obj.volumes') %>
+<%= render partial: "deployments/shared/main_nav" %>
+
+<div class="row">
+  <div class="col-md-12">
+
+    <table id="volume-list" class="table table-hover">
+      <thead>
+        <tr>
+          <th><%= t 'volumes.table.name' %></th>
+          <th><%= t 'volumes.table.usage' %></th>
+          <th><%= t 'obj.deployment' %></th>
+          <th><%= t 'volumes.table.attached_to' %></th>
+          <th><%= t 'common.created' %></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @volumes.each do |i| %>
+          <tr>
+            <td><%= link_to i.label, volume_url(i)  %></td>
+            <td><%= i.usage %> GB</td>
+            <td><%= i.deployment.nil? ? '...' : link_to(i.deployment.name, deployments_path(i.deployment)) %></td>
+            <td><%= i.container_service.nil? ? '...' : link_to(i.container_service.label, container_service_path(i.container_service)) %></td>
+            <td><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
+            <td class="text-right">
+              <div class="btn-group">
+                <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_volume_url(i), class: 'btn btn-sm btn-default' %>
+                <%= link_to raw("<i class='fa fa-trash'></i>"), volume_url(i), method: :delete, data: {confirm: "#{t('volumes.actions.delete.confirm')}"}, class: 'btn btn-sm btn-danger' if i.container_service.nil? %>
+                <%= link_to "<i class='fa fa-trash'></i>".html_safe, '#', title: "#{t('volumes.actions.delete.attached')}", disabled: 'disabled', class: 'btn btn-sm btn-danger' if i.container_service %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+
+  </div>
+</div>

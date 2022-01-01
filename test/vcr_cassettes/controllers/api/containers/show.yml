@@ -1,0 +1,325 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://192.168.173.10:8133/api/v1/query_range?end=1640884431&query=sum(rate(container_cpu_usage_seconds_total%7Bname=%22pma-something-01%22%7D%5B50s%5D))%20by%20(name)%20*%20100&start=1640884311&step=30
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      - Basic cHJvbXVzZXI6RVpacmRHdzBnM3ZsQUNtd3lXTk9PMU9q
+      User-Agent:
+      - Faraday v1.8.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.18.0
+      Date:
+      - Thu, 30 Dec 2021 17:13:51 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '63'
+      Connection:
+      - keep-alive
+    body:
+      encoding: UTF-8
+      string: '{"status":"success","data":{"resultType":"matrix","result":[]}}'
+  recorded_at: Thu, 30 Dec 2021 17:13:51 GMT
+- request:
+    method: get
+    uri: http://192.168.173.10:8133/api/v1/query?query=sum(container_memory_rss%7Bname=%22pma-something-01%22%7D)
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      - Basic cHJvbXVzZXI6RVpacmRHdzBnM3ZsQUNtd3lXTk9PMU9q
+      User-Agent:
+      - Faraday v1.8.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.18.0
+      Date:
+      - Thu, 30 Dec 2021 17:13:51 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '63'
+      Connection:
+      - keep-alive
+    body:
+      encoding: UTF-8
+      string: '{"status":"success","data":{"resultType":"vector","result":[]}}'
+  recorded_at: Thu, 30 Dec 2021 17:13:51 GMT
+- request:
+    method: get
+    uri: http://192.168.173.10:8133/api/v1/query_range?end=1640884431&query=sum(rate(container_cpu_usage_seconds_total%7Bname=%22pma-something-01%22%7D%5B50s%5D))%20by%20(name)%20*%20100&start=1640884311&step=30
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      - Basic cHJvbXVzZXI6RVpacmRHdzBnM3ZsQUNtd3lXTk9PMU9q
+      User-Agent:
+      - Faraday v1.8.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.18.0
+      Date:
+      - Thu, 30 Dec 2021 17:13:51 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '63'
+      Connection:
+      - keep-alive
+    body:
+      encoding: UTF-8
+      string: '{"status":"success","data":{"resultType":"matrix","result":[]}}'
+  recorded_at: Thu, 30 Dec 2021 17:13:51 GMT
+- request:
+    method: get
+    uri: http://192.168.173.10:8133/api/v1/query?query=sum(container_memory_rss%7Bname=%22pma-something-01%22%7D)
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      - Basic cHJvbXVzZXI6RVpacmRHdzBnM3ZsQUNtd3lXTk9PMU9q
+      User-Agent:
+      - Faraday v1.8.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.18.0
+      Date:
+      - Thu, 30 Dec 2021 17:13:51 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '63'
+      Connection:
+      - keep-alive
+    body:
+      encoding: UTF-8
+      string: '{"status":"success","data":{"resultType":"vector","result":[]}}'
+  recorded_at: Thu, 30 Dec 2021 17:13:51 GMT
+- request:
+    method: get
+    uri: http://192.168.173.10:8133/api/v1/query?query=container_last_seen%7Bname=%22pma-something-01%22%7D
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      - Basic cHJvbXVzZXI6RVpacmRHdzBnM3ZsQUNtd3lXTk9PMU9q
+      User-Agent:
+      - Faraday v1.8.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.18.0
+      Date:
+      - Thu, 30 Dec 2021 17:13:51 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '63'
+      Connection:
+      - keep-alive
+    body:
+      encoding: UTF-8
+      string: '{"status":"success","data":{"resultType":"vector","result":[]}}'
+  recorded_at: Thu, 30 Dec 2021 17:13:51 GMT
+- request:
+    method: get
+    uri: https://192.168.173.10:2376/containers/pma-something-01/json
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Swipely/Docker-API 2.0.0.pre.1
+      Accept:
+      - "*/*"
+      Content-Type:
+      - text/plain
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Api-Version:
+      - '1.41'
+      Content-Type:
+      - application/json
+      Docker-Experimental:
+      - 'false'
+      Ostype:
+      - linux
+      Server:
+      - Docker/20.10.8 (linux)
+      Date:
+      - Thu, 30 Dec 2021 17:13:51 GMT
+      Content-Length:
+      - '50'
+    body:
+      encoding: ASCII-8BIT
+      string: '{"message":"No such container: pma-something-01"}
+
+        '
+  recorded_at: Thu, 30 Dec 2021 17:13:51 GMT
+- request:
+    method: get
+    uri: https://192.168.173.10:2376/containers/pma-something-01/json
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Swipely/Docker-API 2.0.0.pre.1
+      Accept:
+      - "*/*"
+      Content-Type:
+      - text/plain
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Api-Version:
+      - '1.41'
+      Content-Type:
+      - application/json
+      Docker-Experimental:
+      - 'false'
+      Ostype:
+      - linux
+      Server:
+      - Docker/20.10.8 (linux)
+      Date:
+      - Thu, 30 Dec 2021 17:13:51 GMT
+      Content-Length:
+      - '50'
+    body:
+      encoding: ASCII-8BIT
+      string: '{"message":"No such container: pma-something-01"}
+
+        '
+  recorded_at: Thu, 30 Dec 2021 17:13:51 GMT
+- request:
+    method: get
+    uri: https://192.168.173.10:2376/containers/pma-something-01/json
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Swipely/Docker-API 2.0.0.pre.1
+      Accept:
+      - "*/*"
+      Content-Type:
+      - text/plain
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Api-Version:
+      - '1.41'
+      Content-Type:
+      - application/json
+      Docker-Experimental:
+      - 'false'
+      Ostype:
+      - linux
+      Server:
+      - Docker/20.10.8 (linux)
+      Date:
+      - Thu, 30 Dec 2021 17:13:51 GMT
+      Content-Length:
+      - '50'
+    body:
+      encoding: ASCII-8BIT
+      string: '{"message":"No such container: pma-something-01"}
+
+        '
+  recorded_at: Thu, 30 Dec 2021 17:13:51 GMT
+- request:
+    method: get
+    uri: https://192.168.173.10:2376/containers/pma-something-01/json
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Swipely/Docker-API 2.0.0.pre.1
+      Accept:
+      - "*/*"
+      Content-Type:
+      - text/plain
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Api-Version:
+      - '1.41'
+      Content-Type:
+      - application/json
+      Docker-Experimental:
+      - 'false'
+      Ostype:
+      - linux
+      Server:
+      - Docker/20.10.8 (linux)
+      Date:
+      - Thu, 30 Dec 2021 17:13:51 GMT
+      Content-Length:
+      - '50'
+    body:
+      encoding: ASCII-8BIT
+      string: '{"message":"No such container: pma-something-01"}
+
+        '
+  recorded_at: Thu, 30 Dec 2021 17:13:51 GMT
+recorded_with: VCR 6.0.0

@@ -1,0 +1,10 @@
+one:
+  deployment: project_test
+  label: test
+  notifier: email
+  value: peter@pp.net
+  rules:
+    - ContainerCreated
+    - ContainerCpuUsage
+    - ContainerDestroyed
+    - ContainerMemoryUsage

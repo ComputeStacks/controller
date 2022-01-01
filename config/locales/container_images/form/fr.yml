@@ -1,0 +1,40 @@
+fr:
+  container_images:
+    form:
+      label: Name
+      free: "Is Free?"
+      active: "Enabled?" # If it's available for new orders.
+      role: Role
+      role_class: Category
+      min_cpu: Minimum CPU
+      min_mem: Minimum Memory
+      scaling: Horizontal Scaling? # Asking if this image can scale
+      volume_override:
+        title: Use local storage for volume backend
+        help: "Enabling this will create all volumes locally on the node. This has the advantage of increased disk performance, at the expense of no high-availability."
+      registry:
+        source: Image Source
+        source_custom_placeholder: "my.custom-registry.com"
+        source_custom_help: Optionally, provide a custom registry URL.
+        image: Image # e.g. mysql
+        tag: Tag # e.g. latest
+        auth:
+          title: Registry Authentication
+          enabled: Enable Authentication
+          subtitle_html: |
+            These settings will be <em>ignored</em> if you're using the built-in container registry.
+      ## Blank line intentional ####
+      owner: Owner
+      command: # Override the default command for an image
+        title: Container Command Override
+        help_html: |
+          <p>Optionally, provide an override command to the container. Examples:</p>
+          <p><code>npm start</code>, <em>or for MySQL</em> <code>--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci</code></p>
+      content_blocks:
+        title: Content Blocks
+        description_html: Link specific content blocks to this image, otherwise the standard default ones will be displayed.
+        sections:
+          general: General Information
+          ssh: SSH Connection Info
+          domain: Domain Information
+          remote: Remote Access Information

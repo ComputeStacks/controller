@@ -1,0 +1,52 @@
+mysql:
+  container_image: mariadb
+  proto: tcp
+  port: 3306
+  tcp_proxy_opt: send-proxy-v2
+nginx_http:
+  container_image: nginx
+  external_access: true
+  proto: http
+  port: 80
+web_http:
+  container_image: wordpress
+  external_access: true
+  proto: http
+  port: 80
+web_ls:
+  container_image: wordpress
+  external_access: true
+  proto: http
+  backend_ssl: true
+  port: 7080
+custom_http:
+  container_image: custom
+  external_access: true
+  proto: http
+  port: 80
+custom_ls:
+  container_image: custom
+  external_access: true
+  proto: http
+  backend_ssl: true
+  port: 7080
+es_nginx:
+  container_image: es_load_balancer
+  external_access: true
+  proto: http
+  port: 80
+elasticsearch_public:
+  container_image: elasticsearch
+  external_access: true
+  load_balancer_rule: es_nginx
+  port: 9200
+  proto: http
+elasticsearch_cluster:
+  container_image: elasticsearch
+  port: 9300
+  proto: tcp
+pma_http:
+  container_image: pma
+  external_access: true
+  proto: http
+  port: 80

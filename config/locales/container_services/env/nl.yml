@@ -1,0 +1,12 @@
+nl:
+  container_services:
+    env:
+      breadcrumb: Environmental Parameters
+      title: "Manage Container Environment for: %{service}"
+      subtitle: "Any changes here will require you to initiate a rebuild of all associated containers."
+      table:
+        name: Name
+        type: Type
+        value: Value
+      new: Add Environmental Parameter
+      edit: "Edit: %{env}"

@@ -1,0 +1,53 @@
+<div class="row">
+  <div class="col-xs-12">
+    <%= form_tag "/admin/deployments", method: :get do %>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="row">
+            <% unless params[:user].to_i.zero? %><input type="hidden" name="user" value="<%= params[:user] %>"><% end %>
+            <div class="col-md-4 col-xs-12">
+              <label>REGION</label>
+              <select name="region" title="Filter by status." class="form-control chosen-select-standard">
+                <option value="">Show All</option>
+                <% Region.has_nodes.sorted.uniq.each do |i| %>
+                  <option value="<%= i.id %>" <% if params[:region].to_i == i.id %>selected="selected"<% end %>><%= i.name %></option>
+                <% end %>
+              </select>
+            </div>
+            <div class="col-md-4 col-xs-12">
+              <label>INCLUDES IMAGE</label>
+              <select name="image[]" title="Filter by status." class="form-control chosen-select-standard" multiple="multiple">
+                <% ContainerImage.where(user: nil).sorted.each do |i| %>
+                  <option value="<%= i.id %>" <% if params[:image].is_a?(Array) && params[:image].include?(i.id.to_s) %>selected="selected"<% end %>><%= i.label %></option>
+                <% end %>
+              </select>
+            </div>
+            <div class="col-md-4 col-xs-12">
+              <label>INCLUDES PACKAGE</label>
+              <select name="package[]" title="Filter by package" class="form-control chosen-select-standard" multiple="multiple">
+                <% Product.packages.sorted.each do |i| %>
+                  <option value="<%= i.id %>" <% if params[:package].is_a?(Array) && params[:package].include?(i.id.to_s) %>selected="selected"<% end %>><%= i.label %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 20px;">
+            <div class="col-md-4 col-xs-12">
+              <label>DISK USAGE GREATER THAN</label>
+              <input type="text" name="disk_usage" class="form-control" <%= params[:disk_usage].to_i.zero? ? '' : %Q(value=#{params[:disk_usage].to_i}) %> placeholder="0 GB">
+              <span class="help-block">Container disk usage, excluding volumes</span>
+            </div>
+            <div class="col-md-8 col-xs-12">
+              <label>CREATED BETWEEN</label>
+              <input type="text" name="created_between" class="datetimefilter form-control" value="<%= params[:created_between] %>" />
+              <span class="help-block">Filter by the date the project was created</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel-footer text-right">
+          <%= submit_tag "Filter", class: 'btn btn-primary' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

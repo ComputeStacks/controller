@@ -1,0 +1,53 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to t('obj.services'), "/container_services" %></li>
+      <li><%= link_to @service.name, "/container_services/#{@service.id}" %></li>
+      <li><%= link_to "Environmental Parameters", "/container_services/#{@service.id}/environmental" %></li>
+      <li class="active">New Setting</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @setting.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @setting, url: "/container_services/#{@service.id}/settings", method: :post do |f| %>
+      <div class="panel panel-default">
+        <div class="panel-body">
+
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <%= f.label :name, t('common.name') %>
+                <%= f.text_field :name, class: 'form-control', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false' %>
+                <%= t('container_images.params.common.name_help.description') %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <%= f.label :label, t('common.label') %>
+                <%= f.text_field :label, class: 'form-control' %>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <%= f.label :value, "Value" %>
+              <%= f.text_field :value, class: 'form-control', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false' %>
+            </div>
+          </div>
+        </div>
+        <div class="panel-footer">
+          <%= link_to t('actions.cancel'), "/container_services/#{@service.id}/environmental", class: 'btn btn-default', style: 'margin-right: 10px;' %>
+          <%= submit_tag t('actions.create'), class: 'btn btn-success pull-right' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <%= render partial: 'application/model_errors', locals: { errors: @setting.errors, obj: 'setting' } unless @setting.errors.count.zero? %>
+</div>

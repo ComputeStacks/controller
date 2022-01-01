@@ -1,0 +1,7 @@
+.panel.panel-primary
+  #signup-header-color.panel-heading
+    .panel-title= t('.title')
+  .panel-body= render partial: "users/form", locals: { f: f }
+  .panel-footer
+    = link_to t('actions.cancel'), "/", class: "btn btn-default"
+    = submit_tag t('.register_btn'), class: "btn btn-primary pull-right", data: {locale: t('common.please_wait'), form: 'register-form'}

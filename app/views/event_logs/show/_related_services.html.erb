@@ -1,0 +1,59 @@
+<%
+  # @param [Array] subscribers
+  # @param [Boolean] from_admin
+%>
+<table class="table-list">
+  <tbody>
+    <% subscribers.each do |i| %>
+      <tr>
+        <% if i.is_a?(Deployment::Container) %>
+          <td><%= t 'obj.container' %></td>
+          <td>
+            <%= link_to(
+                  i.name,
+                  from_admin ? admin_container_path(i) : "/deployments/#{i.deployment.token}/services/#{i.service.id}/containers/#{i.id}"
+                )
+            %>
+          </td>
+        <% elsif i.is_a?(Deployment::ContainerService) %>
+          <td><%= t 'obj.service' %></td>
+          <td>
+            <%=
+              link_to(
+                i.label,
+                from_admin ? admin_container_service_path(i) : "/deployments/#{i.deployment.token}/services/#{i.id}"
+              )
+            %>
+          </td>
+        <% elsif i.is_a?(Volume) %>
+          <td><%= t 'obj.volume' %></td>
+          <td><%= link_to i.label, from_admin ? admin_volume_path(i) : "/volumes/#{i.id}" %></td>
+        <% elsif i.is_a?(User) %>
+          <td><%= t 'obj.user' %></td>
+          <td><%= link_to i.full_name, admin_user_path(i) %></td>
+        <% elsif i.is_a?(Deployment) %>
+          <td><%= t 'obj.deployment' %></td>
+          <td><%= link_to i.name, from_admin ? "/admin/deployments/#{i.id}" : "/deployments/#{i.token}" %></td>
+        <% elsif i.is_a?(ContainerRegistry) %>
+          <td><%= t 'obj.registry' %></td>
+          <td><%= from_admin ? link_to(i.name, "/admin/container_images/registries/#{i.id}") : i.name %></td>
+        <% elsif i.is_a?(Deployment::Sftp) %>
+          <td>SSH <%= t 'obj.container' %></td>
+          <td><%= from_admin ? link_to(i.name, "/admin/sftp/#{i.id}") : i.name %></td>
+        <% elsif i.is_a?(LoadBalancer) %>
+          <td><%= t 'obj.lb' %></td>
+          <td><%= current_user.is_admin ? link_to(i.label, "/admin/load_balancers/#{i.id}") : i.label %></td>
+        <% elsif i.is_a? Node %>
+          <td>Node</td>
+          <td><%= link_to i.label, "/admin/regions/#{i.region.id}" %></td>
+        <% elsif i.is_a?(Deployment::ContainerDomain) %>
+          <td><%= t 'obj.domain' %></td>
+          <td><%= current_user.is_admin ? link_to(i.domain, "/admin/container_domains/#{i.id}") : i.domain %></td>
+        <% elsif i.is_a?(LetsEncrypt) %>
+          <td>LetsEncrypt</td>
+          <td><%= current_user.is_admin ? link_to(i.friendly_name, "/admin/lets_encrypt/#{i.id}") : i.friendly_name %></td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

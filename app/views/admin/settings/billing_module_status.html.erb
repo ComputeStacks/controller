@@ -1,0 +1,10 @@
+<% if @active.nil? %>
+  <i class="fa fa-chain-broken fa-lg" title="Disconnected"></i>
+<% elsif @active %>
+  <span class="fa-stack fa-md">
+      <i class="fa fa-circle fa-stack-2x text-success"></i>
+      <i class="fa fa-check fa-stack-1x fa-inverse"></i>
+    </span>
+<% else %>
+  <i class="fa fa-ban text-danger fa-lg" title="Connection Failed"></i>
+<% end %>

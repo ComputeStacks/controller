@@ -1,0 +1,19 @@
+<td style="vertical-align: middle;">
+  <%= link_to @region.name, "/admin/regions/#{@region.id}" %>
+</td>
+<td style="vertical-align: middle; text-align: center;">
+  <small>CPU</small><br>
+  <span style="font-size:1.2em;"><%= @resources[:cpu] %> %</span>
+</td>
+<td style="vertical-align: middle; text-align: center;">
+  <small>MEM</small><br>
+  <span style="font-size:1.2em;"><%= @resources[:memory] %> %</span>
+</td>
+<td style="vertical-align: middle; text-align: center;">
+  <small>DISK</small><br>
+  <span style="font-size:1.2em;"><%= @resources[:disk] %> %</span>
+</td>
+<td style="vertical-align: middle; text-align: center;">
+  <small>CONTAINERS</small><br>
+  <span style="font-size:1.2em;"><%= @resources[:containers] %></span>
+</td>

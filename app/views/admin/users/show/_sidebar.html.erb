@@ -1,0 +1,13 @@
+<% 2.times do |i| %>
+  <div class="tabbable <%= i.zero? ? 'tabs-left hidden-xs hidden-sm' : 'visible-xs visible-sm' %>" <% unless i.zero? %>style="margin-bottom:20px;"<% end %>>
+    <ul id="adminUserTabs" role="tablist" class="nav nav-tabs" <% if i.zero? %>style="width:100%;text-align:right;"<% end %>>
+      <li role="presentation" class="active"><%= link_to 'Overview', '#overview', role: 'tab', aria: {controls: 'overview'}, data: {toggle: 'tab'} %></li>
+      <li role="presentation"><%= link_to 'Subscriptions', '#subscriptions', role: 'tab', aria: {controls: 'subscriptions'}, data: {toggle: 'tab'} %></li>
+      <li role="presentation"><%= link_to 'Projects', '#deployments', role: 'tab', aria: {controls: 'deployments'}, data: {toggle: 'tab'} %></li>
+      <li role="presentation"><%= link_to 'Images', '#images', role: 'tab', aria: {controls: 'images'}, data: {toggle: 'tab'} %></li>
+      <li role="presentation"><%= link_to 'DNS Zones', '#zones', role: 'tab', aria: {controls: 'zones'}, data: {toggle: 'tab'} %></li>
+      <li role="presentation"><%= link_to 'Volumes', '#volumes', role: 'tab', aria: {controls: 'volumes'}, data: {toggle: 'tab'} %></li>
+      <li role="presentation"><%= link_to 'Lets Encrypt', '#letsencrypt', role: 'tab', aria: {controls: 'letsencrypt'}, data: {toggle: 'tab'} %></li>
+    </ul>
+  </div>
+<% end %>

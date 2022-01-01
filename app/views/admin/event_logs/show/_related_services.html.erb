@@ -1,0 +1,42 @@
+<table class="table-list">
+  <tbody>
+    <% subscribers.each do |i| %>
+      <tr>
+        <% if i.is_a?(Deployment::Container) %>
+          <td>Container</td>
+          <td><%= link_to i.label, "/containers/#{i.id}" %></td>
+        <% elsif i.is_a?(Deployment::ContainerService) %>
+          <td>Container Service</td>
+          <td><%= link_to i.label, "/container_services/#{i.id}" %></td>
+        <% elsif i.is_a?(Volume) %>
+          <td>Volume</td>
+          <td><%= link_to truncate(i.label, length: 30), "/admin/volumes/#{i.id}" %></td>
+        <% elsif i.is_a?(User) %>
+          <td>User</td>
+          <td><%= link_to i.full_name, admin_user_path(i) %></td>
+        <% elsif i.is_a?(Deployment) %>
+          <td>Project</td>
+          <td><%= link_to i.name, "/admin/deployments/#{i.id}" %></td>
+        <% elsif i.is_a?(ContainerRegistry) %>
+          <td>Container Registry</td>
+          <td><%= i.name %></td>
+        <% elsif i.is_a?(Deployment::Sftp) %>
+          <td>SSH Container</td>
+          <td><%= link_to i.name, admin_sftp_path(i) %></td>
+        <% elsif i.is_a?(LoadBalancer) %>
+          <td>Load Balancer</td>
+          <td><%= link_to i.label, "/admin/load_balancers/#{i.id}" %></td>
+        <% elsif i.is_a?(Node) %>
+          <td>Node</td>
+          <td><%= link_to i.label, "/admin/regions/#{i.region.id}" %></td>
+        <% elsif i.is_a?(Deployment::ContainerDomain) %>
+          <td>Domain</td>
+          <td><%= link_to i.domain, "/admin/container_domains/#{i.id}" %></td>
+        <% elsif i.is_a?(LetsEncrypt) %>
+          <td>LetsEncrypt</td>
+          <td><%= link_to i.friendly_name, "/admin/lets_encrypt/#{i.id}" %></td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

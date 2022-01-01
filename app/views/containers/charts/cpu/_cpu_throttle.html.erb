@@ -1,0 +1,13 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <p class="text-center">CPU Throttle Events (Seconds)</p>
+    <%= area_chart "#{container_charts_cpu_throttled_path(container.id)}.json",
+                   points: false,
+                   download: true,
+                   refresh: 60,
+                   label: "Seconds",
+                   curve: false,
+                   legend: false
+    %>
+  </div>
+</div>

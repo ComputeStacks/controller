@@ -1,0 +1,16 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <strong><%= t('obj.volumes').upcase %></strong>
+  </div>
+  <table class="table table-list">
+    <% volumes.each do |i| %>
+      <tr>
+        <td>
+          <%= link_to truncate(i.label, length: 25), "/volumes/#{i.id}" %>
+          <%= %Q(&nbsp; #{volume_ha_warning(i)}).html_safe if i.region.has_clustered_storage? && !i.uses_clustered_storage? %>
+        </td>
+        <td><%= i.usage %> GB</td>
+      </tr>
+    <% end %>
+  </table>
+</div>

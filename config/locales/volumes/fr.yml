@@ -1,0 +1,24 @@
+fr:
+  volumes:
+    list:
+      empty: No Volumes Found
+      edit: "Edit Volume: %{vol}"
+      new_button: Add Volume
+      new_button_help: "Volumes are persistent storage for your container. You can have multiple volumes per container, mounted at different points."
+      usage: Usage
+      backups: Backups
+    table:
+      title: Persistent Storage
+      name: Name
+      mounted: Mounted At
+      backup: Backup Method
+      usage: Usage
+      attached_to: Attached To
+    actions:
+      delete:
+        confirm: Are you sure?
+        attached: Detach from service before deleting.
+    path: Path
+    containers: Attached Containers
+    high_availability:
+      local_disabled: Local volumes will disable HA for this service.

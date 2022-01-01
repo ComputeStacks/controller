@@ -1,0 +1,22 @@
+<%= form_tag "/admin/subscriptions", method: :get do %>
+  <% unless params[:user].to_i.zero? %><input type="hidden" name="user" value="<%= params[:user] %>"><% end %>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>STATUS</label>
+    <select name="state" title="Filter by Active or Inactive." class="form-control chosen-select-standard">
+      <option value="">Active</option>
+      <option value="inactive" <% if params[:state] == 'inactive' %>selected="selected"<% end %>>Inactive</option>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>BY PRODUCT</label>
+    <select name="product" title="Filter by Active or Inactive." class="form-control chosen-select-standard">
+      <option value="">Show All</option>
+      <% Product.sorted.each do |product| %>
+        <option value="<%= product.id %>" <% if params[:product].to_i == product.id %>selected="selected"<% end %>><%= product.label %></option>
+      <% end %>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <%= submit_tag "Filter", class: 'btn btn-primary', style: 'margin-top:20px;' %>
+  </div>
+<% end %>

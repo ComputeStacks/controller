@@ -1,0 +1,63 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>Zone Name</label>
+        <%= f.text_field :name, required: true, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <% if controller.action_name == 'edit' || controller.action_name == 'update' %>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>DNS ID</label>
+        <%= f.text_field :provider_ref, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+  <% end %>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>DNS Driver</label>
+        <select name="dns_zone[provision_driver_id]" class="form-control chosen-select-standard">
+          <option value=""></option>
+          <% @provision_drivers.each do |i| %>
+          <% if controller.action_name == 'new' && @dns_driver.id == i.id %>
+            <option value="<%= i.id %>" selected="selected"><%= pd_module_name(i.module_name) %></option>
+          <% else %>
+            <option value="<%= i.id %>" <% if @zone.provision_driver_id == i.id %>selected="selected"<% end %>><%= pd_module_name(i.module_name) %></option>
+          <% end %>
+          <% end %>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>Owner</label>
+        <%= collection_select(:dns_zone, :user_id, @users, :id, :full_name, { include_blank: true }, {class: 'form-control chosen-select-standard'}) %>
+      </div>
+    </div>
+  </div>
+  <% if (controller.action_name == 'new' || controller.action_name == 'create') || @allow_module_create %>
+    <hr />
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="form-group">
+          <label for="dns_zone[run_module_create]">
+            Create Zone on DNS Server
+          </label>
+          <%= f.check_box :run_module_create, class: 'form-control' %>
+          <span class="help-block">This will create the DNS Zone on the DNS server. If it already exists, uncheck this box.</span>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), '/admin/dns', class: 'btn btn-default', style: 'margin-right: 10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success' %>
+</div>

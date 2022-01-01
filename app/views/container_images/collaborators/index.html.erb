@@ -1,0 +1,15 @@
+<% unless request.xhr? %>
+  <% content_for :title, "#{@image.label} #{t('collaborators.collaborator.plural').capitalize}" %>
+  <% content_for :breadcrumb do %>
+    <div class="row has-breadcrumb">
+      <ol class="breadcrumb">
+        <li><%= link_to t('obj.images'), (request.path =~ /admin/ ? "/admin/container_images" : "/container_images") %></li>
+        <li><%= link_to @image.label, (request.path =~ /admin/ ? "/admin/container_images/#{@image.id}" : "/container_images/#{@image.id}") %></li>
+        <li class="active"><%= t('collaborators.collaborator.plural').capitalize %></li>
+      </ol>
+    </div>
+  <% end %>
+<% end %>
+
+<%= render partial: 'collaborators/index', locals: { resource: @image, collaborators: @collaborators, base_path: "/container_images/#{@image.id}/collaborators" } %>
+

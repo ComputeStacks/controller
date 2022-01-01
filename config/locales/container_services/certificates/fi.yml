@@ -1,0 +1,28 @@
+fi:
+  container_services:
+    certificates:
+      breadcrumb:
+        index: SSL Sertifikaatit
+        new: Lisää SSL Sertifikaatti
+        edit: Muokkaa SSL Sertifikaattia
+      attributes:
+        expires: Umpeutuu
+        issuer: Myöntäjä
+        cert: Sertifikaatti
+        privkey: Yksityinen avain
+      none:
+        custom: Omaa sertifikaattia ei löydetty.
+        le: LetsEncrypt sertifikaattia ei löydetty.
+      verify_domain: Vahvista DNS
+      le:
+        title: LetsEncrypt Ilmainen sertifikaatti
+        action: Ota käyttöön ilmainen SSL
+      custom:
+        title: Omat SSL Sertifikaatit
+        action: Lähetä SSL
+      form:
+        already_exists:
+          title: Sertifikaatti on jo asennettu
+          help: Päivittääksesi tai korvataksesi jo asennetun sertifikaatin, poista vanha sertifikaatti ja asenna uusi.
+        cacert: "Sertifikaatin myöntäjä (valinnainen)"
+        cacert_help: "Useat sertifikaatin myöntäjät toimittavat erillisen sertifikaatin joka vahvistaa heidän allekirjoituksensa. Ilman tätä sertifikaattia jotkut selaimet saattavat hylätä heidän myöntämät sertifikaatit."

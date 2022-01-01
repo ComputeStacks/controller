@@ -1,0 +1,65 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <% if @deployment && @volume.container_service %>
+        <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+        <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+        <li><%= link_to @volume.container_service.label, container_service_path(@volume.container_service) %></li>
+      <% elsif @deployment %>
+        <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+        <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <% else %>
+        <li><%= link_to t('obj.volumes'), "/volumes" %></li>
+      <% end %>
+      <li class="active"><%= truncate(@volume.label, length: 40) %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <p class="lead" style="word-wrap: break-word;"><%= @volume.label %></p>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <a href="/volumes/<%= @volume.id %>/edit" class="btn btn-sm btn-default" style="margin-right:5px;">
+      <i class="fa fa-wrench"></i>
+    </a>
+    <%= link_to tag.i(nil, class: 'fa fa-trash'), "/volumes/#{@volume.id}", method: :delete, data: { confirm: 'Are you sure? This will result in data loss.' }, class: 'btn btn-sm btn-danger', style: "margin-right:5px;" %>
+
+    <a href="/volumes/<%= @volume.id %>/subscribers" class="btn btn-sm btn-default" style="margin-right:5px;">
+      <i class="fa fa-link"></i>
+      <%= t 'obj.containers' %>
+    </a>
+    <a href="/volumes/<%= @volume.id %>/logs" class="btn btn-sm btn-default" style="margin-right:5px;">
+      <i class="fa fa-list"></i>
+      <%= t 'events.plural' %>
+    </a>
+    <% if Feature.check('backups', current_user) %>
+      <a href="#" class="btn btn-sm btn-success" data-toggle="modal" data-target="#volumeCreateBackup">
+        <i class="fa fa-clone"></i>
+        <%= t 'volumes.backups.new' %>
+      </a>
+    <% end %>
+  </div>
+</div>
+
+<div class="row" style="margin-top:25px;">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <%= render partial: "volumes/show/overview", locals: { volume: @volume } %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12 remote-resource refresh" data-url="<%= request.path %>/logs"></div>
+</div>
+
+<% if Feature.check('backups', current_user) %>
+  <div class="row" style="margin-top:25px;">
+    <div class="col-lg-8 col-lg-offset-2 col-md-12">
+      <%= render partial: "volumes/show/backups", locals: { volume: @volume } %>
+    </div>
+  </div>
+  <%= render partial: "volumes/backups/new", locals: { volume: @volume } %>
+<% end %>

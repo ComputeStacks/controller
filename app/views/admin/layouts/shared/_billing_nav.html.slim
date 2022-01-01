@@ -1,0 +1,22 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ul.nav.nav-pills.sub-menu-pills.pull-left
+      li class="#{controller.class == Admin::SubscriptionsController ? 'active' : ''}"= link_to "Subscriptions", "/admin/subscriptions"
+      li class="#{request.path =~ /billing_plan/ ? 'active' : ''}"= link_to "Billing Plans", "/admin/billing_plans"
+      li class="#{request.path =~ /products/ ? 'active' : ''}"= link_to "Products", "/admin/products"
+
+    - if controller.controller_name == 'billing_plans'
+
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to raw("<i class='fa fa-columns'></i>&nbsp;&nbsp;&nbsp;New Billing Plan"), "/admin/billing_plans/new", class: 'btn btn-sm btn-default'
+
+    - elsif controller.controller_name == 'products'
+
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to raw("<i class='fa fa-shopping-basket'></i>&nbsp;&nbsp;&nbsp;New Product"), "/admin/products/new", class: 'btn btn-sm btn-default'
+
+    - else
+
+      ol.breadcrumb.breadcrumb-action.text-right style="height:45px;"
+        li
+          | &nbsp;

@@ -1,0 +1,19 @@
+system:
+  title: "Container Image: Domain Instructions"
+  content_key: container_image.domain
+
+custom:
+  title: Wordpress
+
+email_unlock:
+  title: "Email: Unlock Instructions"
+  content_key: email.unlock
+
+email_password:
+  title: "Email: Password Reset"
+  content_key: email.password
+
+email_confirmation:
+  title: "Email: Confirmation"
+  content_key: email.confirmation
+

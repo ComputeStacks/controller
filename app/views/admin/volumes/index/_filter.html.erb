@@ -1,0 +1,37 @@
+<%= form_tag "/admin/volumes", method: :get do %>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>VOLUME STATE</label>
+    <select name="state" title="Filter by Active or Trashed." class="form-control chosen-select-standard">
+      <option value="">Active Volumes</option>
+      <option value="trashed" <% if params[:state] == 'trashed' %>selected="selected"<% end %>>Trashed Volumes</option>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>HAS CONTAINERS</label>
+    <select name="containers" title="Filter by linked or unlinked volumes." class="form-control chosen-select-standard">
+      <option value="">Show All</option>
+      <option value="linked" <% if params[:containers] == 'linked' %>selected="selected"<% end %>>Volumes With Containers</option>
+      <option value="unlinked" <% if params[:containers] == 'unlinked' %>selected="selected"<% end %>>Volumes Without Containers</option>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>HAS USER</label>
+    <select name="user" title="Volumes connected to a user" class="form-control chosen-select-standard">
+      <option value="">Show All</option>
+      <option value="user" <% if params[:user] == 'user'%>selected="selected"<% end %>>Linked to user</option>
+      <option value="nouser" <% if params[:user] == 'nouser'%>selected="selected"<% end %>>No User</option>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <label>REGION</label>
+    <select name="region" title="Volumes by region" class="form-control chosen-select-standard">
+      <option value="">Show All</option>
+      <% Region.sorted.each do |region| %>
+        <option value="<%= region.id %>" <% if params[:region].to_i == region.id %>selected="selected"<% end %>><%= region.name %></option>
+      <% end %>
+    </select>
+  </div>
+  <div class="col-md-2 col-sm-3 col-col-xs-4">
+    <%= submit_tag "Filter", class: 'btn btn-primary', style: 'margin-top:20px;' %>
+  </div>
+<% end %>

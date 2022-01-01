@@ -1,0 +1,52 @@
+<% unless request.xhr? %>
+  <% content_for :breadcrumb do %>
+    <div class="row has-breadcrumb">
+      <ol class="breadcrumb">
+        <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+        <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+        <li><%= link_to @service.label, container_service_path(@service) %></li>
+        <li class="active"><%= t 'obj.containers' %></li>
+      </ol>
+    </div>
+  <% end %>
+  <div class="row"><div class="col-md-12">
+<% end %>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th><%= t 'obj.container' %></th>
+      <th><%= t 'containers.attributes.ip' %></th>
+      <% if current_user.is_admin || @service.region.has_clustered_storage? %><th>Node</th><% end %>
+      <th><%= t 'containers.attributes.status' %></th>
+      <th>CPU / <%= t 'attributes.mem' %></th>
+      <th title="Container usage, excluding volumes" style="cursor: help;text-decoration: underline;">Disk</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @containers.each do |i| %>
+      <tr>
+        <td class="<%= container_table_list_class i %>">
+          <strong><%= link_to container_name_indicator(i), container_path(i) %></strong>
+          <% if i.alert_notifications.active.exists? %>
+            <br>
+            <span style="font-size:0.85em;"><%= i.alert_notifications.active.map {|alert| link_to alert.description, "/alert_notifications/#{alert.id}", style: 'color:#333;text-decoration:underline;'}.join(" | ").html_safe %></span>
+          <% end %>
+        </td>
+        <td style="vertical-align: middle;" class="<%= container_table_list_class i %>"><%= container_ip_indicator i %></td>
+        <% if current_user.is_admin || @service.region.has_clustered_storage? %>
+          <td style="vertical-align: middle;"  class="<%= container_table_list_class i %>"><%= container_node_indicator i %></td>
+        <% end %>
+        <td style="vertical-align: middle;" class="<%= container_table_list_class i %>"><%= container_status_indicator i %></td>
+        <td style="vertical-align: middle;" class="<%= container_table_list_class i %>"><%= container_stats i %></td>
+        <td style="vertical-align: middle;" class="<%= container_table_list_class i %>"><%= container_current_disk_usage i %></td>
+        <td style="vertical-align: middle;" class="text-right <%= container_table_list_class i %>"><%= render partial: "containers/power_control", locals: { container: i } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% unless request.xhr? %>
+  </div></div>
+<% end %>

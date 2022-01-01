@@ -1,0 +1,16 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <% if defined?(@service) %>
+        <li><%= link_to t('events.plural'), "#{container_service_path(@service)}/events" %></li>
+      <% else %>
+        <li><%= link_to t('events.plural'), "#{deployments_path(@deployment)}/events" %></li>
+      <% end %>
+      <li class="active"><%= @log.id %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row"><%= render partial: 'event_logs/show', locals: { log: @log, subscribers: @subscribers }  %></div>

@@ -1,0 +1,85 @@
+fr:
+  container_services:
+    auto_scale:
+      enabled: AutoScale Active
+      disabled: AutoScale Disabled
+      menu_action: AutoScale
+      form:
+        enable:
+          label: Enable AutoScale
+          help: "Enable or Disable AutoScale for this application."
+        price:
+          title: AutoScale Limit
+          help_html: |
+            <p> With a <strong>value of 0.0</strong>, AutoScale will continually resize your application as you hit memory or cpu limits, and stay at those limits for at least 1 minute.</p>
+            <p>To limit how far your application is automatically scaled, or resized, please enter the maximum total amount you wish to spend, less any bandwidth and storage fees.</p>
+          help_quote_html: |
+            <p>If you choose to place a limit on AutoScale, <strong>we recommend a value of at least %{price}</strong>.<br>This will allow for scaling by either memory, or cpu.</p>
+          label: Max Hourly Spend
+        horizontal:
+          title: Horizontal Scaling
+          label: Enable Horizontal Scaling
+          help_html: |
+            <p>Once all packages have been exhausted, AutoScale will no longer be able to scale your application. In order to provide additional capacity, you have the ability to horizontally scale your application, which will increase your overall capacity.</p>
+            <p>With this option enabled, you're telling AutoScale to add 1 container each time your cpu or memory limit is hit.</p>
+    containers:
+      logs:
+        breadcrumb: Container Logs
+        description: Viewing Container Logs For
+    sidebar:
+      overview: Overview
+      domains: "Domains & SSL"
+      remote: Remote Access
+      logs: App Logs
+      settings: Settings
+      events: Activity
+    actions:
+      resize: Resize
+      scale: Scale
+    header:
+      app: Application
+      price: Estimated Price
+      plan: Package
+      connect: Setup
+      env: Environment
+    controller:
+      resize:
+        queued: Container will be resized shortly.
+        success: Container successfully resized.
+        error: There was a problem resizing your container.
+  deployments:
+    services:
+      edit:
+        name: App Name
+        resize_package:
+          title: Resize
+        scale:
+          title: Scale Horizontally
+      domains:
+        index:
+          empty: No Domains
+          new: Add Domain
+          title: Domains
+        form:
+          title: Add Domain
+          label: Domain Name
+      show:
+        containers:
+          name: Container Name
+          status: Status
+          health: Health
+          region: Region
+          ip: IP Address
+        linked:
+          title: Linked Containers
+        custom:
+          pma:
+            title: MySQL Containers
+            pass: Password
+            empty: No Containers Found
+      events:
+        show:
+          title: Activity
+        event_list:
+          title: Activity Log
+          empty: No Events

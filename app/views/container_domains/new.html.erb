@@ -1,0 +1,29 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <% if @deployment %>
+        <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+        <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <% else %>
+        <li><%= link_to t('obj.domains'), "/container_domains" %></li>
+      <% end %>
+      <li class="active"><%= t('container_services.domains.breadcrumb.new') %></li>
+    </ol>
+  </div>
+<% end %>
+
+<% if @domain.errors.count.zero? && params[:deployment_id] && current_user.container_domains.where("system_domain = false AND le_enabled = false").exists? %>
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12 text-center">
+    <p class="lead"><%= t 'container_services.domains.enable_le_html', link: '/container_domains' %></p>
+  </div>
+</div>
+<% end %>
+<div class="row">
+  <div class="<%= @domain.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @domain, url: "/container_domains", method: :post do |f| %>
+      <div class="panel panel-default"><%= render partial: 'container_domains/form', locals: { f: f } %></div>
+    <% end %>
+  </div>
+  <%= render partial: 'application/model_errors', locals: { errors: @domain.errors, obj: t('obj.domain') } unless @domain.errors.count.zero? %>
+</div>

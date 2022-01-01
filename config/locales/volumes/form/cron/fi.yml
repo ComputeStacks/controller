@@ -1,0 +1,63 @@
+fi:
+  volumes:
+    form:
+      cron:
+        modal:
+          title: Varmuuskopioaikataulun syntaksi
+          help_html: |
+            <p>Cron on tehokas tapa määrittää kuinka usein haluttu työ suoritetaan. Käyttämällä tätä voit määrittää milloin varmistustehtäväsi suoritetaan.</p>
+
+            <p>Voit käyttää myös käteviä oikoteitä joita suosittelemme useimmmille:</p>
+            <pre style="background-color: #fff;border:none;">
+            @hourly
+            @daily (or @midnight)
+            @weekly
+            @monthly
+            @yearly (or @annually)
+            </pre>
+
+            <p>
+              Jos haluat määrittää ajastuksen tarkasti, tässä on tarkka opas:
+            </p>
+            <pre style="background-color: #fff;border:none;">
+            * * * * * *
+            | | | | | |
+            | | | | | +-- Vuosi             (väli: 1900-3000) (valinnainen kenttä)
+            | | | | +---- Viikon päivä      (väli: 0-6, 0 tarkoittaa sunnuntaita)
+            | | | +------ Kuukauden numero  (väli: 1-12, 1 tarkoittaa tammikuuta)
+            | | +-------- Kuukauden päivä   (väli: 1-31)
+            | +---------- Tunti             (väli: 0-23)
+            +------------ Minuutti          (väli: 0-59)
+            </pre>
+            <strong>Note</strong>:Suurin sallittu tiheus on <b>15 minuuttia</b> for tiedostopohjaisille tallennustiloilla ja <b>kerran tunnissa</b> kaikelle muulle.
+          #
+          help_example_table_html: |
+            <table class="table">
+              <thead>
+              <tr><th colspan="2"></th></tr>
+              <tr>
+                <th colspan="2">Esimerkkejä</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>30 minuutin välein</td>
+                <td class="code-font" style="font-size:12px;">
+                  */30 * * * *
+                </td>
+              </tr>
+              <tr>
+                <td>4 tunnin välein</td>
+                <td class="code-font" style="font-size:12px;">
+                  0 */4 * * *
+                </td>
+              </tr>
+              <tr>
+                <td>Joka tiistai, torstai ja lauantai keskiyöllä</td>
+                <td class="code-font" style="font-size:12px;">
+                  0 0 * * 2,4,6
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          #

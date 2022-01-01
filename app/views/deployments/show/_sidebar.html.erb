@@ -1,0 +1,20 @@
+<% 2.times do |i| %>
+
+  <div class="tabbable <%= i.zero? ? 'tabs-left hidden-xs hidden-sm' : 'visible-xs visible-sm' %>" <% unless i.zero? %>style="margin-bottom:20px;"<% end %>>
+    <ul role="tablist" class="nav nav-tabs" <% if i.zero? %>style="width:100%;text-align:right;"<% end %>>
+      <li role="presentation" class="active">
+        <%= link_to t('deployments.show.sidebar.overview'), "#overview", role: 'tab', aria: { controls: 'overview' }, data: { toggle: 'tab' } %>
+      </li>
+      <% unless @deployment.uses_public_net? %>
+        <li><%= link_to t('deployments.show.sidebar.domains'), "#domains", role: 'tab', aria: { controls: 'domains' }, data: { toggle: 'tab' } %></li>
+        <li><%= link_to t('deployments.show.sidebar.ssl'), "#ssl", role: 'tab', aria: { controls: 'ssl' }, data: { toggle: 'tab' } %></li>
+      <% end %>
+      <li><%= link_to t('deployments.show.sidebar.volumes'), "#volumes", role: 'tab', aria: { controls: 'volumes' }, data: { toggle: 'tab' } %></li>
+      <% if @deployment.services.load_balancers.exists? %>
+        <li><%= link_to 'Load Balancers', '#load_balancers', role: 'tab', aria: { controls: 'load_balancers' }, data: { toggle: 'tab'} %></li>
+      <% end %>
+      <li><%= link_to t('collaborators.collaborator.plural').capitalize, "#collaborators", role: 'tab', aria: { controls: 'collaborators' }, data: { toggle: 'tab' } %></li>
+    </ul>
+  </div>
+
+<% end %>

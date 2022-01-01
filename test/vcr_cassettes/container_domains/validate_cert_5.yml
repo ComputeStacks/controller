@@ -1,0 +1,207 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://localhost:14000/dir
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Acme::Client v2.0.9 (https://github.com/unixcharles/acme-client)
+      Content-Type:
+      - application/jose+json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - public, max-age=0, no-cache
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 20 Oct 2021 22:30:15 GMT
+      Content-Length:
+      - '406'
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+           "keyChange": "https://localhost:14000/rollover-account-key",
+           "meta": {
+              "externalAccountRequired": false,
+              "termsOfService": "data:text/plain,Do%20what%20thou%20wilt"
+           },
+           "newAccount": "https://localhost:14000/sign-me-up",
+           "newNonce": "https://localhost:14000/nonce-plz",
+           "newOrder": "https://localhost:14000/order-plz",
+           "revokeCert": "https://localhost:14000/revoke-cert"
+        }
+  recorded_at: Wed, 20 Oct 2021 22:30:15 GMT
+- request:
+    method: head
+    uri: https://localhost:14000/nonce-plz
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Acme::Client v2.0.9 (https://github.com/unixcharles/acme-client)
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - public, max-age=0, no-cache
+      Link:
+      - <https://localhost:14000/dir>;rel="index"
+      Replay-Nonce:
+      - I4r5wEq06GFZxNTmQxCBIQ
+      Date:
+      - Wed, 20 Oct 2021 22:30:15 GMT
+    body:
+      encoding: UTF-8
+      string: ''
+  recorded_at: Wed, 20 Oct 2021 22:30:15 GMT
+- request:
+    method: post
+    uri: https://localhost:14000/sign-me-up
+    body:
+      encoding: UTF-8
+      string: '{"protected":"eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsIm5vbmNlIjoiSTRyNXdFcTA2R0ZaeE5UbVF4Q0JJUSIsInVybCI6Imh0dHBzOi8vbG9jYWxob3N0OjE0MDAwL3NpZ24tbWUtdXAiLCJqd2siOnsiY3J2IjoiUC0yNTYiLCJrdHkiOiJFQyIsIngiOiJtVnNyRDdqcENQWEltcHM4bEhvSWN4NEV3VnMzUmdZWjg2ZnRnZVRRaS1ZIiwieSI6IkhBUHMxa2k1REQ1Y05INjZBWFJibVViTzZZUmtXNkI1TS1YeXBMZVNtLTQifX0","payload":"eyJjb250YWN0IjpbIm1haWx0bzphZG1pbkBjb21wdXRlc3RhY2tzLmNvbSJdLCJ0ZXJtc09mU2VydmljZUFncmVlZCI6dHJ1ZX0","signature":"dubRrqrE4oiAPtgC4ce2Oy5Ha45FyfSeZszsHajvjsO_UYxJwMXpJPJs2NuoskRJkeIkYP8-yxOIdz1abynIFw"}'
+    headers:
+      User-Agent:
+      - Acme::Client v2.0.9 (https://github.com/unixcharles/acme-client)
+      Content-Type:
+      - application/jose+json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 400
+      message: Bad Request
+    headers:
+      Cache-Control:
+      - public, max-age=0, no-cache
+      Content-Type:
+      - application/problem+json; charset=utf-8
+      Link:
+      - <https://localhost:14000/dir>;rel="index"
+      Replay-Nonce:
+      - 8hFK30spqekxliO3buwYLw
+      Date:
+      - Wed, 20 Oct 2021 22:30:15 GMT
+      Content-Length:
+      - '147'
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+           "type": "urn:ietf:params:acme:error:badNonce",
+           "detail": "JWS has an invalid anti-replay nonce: I4r5wEq06GFZxNTmQxCBIQ",
+           "status": 400
+        }
+  recorded_at: Wed, 20 Oct 2021 22:30:15 GMT
+- request:
+    method: post
+    uri: https://localhost:14000/sign-me-up
+    body:
+      encoding: UTF-8
+      string: '{"protected":"eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsIm5vbmNlIjoiOGhGSzMwc3BxZWt4bGlPM2J1d1lMdyIsInVybCI6Imh0dHBzOi8vbG9jYWxob3N0OjE0MDAwL3NpZ24tbWUtdXAiLCJqd2siOnsiY3J2IjoiUC0yNTYiLCJrdHkiOiJFQyIsIngiOiJtVnNyRDdqcENQWEltcHM4bEhvSWN4NEV3VnMzUmdZWjg2ZnRnZVRRaS1ZIiwieSI6IkhBUHMxa2k1REQ1Y05INjZBWFJibVViTzZZUmtXNkI1TS1YeXBMZVNtLTQifX0","payload":"eyJjb250YWN0IjpbIm1haWx0bzphZG1pbkBjb21wdXRlc3RhY2tzLmNvbSJdLCJ0ZXJtc09mU2VydmljZUFncmVlZCI6dHJ1ZX0","signature":"NK--Oeru-5nouHfSxN40Ez-ax9ZfQDDYMr0fTypfHGEL-IUPINpzPbtz2qBSkOhp6NKSeNRdy3XrWb2egFriYA"}'
+    headers:
+      User-Agent:
+      - Acme::Client v2.0.9 (https://github.com/unixcharles/acme-client)
+      Content-Type:
+      - application/jose+json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 400
+      message: Bad Request
+    headers:
+      Cache-Control:
+      - public, max-age=0, no-cache
+      Content-Type:
+      - application/problem+json; charset=utf-8
+      Link:
+      - <https://localhost:14000/dir>;rel="index"
+      Replay-Nonce:
+      - L_SwDfLKGHBMA62aCLz_OA
+      Date:
+      - Wed, 20 Oct 2021 22:30:15 GMT
+      Content-Length:
+      - '147'
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+           "type": "urn:ietf:params:acme:error:badNonce",
+           "detail": "JWS has an invalid anti-replay nonce: 8hFK30spqekxliO3buwYLw",
+           "status": 400
+        }
+  recorded_at: Wed, 20 Oct 2021 22:30:15 GMT
+- request:
+    method: post
+    uri: https://localhost:14000/sign-me-up
+    body:
+      encoding: UTF-8
+      string: '{"protected":"eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsIm5vbmNlIjoiTF9Td0RmTEtHSEJNQTYyYUNMel9PQSIsInVybCI6Imh0dHBzOi8vbG9jYWxob3N0OjE0MDAwL3NpZ24tbWUtdXAiLCJqd2siOnsiY3J2IjoiUC0yNTYiLCJrdHkiOiJFQyIsIngiOiJtVnNyRDdqcENQWEltcHM4bEhvSWN4NEV3VnMzUmdZWjg2ZnRnZVRRaS1ZIiwieSI6IkhBUHMxa2k1REQ1Y05INjZBWFJibVViTzZZUmtXNkI1TS1YeXBMZVNtLTQifX0","payload":"eyJjb250YWN0IjpbIm1haWx0bzphZG1pbkBjb21wdXRlc3RhY2tzLmNvbSJdLCJ0ZXJtc09mU2VydmljZUFncmVlZCI6dHJ1ZX0","signature":"fACEEp1FunEdV1Z7poWRBnl9yoCAFxl3DzTGsz4qiG7TL5BVY7W1ApT4fzkpEccl7VWABifmbfJ21JJlm62ZrQ"}'
+    headers:
+      User-Agent:
+      - Acme::Client v2.0.9 (https://github.com/unixcharles/acme-client)
+      Content-Type:
+      - application/jose+json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Cache-Control:
+      - public, max-age=0, no-cache
+      Content-Type:
+      - application/json; charset=utf-8
+      Link:
+      - <https://localhost:14000/dir>;rel="index"
+      Location:
+      - https://localhost:14000/my-account/6
+      Replay-Nonce:
+      - lPh8S9n1eYS-3R9fRVwIoA
+      Date:
+      - Wed, 20 Oct 2021 22:30:15 GMT
+      Content-Length:
+      - '313'
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+           "status": "valid",
+           "contact": [
+              "mailto:admin@computestacks.com"
+           ],
+           "orders": "https://localhost:14000/list-orderz/6",
+           "key": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "mVsrD7jpCPXImps8lHoIcx4EwVs3RgYZ86ftgeTQi-Y",
+              "y": "HAPs1ki5DD5cNH66AXRbmUbO6YRkW6B5M-XypLeSm-4"
+           }
+        }
+  recorded_at: Wed, 20 Oct 2021 22:30:15 GMT
+recorded_with: VCR 6.0.0

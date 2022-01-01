@@ -1,0 +1,26 @@
+fr:
+  container_registry:
+    not_found: Container Registry not found
+    updated: Successfully updated registry
+    created: Registry successfully created
+    new:
+      breadcrumb: New Registry
+    edit:
+      breadcrumb: Edit Registry
+    form:
+      title_new: New Private Container Registry
+      title_edit: Update Container Registry
+      name: Name
+    registry_list:
+      empty: No Container Registries
+      deploying: Deploying
+      working: Working
+    show:
+      delete_confirm: "Are you sure? This action will also delete all images and all data."
+      url: Registry Url
+      auth: Authentication
+      images:
+        title: Registry Images
+        empty: "No images found. Use `docker push` to deploy your first image."
+        image: Image Name
+        tags: Tags

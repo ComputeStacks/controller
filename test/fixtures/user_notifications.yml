@@ -1,0 +1,10 @@
+one:
+  user: user
+  label: email me
+  notifier: email
+  value: a@example.local
+  rules:
+    - ContainerCreated
+    - ContainerCpuUsage
+    - ContainerDestroyed
+    - ContainerMemoryUsage

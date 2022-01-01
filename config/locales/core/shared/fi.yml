@@ -1,0 +1,7 @@
+fi:
+  project_select:
+    title: Valitse projekti
+    none: Projektia ei löydetty
+  service_select:
+    title: Valitse palvelu
+    none: Palveluita ei löydetty

@@ -1,0 +1,18 @@
+<div class="row deployment-overview-sub hidden-xs">
+  <div class="col-xs-3">
+    <div class="deployment-overview-sub-header">Owner</div>
+    <div class="deployment-overview-sub-content"><%= link_to @deployment.user.full_name, "/admin/users/#{@deployment.user.id}-#{@deployment.user.full_name.parameterize}" %></div>
+  </div>
+  <div class="col-xs-3">
+    <div class="deployment-overview-sub-header">Status</div>
+    <div class="deployment-overview-sub-content"><%= @deployment.current_state.capitalize %></div>
+  </div>
+  <div class="col-xs-3">
+    <div class="deployment-overview-sub-header">Run Rate</div>
+    <div class="deployment-overview-sub-content"><%= deployment_run_rate(@deployment) %></div>
+  </div>
+  <div class="col-xs-3">
+    <div class="deployment-overview-sub-header">Created</div>
+    <div class="deployment-overview-sub-content"><%= l @deployment.created_at.in_time_zone(Time.zone), format: :long %></div>
+  </div>
+</div>

@@ -1,0 +1,98 @@
+.panel-body
+  .row
+    .col-sm-3: .form-group
+      = label_tag :active, 'Enabled'
+      = f.check_box :active, class: 'form-control'
+
+    .col-sm-3: .form-group
+      = label_tag :is_admin, 'Admin'
+      = f.check_box :is_admin, class: 'form-control', disabled: @user.is_support_admin?
+    .col-sm-6: .form-group
+      = label_tag :external_id, 'External ID'
+      = f.text_field :external_id, class: 'form-control', disabled: @user.is_support_admin?
+  .row
+    .col-sm-6: .form-group
+      = label_tag :name, 'First Name'
+      = f.text_field :fname, :class => "form-control", required: true
+
+    .col-sm-6: .form-group
+      = label_tag :lname, 'Last Name'
+      = f.text_field :lname, :class => "form-control", required: true
+  .row
+    .col-sm-6: .form-group
+      = label_tag :email, 'Email'
+      = f.email_field :email, class: 'form-control', required: true, disabled: @user.is_support_admin?
+    .col-sm-6: .form-group
+      = label_tag :phone, 'Phone'
+      = f.text_field :phone, class: 'form-control'
+
+  .row
+    .col-sm-12: .form-group
+      = label_tag :company_name, t('users.fields.company')
+      = f.text_field :company_name, class: 'form-control'
+
+  .row
+    .col-md-8.col-sm-6: .form-group
+      label Billing Start
+      = f.date_field :phase_started, class: 'form-control'
+    .col-md-4.col-sm-6: .form-group
+      = label_tag :bypass_billing, 'Bypass Billing'
+      = f.check_box :bypass_billing, class: 'form-control', disabled: @user.is_support_admin?
+      span.help-block Bypass billing integration.
+  - unless @user.is_support_admin?
+    hr
+    .row
+      .col-sm-6: .form-group
+        = label_tag :address1, t('users.fields.address_1')
+
+        = f.text_field :address1, class: 'form-control'
+
+      .col-sm-6: .form-group
+        = label_tag :address2, t('users.fields.address_2').to_s.strip.length.zero? ? raw("&nbsp;") : t('users.fields.address_2')
+
+        = f.text_field :address2, class: 'form-control'
+
+    .row
+      .col-sm-4: .form-group
+        = label_tag :city, t('users.fields.city')
+
+        = f.text_field :city, class: 'form-control'
+
+      .col-sm-4: .form-group
+        = label_tag :state, t('users.fields.state')
+
+        = f.text_field :state, class: 'form-control'
+      .col-md-4: .form-group
+        = label_tag :zip, t('users.fields.zip')
+        = f.text_field :zip, class: 'form-control'
+    .row
+      .col-md-8: .form-group
+        = label_tag :country, t('users.fields.country')
+        span style='color:red;' *
+        = country_select :user, :country, {}, { class: 'form-control chosen-select-standard' }
+      .col-sm-4: .form-group
+        = label_tag :currency, 'Currency'
+        = select(:user, :currency, available_currencies(BillingResourcePrice.available_currencies), {}, {class: 'form-control chosen-select-standard'})
+    hr
+    .row: .col-md-12: .form-group
+      = label_tag :user_group_id, 'Group'
+      = f.collection_select :user_group_id, UserGroup.all, :id, :name, {}, {class: 'form-control'}
+    hr
+    .row
+      .col-sm-6: .form-group
+        = label_tag :password, t('users.fields.password')
+        = f.password_field :password, class: 'form-control'
+
+      .col-sm-6: .form-group
+        = label_tag :password_confirmation, t('users.fields.password_confirmation')
+        = f.password_field :password_confirmation, class: 'form-control'
+
+    hr
+    .row: .col-sm-12: .form-group
+      = label_tag :comments, 'Notes'
+      = f.hidden_field :comments, id: "user_comments"
+      trix-editor input="user_comments" class="trix-editor-format"
+
+
+
+.panel-footer= submit_tag t('actions.save'), class: 'btn btn-success'

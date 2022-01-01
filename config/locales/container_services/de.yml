@@ -1,0 +1,85 @@
+de:
+  container_services:
+    auto_scale:
+      enabled: Auto-Skalierung aktiv
+      disabled: Auto-Skalierung deaktiviert
+      menu_action: Auto-Skalierung
+      form:
+        enable:
+          label: Auto-Skalierung aktiviert
+          help: "Aktivieren oder deaktivieren Sie die Auto-Skalierung für diese App."
+        price:
+          title: Auto-Skalierung Limit
+          help_html: |
+            <p> Mit einem <strong>Wert von 0.0</strong>, Auto-Skalierung passt die Ressourcen Ihrer Applikation kontinuierlich an, wenn Sie an Speicher- oder CPU-Grenzen stoßen, und bleibt für mindestens 1 Minute an diesen Grenzen.</p>
+            <p> Um die Auto-Skalierung bzw. Größenänderung Ihrer Applikation zu limitieren, geben Sie bitte den maximalen Gesamtbetrag ein, den Sie ausgeben möchten, abzüglich eventueller Bandbreiten- und Speichergebühren.</p>
+          help_quote_html: |
+            <p> Wenn Sie einen Grenzwert für die Auto-Skalierung festlegen möchten, <strong>empfehlen wir einen Wert von mindestens %{price}</strong>.<br>Dies ermöglicht eine Skalierung entweder nach Speicher oder nach CPU.</p>
+          label: Max. Ausgaben je Stunde
+        horizontal:
+          title: Horizontale Skalierung
+          label: Horizontale Skalierung aktivieren
+          help_html: |
+            <p>Sofern alle Ressourcen aus den gebuchten Paketen erschöpft sind, kann die Auto-Skalierung Ihre Applikation nicht mehr skalieren. Um zusätzliche Ressourcen bereitzustellen haben Sie die Möglichkeit Ihre Appllikation horizontal zu skalieren, was Ihre Gesamtkapazität erhöht.</p>
+            <p>Wenn Sie diese Option aktivieren weisen Sie die Auto-Skalierung an, jedes Mal einen Container hinzuzufügen sobald das CPU- oder Speicherlimit erreicht ist.</p>
+    containers:
+      logs:
+        breadcrumb: Container Logs
+        description: Container Logs anzeigen für
+    sidebar:
+      overview: Übersicht
+      domains: "Domains & SSL"
+      remote: Fernzugriff
+      logs: App Logs
+      settings: Einstellungen
+      events: Aktivitäten
+    actions:
+      resize: Größe anpassen
+      scale: skalieren
+    header:
+      app: Applikation
+      price: Voraussichtlicher Preis
+      plan: Paket
+      connect: Einrichtung
+      env: Umgebung
+    controller:
+      resize:
+        queued: Die Ressourcen des Containers werden in Kürze angepasst.
+        success: Container erfolgreich angepasst.
+        error: Es gab ein Problem bei der Anpassung der Ressourcen Ihres Containers.
+  deployments:
+    services:
+      edit:
+        name: App Name
+        resize_package:
+          title: Skalieren
+        scale:
+          title: Horizontale Skalierung
+      domains:
+        index:
+          empty: keine Domains
+          new: Domain hinzufügen
+          title: Domains
+        form:
+          title: Domain hinzufügen
+          label: Domain Name
+      show:
+        containers:
+          name: Container Name
+          status: Status
+          health: Sicherheit
+          region: Region
+          ip: IP Adresse
+        linked:
+          title: Verlinkte Container
+        custom:
+          pma:
+            title: MySQL Container
+            pass: Passwort
+            empty: keine Container gefunden
+      events:
+        show:
+          title: Aktivitäten
+        event_list:
+          title: Aktivitäten Log
+          empty: keine Ereignisse

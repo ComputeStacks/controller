@@ -1,0 +1,43 @@
+- content_for :breadcrumb do
+  .row.has-breadcrumb
+    ul.nav.nav-pills.sub-menu-pills.pull-left
+      li class="#{request.path =~ /dns/ ? 'active' : ''}"= link_to "DNS", "/admin/dns"
+      li class="#{request.path =~ /locations|regions|nodes/ ? 'active' : ''}"= link_to "Regions", "/admin/locations"
+      li class="#{request.path =~ /networks/ ? 'active' : ''}"= link_to "Networks", "/admin/networks"
+      li class="#{request.path =~ /load_balancers/ ? 'active' : ''}"= link_to "Load Balancers", "/admin/load_balancers"
+      li class="#{request.path =~ /blocks/ ? 'active' : ''}"= link_to "Content Blocks", "/admin/blocks"
+      li class="#{request.path =~ /lets_encrypt/ ? 'active' : ''}"= link_to "Lets Encrypt", "/admin/lets_encrypt"
+      li class="#{request.path =~ /system_notifications/ ? 'active' : ''}"= link_to "Notifications", "/admin/system_notifications"
+      li class="#{request.path =~ /settings/ ? 'active' : ''}"= link_to "Advanced Settings", "/admin/settings"
+
+    - if controller.controller_name == 'regions'
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to "Create Region", new_admin_region_url, class: 'btn btn-sm btn-default'
+        li= link_to "Create Node", "/admin/nodes/new", class: 'btn btn-sm btn-default'
+
+    - elsif controller.controller_name == 'networks'
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to "Create Network", "/admin/networks/new", class: 'btn btn-sm btn-default'
+
+    - elsif controller.controller_name == 'load_balancers'
+      ol.breadcrumb-action.breadcrumb.text-right
+        li= link_to "Create Load Balancer", "/admin/load_balancers/new", class: 'btn btn-sm btn-default'
+
+    - elsif controller.controller_name == 'locations'
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to "Create Region", new_admin_location_url, class: 'btn btn-sm btn-default'
+        li= link_to "Create AZ", new_admin_region_url, class: 'btn btn-sm btn-default'
+
+    - elsif controller.controller_name == 'blocks'
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to "Add Block", "/admin/blocks/new", class: 'btn btn-sm btn-default'
+
+    - elsif controller.class == Admin::DnsController
+      ol.breadcrumb.breadcrumb-action.text-right
+        li= link_to 'Create Zone', new_admin_dn_url, class: 'btn btn-sm btn-default'
+
+    - else
+
+      ol.breadcrumb.breadcrumb-action.text-right style="height:45px;"
+        li
+          | &nbsp;

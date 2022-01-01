@@ -1,0 +1,12 @@
+<% 2.times do |i| %>
+
+  <div class="tabbable <%= i.zero? ? 'tabs-left hidden-xs hidden-sm' : 'visible-xs visible-sm' %>" <% unless i.zero? %>style="margin-bottom:20px;"<% end %>>
+    <ul class="nav nav-tabs" <% if i.zero? %>style="width:100%;text-align:right;"<% end %>>
+      <% regions.each do |region| %>
+        <li class="<%= active == region ? 'active' : '' %>" onclick="window.location='/admin/regions?filter=<%= region.id %>'">
+          <%= link_to region.name, "/admin/regions?filter=#{region.id}" %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
