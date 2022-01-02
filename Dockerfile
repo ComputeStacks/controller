@@ -12,8 +12,8 @@ ENV SECRET_KEY_BASE=3a698257a1e32f1bb9b3fd861640c3b53cc9c57dd40b3fa360fed44d2e5d
 ENV USER_AUTH_SECRET=3a698257a1e32f1bb9b3fd861640c3b53cc9c57dd40b3fa360fed44d2e5da3fdb3351db2f8c881f2a04e6a7ca7e721de67d98061ffa7d394d3ad1c24ce9e09ec
 ENV LOCALE=en
 ENV CURRENCY=USD
-ENV DATABASE_URL="postgresql://cstacks:cstacks@postgres/cstacks?pool=30"
-ENV REDIS_HOST=redis
+ENV DATABASE_URL="postgresql://cstacks:cstacks@localhost/cstacks?pool=30"
+ENV REDIS_HOST=localhost
 #ENV RUBYOPT='-W:no-deprecated'
 ENV APP_ID=build
 

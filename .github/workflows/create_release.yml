@@ -26,6 +26,8 @@ jobs:
           POSTGRES_USER: cstacks
           POSTGRES_DB: cstacks
           POSTGRES_PASSWORD: cstacks
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -33,6 +35,8 @@ jobs:
           --health-retries 5
       redis:
         image: redis
+        ports:
+          - 6379:6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -57,6 +61,7 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
+          network: host
           build-args: |
             github_user=${{ secrets.GEM_PULL_USER }}
             github_token=${{ secrets.GEM_PULL_TOKEN }}
