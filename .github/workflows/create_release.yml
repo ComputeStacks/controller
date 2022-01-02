@@ -1,0 +1,55 @@
+name: "create release"
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionTag:
+        description: 'Version Tag (e.g. v7.0.1)'
+        required: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: cstacks
+          POSTGRES_DB: cstacks
+          POSTGRES_PASSWORD: cstacks
+      redis:
+        image: redis
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Log into DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push controller
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            github_user=${{ secrets.GEM_PULL_USER }}
+            github_token=${{ secrets.GEM_PULL_TOKEN }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.versionTag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
