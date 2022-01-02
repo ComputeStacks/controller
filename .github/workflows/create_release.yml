@@ -26,8 +26,18 @@ jobs:
           POSTGRES_USER: cstacks
           POSTGRES_DB: cstacks
           POSTGRES_PASSWORD: cstacks
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
       redis:
         image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout repository
