@@ -51,5 +51,5 @@ jobs:
             github_user=${{ secrets.GEM_PULL_USER }}
             github_token=${{ secrets.GEM_PULL_TOKEN }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.versionTag }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/computestacks/controller:${{ github.event.inputs.versionTag }}
+            ${{ env.REGISTRY }}/computestacks/controller:latest
