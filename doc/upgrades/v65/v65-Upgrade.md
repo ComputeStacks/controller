@@ -72,4 +72,4 @@ Policies:
 
 * Re-apply all project calico policies
 * Rebuild all sftp containers
-* Update `calico/config.json` and set default policy to deny
+* Update `consul/config.json` and set default policy to deny
