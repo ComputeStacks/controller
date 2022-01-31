@@ -18,24 +18,15 @@ module ContainerServices
       vars
     end
 
-    # Generate Configuration for new container service from order
+    ##
+    # Ensure container has required dependencies
     #
+    # This is an important check to ensure that when we go to build
+    # the container config, we have the required dependencies
+    # to generate any variables defined in the configuration.
     #
-    # \@param [Hash] additional_params
+    # @see Containers::ContainerVariables#var_lookup
     #
-    # \@example
-    #     {"timezone"=>{"type"=>"static", "default_value"=>"America/Los_Angeles", "value"=>"America/Los_Angeles", "label"=>"TZ"}
-    #
-    # def generate_config!(additional_params = {})
-    #   return false if container_image.nil?
-    #   return false unless gen_load_balancer!
-    #   return false unless gen_settings_config!(additional_params)
-    #   return false unless gen_env_config! # Moved to later, along with link.
-    #   return false unless gen_ingress_rules!
-    #   update_attribute :command, container_image.command
-    #   true
-    # end
-
     def init_link!
       current_links = self.service_resources
       matches_fulfilled = true
@@ -43,7 +34,7 @@ module ContainerServices
         is_met = false
         # Make sure we're not already linked
         current_links.each do |c|
-          if i.id == c.container_image.id
+          if i.id == c.container_image.id || i.role == c.container_image.role
             is_met = true
             break
           end
@@ -51,18 +42,10 @@ module ContainerServices
         unless is_met
           matched = nil
           self.deployment.services.order(created_at: :desc).each do |dc|
-            matched = dc if dc.container_image.id == i.id
+            if dc.container_image.id == i.id || dc.container_image.role == i.role
+              matched = dc
+            end
           end
-          ##
-          # TODO: Consider allowing dependency match by role.
-          #       I took this from https://github.com/ComputeStacks/app/commit/bb67a4b05afb6b128d31da2b1247025086a4812b
-          #
-          # Now find by role
-          # if matched.nil?
-          #   deployment.services.where(status: 'deployed').order(created_at: :desc).each do |dc|
-          #     matched = dc if dc.container_image.role == i.role
-          #   end
-          # end
           if matched
             self.service_resources << matched
           else
