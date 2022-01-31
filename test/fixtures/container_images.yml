@@ -19,8 +19,6 @@ wordpress:
   container_image_provider: dockerhub
   registry_image_path: "cmptstks/wordpress"
   registry_image_tag: "php7.3-litespeed"
-  min_cpu: 1
-  min_memory: 512
   role: wordpress
   role_class: web
   can_scale: true

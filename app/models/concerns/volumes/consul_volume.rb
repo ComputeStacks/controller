@@ -182,16 +182,12 @@ module Volumes
       dc = region.nil? ? nodes.online.first.region.name.strip.downcase : region.name.strip.downcase
       token = region.nil? ? nodes.online.first.region.consul_token : region.consul_token
       return {} if token.blank?
+      consul_ip = nodes.online.first.primary_ip
       {
-        http_addr: "https://#{nodes.online.first.primary_ip}:8501",
+        http_addr: Diplomat.configuration.options.empty? ? "http://#{consul_ip}:8500" : "https://#{consul_ip}:8501",
         dc: dc.blank? ? nil : dc,
         token: token
       }
-      # {
-      #   http_addr: nil,
-      #   dc: nil,
-      #   token: nil
-      # }
     end
 
   end

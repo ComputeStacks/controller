@@ -21,13 +21,11 @@ class AutoScaleServiceTest < ActiveSupport::TestCase
   end
 
   test 'can auto-scale by scale' do
-    VCR.use_cassette('auto_scale_horizontal') do
-      service = deployment_container_services(:wordpress)
-      orig_count = service.containers.count
-      s = ContainerServices::AutoScaleService.new service, 'memory'
-      assert s.perform
-      assert_equal orig_count + 1, service.containers.count
-    end
+    service = deployment_container_services(:wordpress)
+    orig_count = service.containers.count
+    s = ContainerServices::AutoScaleService.new service, 'memory'
+    assert s.perform
+    assert_equal orig_count + 1, service.containers.count
   end
 
   test 'can not exceed max price' do

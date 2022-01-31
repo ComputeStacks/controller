@@ -7,8 +7,7 @@ require 'test_helper'
 #
 class Deployment::ContainerDomainTest < ActiveSupport::TestCase
 
-  include AcmeTestContainerConcern # Only enable when you need to refresh VCR.
-  include PdnsTestContainerConcern
+  include AcmeTestContainerConcern
 
   test 'can list all container domains' do
 
@@ -40,20 +39,18 @@ class Deployment::ContainerDomainTest < ActiveSupport::TestCase
 
   test 'domain with valid ip and CAA' do
 
-    VCR.use_cassette('container_domains/validate_cert_1') do
-      Sidekiq::Testing.inline! do
-        # Create the domain and enable Lets Encrypt
-        Deployment::ContainerDomain.create!(
-          domain: 'cmptstks.com', # 192.168.173.10
-          le_enabled: true,
-          enabled: true,
-          ingress_rule: network_ingress_rules(:wordpress_web_http),
-          user: users(:admin)
-        )
-      end
+    Sidekiq::Testing.inline! do
+      # Create the domain and enable Lets Encrypt
+      Deployment::ContainerDomain.create!(
+        domain: 'csdevserver.local', # 127.0.0.1
+        le_enabled: true,
+        enabled: true,
+        ingress_rule: network_ingress_rules(:wordpress_web_http),
+        user: users(:admin)
+      )
     end
 
-    domain = Deployment::ContainerDomain.find_by(domain: 'cmptstks.com')
+    domain = Deployment::ContainerDomain.find_by(domain: 'csdevserver.local')
     # These are created when A record is wrong
     refute domain.event_details.where(event_code: '510806d5621c97d5').exists?
     refute domain.event_details.where(event_code: 'afda9ae32934c1d8').exists?
@@ -70,20 +67,18 @@ class Deployment::ContainerDomainTest < ActiveSupport::TestCase
 
   test 'domain with valid ip and no CAA' do
 
-    VCR.use_cassette('container_domains/validate_cert_2') do
-      Sidekiq::Testing.inline! do
-        # Create the domain and enable Lets Encrypt
-        Deployment::ContainerDomain.create!(
-          domain: 'cmptstks.org', # 192.168.173.10
-          le_enabled: true,
-          enabled: true,
-          ingress_rule: network_ingress_rules(:wordpress_web_http),
-          user: users(:admin)
-        )
-      end
+    Sidekiq::Testing.inline! do
+      # Create the domain and enable Lets Encrypt
+      Deployment::ContainerDomain.create!(
+        domain: 'cstacksorg.local', # 127.0.0.1
+        le_enabled: true,
+        enabled: true,
+        ingress_rule: network_ingress_rules(:wordpress_web_http),
+        user: users(:admin)
+      )
     end
 
-    domain = Deployment::ContainerDomain.find_by(domain: 'cmptstks.org')
+    domain = Deployment::ContainerDomain.find_by(domain: 'cstacksorg.local')
     # These are created when A record is wrong
     refute domain.event_details.where(event_code: '510806d5621c97d5').exists?
     refute domain.event_details.where(event_code: 'afda9ae32934c1d8').exists?
@@ -100,20 +95,18 @@ class Deployment::ContainerDomainTest < ActiveSupport::TestCase
 
   test 'domain with valid ip and invalid CAA' do
 
-    VCR.use_cassette('container_domains/validate_cert_3') do
-      Sidekiq::Testing.inline! do
-        # Create the domain and enable Lets Encrypt
-        Deployment::ContainerDomain.create!(
-          domain: 'cmptstks.net', # 192.168.173.10
-          le_enabled: true,
-          enabled: true,
-          ingress_rule: network_ingress_rules(:wordpress_web_http),
-          user: users(:admin)
-        )
-      end
+    Sidekiq::Testing.inline! do
+      # Create the domain and enable Lets Encrypt
+      Deployment::ContainerDomain.create!(
+        domain: 'csnet.local', # 127.0.0.1
+        le_enabled: true,
+        enabled: true,
+        ingress_rule: network_ingress_rules(:wordpress_web_http),
+        user: users(:admin)
+      )
     end
 
-    domain = Deployment::ContainerDomain.find_by(domain: 'cmptstks.net')
+    domain = Deployment::ContainerDomain.find_by(domain: 'csnet.local')
     refute domain.event_details.where(event_code: '510806d5621c97d5').exists?
     refute domain.event_details.where(event_code: 'afda9ae32934c1d8').exists?
 
@@ -129,20 +122,18 @@ class Deployment::ContainerDomainTest < ActiveSupport::TestCase
 
   test 'valid root CAA, invalid subdomain CAA' do
 
-    VCR.use_cassette('container_domains/validate_cert_4') do
-      Sidekiq::Testing.inline! do
-        # Create the domain and enable Lets Encrypt
-        Deployment::ContainerDomain.create!(
-          domain: 'test.cmptstks.us', # 192.168.173.10
-          le_enabled: true,
-          enabled: true,
-          ingress_rule: network_ingress_rules(:wordpress_web_http),
-          user: users(:admin)
-        )
-      end
+    Sidekiq::Testing.inline! do
+      # Create the domain and enable Lets Encrypt
+      Deployment::ContainerDomain.create!(
+        domain: 'test.cstacksus.local', # 127.0.0.1
+        le_enabled: true,
+        enabled: true,
+        ingress_rule: network_ingress_rules(:wordpress_web_http),
+        user: users(:admin)
+      )
     end
 
-    domain = Deployment::ContainerDomain.find_by(domain: 'test.cmptstks.us')
+    domain = Deployment::ContainerDomain.find_by(domain: 'test.cstacksus.local')
     refute domain.event_details.where(event_code: '510806d5621c97d5').exists?
     refute domain.event_details.where(event_code: 'afda9ae32934c1d8').exists?
 
@@ -158,20 +149,18 @@ class Deployment::ContainerDomainTest < ActiveSupport::TestCase
 
   test 'valid CAA on subdomain, invalid CAA on root' do
 
-    VCR.use_cassette('container_domains/validate_cert_5') do
-      Sidekiq::Testing.inline! do
-        # Create the domain and enable Lets Encrypt
-        Deployment::ContainerDomain.create!(
-          domain: 'test.cmptstks.cc', # 192.168.173.10
-          le_enabled: true,
-          enabled: true,
-          ingress_rule: network_ingress_rules(:wordpress_web_http),
-          user: users(:admin)
-        )
-      end
+    Sidekiq::Testing.inline! do
+      # Create the domain and enable Lets Encrypt
+      Deployment::ContainerDomain.create!(
+        domain: 'test.cstackscc.local', # 127.0.0.1
+        le_enabled: true,
+        enabled: true,
+        ingress_rule: network_ingress_rules(:wordpress_web_http),
+        user: users(:admin)
+      )
     end
 
-    domain = Deployment::ContainerDomain.find_by(domain: 'test.cmptstks.cc')
+    domain = Deployment::ContainerDomain.find_by(domain: 'test.cstackscc.local')
     # These are created when A record is wrong
     refute domain.event_details.where(event_code: '510806d5621c97d5').exists?
     refute domain.event_details.where(event_code: 'afda9ae32934c1d8').exists?
@@ -188,20 +177,18 @@ class Deployment::ContainerDomainTest < ActiveSupport::TestCase
 
   test 'domain with cname and no caa' do
 
-    VCR.use_cassette('container_domains/validate_cert_6') do
-      Sidekiq::Testing.inline! do
-        # Create the domain and enable Lets Encrypt
-        Deployment::ContainerDomain.create!(
-          domain: 'www.usr.cloud', # 192.168.173.10
-          le_enabled: true,
-          enabled: true,
-          ingress_rule: network_ingress_rules(:wordpress_web_http),
-          user: users(:admin)
-        )
-      end
+    Sidekiq::Testing.inline! do
+      # Create the domain and enable Lets Encrypt
+      Deployment::ContainerDomain.create!(
+        domain: 'www.usrcloud.local', # 127.0.0.1
+        le_enabled: true,
+        enabled: true,
+        ingress_rule: network_ingress_rules(:wordpress_web_http),
+        user: users(:admin)
+      )
     end
 
-    domain = Deployment::ContainerDomain.find_by(domain: 'www.usr.cloud')
+    domain = Deployment::ContainerDomain.find_by(domain: 'www.usrcloud.local')
     # These are created when A record is wrong
     refute domain.event_details.where(event_code: '510806d5621c97d5').exists?
     refute domain.event_details.where(event_code: 'afda9ae32934c1d8').exists?
@@ -218,20 +205,18 @@ class Deployment::ContainerDomainTest < ActiveSupport::TestCase
 
   test 'domain with cname and caa' do
 
-    VCR.use_cassette('container_domains/validate_cert_7') do
-      Sidekiq::Testing.inline! do
-        # Create the domain and enable Lets Encrypt
-        Deployment::ContainerDomain.create!(
-          domain: 'www.usr.ca', # 192.168.173.10
-          le_enabled: true,
-          enabled: true,
-          ingress_rule: network_ingress_rules(:wordpress_web_http),
-          user: users(:admin)
-        )
-      end
+    Sidekiq::Testing.inline! do
+      # Create the domain and enable Lets Encrypt
+      Deployment::ContainerDomain.create!(
+        domain: 'www.usrca.local', # 127.0.0.1
+        le_enabled: true,
+        enabled: true,
+        ingress_rule: network_ingress_rules(:wordpress_web_http),
+        user: users(:admin)
+      )
     end
 
-    domain = Deployment::ContainerDomain.find_by(domain: 'www.usr.ca')
+    domain = Deployment::ContainerDomain.find_by(domain: 'www.usrca.local')
     # These are created when A record is wrong
     refute domain.event_details.where(event_code: '510806d5621c97d5').exists?
     refute domain.event_details.where(event_code: 'afda9ae32934c1d8').exists?
@@ -249,16 +234,14 @@ class Deployment::ContainerDomainTest < ActiveSupport::TestCase
   test 'domain that does not exist' do
     Sidekiq::Testing.inline! do
 
-      VCR.use_cassette('container_domains/validate_cert_8') do
-        # Create the domain and enable Lets Encrypt
-        Deployment::ContainerDomain.create!(
-          domain: 'supercool33fakedomain22.net',
-          le_enabled: true,
-          enabled: true,
-          ingress_rule: network_ingress_rules(:wordpress_web_http),
-          user: users(:admin)
-        )
-      end
+      # Create the domain and enable Lets Encrypt
+      Deployment::ContainerDomain.create!(
+        domain: 'supercool33fakedomain22.net',
+        le_enabled: true,
+        enabled: true,
+        ingress_rule: network_ingress_rules(:wordpress_web_http),
+        user: users(:admin)
+      )
 
       domain = Deployment::ContainerDomain.find_by(domain: 'supercool33fakedomain22.net')
       refute domain.le_ready
@@ -267,7 +250,7 @@ class Deployment::ContainerDomainTest < ActiveSupport::TestCase
       assert domain.event_logs.where(event_code: '971c02e9e85ad118', status: 'failed').exists?
 
       # We should see 3 failed attempts
-      assert domain.event_details.where(event_code: 'afb5d727910b5954').count == 4
+      assert domain.event_details.where(event_code: 'afb5d727910b5954').count == 3
 
       # We should only have a single event
       assert_equal 1, domain.event_logs.where(event_code: '971c02e9e85ad118').count

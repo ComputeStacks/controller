@@ -58,7 +58,7 @@ config-dir=/etc/powerdns
 default-soa-edit=inception-increment
 default-ttl=14400
 default-soa-content=ns-1.dockr.net hostmaster.@ 0 10800 3600 604800 3600
-negquery-cache-ttl=20
+query-cache-ttl=20
 ```
 
 `/etc/powerdns/pdns.d/pdns.local.gpgsql.conf`
@@ -111,7 +111,7 @@ s = {
   "config" => {
     "zone_type" => "Native",
     "masters" => [],
-    "nameservers" => ["ns-1.dockr.net.", "ns-2.dockr.net."],
+    "nameservers" => ["ns1.example.net.", "ns2.example.net."],
     "server" => "localhost"
   }
 }

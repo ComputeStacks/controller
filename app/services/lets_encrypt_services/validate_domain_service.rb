@@ -23,7 +23,7 @@ module LetsEncryptServices
         self.container_domain = nil
       end
       self.event = event
-      @dns = Dnsruby::Resolver.new( { nameserver: NS_LIST, port: Rails.env.test? ? 25353 : 53 } )
+      @dns = Dnsruby::Resolver.new( { nameserver: NS_LIST } )
       @dns.retry_delay = 1
       @dns.retry_times = 3
     end
@@ -58,7 +58,7 @@ module LetsEncryptServices
     # Ensure that there are no redirects in place that would prevent the domain
     # from being properly validated.
     def valid_http?
-      return true if Rails.env.test? # No good to test this right now...
+      return true if Rails.env.test? # No good way to test this right now...
       return true if load_balancer # Not performing this check on load balancer domains right now.
       response = HTTParty.get("https://#{domain}/.well-known/acme-challenge/http_check", verify: false, follow_redirects: false)
       unless response.code == 200
@@ -130,11 +130,19 @@ module LetsEncryptServices
     # @return [Boolean]
     def valid_caa?
       full_domain = domain
-      root_tld = DomainPrefix.registered_domain full_domain
+
+      root_tld = if Rails.env.production?
+                   DomainPrefix.registered_domain full_domain
+                 elsif full_domain.split('.').last == "local"
+                   # In testing, `.local` will fail, so lets find the root domain
+                   # given our known set of test domains in use.
+                   "#{full_domain.split(".")[-2]}.#{full_domain.split(".")[-1]}"
+                 else
+                   nil
+                 end
 
       if root_tld.nil? # We should always have a valid TLD!
         event.event_details.create!( data: "Invalid TLD: #{full_domain}.", event_code: '1a6505df079a9b3c' )
-        Raven.capture_message("Root TLD error: #{full_domain} - #{ENV['APP_ID']}")
         return false
       end
 
@@ -248,8 +256,7 @@ module LetsEncryptServices
       return dns_resource, dns_resource_six
     rescue Dnsruby::NXDomain
       return [],[]
-    rescue Dnsruby::Refused => e
-      ExceptionAlertService.new(e, 'bf4c286afe9ba40e').perform
+    rescue Dnsruby::Refused
       event.event_details.create!(
         data: "Error! #{domain} does not exist!",
         event_code: 'afb5d727910b5954'
@@ -258,13 +265,9 @@ module LetsEncryptServices
     end
 
     def load_wildcard_cname!
-      dns = if Rails.env.test?
-              Resolv::DNS.new(nameserver_port: [['localhost', 25353]])
-            else
-              Resolv::DNS.new(nameserver: NS_LIST)
-            end
-      dns.timeouts = Rails.env.test? ? 30 : 5
-      dns_resource_wildcard = dns.getresource("#{SecureRandom.hex(8)}.#{domain}", Resolv::DNS::Resource::IN::CNAME)
+      dns = Resolv::DNS.new(nameserver: NS_LIST)
+      dns.timeouts = Rails.env.test? ? 15 : 5
+      dns.getresource("#{SecureRandom.hex(8)}.#{domain}", Resolv::DNS::Resource::IN::CNAME)
     rescue Resolv::ResolvError # Record does not exist.
       nil
     end

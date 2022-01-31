@@ -49,7 +49,20 @@ module ProjectServices
             decrypted_value: c.decrypted_value
           }
         end
-        product = i.package
+        package_data = if i.package
+                         {
+                           label: i.package.product.label,
+                           cpu: i.package.cpu,
+                           memory: i.package.memory,
+                           storage: i.package.storage,
+                           bandwidth: i.package.bandwidth,
+                           local_disk: i.package.local_disk,
+                           memory_swap: i.package.memory_swap,
+                           memory_swappiness: i.package.memory_swappiness
+                         }
+                       else
+                         {}
+                       end
         s << {
           id: i.id,
           name: i.name,
@@ -65,19 +78,11 @@ module ProjectServices
           },
           containers: containers,
           ingress_rules: ingress_rules,
-          package: {
-            label: i.label,
-            cpu: product.cpu,
-            memory: product.memory,
-            storage: product.storage,
-            bandwidth: product.bandwidth,
-            local_disk: product.local_disk,
-            memory_swap: product.memory_swap,
-            memory_swappiness: product.memory_swappiness
-          },
+          package: package_data,
           settings: settings
         }
       end
+      s
     end
 
 

@@ -74,6 +74,10 @@ class Dns::Zone < ApplicationRecord
       if (name =~ /^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,15}$/).nil?
         return false
       end
+      # Allow `.local` outside of production.
+      unless Rails.env.production?
+        return true if name.strip.split('.').last == "local"
+      end
       !DomainPrefix.registered_domain(name).nil?
     end
 

@@ -10,7 +10,7 @@ class ServiceProvisionFlowTest < ActionDispatch::IntegrationTest
     order_session.project.name = 'Test Order'
 
     order_session.images.each do |image|
-      image[:package_id] = products(:containerm).id
+      image[:package_id] = products(:containersmall).id
       next unless image[:container_name] == 'Wordpress'
       image[:params]['username'][:value] = 'devuser'
     end
@@ -24,7 +24,9 @@ class ServiceProvisionFlowTest < ActionDispatch::IntegrationTest
     build_order = BuildOrderService.new(audit, order_session.to_order)
     build_order.process_order = false
 
-    assert build_order.perform
+    prep_order_success = build_order.perform
+    puts build_order.errors.join(" ")
+    assert prep_order_success
 
     order = build_order.order
     assert_kind_of Order, order
@@ -41,10 +43,10 @@ class ServiceProvisionFlowTest < ActionDispatch::IntegrationTest
     order.current_event = event
     order_process = ProcessOrderService.new(order)
 
-    VCR.use_cassette('provision_wordpress') do
-      Sidekiq::Testing.inline! do
-        assert order_process.perform
-      end
+    Sidekiq::Testing.inline! do
+      order_prov_success = order_process.perform
+      puts order_process.errors.join(" ") unless order_process.errors.empty?
+      assert order_prov_success
     end
 
     project = order.deployment

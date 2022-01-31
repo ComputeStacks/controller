@@ -140,7 +140,6 @@ group :test do
   gem 'capybara', '~> 3.35'
   gem 'selenium-webdriver'
   gem 'webmock'
-  gem 'vcr'
 end
 
 source "https://rubygems.pkg.github.com/computestacks" do

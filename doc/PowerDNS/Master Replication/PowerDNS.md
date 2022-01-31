@@ -2,7 +2,7 @@
 
 ### Requirements
 
-  - Ubuntu 16.04 Fresh Installation
+  - Debian 11 (Bullseye) Fresh Installation
   - Static IP Address with Hostnames already configured
 
 ### Installation Notes & Defaults
@@ -33,29 +33,6 @@ When your PowerDNS setup is completed, you will need to send the following detai
 
 _Make sure NTP is running, and the system timezone is correct._
 
-Configure PowerDNS Repo
-
-Create the file `/etc/apt/sources.list.d/pdns.list` with the contents:
-
-```
-deb [arch=amd64] http://repo.powerdns.com/ubuntu xenial-auth-40 main
-```
-
-Create the file `/etc/apt/preferences.d/pdns` with the content:
-
-```
-Package: pdns-*
-Pin: origin repo.powerdns.com
-Pin-Priority: 600
-```
-
-Install PowerDNS' repository key with: `curl https://repo.powerdns.com/FD380FBB-pub.asc | sudo apt-key add`
-
-Install latest updates: `apt update && apt upgrade`
-
-Install Basic Packages: `apt install build-essential postgresql-9.5 pdns-server pdns-backend-pgsql`
-
-
 ### Configure PostgreSQL
 
 **Create User & Database:**
@@ -63,13 +40,15 @@ Install Basic Packages: `apt install build-essential postgresql-9.5 pdns-server 
 ```
 su postgres
 psql
+create user root with superuser;
+create database root owner root;
 create user pdns with password 'POSTGRES_PDNS_PASSWORD';
 create database pdns owner pdns;
 alter user pdns with superuser;
 \c pdns
 ```
 
-While still connected to psql, copy and paste the contents of the 'Default Schema' section listed here: https://doc.powerdns.com/md/authoritative/backend-generic-postgresql/#default-schema
+While still connected to psql, copy and paste the contents of the [Default Schema](https://doc.powerdns.com/authoritative/backends/generic-postgresql.html#default-schema).
 
 Once finished, type `\q` to exit the psql terminal. Type `exit` to exit the `postgres` user and return to `root`.
 
@@ -92,11 +71,13 @@ These steps should be repeated on all PowerDNS Servers in the cluster.
 Remove the following files:
 
 ```
-rm /etc/powerdns/bindbackend.conf
-rm /etc/powerdns/pdns.d/pdns.simplebind.conf
+rm /etc/powerdns/named.conf
+rm /etc/powerdns/pdns.d/bind.conf
 ```
 
 ### Configure The Master DNS Server
+
+TODO: Changed in v4.5. 'SuperMaster' is now 'AutoPrimary': https://doc.powerdns.com/authoritative/modes-of-operation.html#autoprimary-automatic-provisioning-of-secondaries
 
 Edit `/etc/powerdns/pdns.conf` to look like:
 
@@ -111,18 +92,15 @@ webserver-address=0.0.0.0
 webserver-port=8081
 webserver-allow-from=0.0.0.0/0,10.10.0.25/32
 webserver-password=CHANGEMENOW
-allow-recursion=127.0.0.1/32
 local-port=53
-local-address=0.0.0.0
-recursor=no
-setgid=pdns
-setuid=pdns
-security-poll-suffix=
+local-address=0.0.0.0, ::
 include-dir=/etc/powerdns/pdns.d
 launch=gpgsql
 config-dir=/etc/powerdns
-default-soa-name=ns1.computestacks.net
+default-soa-edit=inception-increment
+default-ttl=14400
 allow-axfr-ips=10.20.0.10/32
+default-soa-content=ns-1.dockr.net hostmaster.@ 0 10800 3600 604800 3600
 ```
 
 Restart the server with:
@@ -147,6 +125,10 @@ psql
 
 _Once in the postgres terminal, run:_
 
+`pdnsutil add-supermaster 10.0.0.14 ns-2.dockr.net internal`
+
+OLD:
+
 ```
 \c pdns
 insert into supermasters values ('10.10.0.10', 'ns2.computestacks.net', 'admin');
@@ -160,16 +142,12 @@ Edit `/etc/powerdns/pdns.conf` to look like:
 master=no
 slave=yes
 slave-cycle-interval=60
-recursor=no
-allow-recursion=127.0.0.1/32
 local-port=53
-local-address=0.0.0.0
-setgid=pdns
-setuid=pdns
-security-poll-suffix=
+local-address=0.0.0.0, ::
 include-dir=/etc/powerdns/pdns.d
 launch=gpgsql
 config-dir=/etc/powerdns
+autosecondary=yes
 ```
 
 

@@ -17,6 +17,8 @@
 #   @return [String] IP Address of NFS Server when connecting from the controller
 # @!attribute nfs_remote_path
 #   @return [String] path to nfs volume on remote server. the volume name will be appended to this, so dont add trailing slash.
+# @!attribute consul_token
+#   @return [String] token used to connect to consul
 class Region < ApplicationRecord
 
   include Auditable
@@ -92,7 +94,7 @@ class Region < ApplicationRecord
     primary_ip = nodes.online.first&.primary_ip
     dc = name.strip.downcase
     {
-      http_addr: "https://#{primary_ip}:8501",
+      http_addr: Diplomat.configuration.options.empty? ? "http://#{primary_ip}:8500" : "https://#{primary_ip}:8501",
       dc: dc.blank? ? nil : dc,
       token: consul_token
     }

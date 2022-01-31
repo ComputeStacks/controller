@@ -33,9 +33,9 @@ class Deployment::SftpHostKey < ApplicationRecord
   def generate_certificate
     filename = "/tmp/#{SecureRandom.alphanumeric(10)}"
     if algo == 'ed25519'
-      `ssh-keygen -t ed25519 -f #{filename} -q -C "#{sftp_container.name}"`
+      `ssh-keygen -t ed25519 -f #{filename} -q -C "#{sftp_container.name}" -N ""`
     else
-      `ssh-keygen -b 2048 -t rsa -f #{filename} -q -C "#{sftp_container.name}"`
+      `ssh-keygen -b 2048 -t rsa -f #{filename} -q -C "#{sftp_container.name}" -N ""`
     end
     self.pkey = File.read(filename)
     self.pubkey = File.read("#{filename}.pub")

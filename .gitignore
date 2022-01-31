@@ -66,9 +66,7 @@ config/database.yml
 # dont commit generated yard
 .yardoc
 doc/rdoc
-Procfile
 Vagrantfile
-
 /public/packs
 /public/packs-test
 /node_modules

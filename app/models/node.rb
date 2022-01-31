@@ -123,7 +123,6 @@ Node < ApplicationRecord
     opts[:connect_timeout] = 15 * timeout
     opts[:read_timeout] = 60 * timeout
     opts[:write_timeout] = 60 * timeout
-    opts.merge!(docker_dev_ssh) if (Rails.env.development? || Rails.env.test?) && ENV['CS_DOCKER_CERT_PATH']
     Docker::Connection.new("tcp://#{self.primary_ip}:2376", opts)
   end
 
@@ -132,7 +131,6 @@ Node < ApplicationRecord
     opts[:connect_timeout] = 5
     opts[:read_timeout] = 5
     opts[:write_timeout] = 5
-    opts.merge!(docker_dev_ssh) if (Rails.env.development? || Rails.env.test?) && ENV['CS_DOCKER_CERT_PATH']
     Docker::Connection.new("tcp://#{self.primary_ip}:2376", opts)
   end
 
@@ -171,16 +169,6 @@ Node < ApplicationRecord
     if volume_device.count('/').zero?
       errors.add(:volume_device, 'is not a valid path')
     end
-  end
-
-  # To avoid breaking local docker dev setups, we use a different env var in our `.envrc`
-  def docker_dev_ssh
-    {
-      client_cert: File.join(ENV['CS_DOCKER_CERT_PATH'], "cert.pem"),
-      client_key: File.join(ENV['CS_DOCKER_CERT_PATH'], "key.pem"),
-      ssl_ca_file: File.join(ENV['CS_DOCKER_CERT_PATH'], "ca.pem"),
-      scheme: "https"
-    }
   end
 
 end

@@ -1,0 +1,7 @@
+powerdns:
+  endpoint: "http://localhost:8081/api/v1/servers"
+  settings: '<%= { config: { zone_type: "Master", masters: ["ns1.cstacks.local."], nameservers: ["ns1.stacks.local."], server: "localhost" } } %>'
+  module_name: "Pdns"
+  username: "Admin"
+  api_key: '<%= Secret.encrypt! File.read("/home/vagrant/.pdns/web_auth_pass").gsub("\n","") %>'
+  api_secret: '<%= Secret.encrypt! File.read("/home/vagrant/.pdns/api_key").gsub("\n","") %>'

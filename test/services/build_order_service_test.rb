@@ -7,7 +7,7 @@ class BuildOrderServiceTest < ActiveSupport::TestCase
     order_session.project.name = 'Test'
     order_session.add_image container_images(:wordpress)
     order_session.images.each do |i|
-      i[:package_id] = products(:containerm).id
+      i[:package_id] = products(:containersmall).id
     end
     order_session.location = locations(:testlocation)
     order_session.save
@@ -16,12 +16,6 @@ class BuildOrderServiceTest < ActiveSupport::TestCase
     # `order_session` has no region just yet
     session_check_one = OrderSession.new(users(:admin), order_session.id)
     refute_nil session_check_one.region
-    session_check_one.save
-
-    assert_equal session_check_one.region, OrderSession.new(users(:admin), order_session.id).region
-
-    # Now try changing, re-saving, and re-loading to verify it loads the correct region
-    session_check_one.region = session_check_one.region.name == "dev" ? regions(:regiontwo) : regions(:regionone)
     session_check_one.save
 
     assert_equal session_check_one.region, OrderSession.new(users(:admin), order_session.id).region

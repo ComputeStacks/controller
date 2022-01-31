@@ -1,23 +1,16 @@
+##
+# Sample ComputeStacks Database Config File
+# For production, this file is omitted and removed since we set the DB using environmental variables.
+# For local dev environments, you may simply copy this file to `config/database.yml` without making any changes,
+# unless you're not using our Vagrant image.
 development:
   adapter: postgresql
   encoding: unicode
   database: computestacks
-  host: localhost
-  pool: 50
-  username: user
+  pool: 25
 
 test:
   adapter: postgresql
   encoding: unicode
   database: computestacks_test
-  host: localhost
-  pool: 50
-  username: user
-
-production:
-  adapter: postgresql
-  encoding: unicode
-  database: computestacks
-  host: localhost
-  pool: 50
-  username: user
+  pool: 25

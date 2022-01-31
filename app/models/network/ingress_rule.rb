@@ -234,9 +234,17 @@ class Network::IngressRule < ApplicationRecord
 
   def has_valid_port
     if container_service
-      errors.add(:port, 'is already in use') if Network::IngressRule.where(proto: proto, port: port, container_service: container_service).exists?
+      if id && Network::IngressRule.where(proto: proto, port: port, container_service: container_service).where.not(id: id).exists?
+        errors.add(:port, 'is already in use')
+      elsif id.nil? && Network::IngressRule.where(proto: proto, port: port, container_service: container_service).exists?
+        errors.add(:port, 'is already in use')
+      end
     elsif sftp_container
-      errors.add(:port, 'is already in use') if Network::IngressRule.where(proto: proto, port: port, sftp_container: sftp_container).exists?
+      if id && Network::IngressRule.where(proto: proto, port: port, sftp_container: sftp_container).where.not(id: id).exists?
+        errors.add(:port, 'is already in use')
+      elsif id.nil? && Network::IngressRule.where(proto: proto, port: port, sftp_container: sftp_container).exists?
+        errors.add(:port, 'is already in use')
+      end
     end
   end
 

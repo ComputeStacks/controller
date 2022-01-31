@@ -4,10 +4,11 @@ regionone:
   volume_backend: local
   log_client: vagrant_log_client
   metric_client: vagrant_metric_client
-regiontwo:
-  location: testlocation
-  name: dev2
-  volume_backend: local
-  log_client: vagrant_log_client
-  metric_client: vagrant_metric_client
+  consul_token: '<%= File.exist?("/home/vagrant/consul.token") ? File.read("/home/vagrant/consul.token").gsub("\n","") : "" %>'
+#regiontwo:
+#  location: testlocation
+#  name: dev2
+#  volume_backend: local
+#  log_client: vagrant_log_client
+#  metric_client: vagrant_metric_client
 

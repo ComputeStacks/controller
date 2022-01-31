@@ -2,8 +2,7 @@ require 'test_helper'
 
 class LoadBalancerTest < ActiveSupport::TestCase
 
-  include AcmeTestContainerConcern # Only enable when you need to refresh VCR.
-  include PdnsTestContainerConcern
+  include AcmeTestContainerConcern
 
   setup do
     @lb = load_balancers(:default)
@@ -71,21 +70,19 @@ class LoadBalancerTest < ActiveSupport::TestCase
 
   test 'domain: valid' do
 
-    VCR.use_cassette('load_balancers/validate_domain_0') do
-      fake_location = Location.create!(name: "fake00")
-      region = Region.create!(location: fake_location, name: "fake000")
-      Sidekiq::Testing.inline! do
-        LoadBalancer.create!(
-          label: 'test00',
-          region: region,
-          public_ip: '192.168.173.10',
-          ext_ip: ['192.168.173.10'],
-          le: false,
-          internal_ip: ['192.168.173.10'],
-          domain_valid: false,
-          domain: 'app.sharedurl.com'
-        )
-      end
+    fake_location = Location.create!(name: "fake00")
+    region = Region.create!(location: fake_location, name: "fake000")
+    Sidekiq::Testing.inline! do
+      LoadBalancer.create!(
+        label: 'test00',
+        region: region,
+        public_ip: '127.0.0.1',
+        ext_ip: ['127.0.0.1'],
+        le: false,
+        internal_ip: ['127.0.0.1'],
+        domain_valid: false,
+        domain: 'app.myshared.local'
+      )
     end
 
     lb = LoadBalancer.find_by(label: 'test00')
@@ -112,21 +109,19 @@ class LoadBalancerTest < ActiveSupport::TestCase
 
   test 'domain: invalid a record' do
 
-    VCR.use_cassette('load_balancers/validate_domain_1') do
-      fake_location = Location.create!(name: "fake01")
-      region = Region.create!(location: fake_location, name: "fake001")
-      Sidekiq::Testing.inline! do
-        LoadBalancer.create!(
-          label: 'test01',
-          region: region,
-          public_ip: '192.168.173.10',
-          ext_ip: ['192.168.173.10'],
-          le: false,
-          internal_ip: ['192.168.173.10'],
-          domain_valid: false,
-          domain: 'app.sharedurl.us'
-        )
-      end
+    fake_location = Location.create!(name: "fake01")
+    region = Region.create!(location: fake_location, name: "fake001")
+    Sidekiq::Testing.inline! do
+      LoadBalancer.create!(
+        label: 'test01',
+        region: region,
+        public_ip: '127.0.0.1',
+        ext_ip: ['127.0.0.1'],
+        le: false,
+        internal_ip: ['127.0.0.1'],
+        domain_valid: false,
+        domain: 'app.mysharedus.local'
+      )
     end
 
     lb = LoadBalancer.find_by(label: 'test01')
@@ -153,21 +148,19 @@ class LoadBalancerTest < ActiveSupport::TestCase
 
   test 'domain: invalid CAA' do
 
-    VCR.use_cassette('load_balancers/validate_domain_2') do
-      fake_location = Location.create!(name: "fake02")
-      region = Region.create!(location: fake_location, name: "fake002")
-      Sidekiq::Testing.inline! do
-        LoadBalancer.create!(
-          label: 'test02',
-          region: region,
-          public_ip: '192.168.173.10',
-          ext_ip: ['192.168.173.10'],
-          le: false,
-          internal_ip: ['192.168.173.10'],
-          domain_valid: false,
-          domain: 'app.sharedurl.net'
-        )
-      end
+    fake_location = Location.create!(name: "fake02")
+    region = Region.create!(location: fake_location, name: "fake002")
+    Sidekiq::Testing.inline! do
+      LoadBalancer.create!(
+        label: 'test02',
+        region: region,
+        public_ip: '127.0.0.1',
+        ext_ip: ['127.0.0.1'],
+        le: false,
+        internal_ip: ['127.0.0.1'],
+        domain_valid: false,
+        domain: 'app.mysharednet.local'
+      )
     end
 
     lb = LoadBalancer.find_by(label: 'test02')
@@ -194,21 +187,19 @@ class LoadBalancerTest < ActiveSupport::TestCase
 
   test 'domain: no caa record' do
 
-    VCR.use_cassette('load_balancers/validate_domain_3') do
-      fake_location = Location.create!(name: "fake03")
-      region = Region.create!(location: fake_location, name: "fake003")
-      Sidekiq::Testing.inline! do
-        LoadBalancer.create!(
-          label: 'test03',
-          region: region,
-          public_ip: '192.168.173.10',
-          ext_ip: ['192.168.173.10'],
-          le: false,
-          internal_ip: ['192.168.173.10'],
-          domain_valid: false,
-          domain: 'app.sharedurl.org'
-        )
-      end
+    fake_location = Location.create!(name: "fake03")
+    region = Region.create!(location: fake_location, name: "fake003")
+    Sidekiq::Testing.inline! do
+      LoadBalancer.create!(
+        label: 'test03',
+        region: region,
+        public_ip: '127.0.0.1',
+        ext_ip: ['127.0.0.1'],
+        le: false,
+        internal_ip: ['127.0.0.1'],
+        domain_valid: false,
+        domain: 'app.mysharedorg.local'
+      )
     end
 
     lb = LoadBalancer.find_by(label: 'test03')
@@ -235,21 +226,19 @@ class LoadBalancerTest < ActiveSupport::TestCase
 
   test 'domain: missing wildcard caa' do
 
-    VCR.use_cassette('load_balancers/validate_domain_4') do
-      fake_location = Location.create!(name: "fake04")
-      region = Region.create!(location: fake_location, name: "fake004")
-      Sidekiq::Testing.inline! do
-        LoadBalancer.create!(
-          label: 'test04',
-          region: region,
-          public_ip: '192.168.173.10',
-          ext_ip: ['192.168.173.10'],
-          le: false,
-          internal_ip: ['192.168.173.10'],
-          domain_valid: false,
-          domain: 'app.sharedurl.app'
-        )
-      end
+    fake_location = Location.create!(name: "fake04")
+    region = Region.create!(location: fake_location, name: "fake004")
+    Sidekiq::Testing.inline! do
+      LoadBalancer.create!(
+        label: 'test04',
+        region: region,
+        public_ip: '127.0.0.1',
+        ext_ip: ['127.0.0.1'],
+        le: false,
+        internal_ip: ['127.0.0.1'],
+        domain_valid: false,
+        domain: 'app.mysharedapp.local'
+      )
     end
 
     lb = LoadBalancer.find_by(label: 'test04')

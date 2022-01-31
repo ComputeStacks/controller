@@ -1,11 +1,11 @@
 default:
   name: test-lb01
   label: test-lb01
-  internal_ip: '["172.16.0.10"]'
-  ext_ip: '["192.168.173.10","192.168.173.11","192.168.173.12"]'
+  internal_ip: '["127.0.0.1"]'
+  ext_ip: '["127.0.0.1"]'
   ext_config: '["/etc/haproxy/haproxy.cfg"]'
   ext_reload_cmd: "bash -c 'if [[ -z $(pidof haproxy) ]]; then service haproxy start; else service haproxy reload; fi;'"
-  public_ip: 192.168.173.10
+  public_ip: 127.0.0.1
   ext_cert_dir: "/etc/haproxy/certs"
   ext_dir: "/etc/haproxy"
   domain: a.app
@@ -17,25 +17,25 @@ default:
   direct_connect: true
   le: false
   region: regionone
-  cert_encrypted: "<%= Secret.encrypt!(File.read("#{Rails.root.to_s}/lib/dev/keys/shared_cert.pem")) %>"
+  cert_encrypted: "<%= Secret.encrypt!(File.read('/home/vagrant/.ssl_wildcard/sharedcert.pem')) %>"
 
-other:
-  name: test-lb02
-  label: test-lb02
-  internal_ip: '["172.16.0.11"]'
-  ext_ip: '["192.168.173.13","192.168.173.14","192.168.173.15"]'
-  ext_config: '["/etc/haproxy/haproxy.cfg"]'
-  ext_reload_cmd: "bash -c 'if [[ -z $(pidof haproxy) ]]; then service haproxy start; else service haproxy reload; fi;'"
-  public_ip: 192.168.173.11
-  ext_cert_dir: "/etc/haproxy/certs"
-  ext_dir: "/etc/haproxy"
-  domain: b.app
-  job_status: "idle"
-  cpus: 1
-  maxconn: 100000
-  maxconn_c: 200
-  ssl_cache: 1000000
-  direct_connect: true
-  le: false
-  region: regiontwo
-  cert_encrypted: "<%= Secret.encrypt!(File.read("#{Rails.root.to_s}/lib/dev/keys/shared_cert.pem")) %>"
+#other:
+#  name: test-lb02
+#  label: test-lb02
+#  internal_ip: '["127.0.0.1"]'
+#  ext_ip: '["127.0.0.1"]'
+#  ext_config: '["/etc/haproxy/haproxy.cfg"]'
+#  ext_reload_cmd: "bash -c 'if [[ -z $(pidof haproxy) ]]; then service haproxy start; else service haproxy reload; fi;'"
+#  public_ip: 127.0.0.1
+#  ext_cert_dir: "/etc/haproxy/certs"
+#  ext_dir: "/etc/haproxy"
+#  domain: b.app
+#  job_status: "idle"
+#  cpus: 1
+#  maxconn: 100000
+#  maxconn_c: 200
+#  ssl_cache: 1000000
+#  direct_connect: true
+#  le: false
+#  region: regiontwo
+#  cert_encrypted: "<%= Secret.encrypt!(File.read("/home/vagrant/.ssl_wildcard/sharedcert.pem")) %>"

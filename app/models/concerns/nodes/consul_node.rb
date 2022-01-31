@@ -25,7 +25,7 @@ module Nodes
       return {} unless online?
       dc = region.name.strip.downcase
       {
-        http_addr: "https://#{primary_ip}:8501",
+        http_addr: Diplomat.configuration.options.empty? ? "http://#{primary_ip}:8500" : "https://#{primary_ip}:8501",
         dc: dc.blank? ? nil : dc,
         token: region.consul_token
       }

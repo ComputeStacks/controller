@@ -170,8 +170,6 @@ class BuildOrderService
     errors << "Unknown Region" if location.nil?
     self.region = if project && !project.locations.empty?
                     project.regions.first
-                  elsif params[:region]
-                    Region.find_by id: params[:region_id]
                   elsif location
                     location.next_region requested_packages, project_user, 1
                   else

@@ -7,7 +7,7 @@ class ContainerImageControllerTest < ActionDispatch::IntegrationTest
 
   test "create container image with custom auth" do
     sign_in users(:admin)
-    reg_url = 'cr.cmptstks.com'
+    reg_url = 'cr.csdevserver.local'
     reg_pw = 'WYF6A6jy2vxZjALQbFos'
     reg_user = 'gitlab+deploy-token-2'
 
