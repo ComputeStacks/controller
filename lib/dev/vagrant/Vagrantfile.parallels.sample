@@ -1,0 +1,33 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure("2") do |config|
+
+  config.vm.synced_folder ".", "/home/vagrant/controller"
+
+  # ComputeStacks Web UI: http://localhost:3005
+  config.vm.network "forwarded_port", guest: 3005, host: 3005, auto_correct: true
+
+  # Prometheus: http://localhost:9090
+  config.vm.network "forwarded_port", guest: 9090, host: 9090, auto_correct: true
+
+  config.vm.box = "roboxes/debian11"
+  config.vm.provider "parallels" do |vm|
+    vm.name = "computestacks"
+    vm.memory = 4096
+    vm.cpus = 2
+    # vm.customize ["set", :id, "--hypervisor-type", "apple"]
+    vm.check_guest_tools = true
+    vm.update_guest_tools = true
+  end
+
+  config.vm.provision "file", source: "lib/test/powerdns/pdns_up.sh", destination: "/tmp/cs_pdns_up"
+  config.vm.provision "shell", path: "lib/dev/vagrant/vagrant_provision.sh"
+
+  config.trigger.after :up do |trigger|
+    trigger.name = "Setup IPTables"
+    trigger.run_remote = {
+      inline: "iptables -t nat -N expose-ports && iptables -t nat -A OUTPUT -j expose-ports && iptables -t nat -A PREROUTING -j expose-ports"
+    }
+  end
+
+end
