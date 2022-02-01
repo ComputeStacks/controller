@@ -64,7 +64,8 @@ class Admin::DnsController < Admin::ApplicationController
         return false
       end
     end
-  rescue
+  rescue => e
+    ExceptionAlertService.new(e, 'e8e6267bc13736f4', current_user).perform
     redirect_to "/admin/dns", alert: "Error connecting to DNS Server."
   end
 
