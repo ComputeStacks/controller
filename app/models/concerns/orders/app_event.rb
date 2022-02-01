@@ -22,7 +22,7 @@ module Orders
 
     def app_event_labels
       data = order_data['raw_order']
-      result = [ { 'key' => 'link', 'value' => %Q(https://#{Setting.hostname}/admin/orders/#{id}) } ]
+      result = [ { 'key' => 'link', 'value' => %Q(#{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/admin/orders/#{id}) } ]
       result << { 'key' => 'Project', 'value' => deployment.name } if deployment
       data.each_with_index do |i, k|
         container_image = ContainerImage.find_by(id: i['container_id'])

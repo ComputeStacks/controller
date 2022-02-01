@@ -11,7 +11,7 @@ module Containers
         when "endpoint"
           case var[2]
           when "api"
-            param = {'type' => 'raw', 'value' => "https://#{Setting.hostname}/api"}
+            param = {'type' => 'raw', 'value' => "#{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/api"}
           end
         end
       when "build"

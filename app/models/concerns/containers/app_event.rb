@@ -38,7 +38,7 @@ module Containers
 
     def app_event_labels
       [
-        { 'key' => 'link', 'value' => %Q(https://#{Setting.hostname}/containers/#{id}) },
+        { 'key' => 'link', 'value' => %Q(#{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/containers/#{id}) },
         { 'key' => 'Name', 'value' => name },
         { 'key' => 'Service', 'value' => service.label },
         { 'key' => 'Image', 'value' => container_image.label }

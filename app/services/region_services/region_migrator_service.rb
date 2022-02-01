@@ -128,7 +128,11 @@ module RegionServices
       dc = new_region.name.strip.downcase
       n = new_region.nodes.online.first.primary_ip
       begin
-        Diplomat::Node.get_all({ http_addr: "https://#{n}:8501", dc: dc })
+        Diplomat::Node.get_all({
+                                 http_addr: Diplomat.configuration.options.empty? ? "http://#{n}:8500" : "https://#{n}:8501",
+                                 dc: dc.blank? ? nil : dc,
+                                 token: new_region.consul_token
+                               })
       rescue
         errors << "Unable to connect to consul: #{new_region.name}"
       end
@@ -212,7 +216,8 @@ module RegionServices
               @skipped_services << service
             end
           end
-        else # Local storage: Each service uses a single node for all containers
+        else
+          # Local storage: Each service uses a single node for all containers
           new_node = new_region.find_node service.package_for_node
           if new_node.nil?
             errors << "Unable to find node for service #{service.name}"
@@ -267,7 +272,7 @@ module RegionServices
                           new_region.volume_backend
                         end
         s.volumes.each do |vol|
-          unless vol.update volume_backend: volume_driver, region: new_region, nodes: ( volume_driver == 'nfs' ? new_region.nodes : s.nodes )
+          unless vol.update volume_backend: volume_driver, region: new_region, nodes: (volume_driver == 'nfs' ? new_region.nodes : s.nodes)
             errors << "Error updating volume #{vol.name} for service #{s.name}: #{vol.errors.full_messages.join(" ")}"
             @skipped_volumes << vol
             next
@@ -287,22 +292,21 @@ module RegionServices
     # TODO: Migrate Volume Data
     # def transfer_volumes
 
-      # Get raw path of original volume
-      # Get raw path of new volume
-      # SSH into new node (or nfs server)
-      # rsync original node from full path to new location
-      #
-      # #!/usr/bin/env bash
-      #
-      # set -e
-      #
-      # for d in /var/lib/docker/volumes/*
-      # do
-      #   ( VOL_ID=$(echo "$d" | sed -e 's/\/.*\///g'); if [ -d "$d/_data" ];then rsync -aP $d/_data/ root@185.63.155.8:/var/nfsshare/volumes/$VOL_ID/; fi  )
-      # done
+    # Get raw path of original volume
+    # Get raw path of new volume
+    # SSH into new node (or nfs server)
+    # rsync original node from full path to new location
+    #
+    # #!/usr/bin/env bash
+    #
+    # set -e
+    #
+    # for d in /var/lib/docker/volumes/*
+    # do
+    #   ( VOL_ID=$(echo "$d" | sed -e 's/\/.*\///g'); if [ -d "$d/_data" ];then rsync -aP $d/_data/ root@185.63.155.8:/var/nfsshare/volumes/$VOL_ID/; fi  )
+    # done
 
     # end
-
 
     ##
     # Start Services

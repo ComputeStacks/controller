@@ -90,7 +90,7 @@ class AlertNotification < ApplicationRecord
 
   # @return [String]
   def public_url
-    "https://#{Setting.hostname}/alert_notifications/#{id}"
+    "#{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/alert_notifications/#{id}"
   end
 
   private

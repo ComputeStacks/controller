@@ -197,6 +197,7 @@ class LoadBalancer < ApplicationRecord
     return nil if node.nil?
     LoadBalancer.all.each do |lb|
       return lb if lb.ext_ip.include?(node.primary_ip)
+      return lb if lb.internal_ip.include?(node.primary_ip)
     end
     nil
   end

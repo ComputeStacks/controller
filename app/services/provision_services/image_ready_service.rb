@@ -17,7 +17,7 @@ module ProvisionServices
           image_service = NodeServices::PullImageService.new(container.node, container.container_image)
           unless image_service.perform
             event.event_details.create!(
-              data: 'Failed to pull image',
+              data: image_service.errors.empty? ? "Failed to pull image" : "Error pulling image:\n\n#{image_service.errors.join("\n")}",
               event_code: 'c3e71c83bc061e34'
             )
             event.fail! 'Failed to pull image'

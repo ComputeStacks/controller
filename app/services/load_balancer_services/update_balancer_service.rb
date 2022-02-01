@@ -114,7 +114,7 @@ module LoadBalancerServices
       lb.ext_ip.each do |i|
         is_node = Node.find_by("public_ip = ? OR primary_ip = ? OR hostname = ?", i, i, i)
         next if is_node && !is_node.online?
-        cmd = %Q(bash -c 'if [ ! -f #{lb.ext_dir}/default.http ]; then curl --insecure -H "Authorization: Bearer #{ClusterAuthService.new(is_node).auth_token}" https://#{Setting.hostname}/api/stacks/load_balancers/assets/default > #{lb.ext_dir}/default.http; fi;' && curl --insecure -H "Authorization: Bearer #{ClusterAuthService.new(is_node).auth_token}" https://#{Setting.hostname}/api/stacks/load_balancers > #{lb.ext_config} && #{lb.ext_reload_cmd})
+        cmd = %Q(bash -c 'if [ ! -f #{lb.ext_dir}/default.http ]; then curl --insecure -H "Authorization: Bearer #{ClusterAuthService.new(is_node).auth_token}" #{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/api/stacks/load_balancers/assets/default > #{lb.ext_dir}/default.http; fi;' && curl --insecure -H "Authorization: Bearer #{ClusterAuthService.new(is_node).auth_token}" #{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/api/stacks/load_balancers > #{lb.ext_config} && #{lb.ext_reload_cmd})
         ssh_port = is_node ? is_node.ssh_port : 22
         begin
           DockerSSH::Node.new("ssh://#{i}:#{ssh_port}", { key: ENV['CS_SSH_KEY'] }).client.exec!(cmd)

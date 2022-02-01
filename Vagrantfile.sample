@@ -4,12 +4,11 @@
 ##
 # ComputeStacks Vagrantfile
 # 1. Copy `envrc.sample` to `.envrc` and update values appropriately.
-# 2. Copy `Vagrantfile.sample` to `Vagrantfile` and update settings to match your environment. This could include using a different provider than the default Virtualbox.
+# 2. Copy `Vagrantfile.sample` to `Vagrantfile` and make any relevant changes, however it should work out of the box without any modification.
 # 3. Bring up with `vagrant up`. This will take a few minutes depending on your computer -- compiling ruby takes a bit.
 # 4. Once up, enter the VM with `vagrant ssh` and `cd ~/controller` and run:
 #    1. `direnv allow .`
-#    2. `bundle` -- if you did not setup your `.envrc` correctly, you will get an authorization error.
-#       1. Our provision script will automatically take the credentials in your `.envrc` file and authenticate with Github, but please also reference this document if you run into issues: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-rubygems-registry
+#    2. `bundle` -- if you did not setup your `.envrc` correctly, you will get an authorization error. Our provision script will automatically take the credentials in your `.envrc` file and authenticate with Github, but please also reference this document if you run into issues: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-rubygems-registry
 #
 # 5. Once all the gems have been installed, bootstrap your database with:
 #    1. `bundle exec rails db:create`
@@ -30,6 +29,13 @@ Vagrant.configure("2") do |config|
 
   # Prometheus: http://localhost:9090
   config.vm.network "forwarded_port", guest: 9090, host: 9090, auto_correct: true
+
+  # Consul: http://localhost:8500/ui/
+  config.vm.network "forwarded_port", guest: 8500, host: 8500, auto_correct: true
+
+  # ComputeStacks Load Balancer
+  config.vm.network "forwarded_port", guest: 80, host: 80
+  config.vm.network "forwarded_port", guest: 443, host: 443
 
   config.vm.box = "roboxes/debian11"
 

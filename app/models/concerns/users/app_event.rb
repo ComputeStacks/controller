@@ -39,7 +39,7 @@ module Users
     end
 
     def app_event_labels
-      [ { 'key' => 'link', 'value' => %Q(https://#{Setting.hostname}/admin/users/#{id}) } ]
+      [ { 'key' => 'link', 'value' => %Q(#{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/admin/users/#{id}) } ]
     end
 
     private

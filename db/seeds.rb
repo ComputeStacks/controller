@@ -1,3 +1,4 @@
+vagrant_vm_ip = `ip -j addr show dev eth0 | jq -r '.[0].addr_info | map(select(.family == "inet"))[0].local'`
 puts "Creating default location and region..."
 location = Location.create! name: "dev"
 
@@ -513,7 +514,7 @@ Feature.setup!
 Feature.find_by(name: 'updated_cr_cert').update active: true
 
 puts "Setting default settings to dev environment..."
-Setting.find_by(name: 'hostname').update value: 'controller.cstacks.local'
+Setting.find_by(name: 'hostname').update value: 'controller.cstacks.local:3005'
 Setting.find_by(name: 'cr_le').update value: 'controller.cstacks.local'
 Setting.find_by(name: 'registry_base_url').update value: 'registry.cstacks.local'
 Setting.find_by(name: 'registry_node').update value: '127.0.0.1'
@@ -528,7 +529,7 @@ region.update metric_client: mc, log_client: lc, loki_endpoint: 'http://127.0.0.
 puts "Creating dev node..."
 region.nodes.create! label: 'csdev',
                      hostname: 'csdev',
-                     primary_ip: '127.0.0.1',
+                     primary_ip: vagrant_vm_ip.gsub("\n",""),
                      public_ip: '127.0.0.1',
                      active: true,
                      ssh_port: 22,
@@ -577,7 +578,7 @@ LoadBalancer.create! label: 'dev',
                      region: region,
                      domain: 'a.cstacks.local',
                      ext_ip: [ '127.0.0.1' ],
-                     internal_ip: [ '127.0.0.1' ],
+                     internal_ip: [ '127.0.0.1', vagrant_vm_ip.gsub("\n","") ],
                      public_ip: '127.0.0.1',
                      direct_connect: true,
                      cert_encrypted: Secret.encrypt!(File.read("/home/vagrant/.ssl_wildcard/sharedcert.pem"))

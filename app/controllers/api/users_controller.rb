@@ -239,7 +239,7 @@ class Api::UsersController < Api::ApplicationController
     @user.tmp_updated_password  = pw
     # Generate an email if the email already exists, or if none is supplied.
     if @user.email.blank? || User.where(email: @user.email).exists?
-      @user.email = "#{params[:provider_username]}_#{SecureRandom.hex(6)}@#{Setting.hostname}"
+      @user.email = "#{params[:provider_username]}_#{SecureRandom.hex(6)}@#{Setting.hostname.split(":").first}"
     end
     if @user.save
       @api_credential = @user.api_credentials.create!(name: "generated-on-signup")

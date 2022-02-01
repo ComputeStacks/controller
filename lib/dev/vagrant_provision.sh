@@ -8,6 +8,8 @@ echo "127.0.0.1 ns1.cstacks.local" >> /etc/hosts
 echo "export EDITOR=vim" >> /etc/profile
 echo "export EDITOR=vim" >> /root/.profile
 echo "export EDITOR=vim" >> /home/vagrant/.profile
+echo "alias dconsole='docker exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" -it'" >> /root/.bashrc
+echo "alias dconsole='docker exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" -it'" >> /home/vagrant/.bashrc
 echo "Defaults:vagrant env_keep += \"EDITOR\"" >> /etc/sudoers.d/vagrant
 echo "syntax on" >> /etc/vim/vimrc
 apt-get update && apt-get -y upgrade
@@ -42,7 +44,7 @@ apt-get update && apt-get -y install consul docker-ce docker-ce-cli containerd.i
 touch /etc/consul.d/consul.env && chown consul:consul /etc/consul.d/consul.env
 cat << 'EOF' > /etc/consul.d/consul.hcl
 datacenter = "dev"
-client_addr = "127.0.0.1"
+client_addr = "0.0.0.0"
 ui_config{
   enabled = true
 }
@@ -391,7 +393,6 @@ chmod +x /usr/local/bin/calicoctl
 chmod +x /usr/local/bin/calico-libnetwork
 
 cat << 'EOF' > /etc/calico/calico-ipam.env
-IP=127.0.0.1
 ETCD_ENDPOINTS=http://127.0.0.1:2379
 NODENAME=csdev
 CALICO_NETWORKING_BACKEND=bird
@@ -430,7 +431,6 @@ docker run --net=host --privileged --name=calico-node -d --restart=always \
   -e CALICO_LIBNETWORK_ENABLED=false \
   -e CALICO_LIBNETWORK_CREATE_PROFILES=false \
   -e NO_DEFAULT_POOLS=true \
-  -e IP=127.0.0.1 \
   -e NODENAME=csdev \
   -v /var/log/calico:/var/log/calico \
   -v /var/run/calico:/var/run/calico \
@@ -1041,3 +1041,16 @@ pdnsutil add-record cstacks.local @ CAA "0 issuewild \"letsencrypt.org\""
 echo "...loading test domains..."
 mv /tmp/cs_pdns_up /usr/local/bin/ \
   && bash /usr/local/bin/cs_pdns_up >/dev/null
+
+echo "Pulling docker images..."
+docker pull cmptstks/ssh:v2
+docker pull cmptstks/ssh:beta
+docker pull cmptstks/borg:stable
+docker pull cmptstks/mariadb-backup:10.1
+docker pull cmptstks/mariadb-backup:10.2
+docker pull cmptstks/mariadb-backup:10.3
+docker pull cmptstks/mariadb-backup:10.4
+docker pull cmptstks/mariadb-backup:10.5
+docker pull cmptstks/mariadb-backup:10.6
+docker pull cmptstks/xtrabackup:2.4
+docker pull cmptstks/xtrabackup:8.0
