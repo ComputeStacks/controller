@@ -569,6 +569,7 @@ pdns_driver = ProvisionDriver.create!(
 dns_type = ProductModule.create!(name: 'dns', primary: pdns_driver)
 pdns_driver.product_modules << dns_type
 Dns::Zone.create! name: 'cstacks.local',
+                  provider_ref: 'cstacks.local.',
                   provision_driver: pdns_driver
 
 puts "Creating load balancer..."

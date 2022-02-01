@@ -11,10 +11,10 @@ end
 
 CS_CDN_URL = "https://cdn.computestacks.net/cloud-portal"
 
-NS_LIST = if Rails.env.test?
-  %w(localhost)
-else
+NS_LIST = if Rails.env.production?
   %w(8.8.8.8 1.1.1.1 8.8.4.4 64.6.64.6 208.67.222.222 1.0.0.1)
+else
+  [ '127.0.0.1' ]
 end
 
 BYTE_TO_GB = Numeric::GIGABYTE.to_f # old: 1.074e+9 # 1024, not 1000

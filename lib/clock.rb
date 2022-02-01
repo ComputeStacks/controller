@@ -88,9 +88,13 @@ module Clockwork
   end
 
   error_handler do |error|
-    Raven::Context.clear!
-    Raven.tags_context(event_code: "c698b5e4da4c518c")
-    Raven.capture_exception(error)
-    Raven::Context.clear!
+    if SENTRY_CONFIGURED
+      Raven::Context.clear!
+      Raven.tags_context(event_code: "c698b5e4da4c518c")
+      Raven.capture_exception(error)
+      Raven::Context.clear!
+    else
+      Rails.logger.warn "error=#{error.message}"
+    end
   end
 end

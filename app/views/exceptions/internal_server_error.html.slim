@@ -1,5 +1,5 @@
 - content_for :title, t('system_errors.fatal.url_title')
-= render partial: "exceptions/sentry_dialog", locals: { event_id: @sentry_event_id }
+= render(partial: "exceptions/sentry_dialog", locals: { event_id: @sentry_event_id }) if SENTRY_CONFIGURED
 
 .row: .block-center.col-md-8.col-md-offset-2
   .panel.panel-primary: .panel-body

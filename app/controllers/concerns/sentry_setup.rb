@@ -8,6 +8,7 @@ module SentrySetup
   private
 
   def set_raven_context
+    return unless SENTRY_CONFIGURED
     if current_user
       if Feature.check('collect_user_info')
         Raven.user_context(
