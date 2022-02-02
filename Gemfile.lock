@@ -470,7 +470,6 @@ GEM
       activesupport (> 5.0)
       railties (> 5.0)
       tzinfo (> 1.2)
-    vishnu (2.0.0)
     warden (1.2.9)
       rack (>= 2.0.9)
     webauthn (2.5.0)
@@ -591,7 +590,6 @@ DEPENDENCIES
   tzinfo-data (= 1.2021.5)
   uglifier (= 4.2.0)
   versioncake (= 4.0.2)
-  vishnu
   webauthn (= 2.5.0)
   webmock
   webpacker (= 5.4.3)

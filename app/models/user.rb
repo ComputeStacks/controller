@@ -303,21 +303,8 @@ class User < ApplicationRecord
   after_create :process_billing_create_hooks
   after_update :process_billing_update_hooks
 
-  ##
-  # Libravatar service
-  #
-  # Available default images
-  #   * retro: https://www.libravatar.org/gravatarproxy/2694f0154096f61b1912f0f21dbe1083?s=80&default=retro
-  #   * robohash: https://www.libravatar.org/gravatarproxy/2694f0154096f61b1912f0f21dbe1083?s=80&default=robohash
-  #   * pagan: https://www.libravatar.org/avatar/2694f0154096f61b1912f0f21dbe1083?s=80&forcedefault=y&default=pagan
-  #   * wavatar: https://www.libravatar.org/gravatarproxy/2694f0154096f61b1912f0f21dbe1083?s=80&default=wavatar
-  #   * monsterid: https://www.libravatar.org/gravatarproxy/2694f0154096f61b1912f0f21dbe1083?s=80&default=monsterid
-  #   * identicon: https://www.libravatar.org/gravatarproxy/2694f0154096f61b1912f0f21dbe1083?s=80&default=identicon
-  #   * mm: https://www.libravatar.org/gravatarproxy/2694f0154096f61b1912f0f21dbe1083?s=80&default=mm
-  #   * mmg: https://www.libravatar.org/avatar/2694f0154096f61b1912f0f21dbe1083?s=80&forcedefault=y&default=mmng
-  #
   def avatar_url(size = 80)
-    Vishnu.new(email: email, default: 'robohash', size: size).url
+    "https://www.gravatar.com/avatar/#{Digest::MD5.hexdigest(email)}?s=#{size}&d=robohash"
   end
 
   def tz

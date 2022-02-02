@@ -1,5 +1,13 @@
 # Change Log
 
+## v7.0.1
+
+* [FEATURE] Brand new vagrant image to aid in development.
+* [CHANGE] Allow containers within a project to be linked by role, rather than a specific version.
+* [FIX] Rollback libravatar service to gravatar due to performance issues.
+
+***
+
 ## v7.0.0
 
 _Jan 1, 2022_

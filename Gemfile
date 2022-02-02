@@ -121,9 +121,6 @@ gem 'dnsruby', '= 1.61.7' # https://github.com/alexdalitz/dnsruby
 
 gem 'prometheus-api-client', '= 0.6.2'
 
-# https://sandfox.dev/ruby/vishnu.html
-gem 'vishnu'
-
 group :development do
   gem 'passenger', '~> 6.0' # Now managed by container
   gem 'yard', '= 0.9.26'
