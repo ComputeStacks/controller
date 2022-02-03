@@ -89,9 +89,9 @@ cat << EOF > /etc/powerdns/pdns.conf
 api=yes
 api-key=$PDNS_API_KEY
 webserver=yes
-webserver-address=127.0.0.1
+webserver-address=0.0.0.0
 webserver-port=8081
-webserver-allow-from=127.0.0.1/32
+webserver-allow-from=0.0.0.0/0
 webserver-password=$PDNS_WEB_KEY
 local-port=53
 local-address=127.0.0.1
