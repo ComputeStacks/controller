@@ -138,6 +138,7 @@ class Api::ContainerServicesController < Api::ApplicationController
   #     * `name`: String
   #     * `scale`: Integer
   #     * `package_id`: Integer
+  #     * `master_domain_id`: Integer | ID of domain that you want to be default.
   #
   def update
     if @service.update(current_user.is_admin ? admin_service_params : container_service_params)
@@ -180,12 +181,12 @@ class Api::ContainerServicesController < Api::ApplicationController
     if current_api_version < 51
       params.permit(:name, :scale, :package_id, {resources: [:cpu, :memory]})
     else
-      params.require(:container_service).permit(:label, :command, :tag_list)
+      params.require(:container_service).permit(:label, :command, :tag_list, :master_domain_id)
     end
   end
 
   def admin_service_params
-    params.require(:container_service).permit(:label, :command, :tag_list, :override_autoremove)
+    params.require(:container_service).permit(:label, :command, :tag_list, :override_autoremove, :master_domain_id)
   end
 
   def load_service  # :doc:
