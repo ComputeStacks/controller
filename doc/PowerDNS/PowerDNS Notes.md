@@ -79,7 +79,8 @@ gpgsql-dnssec=yes
 2. wipe out existing data directory: `rm -rf /var/lib/postgresql/13/main/*`
 3. Seed slave database: `pg_basebackup -h {{MASTER-IP}} -U repuser --checkpoint=fast -D /var/lib/postgresql/13/main/ -R --slot=ns2 -C`
 4. Verify with: `cat /var/lib/postgresql/13/main/postgresql.auto.conf`
-5. Start postgresql
+5. `chown -R postgres: /var/lib/postgresql/13/main`
+6. Start postgresql
 
 Verify by running the following _on the master_:
 

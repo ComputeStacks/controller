@@ -13,13 +13,6 @@
 _Jan 1, 2022_
 
 * [CHANGE] License changed to AGPL.
-
-***
-
-## v6.5.0
-
-_November 16, 2021_
-
 * [FEATURE] SSH Keys for SFTP Containers and configurable password authentication.
 * [FEATURE] Download connection profiles for Filezilla and Transmit.
 * [FEATURE] Switch from gravatar to libravatar.

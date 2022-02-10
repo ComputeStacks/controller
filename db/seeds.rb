@@ -555,8 +555,8 @@ pdns_driver = ProvisionDriver.create!(
   endpoint: 'http://localhost:8081/api/v1/servers',
   settings: {
     config: {
-      zone_type: 'Master',
-      masters: ['ns1.cstacks.local.'],
+      zone_type: 'Native',
+      masters: [], # When zone_type == 'Master', add the primary NS server here.
       nameservers: ['ns1.cstacks.local.'],
       server: 'localhost'
     }

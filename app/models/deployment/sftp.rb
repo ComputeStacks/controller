@@ -205,11 +205,7 @@ class Deployment::Sftp < ApplicationRecord
         }
       }
     }
-    if Rails.env.production?
-      container['HostConfig']['ExtraHosts'] = ["metadata.internal:#{node.primary_ip}"]
-    else
-      container['HostConfig']['ExtraHosts'] = ["dev.computestacks.net:10.211.55.2", "metadata.internal:#{node.primary_ip}"]
-    end
+    container['HostConfig']['ExtraHosts'] = ["metadata.internal:#{node.primary_ip}"]
     container
   rescue ActiveRecord::RecordNotFound
     # Can happen if the SFTP container goes away during loading.

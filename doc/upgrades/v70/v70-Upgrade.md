@@ -9,6 +9,10 @@ Bootstrap ACL System
 ```ruby
 # Add to consul/config.json
 {
+  "addresses": {
+    "http": "0.0.0.0",
+    "https": "0.0.0.0"
+  },
   "ports": {
     "http": "8500"
   },
@@ -37,35 +41,8 @@ Policies:
 Add the following to the consul container:
 
 ```bash
-CONSUL_HTTP_TOKEN=79b0863a-1068-3c8c-085f-96ef4a97bc08
+-e CONSUL_HTTP_TOKEN=79b0863a-1068-3c8c-085f-96ef4a97bc08 \
 ```
-
-#### (Optionally) Generate token for cs-agent
-
-Default is to use the root token for the controller and agent.
-
-```bash
-cat << 'EOF' > 'agent-policy.hcl'
-node "node101" {
-  policy = "write"
-}
-EOF
-consul acl policy create -name node101-agent -rules @agent-policy.hcl
-consul acl token create -description "cs-agent token for node101" -policy-name node101-agent
-```
-
-You'll get a response like:
-
-```
-AccessorID:       d3a139d8-f479-4534-aff4-ad2d123924ec
-SecretID:         c12cdf1b-ddfa-94df-fe23-7bb2e440d25f
-Description:      cs-agent token for node101
-Local:            false
-Create Time:      2021-11-25 22:34:07.315410179 +0000 UTC
-Policies:
-   20766aa4-6e33-03fc-c5c4-04e15a8af12c - node101-agent
-```
-
 
 ### Update Agent
 
@@ -110,11 +87,16 @@ calicoctl get ipPool
 
 ## Controller
 
-Add `SENTRY_DSN` to `/etc/default/computestacks` and `/usr/local/bin/cstacks`
+Add `SENTRY_DSN` to `/etc/default/computestacks` and `-e SENTRY_DSN=$SENTRY_DSN \` to `/usr/local/bin/cstacks`
 
 Run the upgrade process (this will automatically create a database backup): `cstacks upgrade && cstacks run`
 
 For the final steps, enter the console on the controller with: `cstacks console`
+
+```ruby
+Region.pluck(:id, :name)  # find the ID of the region
+Region.find(id-from-previous-query).update consul_token: ''
+```
 
 ### Update Policies & MetaData
 
@@ -122,6 +104,7 @@ For the final steps, enter the console on the controller with: `cstacks console`
 Deployment.all.each do |project|
   ProjectServices::StoreMetadata.new(project).perform
   ProjectServices::GenMetadataToken.new(project).perform
+  ProjectServices::MetadataSshKeys.new(project).perform
   NetworkWorkers::ProjectPolicyWorker.perform_async project.to_global_id.uri
   project.services.each do |service|
     NetworkWorkers::ServicePolicyWorker.perform_async service.id
