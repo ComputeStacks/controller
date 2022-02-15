@@ -4,17 +4,38 @@
 ##
 # ComputeStacks Vagrantfile
 # 1. Copy `envrc.sample` to `.envrc` and update values appropriately.
+#    * Take note that the `GITHUB_GEM_PULL_TOKEN` is a personal access token with the `read_packages` permission.
+# 2. Copy `config/database.sample.yml` to `config/database.yml`.
+#    * _No changes are required._
 # 2. Copy `Vagrantfile.sample` to `Vagrantfile` and make any relevant changes, however it should work out of the box without any modification.
 # 3. Bring up with `vagrant up`. This will take a few minutes depending on your computer -- compiling ruby takes a bit.
-# 4. Once up, enter the VM with `vagrant ssh` and `cd ~/controller` and run:
-#    1. `direnv allow .`
-#    2. `bundle` -- if you did not setup your `.envrc` correctly, you will get an authorization error. Our provision script will automatically take the credentials in your `.envrc` file and authenticate with Github, but please also reference this document if you run into issues: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-rubygems-registry
 #
-# 5. Once all the gems have been installed, bootstrap your database with:
+#   **Enter the vagrant VM with: `vagrant ssh`**
+#
+# 4. Install NodeJS & Yarn
+#    1. Install nodejs with `nvm install --lts`
+#    2. Install yarn `npm -g install yarn`
+# 5. `cd ~/controller` and run:
+#    1. `direnv allow .`
+#    2. `bundle`
+#       * if you did not setup your `.envrc` correctly, you will get an authorization error. Our provision script will automatically take the credentials in your `.envrc` file and authenticate with Github, but please also reference this document if you run into issues: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-rubygems-registry
+#
+# 6. Once all the gems have been installed, bootstrap your database with:
 #    1. `bundle exec rails db:create`
 #    2. `bundle exec rails db:schema:load`
 #    3. `bundle exec rails db:seed`
-#    4. _(optional)_ Run our test suite with: `bundle exec rails test`
+#
+# 7. Bootstrap the controller assets (from inside `~/controller` in vagrant)
+#    1. Run `yarn`
+#    2. Run `bundle exec rake assets:precompile`
+#
+# 8. _(optional)_ Install our default CS theme. Skip if you're building your own.
+#    1. `mkdir ~/controller/public/assets/custom`
+#    2. `wget -q -O ~/controller/public/assets/custom/application.css https://storage.googleapis.com/cstacks/provision_assets/branding/application.css`
+#    3. `wget -q -O ~/controller/public/assets/custom/application.css.map https://storage.googleapis.com/cstacks/provision_assets/branding/application.css.map`
+#    4. `wget -q -O ~/controller/public/assets/custom/logo-login.png https://storage.googleapis.com/cstacks/provision_assets/branding/logo-login.png`
+#
+# 9. _(optional)_ Run our test suite with: `bundle exec rails test`
 #
 # You may now launch ComputeStacks by running `overmind s` from the ~/controller directory within the vagrant vm.
 #

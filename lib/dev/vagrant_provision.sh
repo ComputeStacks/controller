@@ -13,7 +13,7 @@ echo "alias dconsole='docker exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput
 echo "Defaults:vagrant env_keep += \"EDITOR\"" >> /etc/sudoers.d/vagrant
 echo "syntax on" >> /etc/vim/vimrc
 apt-get update && apt-get -y upgrade
-apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent etcd prometheus-node-exporter redis-server postgresql-13 postgresql-13-ip4r rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev nodejs tmux pwgen
+apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent etcd prometheus-node-exporter redis-server postgresql-13 postgresql-13-ip4r rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen
 curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
@@ -59,6 +59,9 @@ bootstrap_expect = 1
 server = true
 EOF
 systemctl enable consul && systemctl start consul
+
+echo "Setting up NVM & nodejs..."
+su - vagrant -c "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash"
 
 systemctl stop pdns
 
