@@ -126,3 +126,14 @@ Deployment::Sftp.all.each do |sftp|
   PowerCycleContainerService.new(sftp, 'rebuild', audit).perform
 end; 0
 ```
+
+### Rebuild phpMyAdmin Containers
+
+```ruby
+ContainerImage.find_by(role: 'pma').deployed_services.each do |service|
+  service.containers.each do |i|
+    audit = Audit.create_from_object! i, 'updated', '127.0.0.1'
+    PowerCycleContainerService.new(i, 'rebuild', audit).perform
+  end
+end
+```

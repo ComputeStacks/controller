@@ -26,9 +26,9 @@ _Jan 1, 2022_
 * [FEATURE] SSH Keys for SFTP Containers and configurable password authentication.
 * [FEATURE] Download connection profiles for Filezilla and Transmit.
 * [FEATURE] Switch from gravatar to libravatar.
-* [FEATURE] (Admin) Set a global motd for all sftp containers.
+* [FEATURE] Set a global motd for all sftp containers. (Admin)
 * [FEATURE] Moved metadata service to distributed database within each availability zone.
-* [FEATURE] (Admin) Improvements to global search.
+* [FEATURE] Improvements to global search. (Admin)
 * [CHANGE] Allow udp and tcp to share the same port
 * [CHANGE] Provide feedback on how a user can change their profile pic
 * [CHANGE] Show user profile pics in admin
