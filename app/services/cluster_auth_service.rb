@@ -18,6 +18,7 @@ class ClusterAuthService
                 :project,
                 :service,
                 :container, # Either SFTP container or Container
+                :load_balancer,
                 :auth_token
 
   # Initialize a new ClusterAuthService
@@ -33,6 +34,9 @@ class ClusterAuthService
     return nil if data.nil?
     if data.is_a?(Node)
       self.node = data
+      self.auth_token = generate_auth_token!
+    elsif data.is_a?(LoadBalancer)
+      self.load_balancer = data
       self.auth_token = generate_auth_token!
     elsif data.is_a?(Deployment::Container)
       self.node = nil
@@ -55,14 +59,13 @@ class ClusterAuthService
     end
   end
 
-  private
-
   def generate_auth_token!
     headers = {}
-    if self.node
+    d = {}
+    if node
       d = {node_id: self.node.id}
       headers[:exp] = 20.minutes.from_now
-    elsif self.container
+    elsif container
       d = {
         project_id: self.project&.id,
         service_id: self.service&.id,
@@ -73,8 +76,9 @@ class ClusterAuthService
         d[:sftp_id] = self.container.id
       else
         return nil # Shouldnt be here
-      end      
+      end
     end
+    d[:load_balancer_id] = load_balancer.id if load_balancer
     return nil if d.nil?
     d[:nonce] = SecureRandom.urlsafe_base64
     JWT.encode(d, Rails.application.secrets.secret_key_base, 'HS256', headers)
@@ -82,6 +86,9 @@ class ClusterAuthService
 
   def load_from_payload!(payload)
     response = decoded_payload(payload)
+    if response[:load_balancer_id]
+      self.load_balancer = LoadBalancer.find_by(id: response[:load_balancer_id])
+    end
     if response[:node_id]
       self.node = Node.find_by(id: response[:node_id])
     else

@@ -3,8 +3,11 @@ name: "create release"
 on:
   workflow_dispatch:
     inputs:
-      versionTag:
-        description: 'Version Tag (e.g. v7.0.1)'
+      majorTag:
+        description: 'Major Tag (e.g. v7.0)'
+        required: true
+      minorTag:
+        description: 'Minor Tag (e.g. v7.0.1)'
         required: true
 
 env:
@@ -66,5 +69,6 @@ jobs:
             github_user=${{ secrets.GEM_PULL_USER }}
             github_token=${{ secrets.GEM_PULL_TOKEN }}
           tags: |
-            ${{ env.REGISTRY }}/computestacks/controller:${{ github.event.inputs.versionTag }}
+            ${{ env.REGISTRY }}/computestacks/controller:${{ github.event.inputs.majorTag }}
+            ${{ env.REGISTRY }}/computestacks/controller:${{ github.event.inputs.minorTag }}
             ${{ env.REGISTRY }}/computestacks/controller:latest

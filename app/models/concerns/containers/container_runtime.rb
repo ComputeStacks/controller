@@ -88,7 +88,7 @@ module Containers
       if Rails.env.production?
         c['HostConfig']['ExtraHosts'] = ["metadata.internal:#{node.primary_ip}"]
       else
-        c['HostConfig']['ExtraHosts'] = ["dev.computestacks.net:10.211.55.2", "metadata.internal:#{node.primary_ip}"]
+        c['HostConfig']['ExtraHosts'] = ["controller.cstacks.local:#{node.primary_ip}", "metadata.internal:#{node.primary_ip}"]
       end
       c['HostConfig'].merge! node.container_io_limits
       c

@@ -1,5 +1,15 @@
 # Change Log
 
+## v7.0.2
+
+_Feb 16, 2022_
+
+* [FEATURE] Allow default domain to be set via the API.
+* [CHANGE] Remove last part of existing metdata api (phpMyAdmin moved to new metadata service).
+* [FIX] Bug fixes with our vagrant image.
+
+***
+
 ## v7.0.1
 
 * [FEATURE] Brand new vagrant image to aid in development.

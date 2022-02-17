@@ -15,24 +15,9 @@ namespace :containers do
         can_scale:                false,
         container_image_provider: dhprovider,
         registry_image_path:      "cmptstks/phpmyadmin",
-        registry_image_tag:       "litespeed",
+        registry_image_tag:       "v2",
         validated_tag: true,
         validated_tag_updated: Time.now
-      )
-      pma.env_params.create!(
-        name:       'BASE_URL',
-        param_type: 'variable',
-        env_value:  'region.endpoint.api'
-      )
-      pma.env_params.create!(
-        name:       'HOSTNAME',
-        param_type: 'variable',
-        env_value:  'build.self.name'
-      )
-      pma.env_params.create!(
-        name:         'API_URL',
-        param_type:   'static',
-        static_value: 'stacks/assets/pma'
       )
       pma.ingress_params.create!(
         port:            80,

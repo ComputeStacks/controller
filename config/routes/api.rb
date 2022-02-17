@@ -23,11 +23,6 @@ Rails.application.routes.draw do
     post 'user/:external_id/authcheck', to: 'application#secondfactor'
     get 'version', to: 'application#version'
 
-    namespace :cluster do
-      resources :assets
-    end
-
-
     match '/', to: 'application#unknown_route', via: :all
     match '*path', to: 'application#unknown_route', via: :all
   end
