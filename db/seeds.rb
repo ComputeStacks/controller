@@ -511,7 +511,6 @@ end
 puts "Setting up settings & features..."
 Setting.setup!
 Feature.setup!
-Feature.find_by(name: 'updated_cr_cert').update active: true
 
 puts "Setting default settings to dev environment..."
 Setting.find_by(name: 'hostname').update value: 'controller.cstacks.local:3005'
