@@ -117,3 +117,44 @@ s = {
   }
 }
 ```
+
+## NSUPDATE and TSIG (RFC 2136)
+
+_Source: [doc.powerdns.com/authoritative/dnsupdate.html](https://doc.powerdns.com/authoritative/dnsupdate.html)_
+
+To enable zone updates via nsupdate, and various plugins that support that, you can add the following to your `/etc/powerdns/pdns.conf` file:
+
+```
+dnsupdate=yes
+allow-dnsupdate-from=
+```
+
+In this configuration, dns updates are not allowed from anywhere. We will set that per-zone
+
+### Setup zone specific permissions
+
+The recommeneded way would be to setup `tsig` on each zone you want a particular user to access.
+
+```bash
+$ pdnsutil generate-tsig-key test hmac-md5
+Create new TSIG key test hmac-md5 kp4/24gyYsEzbuTVJRUMoqGFmN3LYgVDzJ/3oRSP7ys=
+```
+
+```bash
+pdnsutil set-meta example.org TSIG-ALLOW-DNSUPDATE test
+pdnsutil set-meta example.org ALLOW-DNSUPDATE-FROM 127.0.0.0/8 10.0.0.0/8
+```
+
+Where `127.0.0.0/8` and `10.0.0.0/8` are 2 IP ranges you wish to allow updates from.
+
+You can then update the zone with:
+
+```bash
+nsupdate <<!
+server <ip> <port>
+zone example.org
+update add test1.example.org 3600 A 203.0.113.1
+key test kp4/24gyYsEzbuTVJRUMoqGFmN3LYgVDzJ/3oRSP7ys=
+send
+!
+```

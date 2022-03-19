@@ -107,6 +107,8 @@ default-soa-edit=inception-increment
 default-ttl=14400
 default-soa-content=ns1.cstacks.local hostmaster.@ 0 10800 3600 604800 3600
 query-cache-ttl=20
+dnsupdate=yes
+allow-dnsupdate-from=
 EOF
 
 systemctl enable pdns && systemctl start pdns
