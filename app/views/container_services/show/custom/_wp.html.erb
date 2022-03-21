@@ -1,0 +1,19 @@
+<div class="remote-resource" data-url="/container_services/<%= service.id %>/wordpress/protect">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <strong>PROTECTED MODE</strong>
+    </div>
+    <div class="panel-body text-center">
+      <i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading' %>
+    </div>
+  </div>
+</div>
+<div class="panel panel-default remote-resource" data-url="<%= container_service_wordpress_users_path service %>">
+  <div class="panel-heading" style="padding:2px;"></div>
+  <div class="panel-body">
+    <strong>WP USERS</strong>
+  </div>
+  <div class="panel-body text-center">
+    <i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading' %>
+  </div>
+</div>

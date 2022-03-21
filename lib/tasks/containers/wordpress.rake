@@ -73,6 +73,11 @@ namespace :containers do
         backend_ssl:     true
       )
       wp.env_params.create!(
+        name:       'CS_AUTH_KEY',
+        param_type: 'variable',
+        env_value:  'build.self.ec_pub_key'
+      )
+      wp.env_params.create!(
         name:       'LS_ADMIN_PW',
         param_type: 'variable',
         env_value:  'build.settings.litespeed_admin_pw'

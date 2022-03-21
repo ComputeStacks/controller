@@ -14,6 +14,7 @@ module ContainerImages
           build.self.ip
           build.self.default_domain
           build.self.default_domain_with_proto
+          build.self.ec_pub_key
         )
       end
     end

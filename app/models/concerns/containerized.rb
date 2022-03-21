@@ -109,6 +109,7 @@ module Containerized
     docker_client.exec(command, wait: timeout) do |f,d|
       result << d
     end
+    return result.join('') if event.nil?
     event.event_details.create!(
       event_code: '',
       data: result.join('')

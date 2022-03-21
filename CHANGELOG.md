@@ -1,5 +1,13 @@
 # Change Log
 
+## v7.1.0
+
+_Mar 21, 2022_
+
+* [FEATURE] Wordpress Integration Beta
+
+***
+
 ## v7.0.2
 
 _Feb 16, 2022_

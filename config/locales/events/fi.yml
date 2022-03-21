@@ -113,3 +113,7 @@ fi:
         delete: "Poistetaan tallennustila %{volume}"
         imported: "Tuotu tallennustila %{volume}"
         restore: Suoritetaan tallennustilan palautus
+      wordpress:
+        protect:
+          enable: "[%{service}] Enabling protect mode"
+          disable: "[%{service}] Disabling protect mode"

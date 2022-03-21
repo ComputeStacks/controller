@@ -45,16 +45,24 @@ module Containers
           when "project_id"
             param = {'type' => 'raw', 'value' => self.deployment&.id}
           when "default_domain"
-            # domains = self.find_params("domains")
-            # if domains.nil?
-            #   the_domain = "#{self.service.name}.#{Deployment::ContainerDomain.sys_domain(self.region).first}"
-            # else
-            #   the_domain = domains.value.first
-            # end
-            # the_domain = "#{self.service.name}.#{Deployment::ContainerDomain.sys_domain(self.region).first}"
             param = {'type' => 'raw', 'value' => service.default_domain}
           when "default_domain_with_proto"
             param = {'type' => 'raw', 'value' => "https://#{service.default_domain}"}
+          when "ec_pub_key"
+            existing_key = service.secrets.find_by(key_name: "ec_key")
+            ec_signing_key = if existing_key
+                               Ed25519::SigningKey.new Base64.decode64(existing_key.decrypted)
+                             else
+                               Ed25519::SigningKey.generate
+                             end
+            service.secrets.create!(
+              key_name: "ec_key",
+              data: Base64.strict_encode64(ec_signing_key.to_bytes)
+            ) unless existing_key
+            param = {
+              'type' => 'raw',
+              'value' => Base64.strict_encode64(ec_signing_key.verify_key.to_bytes).gsub('/','\\/').gsub('+','\\\+')
+            }
           end
         end
       when "dep"

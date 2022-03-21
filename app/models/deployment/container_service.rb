@@ -99,6 +99,7 @@ class Deployment::ContainerService < ApplicationRecord
   include ContainerServices::ServiceMetrics
   include ContainerServices::ServiceUsage
   include ContainerServices::StateManager
+  include ContainerServices::Wordpress
 
   scope :sorted, -> { order(:label) }
   scope :web_only, -> { where(network_ingress_rules: { external_access: true, proto: 'http' }).joins(:ingress_rules).distinct }
@@ -136,6 +137,8 @@ class Deployment::ContainerService < ApplicationRecord
        dependent:   :destroy
 
   has_many :volumes
+
+  has_many :secrets, -> { where(rel_model: 'Deployment::ContainerService') }, foreign_key: 'rel_id', dependent: :destroy
 
   has_one :metric_client, through: :region
   has_one :log_client, through: :region
