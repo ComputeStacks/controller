@@ -15,12 +15,19 @@ module ContainerServices::WordpressServices
     def initialize(service, p = nil)
       self.service = service
       self.errors = []
-      self.password = p.nil? ? SecureRandom.urlsafe_base64(12) : p
-      self.password = password.gsub("_","").gsub("-","")
+      self.password = p.nil? ? SecureRandom.urlsafe_base64(12).gsub("_","").gsub("-","") : p
       self.username = "wp"
       self.container = service.nil? ? nil : service.containers.active.first
       if container.nil?
         errors << "No active container found"
+      end
+    end
+
+    def load_existing_password!
+      if service.secrets.where(key_name: "protected_mode_pw").exists?
+        self.password = service.secrets.find_by(key_name: "protected_mode_pw").decrypted
+      else
+        nil
       end
     end
 
@@ -39,7 +46,7 @@ module ContainerServices::WordpressServices
         return false
       end
       event.start!
-      c = ["/bin/sh", "-c", %Q(PW=$(openssl passwd -apr1 "#{password}"); echo "#{username}:$PW" > /usr/local/lsws/conf/vhosts/Wordpress/htpasswd && touch /usr/local/lsws/conf/vhosts/Wordpress/.protect_enabled && sed -i '/context \\/ /a realm protected' /usr/local/lsws/conf/vhosts/Wordpress/vhconf.conf)]
+      c = ["/usr/local/bin/enable_protected", username, password ]
       d = container.container_exec!(c, nil, 30)
       if d.blank?
         if service.secrets.where(key_name: "protected_mode_pw").exists?

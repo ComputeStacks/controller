@@ -5,6 +5,7 @@ class ContainerServices::Wordpress::ProtectController < ContainerServices::Wordp
   def index
     if request.xhr?
       @protect = ContainerServices::WordpressServices::ProtectedService.new(@service)
+      @protect.load_existing_password!
       @enabled = @protect.enabled?
       render layout: false
     end
