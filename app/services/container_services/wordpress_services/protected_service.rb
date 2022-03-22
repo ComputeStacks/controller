@@ -16,6 +16,7 @@ module ContainerServices::WordpressServices
       self.service = service
       self.errors = []
       self.password = p.nil? ? SecureRandom.urlsafe_base64(12) : p
+      self.password = password.gsub("_","").gsub("-","")
       self.username = "wp"
       self.container = service.nil? ? nil : service.containers.active.first
       if container.nil?
