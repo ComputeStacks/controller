@@ -24,7 +24,7 @@ module ContainerServices::WordpressServices
     end
 
     def enabled?
-      c = ["/bin/sh", "-c", "if [ -f /usr/local/lsws/conf/vhosts/Wordpress/htpasswd ]; then echo 'yes'; else echo 'no'; fi"]
+      c = ["/bin/sh", "-c", "if [ -f /usr/local/lsws/conf/vhosts/Wordpress/.protect_enabled ]; then echo 'yes'; else echo 'no'; fi"]
       container.container_exec!(c, nil, 30).strip == 'yes'
     rescue => e
       ExceptionAlertService.new(e, 'b457f57908b7e09d').perform
@@ -38,7 +38,7 @@ module ContainerServices::WordpressServices
         return false
       end
       event.start!
-      c = ["/bin/sh", "-c", %Q(PW=$(openssl passwd -apr1 "#{password}"); echo "#{username}:$PW" > /usr/local/lsws/conf/vhosts/Wordpress/htpasswd && sed -i '/context \\/ /a realm protected' /usr/local/lsws/conf/vhosts/Wordpress/vhconf.conf)]
+      c = ["/bin/sh", "-c", %Q(PW=$(openssl passwd -apr1 "#{password}"); echo "#{username}:$PW" > /usr/local/lsws/conf/vhosts/Wordpress/htpasswd && touch /usr/local/lsws/conf/vhosts/Wordpress/.protect_enabled && sed -i '/context \\/ /a realm protected' /usr/local/lsws/conf/vhosts/Wordpress/vhconf.conf)]
       d = container.container_exec!(c, nil, 30)
       if d.blank?
         if service.secrets.where(key_name: "protected_mode_pw").exists?
@@ -65,7 +65,7 @@ module ContainerServices::WordpressServices
         return false
       end
       event.start!
-      c = ["/bin/sh", "-c", "if [ -f /usr/local/lsws/conf/vhosts/Wordpress/htpasswd ]; then rm /usr/local/lsws/conf/vhosts/Wordpress/htpasswd; fi && sed -i '/realm protected$/d' /usr/local/lsws/conf/vhosts/Wordpress/vhconf.conf"]
+      c = ["/bin/sh", "-c", "if [ -f /usr/local/lsws/conf/vhosts/Wordpress/htpasswd ]; then rm /usr/local/lsws/conf/vhosts/Wordpress/htpasswd; fi && if [ -f /usr/local/lsws/conf/vhosts/Wordpress/.protect_enabled ]; then rm /usr/local/lsws/conf/vhosts/Wordpress/.protect_enabled; fi && sed -i '/realm protected$/d' /usr/local/lsws/conf/vhosts/Wordpress/vhconf.conf"]
       d = container.container_exec!(c, nil, 10)
       if d.blank?
         ContainerWorkers::ContainerExecWorker.perform_async container.to_global_id.uri, event.to_global_id.uri, ["/bin/sh", "-c", "/usr/local/lsws/bin/lswsctrl reload"]
