@@ -1,0 +1,56 @@
+# will never run on a git push or merge request event.
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - when: always
+
+##
+# Set at job
+# $CS_MINOR_VERSION
+# $CS_MAJOR_VERSION
+variables:
+  FULL_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
+  DH_IMAGE: cmptstks/controller
+
+default:
+  tags:
+    - shell
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+    - echo "$DH_PW" | docker login -u $DH_USER --password-stdin
+  after_script:
+    - docker logout $CI_REGISTRY
+    - docker logout
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  before_script:
+    - 'docker run -d --rm --name cstacks-pg -e POSTGRES_USER=cstacks -e POSTGRES_DB=cstacks -e POSTGRES_PASSWORD=cstacks postgres:13-alpine'
+    - 'docker run -d --rm --name cstacks-redis --network "container:cstacks-pg" redis:latest'
+  after_script:
+    - docker stop cstacks-redis cstacks-pg
+  script:
+    - 'docker build --network "container:cstacks-pg" --progress plain --build-arg github_user=$GITHUB_GEM_PULL_USER --build-arg github_token=$GITHUB_GEM_PULL_TOKEN -t $FULL_IMAGE .'
+deploy:
+  stage: deploy
+  script:
+    - "docker tag $FULL_IMAGE $CI_REGISTRY_IMAGE:$CS_MINOR_VERSION"
+    - "docker tag $FULL_IMAGE $CI_REGISTRY_IMAGE:$CS_MAJOR_VERSION"
+    - "docker tag $FULL_IMAGE $CI_REGISTRY_IMAGE:latest"
+    - "docker tag $FULL_IMAGE $DH_IMAGE:$CS_MINOR_VERSION"
+    - "docker tag $FULL_IMAGE $DH_IMAGE:$CS_MAJOR_VERSION"
+    - "docker tag $FULL_IMAGE $DH_IMAGE:latest"
+    - "docker push $FULL_IMAGE"
+    - "docker push $CI_REGISTRY_IMAGE:$CS_MINOR_VERSION"
+    - "docker push $CI_REGISTRY_IMAGE:$CS_MAJOR_VERSION"
+    - "docker push $CI_REGISTRY_IMAGE:latest"
+    - "docker push $DH_IMAGE:$$CS_MINOR_VERSION"
+    - "docker push $DH_IMAGE:$CS_MAJOR_VERSION"
+    - "docker push $DH_IMAGE:latest"
