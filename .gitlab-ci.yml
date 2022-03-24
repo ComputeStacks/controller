@@ -9,8 +9,8 @@ workflow:
 
 ##
 # Set at job
-# $CS_MINOR_VERSION
-# $CS_MAJOR_VERSION
+# CS_MINOR_VERSION
+# CS_MAJOR_VERSION
 variables:
   FULL_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
   DH_IMAGE: cmptstks/controller
@@ -51,6 +51,6 @@ deploy:
     - "docker push $CI_REGISTRY_IMAGE:$CS_MINOR_VERSION"
     - "docker push $CI_REGISTRY_IMAGE:$CS_MAJOR_VERSION"
     - "docker push $CI_REGISTRY_IMAGE:latest"
-    - "docker push $DH_IMAGE:$$CS_MINOR_VERSION"
+    - "docker push $DH_IMAGE:$CS_MINOR_VERSION"
     - "docker push $DH_IMAGE:$CS_MAJOR_VERSION"
     - "docker push $DH_IMAGE:latest"
