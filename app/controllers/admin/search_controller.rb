@@ -15,7 +15,8 @@ class Admin::SearchController < Admin::ApplicationController
       dns_zones: [],
       images: [],
       subscriptions: [],
-      product: []
+      product: [],
+      sftp: []
     }
     q_filter = nil
     unless params[:q].nil? || params[:q] == ""
@@ -61,6 +62,7 @@ class Admin::SearchController < Admin::ApplicationController
         sparams[:images] = ContainerImage.where Arel.sql %Q(lower(name) ~ '#{@q}' OR lower(label) ~ '#{@q}')
         sparams[:subscriptions] = Subscription.where Arel.sql %Q(lower(label) ~ '#{@q}')
         sparams[:product] = Product.where Arel.sql %Q(lower(name) ~ '#{@q}' OR lower(label) ~ '#{@q}')
+        sparams[:sftp] = Deployment::Sftp.where(Arel.sql(%Q(lower(name) ~ '#{@q}')))
       end
     end
     @empty_results = true
@@ -169,6 +171,14 @@ class Admin::SearchController < Admin::ApplicationController
         label: "<span class='label label-success'>Product</span>",
         link: "/admin/products/#{i.id}",
         title: i.label,
+        created_at: i.created_at
+      }
+    end
+    sparams[:sftp].each do |i|
+      @search_params << {
+        label: "<span class='label label-info'>SFTP</span>",
+        link: "/admin/sftp/#{i.id}",
+        title: i.name,
         created_at: i.created_at
       }
     end
