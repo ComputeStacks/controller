@@ -39,4 +39,30 @@ class ContainerRegistryCollaboratorTest < ActiveSupport::TestCase
 
   end
 
+  test 'delete user also deletes collaborator record' do
+
+    u = User.new(
+      fname: "jimmy",
+      lname: "little",
+      email: "jlittle@example.net",
+      password: "foobar5%532",
+      password_confirmation: "foobar5%532",
+      is_admin: false,
+      country: "US"
+    )
+    u.skip_confirmation!
+    u.save
+
+    r = ContainerRegistry.first
+    admin = users(:admin)
+    r.container_registry_collaborators.create! current_user: admin, collaborator: u
+
+    assert r.container_registry_collaborators.where(user_id: u.id).exists?
+    u.current_user = admin
+    u.destroy
+
+    refute r.container_registry_collaborators.where(user_id: u.id).exists?
+
+  end
+
 end

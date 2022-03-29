@@ -212,6 +212,7 @@ class User < ApplicationRecord
   scope :by_last_name, -> { order( Arel.sql("lower(lname)") ) }
   scope :with_active_subscriptions, -> { select( Arel.sql("lower(users.lname), lower(users.fname), users.*") ).where(subscriptions: { active: true }).joins(:subscriptions).distinct }
   scope :cpanel, -> { where("labels::jsonb ? 'cpanel'") }
+  scope :admins, -> { where is_admin: true }
 
   has_many :audits, dependent: :destroy
   has_many :event_logs, -> { distinct}, through: :audits
@@ -219,12 +220,12 @@ class User < ApplicationRecord
   has_many :container_images, dependent: :destroy
   has_many :container_registries, dependent: :destroy
 
-  has_many :container_registry_collaborators, -> { where("container_registry_collaborators.active = true") }
+  has_many :container_registry_collaborators, -> { where("container_registry_collaborators.active = true") }, foreign_key: 'user_id'
   has_many :registry_collaborations, through: :container_registry_collaborators, source: :container_registry
 
   has_many :deployments, dependent: :destroy
 
-  has_many :deployment_collaborators, -> { where("deployment_collaborators.active = true") }
+  has_many :deployment_collaborators, -> { where("deployment_collaborators.active = true") }, foreign_key: 'user_id'
   has_many :project_collaborations, through: :deployment_collaborators, source: :deployment
   has_many :service_collaborations, through: :deployment_collaborators, source: :container_services
   # This is different from `image_collaborations`. These are images related to a project this user is collaborating on.
@@ -249,7 +250,7 @@ class User < ApplicationRecord
 
   has_many :deployed_images, through: :container_services, source: :container_image
 
-  has_many :container_image_collaborators, -> { where("container_image_collaborators.active = true") }
+  has_many :container_image_collaborators, -> { where("container_image_collaborators.active = true") }, foreign_key: 'user_id'
   has_many :image_collaborations, through: :container_image_collaborators, source: :container_image
 
   has_many :sftp_containers, through: :deployments
@@ -299,6 +300,8 @@ class User < ApplicationRecord
 
   before_create :set_defaults
   before_destroy :safe_to_destroy?, prepend: true
+
+  before_destroy :clean_collaborations, prepend: true
 
   after_create :process_billing_create_hooks
   after_update :process_billing_update_hooks
@@ -470,6 +473,35 @@ class User < ApplicationRecord
     return if current_password.blank?
     unless valid_password? current_password
       errors.add(:base, 'current password is invalid')
+    end
+  end
+
+  ##
+  # Clean collaborations prior to deleting
+  #
+  # relations will be scoped to active,
+  # we want to remove all including pending
+  def clean_collaborations
+    return unless current_user
+    ContainerImageCollaborator.where(user_id: id).each do |i|
+      i.current_user = current_user
+      i.skip_confirmation = true
+      i.destroy
+    end
+    ContainerRegistryCollaborator.where(user_id: id).each do |i|
+      i.current_user = current_user
+      i.skip_confirmation = true
+      i.destroy
+    end
+    DeploymentCollaborator.where(user_id: id).each do |i|
+      i.current_user = current_user
+      i.skip_confirmation = true
+      i.destroy
+    end
+    Dns::ZoneCollaborator.where(user_id: id).each do |i|
+      i.current_user = current_user
+      i.skip_confirmation = true
+      i.destroy
     end
   end
 

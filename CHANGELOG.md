@@ -1,5 +1,13 @@
 # Change Log
 
+## v7.1.1
+
+_Mar 29, 2022_
+
+* [FIX] Resolve issue with orphanied collaboration records.
+
+***
+
 ## v7.1.0
 
 _Mar 21, 2022_
