@@ -90,7 +90,7 @@ gem 'jwt', '= 2.2.3'
 #gem 'rbnacl', '= 4.0.2' # Support ed25519 ssh keys for net-ssh. >= 5.0 does not work.
 
 # LetsEncrypt
-gem 'acme-client', '= 2.0.9'
+gem 'acme-client', '= 2.0.10'
 
 gem 'versioncake', '= 4.0.2'
 
@@ -141,12 +141,12 @@ end
 
 source "https://rubygems.pkg.github.com/computestacks" do
   gem "autodns", "2.1.1"
-  gem "docker_registry", "0.2.3"
+  gem "docker_registry", "0.3.2"
   gem "docker_ssh", "0.7.1"
   gem "docker_volume_local", "0.2.5"
   gem "docker_volume_nfs", "0.2.7"
   gem "pdns", "1.1.1"
-  gem "whmcs", "2.3.4"
+  gem "whmcs", "2.3.6"
 end
 
 gem 'docker-api', github: 'ComputeStacks/docker-api', ref: 'a36e692'

@@ -1,5 +1,13 @@
 # Change Log
 
+## v7.1.2
+
+_Apr 6, 2022_
+
+* [CHANGE] Update container registry to include docker user agent. Resolves an issue that prevented CS from validating images hosted on container registries that were only allowing the docker user-agent to connect.
+
+***
+
 ## v7.1.1
 
 _Mar 29, 2022_
