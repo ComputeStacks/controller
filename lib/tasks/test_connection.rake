@@ -56,14 +56,18 @@ namespace :test_connection do
       return
     end
     client = provision_driver.service_client
-
-    find_zone_data = %Q[<task><code>0205</code><zone><name>mytestdomain.net</name><system_ns>ns1.auto-dns.com</system_ns></zone></task>]
+    unless client.auth.is_a?(AutoDNS::Auth)
+      puts "Missing AutoDNS conf"
+      return
+    end
+    primary_ns = provision_driver.settings.dig('config', 'master_ns')
+    find_zone_data = %Q[<task><code>0205</code><zone><name>mytestdomain.net</name><system_ns>#{primary_ns}</system_ns></zone></task>]
     auth = %Q[<auth><user>#{provision_driver.username}</user><password>#{Secret.decrypt!(provision_driver.api_key)}</password><context>#{Secret.decrypt!(provision_driver.api_secret)}</context></auth>]
     data = '<?xml version="1.0" encoding="UTF-8"?><request>' + auth + find_zone_data + '</request>'
-    rsp_headers = { 'Content-Type' => 'application/xml', 'Accept' => 'application/xml' }
-    opts = { timeout: 40, headers: rsp_headers, body: data }
 
-    puts HTTParty.post(provision_driver.endpoint, opts)
+    response = HTTP.timeout(40).headers(accept: "application/xml", content_type: "application/xml").post provision_driver.endpoint, body: data
+
+    response.status.success? ? "Successful connection to AutoDNS" : "AutoDNS Error: #{response.body.to_s}"
   end
 
 end
