@@ -3,6 +3,7 @@ module ContainerServices
     extend ActiveSupport::Concern
 
     def is_wordpress?
+      return false unless Feature.check('wp_beta')
       container_image.role == 'wordpress'
     end
 

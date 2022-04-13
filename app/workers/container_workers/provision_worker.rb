@@ -18,7 +18,7 @@ module ContainerWorkers
       # Ensure prerequisites are met
       return unless ProvisionServices::ImageReadyService.new(container, event).perform
 
-      build_result = Timeout::timeout(30) do
+      build_result = Timeout::timeout(60) do
         container.build! event
       end
 

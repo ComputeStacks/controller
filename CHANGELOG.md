@@ -1,5 +1,16 @@
 # Change Log
 
+## v7.1.3
+
+_Apr 13, 2022_
+
+* [CHANGE] Support for generating single-domain LetsEncrypt certificates.
+* [CHANGE] Move wordpress beta features behind a feature flag.
+* [CHANGE] Configuration option to temporarily disable LE automatic generation & renewal.
+* [CHANGE] Increase LetsEncrypt provisioning from every 15min, to every 8min.
+
+***
+
 ## v7.1.2
 
 _Apr 6, 2022_
@@ -12,7 +23,7 @@ _Apr 6, 2022_
 
 _Mar 29, 2022_
 
-* [FIX] Resolve issue with orphanied collaboration records.
+* [FIX] Resolve issue with orphaned collaboration records.
 
 ***
 

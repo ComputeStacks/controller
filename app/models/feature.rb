@@ -42,7 +42,9 @@ class Feature < ApplicationRecord
         { 'feature' => 'loki', 'default' => true },
         { 'feature' => 'loki_fluentd', 'default' => true },
         { 'feature' => 'updated_cr_cert', 'default' => true },
-        { 'feature' => 'tcp_iptables', 'default' => true }
+        { 'feature' => 'tcp_iptables', 'default' => true },
+        { 'feature' => 'wp_beta', 'default' => false }, # Wordpress Beta Features
+        { 'feature' => 'setting_belco', 'default' => false } # Show belco options
       ]
       feature_list.each do |i|
         unless Feature.where(name: i['feature']).first

@@ -22,6 +22,7 @@ module Admin::SettingsHelper
     return 'Container Registry Certificate Name' if name == 'cr_le'
     return 'Enable LetsEncrypt' if name == 'le'
     return 'LetsEncrypt Validation Server' if name == 'le_validation_server'
+    return '1 Certificate per Domain' if name == 'le_single_domain'
     name.split('_').map do |i|
       %w(id url smtp).include?(i.downcase) ? i.upcase : i.downcase.capitalize
     end.join(' ')

@@ -468,6 +468,22 @@ class Setting < ApplicationRecord
       ActiveRecord::Type::Boolean.new.cast s.value
     end
 
+    # Quick way to temporarily disable certificate generation.
+    # It will still schedule the job, but won't run it
+    def le_auto_enabled?
+      s = Setting.find_by(name: 'le_auto', category: 'lets_encrypt')
+      if s.nil?
+        s = Setting.create!(
+          name: 'le_auto',
+          category: 'lets_encrypt',
+          description: 'Enable Lets Encrypt Scheduled Job',
+          value: true,
+          encrypted: false
+        )
+      end
+      ActiveRecord::Type::Boolean.new.cast s.value
+    end
+
     def le_server
       s = Setting.find_by(name: 'le_validation_server', category: 'lets_encrypt')
       if s.nil?
@@ -480,6 +496,34 @@ class Setting < ApplicationRecord
         )
       end
       s.value
+    end
+
+    def le_domains_per_account
+      s = Setting.find_by(name: 'le_domains_per_account', category: 'lets_encrypt')
+      if s.nil?
+        s = Setting.create!(
+          name: 'le_domains_per_account',
+          category: 'lets_encrypt',
+          description: 'How many certificates to place under a single LE Account? 150 min.',
+          value: "300",
+          encrypted: false
+        )
+      end
+      (s.value.blank? || s.value.to_i < 150) ? 150 : s.value.to_i
+    end
+
+    def le_single_domain?
+      s = Setting.find_by(name: 'le_single_domain', category: 'lets_encrypt')
+      if s.nil?
+        s = Setting.create!(
+          name: 'le_single_domain',
+          category: 'lets_encrypt',
+          description: 'Use 1 domain per certificate, rather than combining. Please note https://letsencrypt.org/docs/rate-limits',
+          value: false,
+          encrypted: false
+        )
+      end
+      ActiveRecord::Type::Boolean.new.cast s.value
     end
 
     ##
@@ -535,7 +579,10 @@ class Setting < ApplicationRecord
         google_analytics
         hostname
         le
+        le_auto_enabled?
+        le_domains_per_account
         le_server
+        le_single_domain?
         registry_base_url
         registry_node
         registry_selinux

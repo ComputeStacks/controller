@@ -61,7 +61,7 @@ module LeContainerDomain
     account = LetsEncryptAccount.find_or_create
     return false if account.nil?
     chosen_cert = nil
-    chosen_cert = user.lets_encrypts.selectable.first
+    chosen_cert = user.lets_encrypts.selectable.first unless Setting.le_single_domain?
     chosen_cert = user.lets_encrypts.create!(account: account) if chosen_cert.nil?
     if chosen_cert.nil?
       SystemEvent.create!(

@@ -15,12 +15,12 @@ module Clockwork
     NodeWorkers::HealthCheckWorker.perform_async
   end
 
-  every(10.minutes, 'sftp.cleanup') do
-    ContainerWorkers::SftpCleanupWorker.perform_async
+  every(8.minutes, 'le.provision_certs') do
+    LetsEncryptWorkers::GenerateCertWorker.perform_async nil
   end
 
-  every(15.minutes, 'le.provision_certs') do
-    LetsEncryptWorkers::GenerateCertWorker.perform_async nil
+  every(10.minutes, 'sftp.cleanup') do
+    ContainerWorkers::SftpCleanupWorker.perform_async
   end
 
   every(20.minutes, 'volume.cleanup') do

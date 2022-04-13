@@ -12,14 +12,22 @@ module LetsEncryptWorkers
     def perform(lets_encrypt_id, event_id = nil)
 
       if lets_encrypt_id.nil?
+        return unless Setting.le_auto_enabled?
         LetsEncrypt.all.each do |le|
           next unless le.can_renew?
+          next if le.event_logs.where(status: 'running').exists?
           LetsEncryptWorkers::GenerateCertWorker.perform_async le.id
         end
         return
       end
 
       event = event_id.nil? ? nil : EventLog.find_by(id: event_id, status: 'running')
+
+      unless Setting.le_auto_enabled?
+        event.cancel! 'Provisioning temporarily disabled' if event
+        return
+      end
+
       lets_encrypt = LetsEncrypt.find_by(id: lets_encrypt_id)
       return false if lets_encrypt.nil?
 
