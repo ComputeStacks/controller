@@ -1044,7 +1044,6 @@ pdnsutil add-record cstacks.local registry A 127.0.0.1
 pdnsutil add-record cstacks.local a A 127.0.0.1
 pdnsutil add-record cstacks.local *.a CNAME a.cstacks.local
 pdnsutil add-record cstacks.local @ CAA "0 issue \"letsencrypt.org\""
-pdnsutil add-record cstacks.local @ CAA "0 issuewild \"letsencrypt.org\""
 echo "...loading test domains..."
 mv /tmp/cs_pdns_up /usr/local/bin/ \
   && bash /usr/local/bin/cs_pdns_up >/dev/null
