@@ -65,7 +65,7 @@ class BillingResource < ApplicationRecord
     final_phase = billing_phases.find_by(phase_type: 'final')
     p << trial_phase if trial_phase
     p << discount_phase if discount_phase
-    p << final_phase
+    p << final_phase if final_phase
     p
   end
 

@@ -2,7 +2,10 @@
   .row
     .col-sm-12: .form-group
       = label_tag :phase_type, 'Phase'
-      = select(:phase, :phase_type, selectable_phases(@phase.billing_resource, (controller.action_name == 'new' || controller.action_name == 'create' ? nil : @phase.phase_type)), {}, { class: 'form-control chosen-select-standard', name: 'billing_phase[phase_type]' })
+      - if @phase.id && @phase.phase_type == 'final'
+        = select(:phase, :phase_type, selectable_phases(@phase.billing_resource, (controller.action_name == 'new' || controller.action_name == 'create' ? nil : @phase.phase_type)), {}, { class: 'form-control chosen-select-standard', name: 'billing_phase[phase_type]', disabled: true })
+      - else
+        = select(:phase, :phase_type, selectable_phases(@phase.billing_resource, (controller.action_name == 'new' || controller.action_name == 'create' ? nil : @phase.phase_type)), {}, { class: 'form-control chosen-select-standard', name: 'billing_phase[phase_type]' })
       span.help-block Phases flow from Trial, to Discount, and then to Final.
 
   hr style='border-color:#ccc;'
@@ -23,6 +26,6 @@
 
 
 .panel-footer
-  = link_to t('actions.cancel'), @base_url, class: 'btn btn-default', style: 'margin-right:10px;'
+  = link_to t('actions.cancel'), "#{@base_url}/billing_phases/#{@phase.id}", class: 'btn btn-default', style: 'margin-right:10px;'
   = submit_tag t('actions.save'), class: 'btn btn-success'
   = link_to "Delete", "#{@base_url}/billing_phases/#{@phase.id}", method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-danger pull-right' if (controller.action_name == 'edit' || controller.action_name == 'update') && @phase.phase_type != 'final'

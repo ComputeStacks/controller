@@ -11,8 +11,12 @@
     | &nbsp;
     b= @phase.phase_type.capitalize
   .col-lg-4.col-xs-6.text-right
-    = link_to raw("<i class='fa fa-wrench'></i> Edit Phase"), "#{@base_url}/billing_phases/#{@phase.id}/edit", class: "btn btn-sm btn-default", style: "margin-right:10px;"
-    = link_to raw("<i class='fa fa-trash'></i> Delete Phase"), "#{@base_url}/billing_phases/#{@phase.id}", method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-sm btn-danger"
+    - if @phase.phase_type == 'final'
+      = link_to raw("<i class='fa fa-wrench'></i> Edit Phase"), '#', class: "btn btn-sm btn-default", style: "margin-right:10px;", disabled: 'disabled', title: "Unable to edit the Final Phase"
+      = link_to raw("<i class='fa fa-trash'></i> Delete Phase"), '#', class: "btn btn-sm btn-danger", disabled: 'disabled', title: "Unable to delete the Final Phase"
+    - else
+      = link_to raw("<i class='fa fa-wrench'></i> Edit Phase"), "#{@base_url}/billing_phases/#{@phase.id}/edit", class: "btn btn-sm btn-default", style: "margin-right:10px;"
+      = link_to raw("<i class='fa fa-trash'></i> Delete Phase"), "#{@base_url}/billing_phases/#{@phase.id}", method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-sm btn-danger"
 
 .row: .col-md-12
   - @phase.available_currencies.each do |currency|

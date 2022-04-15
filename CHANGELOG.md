@@ -1,5 +1,13 @@
 # Change Log
 
+## v7.1.4
+
+_Apr 14, 2022_
+
+* [FIX] Resolve a bug that would allow removing the final phase of a billing resource.
+
+***
+
 ## v7.1.3
 
 _Apr 13, 2022_
