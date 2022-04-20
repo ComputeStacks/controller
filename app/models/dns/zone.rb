@@ -1,6 +1,11 @@
 ##
 # Dns Zone
 #
+# To delete a zone without deleting it from the remote server,
+# simply run `destroy` on the object from the console.
+#
+# Remote zones are not deleted as a callback, and destroy won't remove them.
+#
 # @!attribute [r] id
 #   @return [Integer]
 #
@@ -35,7 +40,7 @@ class Dns::Zone < ApplicationRecord
   has_many :collaborators, through: :dns_zone_collaborators, source: :collaborator
 
   validates :name, uniqueness: true
-  validate :domain_validator, on: :save
+  validate :domain_validator
 
   after_create_commit :refresh_user_quota
 
@@ -81,21 +86,26 @@ class Dns::Zone < ApplicationRecord
       !DomainPrefix.registered_domain(name).nil?
     end
 
+    ##
+    # Ensure zone does not already exist.
+    # Admins can bypass by checking run_module_create.
     def name_available?(zone)
-      true
-      # load_all(true).each do |i|
-      #   has_dot = zone.strip.split('').last == '.'
-      #   remote_has_dot = i.id.strip.split('').last == '.'
-      #   remote_zone = i.id
-      #   if remote_has_dot && !has_dot
-      #     zone = "#{zone}."
-      #     remote_zone = i.id
-      #   elsif !remote_has_dot && has_dot
-      #     remote_zone = "#{i.id}."
-      #   end
-      #   return false if zone == remote_zone
-      # end
-      # true
+      dns_type = ProductModule.find_by(name: 'dns')
+      if dns_type.nil?
+        dns_type = ProductModule.create!(name: 'dns')
+      end
+      pd = dns_type.default_driver
+      auth_client = pd.host_settings['auth_type'] == 'user' ? auth.client : pd.service_client
+      z = zone.strip[-1] == '.' ? zone : "#{zone}."
+      pd.zone.find(auth_client, z).nil?
+    rescue => e
+      SystemEvent.create!(
+        message: "Error connecting to dns server",
+        log_level: 'warn',
+        data: { error: e.message },
+        event_code: "32ccbcb57ad99d4c"
+      )
+      false
     end
 
     def sync!
@@ -181,6 +191,12 @@ class Dns::Zone < ApplicationRecord
   def domain_validator
     unless Dns::Zone.valid_domain?(name)
       errors.add(:name, "Not a valid domain name.")
+    end
+    return if ActiveRecord::Type::Boolean.new.cast(skip_provision_driver)
+    return unless ActiveRecord::Type::Boolean.new.cast(run_module_create)
+    return unless name_changed?
+    unless Dns::Zone.name_available?(name)
+      errors.add(:name, "already exists")
     end
   end
 

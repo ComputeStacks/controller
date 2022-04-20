@@ -70,10 +70,7 @@ class DnsController < AuthController
   end
 
   def zone_params
-    params.require(:dns_zone).permit(
-        :name, :run_module_create, :commit_changes,
-        :revert_changes, :soa_email
-    )
+    params.require(:dns_zone).permit( :name, :commit_changes, :revert_changes, :soa_email )
   end
 
   def load_vars

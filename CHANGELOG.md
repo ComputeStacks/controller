@@ -1,5 +1,13 @@
 # Change Log
 
+## v7.1.5
+
+_Apr 15, 2022_
+
+* [CHANGE] Support for dns servers that are accessed in other locations. ComputeStacks will now check if a zone already exists before creating it. If a zone exists and you wish to manage it from ComputeStacks, you will need to first add it in the administrator and uncheck the Create Zone box.
+
+***
+
 ## v7.1.4
 
 _Apr 14, 2022_
