@@ -498,6 +498,7 @@ class Setting < ApplicationRecord
       s.value
     end
 
+    # @return [Integer]
     def le_domains_per_account
       s = Setting.find_by(name: 'le_domains_per_account', category: 'lets_encrypt')
       if s.nil?
@@ -512,6 +513,7 @@ class Setting < ApplicationRecord
       (s.value.blank? || s.value.to_i < 150) ? 150 : s.value.to_i
     end
 
+    # @return [Boolean]
     def le_single_domain?
       s = Setting.find_by(name: 'le_single_domain', category: 'lets_encrypt')
       if s.nil?
@@ -524,6 +526,23 @@ class Setting < ApplicationRecord
         )
       end
       ActiveRecord::Type::Boolean.new.cast s.value
+    end
+
+    # @return [Integer]
+    def le_dns_sleep
+      s = Setting.find_by(name: 'le_dns_sleep', category: 'lets_encrypt')
+      if s.nil?
+        s = Setting.create!(
+          name: 'le_dns_sleep',
+          category: 'lets_encrypt',
+          description: 'How long to wait (in seconds) before verifying DNS with wildcard certificates. Min 2, Max 90.',
+          value: "10",
+          encrypted: false
+        )
+      end
+      v = s.value.to_i
+      return 2 if v < 2
+      v > 90 ? 90 : v
     end
 
     ##
@@ -581,6 +600,7 @@ class Setting < ApplicationRecord
         le
         le_auto_enabled?
         le_domains_per_account
+        le_dns_sleep
         le_server
         le_single_domain?
         registry_base_url

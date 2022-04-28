@@ -1,5 +1,13 @@
 # Change Log
 
+## v7.1.6
+
+_Apr 27, 2022_
+
+* [CHANGE] Make lets encrypt dns validation waiting period configurable in the
+
+***
+
 ## v7.1.5
 
 _Apr 15, 2022_
