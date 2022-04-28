@@ -95,7 +95,7 @@ module LetsEncryptWorkers
             break
           end
           # You can only request dns validation once, so we need to allow some time to process
-          sleep(10)
+          sleep(Setting.le_dns_sleep)
           auth_challenge.reload
         else # HTTP Auth
           auth_challenge = auth.http
@@ -108,7 +108,7 @@ module LetsEncryptWorkers
         end
 
         auth_challenge.request_validation
-        challenge_timeout = Rails.env.test? ? 5.seconds.from_now : 4.minutes.from_now
+        challenge_timeout = (Rails.env.test? ? 5.seconds.from_now : 4.minutes.from_now).to_time
         while auth_challenge.status == 'pending' && (Time.now < challenge_timeout)
           sleep(1)
           auth_challenge.reload
@@ -148,7 +148,7 @@ module LetsEncryptWorkers
 
       ##
       # Wait for order to become ready
-      ready_timeout = Rails.env.test? ? 5.seconds.from_now : 1.minute.from_now
+      ready_timeout = (Rails.env.test? ? 5.seconds.from_now : 1.minute.from_now).to_time
       while order.status == 'pending' && (Time.now < ready_timeout)
         sleep(1)
         order.reload
@@ -171,7 +171,7 @@ module LetsEncryptWorkers
       )
       order.finalize(csr: csr)
 
-      order_timeout = Rails.env.test? ? 5.seconds.from_now : 2.minutes.from_now
+      order_timeout = (Rails.env.test? ? 5.seconds.from_now : 2.minutes.from_now).to_time
       while order.status == 'processing' && (Time.now < order_timeout)
         sleep(1)
         order.reload
