@@ -22,5 +22,14 @@ module Authorization
       deployment_collaborators.where(active: true, user_id: current_user.id).exists?
     end
 
+    # @param [User] current_user
+    # @return [Boolean]
+    def can_delete?(current_user)
+      return false if current_user.nil?
+      return true if current_user.is_admin
+      return true if current_user == user
+      deployment_collaborators.where(active: true, user_id: current_user.id).exists?
+    end
+
   end
 end
