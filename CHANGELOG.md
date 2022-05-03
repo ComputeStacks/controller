@@ -1,5 +1,13 @@
 # Change Log
 
+## v7.1.7
+
+_May 2, 2022_
+
+* [FIX] Resolve issue that could prevent users from deleting projects.
+
+***
+
 ## v7.1.6
 
 _Apr 27, 2022_
