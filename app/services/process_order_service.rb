@@ -58,7 +58,7 @@ class ProcessOrderService
     complete_process!
     true
   ensure
-    # If this is triggered and the vent is still running, then something bad happened.
+    # If this is triggered and the event is still running, then something bad happened.
     if event.running?
       fail_process! 'Fatal Error'
     end
