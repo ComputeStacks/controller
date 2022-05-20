@@ -1,5 +1,14 @@
 # Change Log
 
+## v7.1.8
+
+_May 19, 2022_
+
+* [FIX] Resolve issues with collaborator API.
+
+***
+
+
 ## v7.1.7
 
 _May 2, 2022_
