@@ -28,12 +28,11 @@ class Deployments::SftpController < Deployments::BaseController
     @sftp.current_audit = Audit.create_from_object! @sftp, 'updated', request.remote_ip, current_user
     @sftp.toggle_pw_auth!
     if request.xhr?
-      render head: 201
+      head :created
     else
       redirect_back fallback_location: "/deployments/#{@deployment.token}", notice: "Password Auth has been updated"
     end
   end
-
 
   private
 

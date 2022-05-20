@@ -97,7 +97,7 @@ class Api::CollaborationsController < Api::ApplicationController
   #
   def destroy
     if @collab.destroy
-      render head: :accepted
+      head :accepted
     else
       api_obj_error @collab.errors.full_messages
     end
