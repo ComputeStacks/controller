@@ -10,7 +10,7 @@ class Api::Admin::ContainerImages::CollaboratorsController < Api::Admin::Contain
   #
   #   * `collaborations`: Array
   #       * `id`: Integer
-  #       * `resource_owner`: Object
+  #       * `collaborator`: Object
   #           * `id`: Integer
   #           * `email`: String
   #           * `full_name`: String
@@ -32,6 +32,10 @@ class Api::Admin::ContainerImages::CollaboratorsController < Api::Admin::Contain
   #     * `image`: Object
   #         * `id`: Integer
   #         * `name`: String
+  # * `collaborator`: Object
+  #     * `id`: Integer
+  #     * `email`: String
+  #     * `full_name`: String
   # * `resource_owner`: Object
   #     * `id`: Integer
   #     * `email`: String
@@ -56,7 +60,9 @@ class Api::Admin::ContainerImages::CollaboratorsController < Api::Admin::Contain
     @collab = @image.container_image_collaborators.new user_email: collaborator_params[:user_email], current_user: current_user
     @collab.skip_confirmation = true if collaborator_params[:skip_confirmation]
     return api_obj_error(@collab.errors.full_messages) unless @collab.save
-    render action: :show, status: :created
+    respond_to do |format|
+      format.any(:json, :xml) { render template: 'api/collaborations/show', status: :created }
+    end
   end
 
   ##
@@ -66,7 +72,7 @@ class Api::Admin::ContainerImages::CollaboratorsController < Api::Admin::Contain
   #
   def destroy
     return api_obj_error(@collab.errors.full_messages) unless @collab.destroy
-    render head: :accepted
+    head :accepted
   end
 
   private

@@ -94,7 +94,7 @@ class Api::Admin::Users::CollaborationsController < Api::Admin::Users::BaseContr
   #
   def destroy
     if @collab.destroy
-      render head: :accepted
+      head :accepted
     else
       api_obj_error @collab.errors.full_messages
     end
