@@ -17,9 +17,7 @@ class Api::VolumesController < Api::ApplicationController
   #     * `id`: Integer
   #     * `name`: String
   #     * `label`: String
-  #     * `container_path`: String
   #     * `region_id`: Integer
-  #     * `container_service_id`: Integer
   #     * `to_trash`: Boolean
   #     * `trash_after`: DateTime
   #     * `size`: Decimal
@@ -60,9 +58,7 @@ class Api::VolumesController < Api::ApplicationController
   #     * `id`: Integer
   #     * `name`: String
   #     * `label`: String
-  #     * `container_path`: String
   #     * `region_id`: Integer
-  #     * `container_service_id`: Integer
   #     * `to_trash`: Boolean
   #     * `trash_after`: DateTime
   #     * `size`: Decimal

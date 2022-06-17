@@ -1,30 +1,19 @@
 <div class="panel-body">
 
   <div class="row">
-    <div class="col-md-8 col-sm-12">
-      <div class="form-group">
-        <%= f.label :label, t('volumes.form.label') %>
-        <%= f.text_field :label, class: 'form-control' %>
-        <span class="help-block">
-          <%= t('volumes.form.label_help') %>
-        </span>
-      </div>
+    <div class="col-sm-12 tabbable">
+      <ul role="tablist" class="nav nav-tabs">
+        <li role="presentation" <% if @volume.source_volume.nil? %>class="active"<% end %>>
+          <%= link_to "Create Volume", "#create", role: 'tab', aria: { controls: 'create' }, data: { toggle: 'tab' } %>
+        </li>
+        <li role="presentation" <% if @volume.source_volume %>class="active"<% end %>>
+          <%= link_to "Mount Volume", "#mount", role: 'tab', aria: { controls: 'mount' }, data: { toggle: 'tab' } %>
+        </li>
+      </ul>
     </div>
-    <div class="col-md-4 col-sm-12">
-      <div class="checkbox-inline">
-        <%= f.label :enable_sftp, t('volumes.form.enable_sftp') do %>
-          <%= f.check_box :enable_sftp %>
-          <%= t 'volumes.form.enable_sftp' %>
-        <% end %>
-        <span class="help-block">
-          <%= t 'volumes.form.enable_sftp_help' %>
-        </span>
-      </div>
-    </div>
-
   </div>
 
-  <div class="row">
+  <div class="row" style="margin-top:25px;">
     <div class="col-sm-12">
       <div class="form-group">
         <%= f.label :mount_path, t('volumes.form.mount_path') %>
@@ -36,6 +25,60 @@
     </div>
   </div>
 
-</div>
+  <div class="tab-content" style="margin-top:25px;">
+    <div id="create" class="tab-pane<%= @volume.source_volume.nil? ? ' active' : '' %>">
+      <div class="row">
+        <div class="col-md-8 col-sm-12">
+          <div class="form-group">
+            <%= f.label :label, t('volumes.form.label') %>
+            <%= f.text_field :label, class: 'form-control' %>
+            <span class="help-block">
+              <%= t('volumes.form.label_help') %>
+            </span>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+          <div class="checkbox-inline">
+            <%= f.label :enable_sftp, t('volumes.form.enable_sftp') do %>
+              <%= f.check_box :enable_sftp %>
+              <%= t 'volumes.form.enable_sftp' %>
+            <% end %>
+            <span class="help-block">
+              <%= t 'volumes.form.enable_sftp_help' %>
+            </span>
+          </div>
+        </div>
+      </div>
+      <%= render partial: "container_images/volume_params/borg_form", locals: { f: f, volume: @volume } if Feature.check('backups', current_user) %>
+    </div>
 
-<%= render partial: "container_images/volume_params/borg_form", locals: { f: f, volume: @volume } if Feature.check('backups', current_user) %>
+    <div id="mount" class="tab-pane<%= @volume.source_volume.nil? ? '' : ' active' %>">
+      <div class="row">
+        <div class="col-lg-8 col-sm-12">
+          <div class="form-group">
+            <label for="source_volume_id">Source Volume</label>
+            <select name="container_image_volume_param[source_volume_id]" class="form-control" id="container_image_volume_param_source_volume_id">
+              <% if image_mountable_volumes(@volume).empty? %>
+                <option>Add dependent image to see volumes</option>
+              <% else %>
+                <option value="">Select Existing Volume</option>
+                <% image_mountable_volumes(@volume).each do |i| %>
+                  <option value="<%= i[:id] %>"<% if @volume.source_volume&.id == i[:id].to_i %> selected="selected"<% end %>><%= i[:label] %></option>
+                <% end %>
+              <% end %>
+            </select>
+          </div>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+          <div class="form-group">
+            <%= f.label :mount_ro, "Mount Read Only" do %>
+              <%= f.check_box :mount_ro %>
+              <%= "Mount Read Only" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

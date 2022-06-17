@@ -44,28 +44,34 @@
   </div>
 
   <div class="row">
-    <div class="col-sm-3 col-xs-6">
+    <div class="col-sm-4 col-xs-6">
       <div class="form-group">
         <%= f.label :borg_keep_hourly, t('volumes.form.backups.retention.hourly') %>
         <%= f.text_field :borg_keep_hourly, class: 'form-control' %>
       </div>
     </div>
-    <div class="col-sm-3 col-xs-6">
+    <div class="col-sm-4 col-xs-6">
       <div class="form-group">
         <%= f.label :borg_keep_daily, t('volumes.form.backups.retention.daily') %>
         <%= f.text_field :borg_keep_daily, class: 'form-control' %>
       </div>
     </div>
-    <div class="col-sm-3 col-xs-6">
+    <div class="col-sm-4 col-xs-6">
       <div class="form-group">
         <%= f.label :borg_keep_weekly, t('volumes.form.backups.retention.weekly') %>
         <%= f.text_field :borg_keep_weekly, class: 'form-control' %>
       </div>
     </div>
-    <div class="col-sm-3 col-xs-6">
+    <div class="col-xs-6">
       <div class="form-group">
         <%= f.label :borg_keep_monthly, t('volumes.form.backups.retention.monthly') %>
         <%= f.text_field :borg_keep_monthly, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-xs-6">
+      <div class="form-group">
+        <%= f.label :borg_keep_annually, t('volumes.form.backups.retention.yearly') %>
+        <%= f.text_field :borg_keep_annually, class: 'form-control' %>
       </div>
     </div>
   </div>

@@ -14,13 +14,11 @@ class Api::Admin::VolumesController < Api::Admin::ApplicationController
   #   * `id`: Integer
   #   * `name`: String
   #   * `label`: String
-  #   * `container_path`: String - Where the volume is mounted inside the container
   #   * `user`: Object
   #       * `id`: Integer
   #       * `email`: String
   #       * `external_id`: String
   #       * `labels`: Object
-  #   * `container_service_id`: Integer
   #   * `region_id`: Integer
   #   * `to_trash`: Boolean
   #   * `trash_after`: DateTime

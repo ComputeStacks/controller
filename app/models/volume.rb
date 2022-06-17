@@ -10,15 +10,9 @@
 # @!attribute label
 #   @return [String]
 #
-# @!attribute container_path
-#   @return [String] The path inside the container where the volume is mounted.
-#
 # @!attribute user
 #   @return [User]
-#
-# @!attribute container_service
-#   @return [Deployment::ContainerService]
-#
+##
 # @!attribute region
 #   @return [Region]
 #
@@ -88,8 +82,8 @@
 # @!attribute volume_backend
 #   @return [local,nfs] local is default.
 #
-# @!attribute container_service
-#   @return [Deployment::ContainerService]
+# @!attribute container_services
+#   @return [Array<Deployment::ContainerService>]
 #
 # @!attribute deployment
 #   @return [Deployment]
@@ -132,9 +126,15 @@ class Volume < ApplicationRecord
   scope :sftp_enabled, -> { where(enable_sftp: true) }
   scope :all_local, -> { where(volume_backend: 'local') }
 
-  belongs_to :container_service, class_name: 'Deployment::ContainerService', optional: true
-  has_one :deployment, through: :container_service
-  has_many :containers, through: :container_service
+  has_many :volume_maps, dependent: :destroy
+  has_many :container_services, through: :volume_maps
+  has_many :containers, through: :volume_maps
+  belongs_to :deployment, optional: true
+  # belongs_to :container_service, class_name: 'Deployment::ContainerService', optional: true
+  # has_one :deployment, through: :container_service
+  # has_many :containers, through: :container_service
+
+  belongs_to :template, class_name: "ContainerImage::VolumeParam", optional: true
 
   has_many :collaborators, through: :deployment
 
@@ -151,13 +151,12 @@ class Volume < ApplicationRecord
   belongs_to :subscription, optional: true
 
   validates :label, presence: true
-  validates :container_path, presence: true
 
   before_validation :set_name, on: :create
 
   before_save :set_trash_after #, if: :persisted?
   before_save :update_user, unless: :skip_user_update
-  after_save :rebuild_services, if: :force_rebuild
+  # after_save :rebuild_services, if: :force_rebuild
 
   after_save :update_subscription
 
@@ -165,8 +164,6 @@ class Volume < ApplicationRecord
   after_commit :update_consul!
 
   validates :name, presence: true, uniqueness: true
-  validates :container_path, format: {with: /[\x00-\x1F\/\\:\*\?\"<>\|]/u}
-  validate :ensure_single_path
 
   belongs_to :trashed_by, class_name: 'Audit', optional: true
 
@@ -175,7 +172,22 @@ class Volume < ApplicationRecord
   # CurrentAudit: Audit in use for this job.
   # ProvisionVolume: Build the volume on the node
   # ForceRebuild: Useful after changes are made to the container service.
-  attr_accessor :force_rebuild, :skip_user_update
+  # attr_accessor :force_rebuild, :skip_user_update
+  attr_accessor :skip_user_update
+
+  def csrn
+    "csrn:caas:project:vol:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return "null" if label.blank?
+    label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+  end
+
+  # Pick the primary container service
+  def container_service
+    volume_maps.primary.first&.container_service
+  end
 
   def can_trash?
     to_trash && trash_after <= Time.now
@@ -246,8 +258,8 @@ class Volume < ApplicationRecord
   def find_node
     if !nodes.empty?
       nodes.first
-    elsif container_service
-      container_service.nodes.first
+    elsif deployment
+      deployment.nodes.first
     elsif region
       region.nodes.available.first
     end
@@ -281,45 +293,17 @@ class Volume < ApplicationRecord
     self.name = SecureRandom.uuid.strip if self.name.blank?
   end
 
-  # A volume may not be above another volume in the path.
-  def ensure_single_path
-    is_parent = false
-    return nil if container_service.nil?
-    container_service.volumes.where.not(id: self.id).pluck(:container_path).each do |i|
-      is_parent = true if i.start_with?(container_path) # Is our new path is above an existing path?
-      is_parent = true if container_path.start_with?(i) # Is our new path below an existing path?
-    end
-    errors.add(:container_path, "is already in use.") if is_parent
-  end
-
   # Ensure we record the user.
   # Will not update if the deployment is null.
   def update_user
     self.user = self.deployment.user if self.deployment
   end
 
-  def rebuild_services
-    # Only if container_path or container_service change
-    if self.saved_change_to_attribute?("container_path") || self.saved_change_to_attribute?("container_service_id")
-      as = attached_services
-      unless as[:known].empty?
-        audit = if current_audit.nil?
-                  Audit.create_from_object!(self, 'updated', '127.0.0.1')
-                else
-                  current_audit
-                end
-        as[:known].each do |i|
-          PowerCycleContainerService.new(i, 'rebuild', audit)
-        end
-      end
-    end
-  end
-
   # Track when this volume went offline, for billing purposes.
   def set_detached
-    if self.container_service.nil? && self.detached_at.nil?
+    if self.container_services.empty? && self.detached_at.nil?
       self.update_column(:detached_at, Time.now.utc)
-    elsif self.container_service && !self.detached_at.nil?
+    elsif !self.container_services.empty? && !self.detached_at.nil?
       self.update_column(:detached_at, nil)
     end
   rescue

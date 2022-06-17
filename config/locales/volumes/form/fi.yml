@@ -22,12 +22,13 @@ fi:
           daily: Päivittäin
           weekly: Viikottain
           monthly: Kuukausittain
+          yearly: Annually
         hooks:
           custom: Omat koukut
           custom_help_html: |
             <p>Ennen- ja jälkeen komennot jotka suoritetaan kontin sisällä</p>
             <p>Skriptisi täytyy palauttaa exit koodi 0, muuten sen suoritus tulkitaan epäonnistuneeksi.</p>
-          ## Space is intentional ####          
+          ## Space is intentional ####
           pre_backup:
             continue_on_error: "Jatka virheestä välittämättä?" # If a pre-backup hook fails, should we continue?
             custom_script:

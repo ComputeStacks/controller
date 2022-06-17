@@ -17,7 +17,7 @@ class VolumesController < AuthController
   def update
     audit = Audit.create_from_object!(@volume, 'updated', request.remote_ip, current_user)
     @volume.current_audit = audit
-    @volume.force_rebuild = true
+    # @volume.force_rebuild = true <-- previous behavior, but we're not doing that now.
     if @volume.update(volume_params)
       redirect_to "/volumes/#{@volume.id}", notice: "Volume updated"
     else
@@ -40,11 +40,10 @@ class VolumesController < AuthController
 
   def volume_params
     params.require(:volume).permit(
-      :label, :container_service_id, :to_trash, :container_path,
       :borg_freq, :borg_strategy, :borg_backup_error, :borg_restore_error,
       :borg_keep_hourly, :borg_keep_daily, :borg_keep_weekly, :borg_keep_monthly,
       :borg_pre_backup, :borg_post_backup, :borg_pre_restore, :borg_post_restore,
-      :borg_rollback, :borg_enabled
+      :borg_rollback, :borg_enabled, :label, :to_trash
     )
   end
 

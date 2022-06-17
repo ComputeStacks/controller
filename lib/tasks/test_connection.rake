@@ -29,10 +29,6 @@ namespace :test_connection do
   end
 
   task consul: :environment do
-    docker_client_opts = Docker.connection.options
-    docker_client_opts[:connect_timeout] = 3
-    docker_client_opts[:read_timeout] = 3
-    docker_client_opts[:write_timeout] = 3
     Region.all.each do |region|
       dc = region.name.strip.downcase
       n = region.nodes.online.first&.primary_ip
@@ -41,7 +37,8 @@ namespace :test_connection do
         next
       end
       begin
-        peers = Diplomat::Status.peers({ http_addr: "https://#{n}:8501", dc: dc })
+        addr = Diplomat.configuration.options.empty? ? "http://#{n}:8500" : "https://#{n}:8501"
+        peers = Diplomat::Status.peers({ http_addr: addr, dc: dc })
         puts %Q[Consul Region: #{dc} #{n} - #{peers.is_a?(Array) ? "found #{peers.count} nodes": peers}]
       rescue
         puts "[FAILED] Consul Region: #{dc} Failed to connect to node: #{n}"

@@ -92,6 +92,14 @@ class Network::IngressRule < ApplicationRecord
   after_save :provision_domain, unless: Proc.new { |i| i.no_provision_domain }
   after_save :refresh_metadata, unless: Proc.new { |i| i.skip_metadata_refresh }
 
+  def csrn
+    "csrn:caas:project:ingress:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    "#{port}#{proto}"
+  end
+
   def deployment
     return container_service.deployment if container_service
     return sftp_container.deployment if sftp_container

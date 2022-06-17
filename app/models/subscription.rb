@@ -71,6 +71,15 @@ class Subscription < ApplicationRecord
 
   attr_accessor :current_audit
 
+  def csrn
+    "csrn:billing:subscription:root:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return "null" if label.blank?
+    label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+  end
+
   # Public run rate, returns it in monthly!
   def run_rate
     total = 0e0

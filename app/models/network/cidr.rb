@@ -23,6 +23,15 @@ class Network::Cidr < ApplicationRecord
 
   before_create :set_ip_addr!
 
+  def csrn
+    "csrn:caas:project:cidr:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return "null" if cidr.blank?
+    cidr.to_s.strip.gsub(".","-")
+  end
+
   def ipaddr
     cidr.to_s
   end

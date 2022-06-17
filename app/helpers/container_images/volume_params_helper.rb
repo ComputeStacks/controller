@@ -32,4 +32,15 @@ module ContainerImages::VolumeParamsHelper
     ]
   end
 
+  def image_mountable_volumes(volume)
+    mountable = []
+    volume.container_image.dependencies.each do |i|
+      i.volumes.each do |ii|
+        mountable << {id: ii.id, csrn: ii.csrn, label: ii.label}
+      end
+    end
+    mountable
+  end
+
+
 end

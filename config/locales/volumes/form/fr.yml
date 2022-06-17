@@ -22,6 +22,7 @@ fr:
           daily: Daily
           weekly: Weekly
           monthly: Monthly
+          yearly: Annually
         hooks:
           custom: Custom Hooks
           custom_help_html: |

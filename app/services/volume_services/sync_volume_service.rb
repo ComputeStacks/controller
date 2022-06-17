@@ -97,7 +97,6 @@ module VolumeServices
       end
 
       new_volume = existing_container_service.volumes.new(
-        container_path: service_mount_path,
         label: vol.info['Name'],
         name: vol.info['Name'],
         deployment: existing_container_service.deployment,
@@ -105,10 +104,14 @@ module VolumeServices
         borg_enabled: false,
         enable_sftp: false,
         region: existing_container_service.region,
-        volume_backend: 'local'
+        volume_backend: 'local' # TODO: Read the drive from the docker api.
       )
       new_volume.nodes << node
       unless new_volume.save
+        new_volume.volume_maps.create!(
+          mount_path: service_mount_path,
+          container_service: existing_container_service
+        )
         event.event_details.create!(
           data: "Fatal error importing volume #{vol.info['Name']}.\n\n#{new_volume.errors.full_messages.join(' ')}",
           event_code: '23d980fd2ed94884'

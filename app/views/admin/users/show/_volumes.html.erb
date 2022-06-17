@@ -7,8 +7,6 @@
             <th>ID</th>
             <th>Label</th>
             <th>Project</th>
-            <th>Service</th>
-            <th>Path</th>
             <th>Created</th>
             <th>Delete After</th>
           </tr>
@@ -22,8 +20,6 @@
               <td><%= link_to i.id, "/admin/volumes/#{i.id}" %></td>
               <td><%= link_to i.label, "/admin/volumes/#{i.id}" %></td>
               <td><%= i.deployment.name if i.deployment %></td>
-              <td><%= i.container_service.label if i.container_service %></td>
-              <td><%= i.container_path %></td>
               <td><%= l i.created_at, format: :short %></td>
               <td><%= i.to_trash ? l(i.trash_after, format: :short) : 'n/a' %></td>
             </tr>

@@ -6,12 +6,12 @@ module Containers
     # List volumes that _should_ belong to this SSH container
     def volumes
       expected_volumes = node.volumes.where(
-        deployment_container_services: { deployment_id: deployment.id },
+        deployment_id: deployment.id,
         to_trash: false,
         enable_sftp: true
       ).where.not(
-        deployment_container_services: { status: 'deleting' }
-      ).joins(:container_service).distinct
+        deployment: { status: 'deleting' }
+      ).joins(:deployment).distinct
 
       result = []
       DockerVolumeLocal::Node.new(node).list_all_volumes.each do |i|

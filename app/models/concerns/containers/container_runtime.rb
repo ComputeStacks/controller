@@ -52,8 +52,10 @@ module Containers
       runtime_env.each do |k,v|
         (c['Env'] ||= []) << "#{k}=#{v}"
       end
-      service.volumes.where(nodes: {id: node.id}).joins(:nodes).each do |v|
-        (c['HostConfig']['Binds'] ||= []) << "#{v.name}:#{v.container_path.strip}"
+      service.volumes.where(nodes: {id: node.id}).joins(:nodes).distinct.each do |vol|
+        vm = vol.volume_maps.find_by container_service: service
+        next if vm.nil?
+        (c['HostConfig']['Binds'] ||= []) << "#{vm.volume.name}:#{vm.mount_path.strip}:#{vm.mount_ro ? 'ro' : 'rw'}"
       end
       cmd = parsed_command
       if cmd

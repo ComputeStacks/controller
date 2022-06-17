@@ -136,7 +136,8 @@ class Deployment::ContainerService < ApplicationRecord
        foreign_key: 'container_service_id',
        dependent:   :destroy
 
-  has_many :volumes
+  has_many :volume_maps
+  has_many :volumes, through: :volume_maps
 
   has_many :secrets, -> { where(rel_model: 'Deployment::ContainerService') }, foreign_key: 'rel_id', dependent: :destroy
 
@@ -164,6 +165,15 @@ class Deployment::ContainerService < ApplicationRecord
   has_many :dependent_services, through: :dependent_links, source: :service
 
   before_destroy :flag_volumes
+
+  def csrn
+    "csrn:caas:project:service:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return "null" if name.blank?
+    name.strip
+  end
 
   def can_scale?
     !public_network? && container_image.can_scale

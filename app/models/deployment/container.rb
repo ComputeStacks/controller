@@ -112,6 +112,15 @@ class Deployment::Container < ApplicationRecord
   after_create_commit :refresh_user_quota
   after_destroy :refresh_user_quota
 
+  def csrn
+    "csrn:caas:project:container:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return "null" if name.blank?
+    name.strip
+  end
+
   ##
   # Helper to determine if this container can migrate to a different node
   def can_migrate?

@@ -82,6 +82,15 @@ class Deployment::Sftp < ApplicationRecord
 
   attr_accessor :current_audit
 
+  def csrn
+    "csrn:caas:project:shell:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return "null" if name.blank?
+    name.strip
+  end
+
   def toggle_pw_auth!
     pw_auth ? update(pw_auth: false) : update(pw_auth: true)
   end

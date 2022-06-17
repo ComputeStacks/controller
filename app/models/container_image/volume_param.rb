@@ -70,16 +70,41 @@ class ContainerImage::VolumeParam < ApplicationRecord
   include Auditable
 
   include Volumes::BorgPolicy
+  include Volumes::VolumeMount
 
   belongs_to :container_image
+  belongs_to :source_volume, class_name: 'ContainerImage::VolumeParam', optional: true
+
+  has_many :volumes, class_name: "Volume", foreign_key: "template_id", dependent: :nullify
+  has_many :dependent_volumes, class_name: 'ContainerImage::VolumeParam', foreign_key: 'source_volume_id', dependent: :restrict_with_error
 
   validates :borg_strategy, inclusion: { in: %w(file mysql postgres) }
   validates :label, presence: true
   validates :mount_path, presence: true
+  validate :prevent_dependency_loop
 
   validate :valid_mount_point?
 
+  before_validation :set_from_source
+
+  # For ref volumes, we return the parent volume CSRN since this
+  # record becomes simply a placeholder.
+  def csrn
+    return source_volume.csrn if source_volume
+    "csrn:caas:template:vol:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return source_volume.resource_name if source_volume
+    return "null" if label.blank?
+    label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+  end
+
   private
+
+  def set_from_source
+    self.label = source_volume.label if source_volume
+  end
 
   def valid_mount_point?
     if !id.nil? && container_image.volumes.where("id != ? and mount_path = ?", id, mount_path).exists?
@@ -87,6 +112,10 @@ class ContainerImage::VolumeParam < ApplicationRecord
     elsif id.nil? && container_image.volumes.where(mount_path: mount_path).exists?
       errors.add(:mount_path, 'already exists')
     end
+  end
+
+  def prevent_dependency_loop
+    # Ensure our source volume doesn't belong to an image that also requires a volume from us
   end
 
 end

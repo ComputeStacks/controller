@@ -9,14 +9,6 @@
       <td><%= volume.deployment.nil? ? '...' : link_to(volume.deployment.name, "/admin/deployments/#{volume.deployment.id}") %></td>
     </tr>
     <tr>
-      <td>Service</td>
-      <td><%= volume.container_service.nil? ? '...' : volume.container_service.name %></td>
-    </tr>
-    <tr>
-      <td>Path</td>
-      <td><%= volume.container_path %></td>
-    </tr>
-    <tr>
       <td>User</td>
       <td><%= volume.user.nil? ? '...' : link_to(volume.user.full_name, admin_user_path(volume.user)) %></td>
     </tr>

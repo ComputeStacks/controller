@@ -26,7 +26,10 @@ module NodeWorkers
         event.volumes << vol
         event.nodes << node
         VolumeServices::ProvisionVolumeService.new(vol, event).perform
-        if event.event_details.where( Arel.sql( %q(event_code = '7644f82e2a97cd0e' OR event_code = 'cec8b7094470e525') ) ).exists?
+
+        failed_even_codes = %w(7644f82e2a97cd0e cec8b7094470e525 b4e181611d7c5423)
+
+        if event.event_details.where( Arel.sql( %Q(event_code IN (#{failed_even_codes.join(',')}) ) ) ).exists?
           event.fail! 'Fatal Error'
         else
           event.done!

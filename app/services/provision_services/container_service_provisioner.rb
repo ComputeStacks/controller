@@ -51,6 +51,7 @@ module ProvisionServices
                   :qty,
                   :node,
                   :errors,
+                  :volume_maps,
                   ##
                   # Track what's been created
                   #
@@ -59,7 +60,8 @@ module ProvisionServices
                   #   subscriptions: [],
                   #   volumes: []
                   # }
-                  :result
+                  :result,
+                  :provision_state # Track what the parent hash
 
 
     # @param [User] user
@@ -73,13 +75,19 @@ module ProvisionServices
       self.subscription = nil
       self.event = event
       self.node = nil
+      self.volume_maps = {}
+      self.provision_state = {
+        containers: [],
+        subscriptions: [],
+        load_balancers: [],
+        volumes: []
+      }
       self.result = {
         containers: [],
         subscriptions: [],
         load_balancers: [],
         volumes: []
       }
-
       # data = {
       #   qty: Integer,
       #   label: String,
@@ -89,6 +97,7 @@ module ProvisionServices
       #   cpu: Decimal,
       #   memory: Integer,
       #   settings: {},
+      #   volume_config: [],
       #   external_id: String
       # }
       self.data = data
@@ -106,6 +115,7 @@ module ProvisionServices
       return rollback! unless valid?
       return rollback! unless init_subscription?
       return rollback! unless init_service!
+      map_volumes if volume_maps.empty?
       return rollback! unless select_node!
       return rollback! unless init_private_lbs!
       return rollback! unless setup_service_config!
@@ -168,6 +178,30 @@ module ProvisionServices
       true
     end
 
+    # Pre-determine which volumes will be mounted, and identify which
+    # node they reside on.
+    def map_volumes
+      skip_volumes = data[:volume_config].filter_map {|i| i[:csrn] if i[:action] == "skip" }
+      req_volume_templates = container_service.container_image.volumes.filter_map { |i| i.csrn unless skip_volumes.include?(i.csrn) }
+      v = {}
+      created_volumes = provision_state[:volumes].filter_map { |i| i.template.csrn if i.template }
+
+      # We need to have a hash of template csrn's to created volumes
+      volume_resources = {}
+      provision_state[:volumes].each do |i|
+        next unless i.template
+        volume_resources[i.template.csrn] = i
+      end
+
+      # Volumes that we need and have been created
+      (req_volume_templates & created_volumes).each do |i|
+        v[i] = volume_resources[i]
+      end
+
+
+
+    end
+
     # Select the node this service will use
     #
     # if the service has no volumes, then we can allow it to run across nodes. Otherwise,
@@ -175,6 +209,34 @@ module ProvisionServices
     def select_node!
       return node unless node.nil?
       return true if region.has_clustered_storage?
+
+      # Find any volumes that have been marked as skip during the order process.
+      skip_volumes = data[:volume_config].filter_map {|i| i[:csrn] if i[:action] == "skip" }
+
+      # TODO: Try to first select volumes created in this order, and then fallback to volumes
+      #       created within the project.
+
+      # Returns a list of volume resource names
+      # this includes both volumes we need to create for ourselves, but also ones we reference from other containers
+      req_volume_templates = container_service.container_image.volumes.filter_map { |i| i.csrn unless skip_volumes.include?(i.csrn) }
+
+      # Based on what we need, and what we have, figure out if we're already bound to a specific node(s).
+      have_nodes = []
+      project.volumes.where.not(template: nil).each do |i|
+        next unless req_volume_templates.include?(i.template.csrn)
+        # for local storage, volumes will only ever have 1 node, but we still need to select it from the array.
+        have_nodes << i.nodes.first unless have_nodes.include?(i.nodes.first)
+      end
+
+      if have_nodes.count > 1
+        errors << "Service requires volumes found on multiple nodes, unable to provision."
+        return false
+      elsif have_nodes.count == 1
+        self.node = have_nodes.first
+        return true
+      end
+
+
       if container_service.container_image.volumes.empty?
         self.node = nil
       else
@@ -201,50 +263,117 @@ module ProvisionServices
                         container_service.region.volume_backend
                       end
 
-      container_service.container_image.volumes.each do |vol|
-        next if container_service.volumes.where(container_path: vol.mount_path).exists?
-        new_vol = container_service.volumes.new(
-          container_path: vol.mount_path,
-          label: vol.label,
-          deployment: container_service.deployment,
-          user: container_service.deployment.user,
-          borg_enabled: vol.borg_enabled,
-          borg_freq: vol.borg_freq,
-          borg_strategy: vol.borg_strategy,
-          borg_keep_hourly: vol.borg_keep_hourly,
-          borg_keep_daily: vol.borg_keep_daily,
-          borg_keep_weekly: vol.borg_keep_weekly,
-          borg_keep_monthly: vol.borg_keep_monthly,
-          borg_keep_annually: vol.borg_keep_annually,
-          borg_backup_error: vol.borg_backup_error,
-          borg_restore_error: vol.borg_restore_error,
-          borg_pre_backup: vol.borg_pre_backup,
-          borg_post_backup: vol.borg_post_backup,
-          borg_pre_restore: vol.borg_pre_restore,
-          borg_post_restore: vol.borg_post_restore,
-          borg_rollback: vol.borg_rollback,
-          enable_sftp: vol.enable_sftp,
-          region: container_service.region,
-          volume_backend: volume_driver
-        )
+      # template = Volume.volume_template_id
+      # have_volume_templates = project.volumes.where.not(template: nil).collect { |i| i.template.csrn }
 
-        ##
-        # Ensure that the volume is allowed on _all_ nodes in the region when clustering.
-        if volume_driver == 'nfs'
-          # We need to ensure all nodes have the volume
-          container_service.region.nodes.each do |node|
+      skip_volumes = data[:volume_config].filter_map { |i| i[:csrn] if i[:action] == "skip" }
+
+      container_service.container_image.volumes.each do |vol|
+        next if skip_volumes.include?(vol.csrn)
+
+        # Sanity check -- we're not going to mount multiple volumes into the same path.
+        next if container_service.volume_maps.where(mount_path: vol.mount_path).exists?
+
+        existing_volume = nil
+        project.volumes.where.not(template: nil).each do |i|
+          if i.template.csrn == vol.csrn
+            existing_volume = i
+            break
+          end
+        end
+
+        # Grab possible volume to clone (via ContainerImage)
+        # existing_volume_id = have_volume_templates.select { |i| i == vol.csrn }.first
+        # existing_volume = existing_volume_id ? Csrn.locate(existing_volume_id) : nil
+        source_snapshot = nil
+        vol_action = existing_volume ? 'mount' : 'create'
+        mount_ro = vol.mount_ro
+
+        # Volume configuration overrides for this specific order.
+        custom_vol_req = data[:volume_config].select { |i| i[:csrn] == vol.csrn }.first
+        if custom_vol_req
+          existing_volume = Csrn.locate(custom_vol_req[:source]) unless custom_vol_req[:source].blank?
+          vol_action = custom_vol_req[:action] unless custom_vol_req[:action].blank?
+          unless custom_vol_req[:mount_ro].blank?
+            mount_ro = ActiveRecord::Type::Boolean.new.cast(custom_vol_req[:mount_ro])
+          end
+          source_snapshot = custom_vol_req[:snapshot] unless custom_vol_req[:snapshot].blank?
+        end
+
+        new_vol = if existing_volume && vol_action == 'mount'
+                    existing_volume
+                  else
+                    container_service.volumes.new(
+                      label: vol.label,
+                      user: container_service.deployment.user,
+                      deployment: project,
+                      borg_enabled: vol.borg_enabled,
+                      borg_freq: vol.borg_freq,
+                      borg_strategy: vol.borg_strategy,
+                      borg_keep_hourly: vol.borg_keep_hourly,
+                      borg_keep_daily: vol.borg_keep_daily,
+                      borg_keep_weekly: vol.borg_keep_weekly,
+                      borg_keep_monthly: vol.borg_keep_monthly,
+                      borg_keep_annually: vol.borg_keep_annually,
+                      borg_backup_error: vol.borg_backup_error,
+                      borg_restore_error: vol.borg_restore_error,
+                      borg_pre_backup: vol.borg_pre_backup,
+                      borg_post_backup: vol.borg_post_backup,
+                      borg_pre_restore: vol.borg_pre_restore,
+                      borg_post_restore: vol.borg_post_restore,
+                      borg_rollback: vol.borg_rollback,
+                      enable_sftp: vol.enable_sftp,
+                      region: container_service.region,
+                      volume_backend: volume_driver,
+                      template: vol
+                    )
+                  end
+
+        primary_mount = false
+        provision_volume_job = nil
+        if %w(create clone).include?(vol_action)
+          ##
+          # Ensure that the volume is allowed on _all_ nodes in the region when clustering.
+          if volume_driver == 'nfs'
+            # We need to ensure all nodes have the volume
+            container_service.region.nodes.each do |node|
+              new_vol.nodes << node
+            end
+          elsif node
             new_vol.nodes << node
           end
-        elsif node
-          new_vol.nodes << node
+
+          unless new_vol.save
+            errors << "Failed to create volume: #{new_vol.errors.full_messages.join(' ')}"
+            return false
+          end
+          result[:volumes] << new_vol
+          primary_mount = true
+          provision_volume_job = VolumeServices::ProvisionVolumeService.new(new_vol, event)
+          if vol_action == 'clone' # Regardless of state, pass if cloning.
+            provision_volume_job.source_volume = existing_volume
+            provision_volume_job.source_snapshot = source_snapshot
+          end
         end
 
-        unless new_vol.save
-          errors << "Failed to create volume: #{new_vol.errors.full_messages.join(' ')}"
+        vol_map = container_service.volume_maps.new(
+          volume: new_vol,
+          mount_path: vol.mount_path,
+          mount_ro: mount_ro,
+          is_owner: primary_mount
+        )
+        unless vol_map.save
+          errors << "Failed to create volume map: #{vol_map.errors.full_messages.join(' ')}"
           return false
         end
-        result[:volumes] << new_vol
-        VolumeServices::ProvisionVolumeService.new(new_vol, event).perform
+
+        if provision_volume_job
+          unless provision_volume_job.perform
+            errors << "Error provisioning volumes."
+            return false
+          end
+        end
+
       end
     end
 

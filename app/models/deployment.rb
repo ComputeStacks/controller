@@ -153,6 +153,15 @@ class Deployment < ApplicationRecord
 
   before_create :set_token
 
+  def csrn
+    "csrn:caas:project:root:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return "null" if name.blank?
+    name.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+  end
+
   # Projects will be limited to a single region going forward.
   def region
     regions[0]

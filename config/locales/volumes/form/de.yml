@@ -22,12 +22,13 @@ de:
           daily: Täglich
           weekly: Wöchentlich
           monthly: Monatlich
+          yearly: Annually
         hooks:
           custom: Benutzerdefinierte Hooks
           custom_help_html: |
             <p>Vorher- und Nachher-Befehle zur Ausführung innerhalb des Containers</p>
             <p>Ihr Skript muss einen Exit-Code von 0 zurückgeben, sonst wird es als fehlgeschlagen gewertet.</p>
-          ## Space is intentional ####          
+          ## Space is intentional ####
           pre_backup:
             continue_on_error: "Fortsetzung bei Fehler?" # If a pre-backup hook fails, should we continue?
             custom_script:

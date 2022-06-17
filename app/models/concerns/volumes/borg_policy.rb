@@ -14,27 +14,6 @@ module Volumes
       # see: ContainerImages::VolumeParamsHelper.borg_strategies
       validates :borg_strategy, inclusion: { in: %w(custom file mariadb mysql postgres) }
 
-      before_validation :modify_mount_point
-
-    end
-
-    class_methods do
-      def safe_mount(path)
-        p = []
-        path.split('/').each do |i|
-          next if i.blank?
-          p << Zaru.sanitize!(i).gsub(" ","_")
-        end
-        "/#{p.join('/')}"
-      end
-    end
-
-    def modify_mount_point
-      if self.class == ContainerImage::VolumeParam
-        self.mount_path = self.class.safe_mount(self.mount_path)
-      elsif self.class == Volume
-        self.container_path = self.class.safe_mount(self.container_path)
-      end
     end
 
     private

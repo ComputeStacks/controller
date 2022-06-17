@@ -26,20 +26,35 @@
   <tbody>
   <% data.each do |i| %>
     <tr>
-      <td><%= i.label.blank? ? '...' : i.label %></td>
-      <td><%= i.mount_path %></td>
-      <% if Feature.check('backups', current_user) %>
-        <td><%= i.borg_enabled ? i.borg_strategy : 'Disabled' %></td>
-      <% end %>
-      <td><%= i.enable_sftp ? t('common.yes') : t('common.no') %></td>
-      <td class="text-right">
-        <% if @container.can_edit?(current_user) %>
-          <div class="btn-group">
-            <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_image_volume_path(i), class: 'btn btn-xs btn-default' %>
-            <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_volume_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' if current_user.is_admin? || i.container_image.user == current_user %>
-          </div>
+      <% if i.source_volume %>
+        <td><%= i.label.blank? ? '...' : i.label %></td>
+        <td colspan="<%= Feature.check('backups', current_user) ? '3' : '2' %>">
+          <%= "#{i.source_volume.container_image.label}:#{i.source_volume.mount_path} => #{i.mount_path} #{i.mount_ro ? '(read only)' : ''}" %>
+        </td>
+        <td class="text-right">
+          <% if @container.can_edit?(current_user) %>
+            <div class="btn-group">
+              <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_image_volume_path(i), class: 'btn btn-xs btn-default' %>
+              <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_volume_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' if current_user.is_admin? || i.container_image.user == current_user %>
+            </div>
+          <% end %>
+        </td>
+      <% else %>
+        <td><%= i.label.blank? ? '...' : i.label %></td>
+        <td><%= i.mount_path %></td>
+        <% if Feature.check('backups', current_user) %>
+          <td><%= i.borg_enabled ? i.borg_strategy : 'Disabled' %></td>
         <% end %>
-      </td>
+        <td><%= i.enable_sftp ? t('common.yes') : t('common.no') %></td>
+        <td class="text-right">
+          <% if @container.can_edit?(current_user) %>
+            <div class="btn-group">
+              <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_image_volume_path(i), class: 'btn btn-xs btn-default' %>
+              <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_volume_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' if current_user.is_admin? || i.container_image.user == current_user %>
+            </div>
+          <% end %>
+        </td>
+      <% end %>
     </tr>
   <% end %>
   </tbody>

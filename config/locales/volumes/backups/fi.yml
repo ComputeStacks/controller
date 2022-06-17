@@ -6,3 +6,15 @@ fi:
         title_html: '<i class="fa fa-refresh"></i> Palauta'
         confirm: Oletko varma? Toiminto ylikirjoittaa tämänhetkiset tiedot ja uudelleenkäynnistää tähän liittyvät kontit.
       name: Varmuuskopion nimi
+      title: Backups
+      size:
+        disk: Backup Size (Compressed)
+        total: Backup Size
+      schedule: Backup Schedule
+      retention_html: "Retention Policy <small><em> - Only applies to automatic backups</em></small>"
+      retention_periods:
+        h: hourly
+        d: daily
+        w: weekly
+        m: monthly
+        y: yearly

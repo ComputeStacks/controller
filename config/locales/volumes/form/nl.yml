@@ -22,12 +22,13 @@ nl:
           daily: Daily
           weekly: Weekly
           monthly: Monthly
+          yearly: Annually
         hooks:
           custom: Custom Hooks
           custom_help_html: |
             <p>Before and after commands to run inside of container</p>
             <p>Your script must return an exit code of 0, otherwise it will be considered a failure.</p>
-          ## Space is intentional ####          
+          ## Space is intentional ####
           pre_backup:
             continue_on_error: "Continue on error?" # If a pre-backup hook fails, should we continue?
             custom_script:

@@ -61,6 +61,15 @@ class Deployment::ContainerDomain < ApplicationRecord
 
   after_update :update_le_on_user_change
 
+  def csrn
+    "csrn:caas:project:domain:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return "null" if domain.blank?
+    domain.strip.downcase.gsub(".","-")[0..10]
+  end
+
   def enable_hsts_header?
     header_hsts || le_active? || system_domain
   end

@@ -5,14 +5,6 @@
       <td><%= volume.deployment.nil? ? '...' : link_to(volume.deployment.name, "/deployments/#{volume.deployment.token}") %></td>
     </tr>
     <tr>
-      <td><%= t 'obj.service' %></td>
-      <td><%= volume.container_service.nil? ? '...' : link_to(volume.container_service.label, container_service_path(volume.container_service)) %></td>
-    </tr>
-    <tr>
-      <td><%= t 'volumes.path' %></td>
-      <td><%= volume.container_path %></td>
-    </tr>
-    <tr>
       <td><%= t 'volumes.table.usage' %></td>
       <td><%= volume.usage %> GB</td>
     </tr>

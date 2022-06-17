@@ -306,6 +306,14 @@ class User < ApplicationRecord
   after_create :process_billing_create_hooks
   after_update :process_billing_update_hooks
 
+  def csrn
+    "csrn:ident:account:user:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    full_name.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+  end
+
   def avatar_url(size = 80)
     "https://www.gravatar.com/avatar/#{Digest::MD5.hexdigest(email)}?s=#{size}&d=robohash"
   end

@@ -52,6 +52,14 @@ class BillingEvent < ApplicationRecord
 
   after_commit :init_webhook!, on: :create
 
+  def csrn
+    "csrn:billing:subscription:event:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    created_at.strftime("%Y%m%d%H%M")
+  end
+
   def linked_obj
     return nil if self.rel_model.nil?
     eval("#{self.rel_model}").find_by(id: self.rel_id)

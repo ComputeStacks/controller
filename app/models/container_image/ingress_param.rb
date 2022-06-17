@@ -36,6 +36,14 @@ class ContainerImage::IngressParam < ApplicationRecord
 
   validate :custom_load_balancer
 
+  def csrn
+    "csrn:caas:template:ingress:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    "#{port}#{proto}"
+  end
+
   # Helper method since our forms are shared between both ingress rules and ingress params.
   def public_network?
     false

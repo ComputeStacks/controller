@@ -45,6 +45,15 @@ class ContainerImage::EnvParam < ApplicationRecord
   validates :name, presence: true
   validate :valid_env_param, if: -> { param_type == 'variable' }
 
+  def csrn
+    "csrn:caas:template:vol:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return "null" if label.blank?
+    label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+  end
+
   private
 
   def set_value

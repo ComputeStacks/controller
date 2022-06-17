@@ -61,7 +61,17 @@ class BuildOrderService
         qty: c[:qty],
         domains: c[:domains] ? c[:domains] : [],
         resources: c[:resources],
-        params: {}
+        params: {},
+        # c[:volumes] = [
+        #   {
+        #     csrn: String,
+        #     action: String<create,clone,mount,skip>,
+        #     source: String,
+        #     snapshot: String,
+        #     mount_ro: Bool
+        #   }
+        # ]
+        volume_config: c[:volumes].nil? ? [] : c[:volumes]
       }
       # Merge params
       if c[:params] && c[:params].is_a?(Array)
@@ -294,6 +304,68 @@ class BuildOrderService
         end
       end
 
+      # Validate volume parameters
+      if c[:volumes].is_a?(Array)
+
+        c[:volumes].each do |i|
+          id = i[:csrn]
+          action = i[:action]
+          source = i[:source]
+          snapshot = i[:snapshot]
+          vol = Csrn.locate id
+          if vol.nil? || !vol.can_view?(user)
+            errors << "Unknown volume #{id}"
+          end
+
+          # Ensure passed parameters are compatible with requested action
+          case action
+          when "create"
+            errors << "Create action is not compatible with a source volume" unless source.blank?
+            errors << "Create action is not compatible with a snapshot" unless snapshot.blank?
+          when "skip"
+            errors << "Skip action is not compatible with a source volume" unless source.blank?
+            errors << "Skip action is not compatible with a snapshot" unless snapshot.blank?
+          when "mount"
+            errors << "Mount action is not compatible with a snapshot" unless snapshot.blank?
+            errors << "Mount action requires a source volume" if source.blank?
+          when "clone"
+            errors << "Clone action requires a source volume" if source.blank?
+          else
+            errors << "Unknown action: #{action.blank? ? 'null' : action}"
+          end
+
+          # Ensure we have a source volume
+          if source.blank? && !snapshot.blank?
+            errors << "#{action} with a snapshot requires a source volume"
+          end
+
+          # Volume & Snapshot specific validations
+          unless source.blank?
+
+            # Ensure volume exists and user has permission to access it
+            source_vol = Csrn.locate source
+            if source_vol.nil? || !source_vol.can_view?(user)
+              errors << "Unknown source volume #{source}"
+              source_vol = nil # wipe found volume if we don't have permission to use it.
+            end
+
+            if source_vol
+
+              # Mount: Ensure volume exists in the current project
+              if action == "mount" && source_vol.deployment != project
+                errors << "You may only mount volumes from the same project"
+              end
+
+              # Clone with Snapshot: Ensure snapshot exists for volume
+              if action == "clone" && !snapshot.blank?
+                locate_snapshot = vol.list_archives.select { |i| i[:id] == snapshot }
+                errors << "Snapshot not found" if locate_snapshot.empty?
+              end
+
+            end
+          end
+        end
+      end
     end
     errors.empty?
   end

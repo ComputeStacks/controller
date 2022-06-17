@@ -4,6 +4,7 @@ class ProcessOrderService
                 :event,
                 :project,
                 :container_service, # The created service
+                :result,
                 :errors
 
   def initialize(order)
@@ -11,6 +12,20 @@ class ProcessOrderService
     self.event = order.current_event
     self.project = order.deployment if order.deployment
     self.errors = []
+
+    ## Track what we've done.
+    # result = {
+    #   containers: [],
+    #   subscriptions: [],
+    #   load_balancers: [],
+    #   volumes: []
+    # }
+    self.result = {
+      containers: [],
+      subscriptions: [],
+      load_balancers: [],
+      volumes: []
+    }
   end
 
   def perform
@@ -28,31 +43,53 @@ class ProcessOrderService
       fail_process! 'Failed to find or create project'
       return false
     end
-    order.data[:raw_order].each do |product|
-      base_job = case product[:product_type]
-            when 'container'
-              OrderServices::ContainerServiceOrderService
-            else
-              nil
-            end
-      next if base_job.nil?
 
-      job = base_job.new( order, event, project, product )
-      job_status = job.perform
-      job.errors.each do |err|
-        errors << err
+    to_provision = order.data[:raw_order]
+    loop_end = 10.minutes.from_now
+    loop do
+      break if to_provision.empty?
+      break if loop_end <= Time.now
+      to_provision.each_with_index do |product,index|
+        base_job = case product[:product_type]
+                   when 'container'
+                     OrderServices::ContainerServiceOrderService
+                   else
+                     nil
+                   end
+        next if base_job.nil?
+
+        job = base_job.new( order, event, project, product )
+
+        # Keep pushing the result forward so each cycle can track what's been done so far.
+        job.provision_state = result
+
+        next unless job.has_required_mountable_volumes?
+
+        job_status = job.perform
+        job.errors.each do |err|
+          errors << err
+        end
+
+        # Combine results hash so the next cycle will have it.
+        self.result.merge!(job.result) do |k,a,b|
+          a + b
+        end
+
+        # If it fails, but for some reason does not provide errors,
+        # make sure we capture that and stop the order process from finalizing
+        errors << "Failed to build product" if job.errors.empty? && !job_status
+
+        # Remove this from the stack
+        to_provision.delete_at index
       end
-
-      # If it fails, but for some reason does not provide errors,
-      # make sure we capture that and stop the order process from finalizing
-      errors << "Failed to build product" if job.errors.empty? && !job_status
+      break unless errors.empty?
     end
-    unless errors.empty?
-      fail_process!('Failed to provision resources')
+    unless to_provision.empty? && errors.empty?
+      fail_process! "Failed to provision all resources"
       return false
     end
     unless finalize!
-      fail_process!('Error on order cleanup')
+      fail_process! 'Error on order cleanup'
       return false
     end
     complete_process!

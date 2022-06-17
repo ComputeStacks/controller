@@ -52,6 +52,14 @@ class Api::OrdersController < Api::ApplicationController
   #
   # **OAuth AuthorizationRequired**: `order_write`
   #
+  # Volumes:
+  # You have the option to override the volume settings defined in the image template by passing various options:
+  #
+  # * Omitting `volumes` completely, or by passing an empty array, will keep the defaults defined in the image.
+  # * Passing a volume `csrn` will allow you to modify the mount options defined in the image:
+  #     * `action: clone` -- Clone the source volume. This will take a snapshot, and restore that to the newly created volume.
+  #     * `action: mount` -- This will mount the source volume, and you have the option to mount it in readonly mode. Note, that this option also has the effect of forcing this container to be provisioned on the same node as the source volume (unless using NFS-backed volume storage).
+  #
   # * `order`: Object
   #     * `project_name`: String
   #     * `skip_ssh`: Boolean
@@ -65,6 +73,12 @@ class Api::OrdersController < Api::ApplicationController
   #         * `params`: Array
   #             * `key`: String
   #             * `value`: String
+  #         * `volumes`: Array | You may omit volumes, but you may not add volumes that don't exist in the image.
+  #             * `csrn`: String | resource name of volume param from image
+  #             * `action`: String<create,clone,mount,skip> | Volumes not included will default to create.
+  #             * `source`: String | csrn of existing volume
+  #             * `snapshot`: String | ID of specific snapshot to restore
+  #             * `mount_ro`: Bool | Defaults to false, which is read-write.
   #
   def create
     audit = Audit.create!(
@@ -117,7 +131,10 @@ class Api::OrdersController < Api::ApplicationController
         :product_id, :package_id
       ],
       params: [:key, :value],
-      domains: []
+      domains: [],
+      volumes: [
+        :csrn, :action, :source, :mount_ro, :snapshot
+      ]
     ]
     )
   end

@@ -18,22 +18,26 @@ update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent etcd prometheus-node-exporter redis-server postgresql-13 postgresql-13-ip4r rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen
 curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
   $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
-echo "deb [arch=amd64] http://repo.powerdns.com/debian bullseye-auth-46 main" > /etc/apt/sources.list.d/pdns.list
+if [ $(dpkg --print-architecture) == 'amd64' ]; then
+  curl https://repo.powerdns.com/FD380FBB-pub.asc | apt-key add -
+  # for arm/m1, it will fallback to the version included in the debian repository.
+  echo "deb [arch=amd64] http://repo.powerdns.com/debian bullseye-auth-46 main" > /etc/apt/sources.list.d/pdns.list
 
-cat << 'EOF' > /etc/apt/preferences.d/pdns
+  cat << 'EOF' > /etc/apt/preferences.d/pdns
 Package: pdns-*
 Pin: origin repo.powerdns.com
 Pin-Priority: 600
 EOF
-
-curl https://repo.powerdns.com/FD380FBB-pub.asc | apt-key add -
+else
+  echo "Falling back to debian repository for powerdns due to arm architecture."
+fi
 
 curl https://haproxy.debian.net/bernat.debian.org.gpg \
       | gpg --dearmor > /usr/share/keyrings/haproxy.debian.net.gpg
@@ -63,7 +67,13 @@ EOF
 systemctl enable consul && systemctl start consul
 
 echo "Setting up NVM & nodejs..."
-su - vagrant -c "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash"
+su - vagrant -c "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | PROFILE=/Users/vagrant/profile bash"
+
+#cat << 'EOF' >> ~/.profile
+#export NVM_DIR="$HOME/.nvm"
+#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+#EOF
 
 systemctl stop pdns
 
@@ -351,7 +361,11 @@ EOF
 
 systemctl restart redis-server
 
-wget -O /tmp/cs-agent.tar.gz https://cdn.computestacks.net/packages/cs-agent/cs-agent.tar.gz
+if [ $(dpkg --print-architecture) == 'amd64' ]; then
+  wget -O /tmp/cs-agent.tar.gz https://cdn.computestacks.net/packages/cs-agent/cs-agent.tar.gz
+else
+  wget -O /tmp/cs-agent.tar.gz https://cdn.computestacks.net/packages/cs-agent/cs-agent-arm64.tar.gz
+fi
 tar -xzvf /tmp/cs-agent.tar.gz -C /tmp
 mv /tmp/cs-agent /usr/local/bin/ && chmod +x /usr/local/bin/cs-agent
 
@@ -994,8 +1008,8 @@ echo "export PATH=/home/vagrant/.rbenv/shims:$PATH" >> /home/vagrant/.profile
 echo "export OVERMIND_SOCKET=/home/vagrant/.overmind.sock" >> /home/vagrant/.profile
 
 echo "Installing ruby 2.7 (This may take a few minutes)..."
-su - vagrant -c "rbenv install 2.7.5"
-su - vagrant -c "rbenv global 2.7.5"
+su - vagrant -c "rbenv install 2.7.6"
+su - vagrant -c "rbenv global 2.7.6"
 
 echo "Performing GitHub authentication..."
 cat << 'OUTER' > /home/vagrant/gh_auth.sh

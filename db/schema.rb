@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_04_27_223712) do
+ActiveRecord::Schema.define(version: 2022_06_13_034734) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -280,8 +280,11 @@ ActiveRecord::Schema.define(version: 2022_04_27_223712) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "enable_sftp", default: true, null: false
+    t.boolean "mount_ro", default: false, null: false
+    t.bigint "source_volume_id"
     t.index ["container_image_id"], name: "index_container_image_volume_params_on_container_image_id"
     t.index ["enable_sftp"], name: "civp_enable_sftp"
+    t.index ["source_volume_id"], name: "index_container_image_volume_params_on_source_volume_id"
   end
 
   create_table "container_images", id: :serial, force: :cascade do |t|
@@ -1296,11 +1299,22 @@ ActiveRecord::Schema.define(version: 2022_04_27_223712) do
     t.index ["user_group_id"], name: "index_users_on_user_group_id"
   end
 
+  create_table "volume_maps", force: :cascade do |t|
+    t.bigint "volume_id"
+    t.bigint "container_service_id"
+    t.boolean "mount_ro", default: false, null: false
+    t.string "mount_path"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.boolean "is_owner", default: false, null: false
+    t.index ["container_service_id"], name: "index_volume_maps_on_container_service_id"
+    t.index ["is_owner"], name: "index_volume_maps_on_is_owner"
+    t.index ["volume_id"], name: "index_volume_maps_on_volume_id"
+  end
+
   create_table "volumes", force: :cascade do |t|
     t.string "label"
-    t.string "container_path", default: "/usr/src/app", null: false
     t.integer "user_id"
-    t.integer "container_service_id"
     t.integer "region_id"
     t.boolean "to_trash", default: false, null: false
     t.datetime "trash_after"
@@ -1329,12 +1343,15 @@ ActiveRecord::Schema.define(version: 2022_04_27_223712) do
     t.text "borg_rollback", default: [], array: true
     t.boolean "enable_sftp", default: true, null: false
     t.string "volume_backend", default: "local", null: false
+    t.bigint "template_id"
+    t.bigint "deployment_id"
     t.index ["borg_enabled"], name: "index_volumes_on_borg_enabled"
-    t.index ["container_service_id"], name: "index_volumes_on_container_service_id"
+    t.index ["deployment_id"], name: "index_volumes_on_deployment_id"
     t.index ["enable_sftp"], name: "index_volumes_on_enable_sftp"
     t.index ["name"], name: "index_volumes_on_name"
     t.index ["region_id"], name: "index_volumes_on_region_id"
     t.index ["subscription_id"], name: "index_volumes_on_subscription_id"
+    t.index ["template_id"], name: "index_volumes_on_template_id"
     t.index ["to_trash"], name: "index_volumes_on_to_trash"
     t.index ["trashed_by_id"], name: "index_volumes_on_trashed_by_id"
     t.index ["user_id"], name: "index_volumes_on_user_id"

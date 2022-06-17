@@ -52,7 +52,7 @@ class OrderSession
 
     load_state!
 
-    self.project = user.deployments.new if project.nil?
+    self.project = user.deployments.new(name: default_project_name) if project.nil?
   end
 
   ##
@@ -250,6 +250,10 @@ class OrderSession
     return false unless ([:id, :name] - data[:project].keys).empty?
     return false if data[:user_id].blank? # We require this!
     true
+  end
+
+  def default_project_name
+    "#{NamesGenerator.name("").gsub("-"," ").gsub(/[A-Za-z']+/,&:capitalize)} (#{Date.today.strftime("%Y%m%d")})"
   end
 
 end

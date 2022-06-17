@@ -171,6 +171,15 @@ class ContainerImage < ApplicationRecord
 
   before_destroy :clean_collaborators
 
+  def csrn
+    "csrn:caas:template:image:#{resource_name}:#{id}"
+  end
+
+  def resource_name
+    return "null" if name.blank?
+    name.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+  end
+
   def uses_load_balancer?
     ingress_params.where(external_access: true).exists?
   end
