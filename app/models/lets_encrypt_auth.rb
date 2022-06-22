@@ -40,8 +40,18 @@ class LetsEncryptAuth < ApplicationRecord
 
   # @return [Dns::Zone]
   def dns_zone
-    tld = self.domain.split('.').last(2)
-    Dns::Zone.find_by(name: tld.join('.'))
+    # Allow a few extra levels.
+    i = 2
+    count = 4
+    z = nil
+    loop do
+      tld = domain.split('.').last(i)
+      z = Dns::Zone.find_by(name: tld.join('.'))
+      break unless z.nil?
+      break if i > count
+      i += 1
+    end
+    z
   end
 
 end

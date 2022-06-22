@@ -112,7 +112,7 @@ class Deployment < ApplicationRecord
   has_many :networks, -> { distinct }, through: :services
 
 
-  has_many :volumes, through: :services
+  has_many :volumes, -> { distinct }, through: :services
   has_many :ssl_certificates, through: :services
 
   has_many :deployed_containers, through: :services, source: :containers

@@ -30,7 +30,7 @@
                 </td>
                 <td><%= link_to i.label, "/admin/volumes/#{i.id}" %></td>
                 <td><%= i.usage %> GB</td>
-                <td><%= i.container_service.nil? ? '...' : i.container_service.label %></td>
+                <td><%= volume_attached_services i %></td>
                 <td><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
                 <td class="text-right">
                   <div class="btn-group">

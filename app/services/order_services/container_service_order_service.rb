@@ -104,7 +104,7 @@ module OrderServices
 
     # @return [Boolean]
     def image_exists?
-      image = Deployment::ContainerImage.find_by id: product[:container_id]
+      image = ContainerImage.find_by id: product[:container_id]
       image && image.can_view?(order.user)
     end
 
@@ -130,7 +130,7 @@ module OrderServices
     # Find volumes that we require to mount.
     # @return [Array]
     def required_mountable_volumes
-      image = Deployment::ContainerImage.find_by id: product[:container_id]
+      image = ContainerImage.find_by id: product[:container_id]
       return [] if image.nil? # should never happen
 
       # Ignore volumes explicitly skipped.
@@ -149,7 +149,7 @@ module OrderServices
     def expected_mountable_volumes_from_order
       will_provide = []
       order.data[:raw_order].each do |i|
-        image = Deployment::ContainerImage.find_by id: i[:container_id]
+        image = ContainerImage.find_by id: i[:container_id]
         next if image.nil?
         image.volumes.each do |vol|
           will_provide << vol.csrn unless will_provide.include?(vol.csrn)

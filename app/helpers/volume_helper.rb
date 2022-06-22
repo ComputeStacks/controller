@@ -55,4 +55,11 @@ module VolumeHelper
     volume.uses_clustered_storage? ? nil : tag.span("Local Volume", class: "label label-danger", title: t('volumes.high_availability.local_disabled'))
   end
 
+  def volume_attached_services(volume)
+    links = volume.container_services.map do |i|
+      link_to(i.label, container_service_path(i))
+    end
+    links.empty? ? '...' : links.join(', ').html_safe
+  end
+
 end

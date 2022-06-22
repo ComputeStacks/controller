@@ -24,7 +24,7 @@
             </td>
             <td><%= i.usage %> GB</td>
             <td><%= i.borg_enabled ? i.list_archives.count : tag.i(nil, class: 'fa fa-ban') %></td>
-            <td><%= link_to(i.container_service.label, container_service_path(i.container_service)) if i.container_service %></td>
+            <td><%= volume_attached_services i %></td>
             <td class="text-right">
               <div class="btn-group">
                 <%= link_to tag.i(nil, class: 'fa fa-wrench fa-fw'), edit_volume_url(i), class: 'btn btn-warning btn-xs' %>

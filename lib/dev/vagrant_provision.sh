@@ -279,7 +279,7 @@ Content-Type: text/html
 EOF
 
 if systemctl status consul; then
-  echo "Consul booted successfull"
+  echo "Consul booted successfully"
 else
   echo "Consul failed to start"
   exit 1
@@ -288,7 +288,7 @@ fi
 systemctl enable etcd && systemctl start etcd
 
 if systemctl status etcd; then
-  echo "etcd booted successfull"
+  echo "etcd booted successfully"
 else
   echo "etcd failed to start"
   exit 1
