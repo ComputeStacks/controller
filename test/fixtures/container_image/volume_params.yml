@@ -93,3 +93,10 @@ nginx_webroot:
   borg_keep_annually: 1
   borg_backup_error: false
   borg_restore_error: false
+
+nginx_mounted:
+  label: webroot
+  container_image: nginx_shared
+  mount_path: /var/www
+  source_volume: nginx_webroot
+

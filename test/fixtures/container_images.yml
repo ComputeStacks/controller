@@ -38,6 +38,20 @@ nginx:
   can_scale: true
   is_free: false
 
+nginx_shared: # Test mountable volumes
+  name: 'nginx_shared'
+  label: 'nginx mounted'
+  description: 'nginx'
+  container_image_provider: dockerhub
+  registry_image_path: "nginx"
+  registry_image_tag: "latest"
+  min_cpu: 0
+  min_memory: 0
+  role: nginx
+  role_class: web
+  can_scale: true
+  is_free: false
+
 mariadb:
   name: 'mariadb-105'
   label: 'MariaDB 10.5'

@@ -5,4 +5,7 @@ wordpress_mysql:
 custom_mysql:
   container_image: custom
   dependency: mariadb
-  
+
+nginx_nginx:
+  container_image: nginx_shared
+  dependency: nginx
