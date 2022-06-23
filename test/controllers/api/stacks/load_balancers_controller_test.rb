@@ -9,9 +9,15 @@ class Api::Stacks::LoadBalancersControllerTest < ActionDispatch::IntegrationTest
     node = Deployment::ContainerService.web_only.first.nodes.first
     assert_not_nil node
 
+    lb = LoadBalancer.find_by_node node
+    assert_not_nil lb
+    auth = ClusterAuthService.new(lb)
+    auth.node = node
+    auth_token = auth.generate_auth_token!
+
     get "/api/stacks/load_balancers", headers: {
       'Accept' => 'text/plain',
-      'Authorization' => "Bearer #{ClusterAuthService.new(node).auth_token}"
+      'Authorization' => "Bearer #{auth_token}"
     }
 
     assert_response :success

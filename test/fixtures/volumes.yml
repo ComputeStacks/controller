@@ -1,60 +1,55 @@
 mysql:
   label: mysql
-  container_path: "/var/lib/mysql"
   user: admin
-  container_service: mysql
   name: "<%= SecureRandom.uuid %>"
   borg_enabled: true
   enable_sftp: false
   region: regionone
   volume_backend: local
+  deployment: project_test
   nodes:
     - testone
 wordpress_webconfig:
   label: webconfig
-  container_path: "/usr/local/lsws"
   user: admin
-  container_service: wordpress
   name: "<%= SecureRandom.uuid %>"
   borg_enabled: true
   enable_sftp: false
   region: regionone
   volume_backend: local
+  deployment: project_test
   nodes:
     - testone
 wordpress_web:
   label: wordpress
-  container_path: "/var/www"
   user: admin
-  container_service: wordpress
   name: "<%= SecureRandom.uuid %>"
   borg_enabled: true
   enable_sftp: true
   region: regionone
   volume_backend: local
+  deployment: project_test
   nodes:
     - testone
 nginx_web:
   label: nginx
-  container_path: "/var/www"
   user: admin
-  container_service: nginx
   name: "<%= SecureRandom.uuid %>"
   borg_enabled: true
   enable_sftp: true
   region: regionone
   volume_backend: local
+  deployment: project_test
   nodes:
     - testone
 user_nginx_web:
   label: nginx
-  container_path: "/var/www"
   user: user
-  container_service: user_nginx
   name: "<%= SecureRandom.uuid %>"
   borg_enabled: true
   enable_sftp: true
   region: regionone
   volume_backend: local
+  deployment: project_test
   nodes:
     - testone

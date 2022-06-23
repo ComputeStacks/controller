@@ -18,6 +18,8 @@ class VolumeTest < ActiveSupport::TestCase
 
     refute_includes Volume.find_all_for(u), v
 
+    puts
+
     v.deployment.deployment_collaborators.create! current_user: users(:admin), collaborator: u
 
     refute_includes Volume.find_all_for(u), v

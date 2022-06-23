@@ -29,14 +29,14 @@ class Api::Admin::Projects::CollaboratorsControllerTest < ActionDispatch::Integr
 
     data['collaborators'].each do |i|
       refute_nil i['id']
-      owner = i['resource_owner']
-      refute_nil owner['id']
-      refute_nil owner['email']
-      refute_nil owner['full_name']
+      user = i['collaborator']
+      refute_nil user['id']
+      refute_nil user['email']
+      refute_nil user['full_name']
 
-      u = User.find owner['id']
-      assert_equal u.email, owner['email']
-      assert_equal u.full_name, owner['full_name']
+      u = User.find user['id']
+      assert_equal u.email, user['email']
+      assert_equal u.full_name, user['full_name']
     end
 
   end
