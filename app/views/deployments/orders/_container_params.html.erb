@@ -1,0 +1,20 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-xs-12"><strong>APPLICATION SETTINGS</strong></div>
+  </div>
+  <div class="row">
+    <% container[:params].each_key do |p| %>
+      <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+        <div class="form-group">
+          <label><%= container[:params][p][:label] %></label>
+          <input type="text"
+                 class="form-control"
+                 name="service[container-<%= container[:container_id] %>-param-<%= p %>]"
+                 value="<%= container[:params][p][:value].nil? ? container[:params][p][:default_value] : container[:params][p][:value] %>"
+            />
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+<hr>

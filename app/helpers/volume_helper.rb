@@ -62,4 +62,13 @@ module VolumeHelper
     links.empty? ? '...' : links.join(', ').html_safe
   end
 
+  def new_volume_action_options
+    [
+      %w(Create create),
+      %w(Skip skip),
+      %w(Mount mount),
+      %w(Clone clone),
+    ].sort
+  end
+
 end

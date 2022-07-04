@@ -55,7 +55,7 @@ module OrderServices
           cpu: product.dig(:resources, :cpu).to_f,
           memory: product.dig(:resources, :memory).to_i,
           settings: product[:params],
-          volume_config: product[:volumes].nil? ? [] : product[:volumes],
+          volume_config: product[:volume_config].nil? ? [] : product[:volume_config],
           external_id: product[:remote_service_id]
         }
       )

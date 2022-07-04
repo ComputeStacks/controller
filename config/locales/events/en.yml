@@ -83,6 +83,8 @@ en:
           provision: "Provisioning volume %{volume} on node %{node}."
       order:
         provision: Provisioning new order
+      project:
+        clone: "[%{project}] Clone Project"
       service:
         autoscale: "[%{label}] AutoScaling Service"
         building_1: "[%{label}] Provisioning 1 Container."

@@ -7,7 +7,6 @@ module Authorization
 
     class_methods do
 
-      # @return [Array]
       def find_for(current_user, arg, *args)
         return nil if current_user.nil?
         resource = find_by arg, args

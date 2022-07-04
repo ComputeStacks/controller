@@ -86,6 +86,7 @@ Rails.application.routes.draw do
       get 'events/last_event' => 'events#last_event'
       post 'connection_helper/:id' => 'connection_helper#create'
       resources :certificates,
+                :clone_project,
                 :collaborators,
                 :domains,
                 :events,

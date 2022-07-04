@@ -32,27 +32,13 @@
             <%= container[:container_name] %>
           </div>
         </div>
-        <% unless container[:params].empty? %>
-          <div class="panel-body">
-            <div class="row">
-              <% container[:params].each_key do |p| %>
-                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-                  <div class="form-group">
-                    <label><%= container[:params][p][:label] %></label>
-                    <input type="text"
-                           class="form-control"
-                           name="service[container-<%= container[:container_id] %>-param-<%= p %>]"
-                           value="<%= container[:params][p][:value].nil? ? container[:params][p][:default_value] : container[:params][p][:value] %>"
-                      />
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
-        <%= content_tag(:hr, nil) unless container[:params].empty? %>
+        <%= render partial: "deployments/orders/container_params", locals: { container: container } unless container[:params].empty? %>
+        <%= render partial: "deployments/orders/container_volumes", locals: { container: container } unless container[:volumes].empty? %>
         <% unless container[:free] == 'yes' %>
           <div class="panel-body">
+            <div class="row">
+              <div class="col-xs-12"><strong>COMPUTE RESOURCES</strong></div>
+            </div>
             <div class="row">
               <% if order_packages_for_resources(container[:min_cpu], container[:min_mem]).empty? %>
               <div class="col-md-12 text-center">
@@ -84,7 +70,7 @@
   </div></div>
 
 <% end %>
-<% if current_user.is_support_admin? %>
+<% if current_user.is_support_admin? || Rails.env.development? %>
   <div class="row" style="margin-top:10px;">
     <div class="col-md-12" style="color:#ccc;font-size:12px;">
       <%= render partial: 'deployments/orders/admin_header' %>

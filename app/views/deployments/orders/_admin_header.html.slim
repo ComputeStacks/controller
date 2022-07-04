@@ -2,3 +2,8 @@
   = "Order ID: #{@order_session.id}"
   br
   = "Project: #{@order_session.project&.id} #{@order_session.project&.name}"
+- if @order
+  = "Order ID: #{@order.id}"
+  br
+  - if @order.deployment
+    = "Project: #{@order.deployment&.id} #{@order.deployment&.name}"

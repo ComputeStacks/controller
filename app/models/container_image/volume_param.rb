@@ -87,6 +87,15 @@ class ContainerImage::VolumeParam < ApplicationRecord
 
   before_validation :set_from_source
 
+  # def local_csrn
+  #   "csrn:caas:template:vol:#{resource_name}:#{id}"
+  # end
+  #
+  # def local_resource_name
+  #   return "null" if label.blank?
+  #   label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+  # end
+
   # For ref volumes, we return the parent volume CSRN since this
   # record becomes simply a placeholder.
   def csrn
@@ -98,6 +107,20 @@ class ContainerImage::VolumeParam < ApplicationRecord
     return source_volume.resource_name if source_volume
     return "null" if label.blank?
     label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+  end
+
+  # List volumes that are available to this user, which may be cloned
+  def available_to_clone
+    return [] unless current_user
+    Volume.find_all_for(current_user).where("volumes.template_id = ?", id)
+  end
+
+  # List snapshots that are available to this user, which may be restored to this new volume
+  def available_to_restore
+    return [] unless current_user
+    ar = []
+    available_to_clone.each { |i| ar << i }
+    ar.empty? ? [] : ar.flatten
   end
 
   private

@@ -26,7 +26,7 @@ module OrdersHelper
               concat tag.div(order.deployment.name, class: 'order-item-description')
             end
           ) if order.deployment
-          concat tag.small(i['product_type'].upcase.gsub("_", " "))
+          concat tag.small(i['product_type'].upcase.gsub("_", " "), style: 'font-weight:bold;')
           concat tag.div(i.dig('product', 'label'), class: 'order-item-description')
           concat(
               tag.div(class: 'order-children') do
@@ -34,7 +34,7 @@ module OrdersHelper
                   concat(
                       tag.tr do
                         concat(
-                            tag.td(image_name, class: 'order-child-table-item')
+                            tag.td(image_name, class: 'order-child-table-item', style: 'font-weight:bold;')
                         )
                         concat(
                             tag.td(class: 'text-right') do
@@ -43,6 +43,24 @@ module OrdersHelper
                         )
                       end
                   )
+                  i['volume_config'].each do |vol|
+                    concat(
+                      tag.tr do
+                        case vol['action']
+                        when 'clone', 'mount'
+                          concat(
+                            tag.td("-> #{vol['action'].capitalize} Volume #{vol['source']} at #{vol['mount_path']} #{vol['mount_ro'] ? '(RO)' : '' }", class: 'order-child-table-item', colspan: '2', style: 'text-indent: 10px;')
+                          )
+                        when 'create'
+                          concat(
+                            tag.td("-> Create Volume #{vol['label']} at #{vol['mount_path']}", class: 'order-child-table-item', colspan: '2', style: 'text-indent: 10px;')
+                          )
+                        else
+                          next
+                        end
+                      end
+                    )
+                  end
                   if product&.package
                     concat(
                         tag.tr do

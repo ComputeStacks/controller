@@ -6,8 +6,11 @@
       <li class="active"><%= @deployment.name %></li>
     </ol>
     <ol class="breadcrumb breadcrumb-action text-right">
+      <% if current_user == @deployment.user %>
+        <li><%= link_to raw("<i class='fa fa-clone'></i> Clone"), "/deployments/#{@deployment.token}/clone_project", method: :create, data: { confirm: t('confirm_prompt') }, class: "btn btn-sm btn-default", style: "margin-right:5px;" %></li>
+      <% end %>
       <% if current_user.is_admin %>
-        <%= link_to '<i class="fa fa-external-link"></i> View In Admin'.html_safe, "/admin/deployments/#{@deployment.id}", class: 'btn btn-sm btn-default', style: 'margin-right:10px;' %>
+        <%= link_to '<i class="fa fa-external-link"></i> View In Admin'.html_safe, "/admin/deployments/#{@deployment.id}", class: 'btn btn-sm btn-default', style: 'margin-right:5px;' %>
       <% end %>
       <li><%= link_to raw("<i class='fa fa-cube'></i> #{t('.header.new_container')}"), "/deployments/orders?o=#{@deployment.token}&t=container", class: "btn btn-sm btn-default" %></li>
     </ol>

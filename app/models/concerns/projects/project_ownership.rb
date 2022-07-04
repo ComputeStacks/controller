@@ -110,6 +110,8 @@ module Projects
       ProjectWorkers::RefreshMetadataWorker.perform_async id
       ProjectWorkers::RefreshMetadataSshWorker.perform_async id, current_audit&.id
 
+      ProjectServices::MetadataSshKeys.new(self).perform
+
     end
 
     def rollback_new_owner!(data = [])

@@ -9,6 +9,7 @@ class OrderSession
                 :order,
                 :project,
                 :location,
+                :skip_dep, # dont add dependency images
                 :skip_ssh, # defaults to false
                 :region, # Used to find prices
                 :images # Container Images
@@ -22,6 +23,10 @@ class OrderSession
     self.region = nil # Dynamically loaded by location
     self.user = user
     self.skip_ssh = false
+
+    # When adding images programmatically, there are times we
+    # don't want dependent images to be added because we'll get them later.
+    self.skip_dep = false
 
     # Images
     #
@@ -59,7 +64,8 @@ class OrderSession
   # Add a given image, and all dependencies
   #
   # @param [ContainerImage] image
-  def add_image(image)
+  # @param [Array] volume_overrides Pass volumes we expect to be cloned in this image
+  def add_image(image, volume_overrides = [])
     return if image_selected?(image.id)
     to_add = [ image ]
     image.dependencies.each do |i|
@@ -68,7 +74,7 @@ class OrderSession
         next if project.container_images.include?(i)
       end
       to_add << i
-    end
+    end unless skip_dep
     to_add.each do |i|
       settings = {}
       i.setting_params.where(param_type: 'static').each do |ii|
@@ -79,17 +85,62 @@ class OrderSession
           label: ii.label
         }
       end
+      vols = []
+      i.volumes.each do |ii|
+        cloned_vol = volume_overrides.select { |vo| vo[:mount_path] == ii.mount_path }[0]
+        vol_action = if cloned_vol
+                       cloned_vol[:action]
+                     else
+                       ii.source_volume ? 'mount' : 'create'
+                     end
+        vol_source = if cloned_vol
+                       cloned_vol[:source]
+                     else
+                       ii.source_volume&.csrn
+                     end
+        vols << {
+          csrn: ii.csrn,
+          label: ii.label,
+          mount_path: ii.mount_path,
+          action: vol_action,
+          source: vol_source,
+          mount_ro: cloned_vol ? cloned_vol[:mount_ro] : ii.mount_ro,
+          snapshot: nil # archive ID
+        }
+      end
       images << {
         label: "",
         container_id: i.id,
         container_name: i.label,
         params: settings,
+        volumes: vols,
         free: i.is_free ? 'yes' : 'no',
         icon: i.icon_url,
         min_cpu: i.min_cpu,
         min_mem: i.min_memory,
         qty: 1
       }
+    end
+  end
+
+  ##
+  # Fix Dependencies
+  #
+  # Ensure we have all required dependencies.
+  #
+  # When using `skip_dep`, you should also call this
+  # to make sure all dependencies are met prior to handing off to user.
+  def add_dependencies!
+    images.each do |h|
+      image = ContainerImage.find_by id: h[:container_id]
+      next if image.nil?
+      image.dependencies.each do |i|
+        next if image_selected?(i.id)
+        unless new_project?
+          next if project.container_images.include?(i)
+        end
+        add_image i
+      end
     end
   end
 
@@ -145,6 +196,7 @@ class OrderSession
         image_id: image[:container_id].to_i,
         qty: qty.zero? ? 1 : qty,
         params: [],
+        volumes: image[:volumes],
         resources: {}
       }
       c[:resources][:product_id] = image[:package_id] if image[:package_id]

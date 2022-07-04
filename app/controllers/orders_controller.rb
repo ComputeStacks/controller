@@ -32,17 +32,18 @@ class OrdersController < AuthController
         ip_addr: request.remote_ip,
         event: 'updated'
       )
-      event = EventLog.create!(
-        locale: 'order.provision',
-        audit: audit,
-        status: 'pending',
-        event_code: 'bf979cac35507208'
-      )
-      @order.pending!
-      @order.current_event = event
-      unless ProcessOrderService.new(@order).perform
-        flash[:alert] = 'Error processing order request'
-      end
+      ProcessOrderWorker.perform_async @order.to_global_id.uri, audit.to_global_id.uri
+      # event = EventLog.create!(
+      #   locale: 'order.provision',
+      #   audit: audit,
+      #   status: 'pending',
+      #   event_code: 'bf979cac35507208'
+      # )
+      # @order.pending!
+      # @order.current_event = event
+      # unless ProcessOrderService.new(@order).perform
+      #   flash[:alert] = 'Error processing order request'
+      # end
     end
     redirect_to @redirect_path
   end

@@ -28,7 +28,7 @@
   </div>
 </div>
 
-<% if current_user.is_support_admin? %>
+<% if current_user.is_support_admin? || Rails.env.development? %>
   <div class="row" style="margin-top:10px;">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 block-center" style="color:#ccc;font-size:12px;">
       <%= render partial: 'deployments/orders/admin_header' %>

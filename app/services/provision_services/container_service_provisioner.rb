@@ -115,7 +115,7 @@ module ProvisionServices
       return rollback! unless valid?
       return rollback! unless init_subscription?
       return rollback! unless init_service!
-      map_volumes if volume_maps.empty?
+      # map_volumes if volume_maps.empty?
       return rollback! unless select_node!
       return rollback! unless init_private_lbs!
       return rollback! unless setup_service_config!
@@ -180,27 +180,25 @@ module ProvisionServices
 
     # Pre-determine which volumes will be mounted, and identify which
     # node they reside on.
-    def map_volumes
-      skip_volumes = data[:volume_config].filter_map {|i| i[:csrn] if i[:action] == "skip" }
-      req_volume_templates = container_service.container_image.volumes.filter_map { |i| i.csrn unless skip_volumes.include?(i.csrn) }
-      v = {}
-      created_volumes = provision_state[:volumes].filter_map { |i| i.template.csrn if i.template }
-
-      # We need to have a hash of template csrn's to created volumes
-      volume_resources = {}
-      provision_state[:volumes].each do |i|
-        next unless i.template
-        volume_resources[i.template.csrn] = i
-      end
-
-      # Volumes that we need and have been created
-      (req_volume_templates & created_volumes).each do |i|
-        v[i] = volume_resources[i]
-      end
-
-
-
-    end
+    # def map_volumes
+    #   skip_volumes = data[:volume_config].filter_map {|i| i[:csrn] if i[:action] == "skip" }
+    #   req_volume_templates = container_service.container_image.volumes.filter_map { |i| i.csrn unless skip_volumes.include?(i.csrn) }
+    #   v = {}
+    #   created_volumes = provision_state[:volumes].filter_map { |i| i.template.csrn if i.template }
+    #
+    #   # We need to have a hash of template csrn's to created volumes
+    #   volume_resources = {}
+    #   provision_state[:volumes].each do |i|
+    #     next unless i.template
+    #     volume_resources[i.template.csrn] = i
+    #   end
+    #
+    #   # Volumes that we need and have been created
+    #   (req_volume_templates & created_volumes).each do |i|
+    #     v[i] = volume_resources[i]
+    #   end
+    #
+    # end
 
     # Select the node this service will use
     #
@@ -290,7 +288,8 @@ module ProvisionServices
         mount_ro = vol.mount_ro
 
         # Volume configuration overrides for this specific order.
-        custom_vol_req = data[:volume_config].select { |i| i[:csrn] == vol.csrn }.first
+        custom_vol_req = data[:volume_config].select { |i| i[:csrn] == vol.csrn }[0]
+
         if custom_vol_req
           existing_volume = Csrn.locate(custom_vol_req[:source]) unless custom_vol_req[:source].blank?
           vol_action = custom_vol_req[:action] unless custom_vol_req[:action].blank?
@@ -350,6 +349,12 @@ module ProvisionServices
           result[:volumes] << new_vol
           primary_mount = true
           provision_volume_job = VolumeServices::ProvisionVolumeService.new(new_vol, event)
+
+          event.event_details.create!(
+            data: "[DEBUG] ContainerServiceProvisioner - ProvisionVolume\n\nAction: #{vol_action} | Existing Volume: #{existing_volume&.id}",
+            event_code: "76f351a7a6098f90"
+          ) unless Rails.env.production?
+
           if vol_action == 'clone' # Regardless of state, pass if cloning.
             provision_volume_job.source_volume = existing_volume
             provision_volume_job.source_snapshot = source_snapshot

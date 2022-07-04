@@ -307,14 +307,23 @@ class BuildOrderService
       # Validate volume parameters
       if c[:volumes].is_a?(Array)
 
+        have_source_ids = c[:volumes].filter_map { |i| i[:source] if i[:source] && i[:source] =~ /template/ }
+
         c[:volumes].each do |i|
+          next if i[:action] == 'create'
           id = i[:csrn]
           action = i[:action]
           source = i[:source]
           snapshot = i[:snapshot]
           vol = Csrn.locate id
-          if vol.nil? || !vol.can_view?(user)
-            errors << "Unknown volume #{id}"
+
+          # For volumes that are created in this order, vol will be a ContainerImage::VolumeParam.
+          # Verify that this volume param exists in this order.
+          if action == 'mount'
+            unless have_source_ids.include?(source)
+              errors << "Requested mounted volume template is not found in this order"
+            end
+            next
           end
 
           # Ensure passed parameters are compatible with requested action
