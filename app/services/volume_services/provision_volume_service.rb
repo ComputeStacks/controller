@@ -166,7 +166,7 @@ module VolumeServices
         return false if ActiveRecord::Base.uncached { event.event_details.where(event_code: failed_backup_event_code).exists? }
 
         # Grab ID of newly created snapshot
-        Timeout::timeout(60) do
+        Timeout::timeout(300) do
           loop do
             snap = source_volume.list_archives.select { |i| i[:label] == clone_name }.first
             if snap
