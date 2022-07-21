@@ -140,9 +140,9 @@ module VolumeServices
         failed_backup_event_code = "7704f466b97ac18c"
         failed_restore_event_code = "9858861ab2912307"
 
-        # Allow 3 minutes...
+        # Allow 5 minutes...
         # If the snapshot is never created, it will hit the timeout rescue block
-        Timeout::timeout(180) do
+        Timeout::timeout(300) do
           loop do
             clone_backup_event = ActiveRecord::Base.uncached { event.audit.event_logs.find_by(locale: "volume.backup") }
             if clone_backup_event # may not exist yet!
@@ -166,7 +166,7 @@ module VolumeServices
         return false if ActiveRecord::Base.uncached { event.event_details.where(event_code: failed_backup_event_code).exists? }
 
         # Grab ID of newly created snapshot
-        Timeout::timeout(30) do
+        Timeout::timeout(60) do
           loop do
             snap = source_volume.list_archives.select { |i| i[:label] == clone_name }.first
             if snap
@@ -184,7 +184,7 @@ module VolumeServices
       volume.restore_backup! source_snapshot_id, source_volume.name
 
       # Wait for restore event to take place
-      Timeout::timeout(180) do
+      Timeout::timeout(300) do
         loop do
           clone_restore_event = ActiveRecord::Base.uncached { event.audit.event_logs.find_by(locale: "volume.restore") }
           if clone_restore_event # may not exist yet!
