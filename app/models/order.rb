@@ -22,6 +22,7 @@
 # @!attribute events
 #   @return [Array<EventLog>]
 #
+#
 class Order < ApplicationRecord
 
   include Auditable

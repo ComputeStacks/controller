@@ -24,7 +24,8 @@ class ProcessOrderService
       containers: [],
       subscriptions: [],
       load_balancers: [],
-      volumes: []
+      volumes: [],
+      volume_map: [] # [ { template: csrn, volume: csrn } ]
     }
   end
 
@@ -45,7 +46,7 @@ class ProcessOrderService
     end
 
     to_provision = order.data[:raw_order]
-    loop_end = 10.minutes.from_now
+    loop_end = 3.minutes.from_now
     loop do
       break if to_provision.empty?
       break if loop_end <= Time.now
@@ -63,7 +64,7 @@ class ProcessOrderService
         # Keep pushing the result forward so each cycle can track what's been done so far.
         job.provision_state = result
 
-        next unless job.has_required_mountable_volumes?
+        next unless job.ready_to_provision?
 
         job_status = job.perform
         job.errors.each do |err|
@@ -83,6 +84,7 @@ class ProcessOrderService
         to_provision.delete_at index
       end
       break unless errors.empty?
+      sleep 2
     end
     unless to_provision.empty? && errors.empty?
       fail_process! "Failed to provision all resources"
@@ -137,6 +139,7 @@ class ProcessOrderService
         return false
       end
       self.project = d
+      order.save # Ensure project is mapped to this order
     end
     event.deployments << project unless event.deployments.include?(project)
     true

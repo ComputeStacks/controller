@@ -1,0 +1,29 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <strong>Containers</strong>
+  </div>
+  <table class="table-list">
+    <tbody>
+    <% volume.volume_maps.only_services.each do |i| %>
+      <tr>
+        <td>
+          <%= link_to i.container_service.label, (request.path =~ /admin/ ? admin_container_service_path(i.container_service) : "/container_services/#{i.id}") %>
+          <% if i.is_owner %>
+            <span class="label label-primary">OWNER</span>
+          <% end %>
+          <br>
+          <small><%= i.container_service.container_image.label %></small>
+        </td>
+        <td style="vertical-align: top;">
+          <%= i.mount_path %>
+          <% if i.mount_ro %>
+            <span class="label label-default">RO</span>
+          <% else %>
+            <span class="label label-success">RW</span>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>

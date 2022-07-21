@@ -1,0 +1,62 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <% if @service.deployment %>
+        <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+        <li><%= link_to @service.deployment.name, deployments_path(@service.deployment) %></li>
+      <% end %>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active">Host Entries</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12">
+    <h5>Host Entries</h5>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <%= link_to "Create Host Entry", "host_entries/new", class: "btn btn-primary btn-sm pull-right" %>
+        <small>Add additional host entries to this service.</small>
+      </div>
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Hostname</th>
+          <th>IP Address</th>
+          <th>Keep IP Updated?</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <% if @entries.empty? %>
+          <tr>
+            <td colspan="4" class="text-center">No Host Entries Found</td>
+          </tr>
+        <% end %>
+        <% @entries.each do |i| %>
+          <tr>
+            <td style="vertical-align: middle;">
+              <%= i.hostname %>
+            </td>
+            <td style="vertical-align: middle;"><%= i.ipaddr %></td>
+            <td style="vertical-align: middle;">
+              <% if i.template && i.keep_updated && i.template.container_image %>
+                Yes (<%= link_to i.template.container_image.label, "/container_images/#{i.template.container_image.id}" %>)
+              <% else %>
+                No
+              <% end %>
+            </td>
+            <td class="text-right">
+              <div class="btn-group">
+                <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, "host_entries/#{i.id}/edit", class: 'btn btn-xs btn-default' %>
+                <%= link_to '<i class="fa fa-trash"></i>'.html_safe, "host_entries/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

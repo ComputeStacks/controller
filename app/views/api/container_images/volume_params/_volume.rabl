@@ -14,5 +14,7 @@ attributes :id,
            :borg_pre_restore,
            :borg_post_restore,
            :borg_rollback,
+           :mount_ro,
+           :source_volume_id,
            :created_at,
            :updated_at

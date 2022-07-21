@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_13_034734) do
+ActiveRecord::Schema.define(version: 2022_07_08_193316) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -196,6 +196,16 @@ ActiveRecord::Schema.define(version: 2022_06_13_034734) do
     t.index ["container_image_id", "user_id"], name: "image_collab_img_user", unique: true
   end
 
+  create_table "container_image_custom_host_entries", force: :cascade do |t|
+    t.bigint "container_image_id"
+    t.string "hostname"
+    t.bigint "source_image_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["container_image_id"], name: "index_container_image_custom_host_entries_on_container_image_id"
+    t.index ["source_image_id"], name: "index_container_image_custom_host_entries_on_source_image_id"
+  end
+
   create_table "container_image_env_params", force: :cascade do |t|
     t.bigint "container_image_id"
     t.string "name"
@@ -371,6 +381,18 @@ ActiveRecord::Schema.define(version: 2022_06_13_034734) do
     t.datetime "updated_at", null: false
     t.index ["container_image_env_param_id"], name: "csec_image_param_id"
     t.index ["container_service_id"], name: "csec_service_id"
+  end
+
+  create_table "container_service_host_entries", force: :cascade do |t|
+    t.bigint "container_service_id"
+    t.bigint "template_id"
+    t.string "hostname"
+    t.string "ipaddr"
+    t.boolean "keep_updated", default: true, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["container_service_id"], name: "index_container_service_host_entries_on_container_service_id"
+    t.index ["template_id"], name: "index_container_service_host_entries_on_template_id"
   end
 
   create_table "container_service_setting_configs", force: :cascade do |t|
@@ -834,10 +856,12 @@ ActiveRecord::Schema.define(version: 2022_06_13_034734) do
     t.datetime "updated_at", null: false
     t.boolean "restrict_cf", default: false, null: false
     t.boolean "tcp_lb", default: true, null: false
+    t.bigint "region_id"
     t.index ["container_service_id"], name: "index_network_ingress_rules_on_container_service_id"
     t.index ["external_access", "load_balancer_rule_id", "proto"], name: "nir_by_external_access_lb_proto"
     t.index ["ingress_param_id"], name: "index_network_ingress_rules_on_ingress_param_id"
     t.index ["proto"], name: "index_network_ingress_rules_on_proto"
+    t.index ["region_id"], name: "index_network_ingress_rules_on_region_id"
     t.index ["sftp_container_id"], name: "index_network_ingress_rules_on_sftp_container_id"
     t.index ["tcp_lb"], name: "index_network_ingress_rules_on_tcp_lb"
   end

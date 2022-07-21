@@ -3,23 +3,28 @@ mysql_vol_map:
   container_service: mysql
   mount_ro: false
   mount_path: /var/lib/mysql
+  is_owner: true
 wordpress_webconfig_vol_map:
   volume: wordpress_webconfig
   container_service: wordpress
   mount_ro: false
   mount_path: /usr/local/lsws
+  is_owner: true
 wordpress_web_vol_map:
   volume: wordpress_web
   container_service: wordpress
   mount_ro: false
   mount_path: /var/www
+  is_owner: true
 nginx_web_vol_map:
   volume: nginx_web
   container_service: nginx
   mount_ro: false
   mount_path: /var/www
+  is_owner: true
 user_nginx_web_vol_map:
   volume: user_nginx_web
   container_service: user_nginx
   mount_ro: false
   mount_path: /var/www
+  is_owner: true

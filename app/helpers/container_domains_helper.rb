@@ -1,6 +1,12 @@
 module ContainerDomainsHelper
 
+  def new_container_domain_path(deployment)
+    return admin_new_container_domain_path(deployment) if current_user.is_admin && deployment.user != current_user
+    "/container_domains/new?deployment_id=#{deployment.token}"
+  end
+
   def container_domain_path(domain)
+    return admin_container_domains_path(domain) if current_user.is_admin && domain.user != current_user
     "/container_domains/#{domain.id}-#{domain.domain.parameterize}"
   end
 

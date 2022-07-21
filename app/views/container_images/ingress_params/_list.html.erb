@@ -17,7 +17,7 @@
       <th><%= t 'obj.port' %></th>
       <th><%= t 'container_images.ingress_rules.list.table.columns.proto' %></th>
       <th><%= t 'container_images.ingress_rules.list.table.columns.lb' %></th>
-      <th><%= t 'container_images.ingress_rules.list.table.columns.proxy' %></th>
+      <th>External Access</th>
       <th></th>
     </tr>
     </thead>
@@ -33,7 +33,7 @@
           <% end %>
         </td>
         <td><%= ingress_param_load_balancer i %></td>
-        <td><%= i.tcp_proxy_opt %></td>
+        <td><%= i.external_access ? 'Yes' : 'No' %></td>
         <td class="text-right">
           <% if @container.can_edit?(current_user) %>
             <div class="btn-group">

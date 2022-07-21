@@ -28,6 +28,9 @@
 # @!attribute tcp_lb
 #   @return [Boolean] False will use local iptable rules (NAT). `tls` is not possible.
 #
+# @!attribute region
+#   @return [Region]
+#
 # @!attribute container_service
 #   @return [Deployment::ContainerService]
 # @!attribute internal_load_balancer
@@ -71,20 +74,27 @@ class Network::IngressRule < ApplicationRecord
              foreign_key: "ingress_param_id",
              optional: true
 
+  belongs_to :region
+
   has_many :container_domains, class_name: 'Deployment::ContainerDomain', dependent: :destroy
 
   # If this is the load balancer, find our backend rules
   has_many :load_balanced_rules, class_name: 'Network::IngressRule', foreign_key: 'load_balancer_rule_id', dependent: :nullify
   has_many :load_balanced_domains, through: :load_balanced_rules, source: :container_domains
 
-  validate :has_valid_port
+  # validate :has_valid_port
+
+  validates :port_nat, uniqueness: { scope: [:region_id, :proto] }, unless: -> { port_nat.zero? }
+  validates :port, uniqueness: { scope: [:container_service_id, :proto] }, if: -> { container_service }
+  validates :port, uniqueness: { scope: [:sftp_container_id, :proto] }, if: -> { sftp_container }
 
   before_save :set_nat_port
   before_destroy :update_node_rules!
 
   attr_accessor :sys_no_reload,
                 :no_provision_domain,
-                :skip_metadata_refresh
+                :skip_metadata_refresh,
+                :skip_policy_updates
 
   after_save :update_global_load_balancer!
   after_commit :reload_load_balancer!, unless: Proc.new { |i| i.sys_no_reload }
@@ -107,8 +117,7 @@ class Network::IngressRule < ApplicationRecord
   end
 
   def public_network?
-    return container_service.region.public_network? if container_service
-    return sftp_container.region.public_network? if sftp_container
+    return region.public_network? if region
     false
   end
 
@@ -120,7 +129,7 @@ class Network::IngressRule < ApplicationRecord
     if load_balancer_rule
       load_balancer_rule.toggle_nat!
     elsif proto == 'http'
-      errors.add(:proto, 'Unable to create nat port for HTTP service.')
+      errors.add(:proto, 'Unable to create nat port for HTTP service. Please change to TCP.')
       false
     elsif port_nat.zero?
       update external_access: true
@@ -166,28 +175,33 @@ class Network::IngressRule < ApplicationRecord
   def set_nat_port
     if external_access && port_nat.zero? && %w(tcp tls udp).include?(proto)
       unless load_balancer_rule # Only for ingress rules attached to our global LB.
-        region = if container_service
-                   container_service.region
-                 elsif sftp_container
-                   sftp_container.region
-                 else
-                   nil
-                 end
-        return if region.nil?
         if public_network?
           self.port_nat = port
         else
-          ports_in_use = Network::IngressRule.where.not(port_nat: 0).where(deployment_container_services: {region_id: region.id}).joins(:container_service).pluck(:port_nat)
 
-          # https://serverfault.com/questions/401040/maximizing-tcp-connections-on-haproxy-load-balancer
-          # as stated, i guess linux will use 32k+ for connections
+          ActiveRecord::Base.uncached do
+            # If tcp or udp exists, share the port with each other.
+            if %w(tcp udp).include? proto
+              port_pair = nil
+              port_pair = container_service.ingress_rules.find_by(proto: (proto == 'tcp' ? 'udp' : 'tcp'), port: port) if container_service
+              port_pair = sftp_container.ingress_rules.find_by(proto: (proto == 'tcp' ? 'udp' : 'tcp'), port: port) if sftp_container
+              if port_pair && !Network::IngressRule.where(proto: proto, port: port, region: region).exists?
+                self.port_nat = port_pair.port_nat
+              end
+            end
 
-          p = rand(10000..30000)
-          p = rand(10000..30000) while ports_in_use.include?(p)
-          self.port_nat = p
+            if port_nat.zero?
+              ports_in_use = Network::IngressRule.where.not(port_nat: 0).where(region: region, proto: proto).pluck(:port_nat)
+              # https://serverfault.com/questions/401040/maximizing-tcp-connections-on-haproxy-load-balancer
+              # as stated, i guess linux will use 32k+ for connections
+              p = rand(10000..30000) while p.nil? || ports_in_use.include?(p)
+              self.port_nat = p
+            end
+          end
+
         end
       end
-    elsif !self.external_access && !port_nat.zero?
+    elsif !external_access && !port_nat.zero?
       self.port_nat = 0
     end
   end
@@ -205,11 +219,12 @@ class Network::IngressRule < ApplicationRecord
     elsif global_load_balancer
       LoadBalancerServices::DeployConfigService.new(global_load_balancer).perform
     elsif external_access && container_service
-      lb = container_service.region&.load_balancer
-      LoadBalancerServices::DeployConfigService.new(lb).perform if lb
+      LoadBalancerServices::DeployConfigService.new(region.load_balancer).perform if region&.load_balancer
     end
-    NetworkWorkers::ServicePolicyWorker.perform_async(container_service.id) if container_service
-    NetworkWorkers::SftpPolicyWorker.perform_async(sftp_container.id) if sftp_container
+    unless skip_policy_updates
+      NetworkWorkers::ServicePolicyWorker.perform_async(container_service.id) if container_service
+      NetworkWorkers::SftpPolicyWorker.perform_async(sftp_container.id) if sftp_container
+    end
     if sftp_container
       NodeWorkers::ReloadIptableWorker.perform_async sftp_container.node&.to_global_id.uri
     elsif container_service
@@ -223,12 +238,12 @@ class Network::IngressRule < ApplicationRecord
   def update_global_load_balancer!
     return if public_network?
     if external_access && (global_load_balancer.nil? && load_balancer_rule.nil?)
+      lb = region.load_balancer
+      return unless lb
       if container_service && container_service.load_balancer.nil?
-        lb = container_service.region.load_balancer
-        container_service.update_attribute(:load_balancer, lb) if lb
+        container_service.update_attribute(:load_balancer, lb)
       elsif sftp_container && sftp_container.load_balancer.nil?
-        lb = sftp_container.region.load_balancer
-        sftp_container.update_attribute(:load_balancer, lb) if lb
+        sftp_container.update_attribute(:load_balancer, lb)
       end
     end
   end
@@ -240,21 +255,21 @@ class Network::IngressRule < ApplicationRecord
     Deployment::ContainerDomain.create_system_domain!(container_service)
   end
 
-  def has_valid_port
-    if container_service
-      if id && Network::IngressRule.where(proto: proto, port: port, container_service: container_service).where.not(id: id).exists?
-        errors.add(:port, 'is already in use')
-      elsif id.nil? && Network::IngressRule.where(proto: proto, port: port, container_service: container_service).exists?
-        errors.add(:port, 'is already in use')
-      end
-    elsif sftp_container
-      if id && Network::IngressRule.where(proto: proto, port: port, sftp_container: sftp_container).where.not(id: id).exists?
-        errors.add(:port, 'is already in use')
-      elsif id.nil? && Network::IngressRule.where(proto: proto, port: port, sftp_container: sftp_container).exists?
-        errors.add(:port, 'is already in use')
-      end
-    end
-  end
+  # def has_valid_port
+  #   if container_service
+  #     if id && Network::IngressRule.where(proto: proto, port: port, container_service: container_service).where.not(id: id).exists?
+  #       errors.add(:port, 'is already in use')
+  #     elsif id.nil? && Network::IngressRule.where(proto: proto, port: port, container_service: container_service).exists?
+  #       errors.add(:port, 'is already in use')
+  #     end
+  #   elsif sftp_container
+  #     if id && Network::IngressRule.where(proto: proto, port: port, sftp_container: sftp_container).where.not(id: id).exists?
+  #       errors.add(:port, 'is already in use')
+  #     elsif id.nil? && Network::IngressRule.where(proto: proto, port: port, sftp_container: sftp_container).exists?
+  #       errors.add(:port, 'is already in use')
+  #     end
+  #   end
+  # end
 
   def refresh_metadata
     return if deployment.nil?

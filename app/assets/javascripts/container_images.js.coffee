@@ -16,4 +16,3 @@ jQuery ->
   setInterval (->
     imageTag.ajax.reload null, false
   ), 30000
-

@@ -43,6 +43,7 @@ module ContainerImages
           vars << "dep.#{i.role}.parameters.settings.#{ii.name}"
         end
         vars << "dep.#{i.role}.self.ip"
+        vars << "dep.#{i.role}.self.default_domain"
         # vars << "dep.#{i.role}.self.ip_with_port"
         # vars << "dep.#{i.role}.self.port"
       end

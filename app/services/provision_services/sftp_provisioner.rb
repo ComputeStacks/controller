@@ -102,7 +102,8 @@ module ProvisionServices
         sftp = project.sftp_containers.new(
           node: node,
           name: NamesGenerator.name(project.id),
-          load_balancer: load_balancer
+          load_balancer: load_balancer,
+          pw_auth: project.user.c_sftp_pass
         )
         unless sftp.save
           errors << sftp.errors.full_messages.join(' ')

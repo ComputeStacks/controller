@@ -42,11 +42,17 @@
 </div>
 
 <div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <%= render partial: "volumes/show/maps", locals: { volume: @volume } %>
+  </div>
+</div>
+
+<div class="row">
   <div class="col-lg-8 col-lg-offset-2 col-md-12 remote-resource refresh" data-url="<%= request.path %>/logs"></div>
 </div>
 
 <% if Feature.check('backups', current_user) %>
-  <div class="row" style="margin-top:25px;">
+  <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-12">
       <%= render partial: "volumes/show/backups", locals: { volume: @volume } %>
     </div>

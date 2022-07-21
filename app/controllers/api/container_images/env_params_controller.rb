@@ -93,7 +93,7 @@ class Api::ContainerImages::EnvParamsController < Api::ContainerImages::BaseCont
   end
 
   ##
-  # Destroy an env param
+  # Delete Env Param
   #
   # `DELETE /api/container_images/{container-image-id}/env_params/{id}`
   #

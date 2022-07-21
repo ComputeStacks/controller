@@ -107,6 +107,16 @@ module Projects
         end
       end
 
+      sftp_containers.each do |i|
+        next if i.pw_auth == user.c_sftp_pass
+        i.current_audit = current_audit
+        i.pw_auth = user.c_sftp_pass
+        unless i.save
+          errors.add(:base, "Error updating sftp container #{i.id}: #{i.errors.full_messages.join(', ')}")
+          return rollback_new_owner!(sub_state)
+        end
+      end
+
       ProjectWorkers::RefreshMetadataWorker.perform_async id
       ProjectWorkers::RefreshMetadataSshWorker.perform_async id, current_audit&.id
 

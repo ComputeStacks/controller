@@ -1,11 +1,11 @@
 class OrderValidator < ActiveModel::Validator
   def validate(order)
     quota_check!(order)
-    v_deployment(order) unless order.order_data['deployment'].nil?
+    v_deployment(order) unless order.order_data['project'].nil?
   end
 
   def quota_check!(order)
-    if order.order_data['deployment']
+    if order.order_data['project']
       container_orders = order.order_data['raw_order'].map { |i| i if i['product_type'] == 'container' }
       unless order.user.can_order_containers?(container_orders.count)
         order.errors.add(:base, "Over quota, unable to process #{container_orders.count} containers.")

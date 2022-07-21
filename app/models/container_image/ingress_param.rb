@@ -32,7 +32,7 @@ class ContainerImage::IngressParam < ApplicationRecord
   belongs_to :load_balancer_rule, class_name: 'ContainerImage::IngressParam', optional: true
   has_one :internal_load_balancer, through: :load_balancer_rule, source: :container_image
 
-  validates :port, uniqueness: { scope: :container_image_id, message: "port is already assigned to container image" }
+  validates :port, uniqueness: { scope: [:container_image_id, :proto], message: "port is already assigned to container image" }
 
   validate :custom_load_balancer
 

@@ -12,6 +12,7 @@ module ContainerServices
           vars << "dep.#{i.container_image.role}.parameters.settings.#{ii.name}"
         end
         vars << "dep.#{i.container_image.role}.self.ip"
+        vars << "dep.#{i.container_image.role}.self.default_domain"
         # vars << "dep.#{i.container_image.role}.self.ip_with_port"
         # vars << "dep.#{i.container_image.role}.self.port"
       end
@@ -156,7 +157,8 @@ module ContainerServices
           tcp_proxy_opt: i.tcp_proxy_opt,
           tcp_lb: public_network? ? false : i.tcp_lb,
           sys_no_reload: true, # Don't reload the LB.
-          skip_metadata_refresh: true
+          skip_metadata_refresh: true,
+          region: region
         )
         if i.load_balancer_rule
           lb_service = deployment.services.load_balancers.where("labels @> ?", {load_balancer_for: self.id}.to_json).first

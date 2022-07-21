@@ -25,6 +25,7 @@ class VolumeMap < ApplicationRecord
   include Volumes::VolumeMount
 
   scope :primary, -> { where is_owner: true }
+  scope :only_services, -> { where.not container_service: nil }
 
   belongs_to :volume
   belongs_to :container_service, class_name: 'Deployment::ContainerService'

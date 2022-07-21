@@ -41,6 +41,7 @@ class Deployment::Sftp < ApplicationRecord
   include Containers::StateManager
   include Containers::SshVolumes
   include ContainerServices::CalicoServicePolicy
+  include ContainerServices::CleanupNetPolicy
   include UrlPathFinder
 
   scope :sorted, -> { order(created_at: :desc) }
@@ -76,7 +77,6 @@ class Deployment::Sftp < ApplicationRecord
 
   after_create :setup_ingress_rule!
   after_create :generate_certificates!
-  after_create :set_ssh_auth!
 
   after_create_commit :init_metadata!
 
@@ -249,7 +249,8 @@ class Deployment::Sftp < ApplicationRecord
         proto: 'tcp',
         port: 22,
         tcp_lb: false,
-        skip_metadata_refresh: true
+        skip_metadata_refresh: true,
+        region: region
       )
       unless ir.save
         l = event_logs.create!(
@@ -274,7 +275,8 @@ class Deployment::Sftp < ApplicationRecord
         port: ingress_rule.port_nat,
         port_nat: ingress_rule.port_nat,
         tcp_lb: false,
-        skip_metadata_refresh: true
+        skip_metadata_refresh: true,
+        region: region
       )
       unless mosh.save
         l = event_logs.create!(
@@ -299,11 +301,6 @@ class Deployment::Sftp < ApplicationRecord
     unless ssh_host_keys.ed25519.exists?
       ssh_host_keys.create!(algo: 'ed25519')
     end
-  end
-
-  def set_ssh_auth!
-    return unless user
-    self.pw_auth = user.c_sftp_pass
   end
 
   def init_metadata!

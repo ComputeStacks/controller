@@ -66,7 +66,7 @@ class Location < ApplicationRecord
   has_many :container_services, -> { distinct }, through: :regions
   has_many :containers, through: :container_services
   has_many :deployments, through: :regions
-  has_many :sftp_containers, through: :deployments
+  has_many :sftp_containers, -> { distinct }, through: :deployments
 
   validates :name, length: { in: 2..50 }
 
@@ -132,15 +132,13 @@ class Location < ApplicationRecord
       req_cpu = packages.sum { |p| p.cpu }
       req_mem = packages.sum { |p| p.memory }
 
-      # We must have enough resources...
-      next unless current_alloc[:cpu][:available] >= req_cpu
-      next unless current_alloc[:memory][:available] > req_mem
-
       unless overcommit_cpu
+        next unless current_alloc[:cpu][:available] >= req_cpu
         next if (req_cpu + current_alloc[:cpu][:used]) > current_alloc[:cpu][:available]
       end
 
       unless overcommit_memory
+        next unless current_alloc[:memory][:available] > req_mem
         next if (req_mem + current_alloc[:memory][:used]) > current_alloc[:memory][:available]
       end
 

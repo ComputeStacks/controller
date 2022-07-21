@@ -8,12 +8,12 @@
     .col-md-12= render partial: "deployments/index/dense"
   - else
     - @pending_orders.each do |i|
-      - next if i.order_data.dig('deployment','name').nil?
+      - next if i.order_data.dig('project','name').nil?
       .col-lg-3.col-md-4.col-sm-6.col-xs-12
         .panel.panel-default
           .panel-heading
             .panel-title style="font-size:14px;line-height:13px;"
-              = i.order_data['deployment']['name']
+              = i.order_data['project']['name']
               .pull-right: i.fa.fa-clock-o.fa-fw
           .panel-body
             ul.list-unstyled

@@ -73,7 +73,11 @@ class OrderSession
       unless new_project?
         next if project.container_images.include?(i)
       end
-      to_add << i
+      # Check for their dependencies
+      i.dependencies.each do |ii|
+        to_add << ii unless to_add.include?(ii)
+      end
+      to_add << i unless to_add.include?(i)
     end unless skip_dep
     to_add.each do |i|
       settings = {}

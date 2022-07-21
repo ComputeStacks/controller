@@ -4,24 +4,28 @@ mysql:
   proto: tcp
   port: 3306
   tcp_proxy_opt: send-proxy-v2
+  region: regionone
 nginx_http:
   parent_param: nginx_http
   container_service: nginx
   external_access: true
   proto: http
   port: 80
+  region: regionone
 user_nginx_http:
   parent_param: user_nginx_http
   container_service: user_nginx
   external_access: true
   proto: http
   port: 80
+  region: regionone
 wordpress_web_http:
   parent_param: web_http
   container_service: wordpress
   external_access: true
   proto: http
   port: 80
+  region: regionone
 wordpress_web_ls:
   parent_param: web_ls
   container_service: wordpress
@@ -29,12 +33,14 @@ wordpress_web_ls:
   proto: http
   backend_ssl: true
   port: 7080
+  region: regionone
 wordpress_custom_web_http:
   parent_param: web_http
   container_service: wordpress_custom
   external_access: true
   proto: http
   port: 80
+  region: regionone
 wordpress_custom_web_ls:
   parent_param: web_ls
   container_service: wordpress_custom
@@ -42,21 +48,25 @@ wordpress_custom_web_ls:
   proto: http
   backend_ssl: true
   port: 7080
+  region: regionone
 sftp:
   sftp_container: project_test_testone
   external_access: true
   proto: tcp
   port_nat: <%= rand(10000..30000) %>
   port: 22
+  region: regionone
 custom_sftp:
   sftp_container: user_project_test_testone
   external_access: true
   proto: tcp
   port_nat: <%= rand(10000..30000) %>
   port: 22
+  region: regionone
 pma_http:
   parent_param: pma_http
   container_service: pma
   external_access: true
   proto: http
   port: 80
+  region: regionone

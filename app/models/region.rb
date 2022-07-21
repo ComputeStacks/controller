@@ -45,7 +45,7 @@ class Region < ApplicationRecord
 
   has_many :container_services, class_name: 'Deployment::ContainerService', dependent: :restrict_with_error
   has_many :deployments, -> { distinct }, through: :container_services
-  has_many :sftp_containers, through: :deployments
+  has_many :sftp_containers, -> { distinct }, through: :deployments
   has_many :containers, through: :container_services
 
   has_many :volumes

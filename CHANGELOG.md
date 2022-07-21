@@ -1,5 +1,21 @@
 # Change Log
 
+## v7.2.0-beta1
+
+_July 20, 2022_
+
+* [FEATURE] Clone Project.
+* [FEATURE] Clone volumes.
+* [FEATURE] Shared mountable volumes.
+* [FEATURE] Support for custom `/etc/hosts` entries in both images and containers.
+* [CHANGE] Both `tcp` and `udp` will share the same external NAT port.
+* [CHANGE] Previously, even if over-commit memory/cpu was enabled, ComputeStacks would still prevent placing containers on a node that did not have enough cpu or memory available. This would cause orders to fail; this will now follow the over-commit setting as well.
+* [FIX] Resolved issue that would randomly cause an ip address to be assigned to multiple containers at once, and cause a provision failure.
+* [FIX] Annual snapshot retention was not visible in the UI.
+* [FIX] Region allocation was overcounting SFTP containers.
+
+***
+
 ## v7.1.8
 
 _May 19, 2022_

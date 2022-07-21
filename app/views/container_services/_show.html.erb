@@ -15,7 +15,8 @@
 
     <%= render partial: "container_services/show/custom/wp", locals: { service: service } if service.is_wordpress? %>
     <%= render partial: "container_services/show/overview", locals: {service: service, settings: service.combined_settings} %>
-    <%= render partial: "container_services/show/volumes", locals: {volumes: service.volumes.order(:label)} unless service.volumes.empty? %>
+    <%= render partial: "container_services/show/volumes",
+               locals: { volumes: service.volumes.order(:label), service: service } unless service.volumes.empty? %>
     <%= render partial: "container_services/show/backend", locals: { service: service } if service.is_load_balancer %>
     <%= render partial: 'container_services/show/custom/pma' if service.container_image.service_container? %>
 

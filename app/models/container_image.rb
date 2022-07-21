@@ -139,6 +139,12 @@ class ContainerImage < ApplicationRecord
   has_many :env_params, class_name: 'ContainerImage::EnvParam', dependent: :destroy
   has_many :ingress_params, class_name: 'ContainerImage::IngressParam', dependent: :destroy
   has_many :setting_params, class_name: 'ContainerImage::SettingParam', dependent: :destroy
+  has_many :host_entries, class_name: 'ContainerImage::CustomHostEntry', dependent: :destroy
+
+  has_many :host_entry_dependents,
+           class_name: 'ContainerImage::CustomHostEntry',
+           inverse_of: :source_image,
+           dependent: :destroy
 
   has_many :volumes, class_name: "ContainerImage::VolumeParam", dependent: :destroy
 

@@ -56,6 +56,15 @@
       <%= render partial: 'container_images/ingress_params/list', locals: {data: @container.ingress_params.sorted, image: @container} %>
     </div>
     <%= render partial: 'container_images/show/related' unless @container.is_load_balancer %>
+
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, "/container_images/#{@container.id}/custom_host_entries/new", class: "pull-right btn btn-xs btn-default" %>
+        <strong>Custom Host Entries</strong>
+      </div>
+      <%= render partial: "container_images/custom_host_entries/list", locals: { entries: @container.host_entries, image: @container } %>
+    </div>
+
   </div>
 
   <div class="col-md-8 col-sm-6 col-xs-12">

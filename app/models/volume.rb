@@ -175,6 +175,11 @@ class Volume < ApplicationRecord
   # attr_accessor :force_rebuild, :skip_user_update
   attr_accessor :skip_user_update
 
+  # @return [Deployment::ContainerService]
+  def owner
+    volume_maps.find_by(is_owner: true)&.container_service
+  end
+
   def csrn
     "csrn:caas:project:vol:#{resource_name}:#{id}"
   end
@@ -296,15 +301,15 @@ class Volume < ApplicationRecord
   # Ensure we record the user.
   # Will not update if the deployment is null.
   def update_user
-    self.user = self.deployment.user if self.deployment
+    self.user = deployment.user if deployment
   end
 
   # Track when this volume went offline, for billing purposes.
   def set_detached
-    if self.container_services.empty? && self.detached_at.nil?
-      self.update_column(:detached_at, Time.now.utc)
-    elsif !self.container_services.empty? && !self.detached_at.nil?
-      self.update_column(:detached_at, nil)
+    if container_services.empty? && detached_at.nil?
+      update detached_at: Time.now.utc
+    elsif !container_services.empty? && !detached_at.nil?
+      update detached_at: nil
     end
   rescue
     # Ignore errors while we migrate.
@@ -312,16 +317,16 @@ class Volume < ApplicationRecord
 
   # Update the subscription when we mark this to be deleted
   def update_subscription
-    if self.saved_change_to_attribute?("to_trash") && self.subscription
-      if self.to_trash
-        self.subscription.update(
+    if saved_change_to_attribute?("to_trash") && subscription
+      if to_trash
+        subscription.update(
           active: false,
           details: {
             volume_name: self.name
           }
         )
       elsif !self.to_trash
-        self.subscription.update_attribute :active, true
+        subscription.update active: true
       end
     end
   end

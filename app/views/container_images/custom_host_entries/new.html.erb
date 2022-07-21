@@ -1,0 +1,25 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb pull-left">
+      <li><%= link_to t('deployments.shared.main_nav.images'), "/container_images" %></li>
+      <li><%= link_to @image.label, "/container_images/#{@image.id}" %></li>
+      <li><%= link_to "Custom Host Entries", "/container_images/#{@image.id}/custom_host_entries" %></li>
+      <li class="active">New Host Entry</li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @entry.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @entry, url: "#{container_image_path(@entry.container_image)}/custom_host_entries", method: :post do |f| %>
+      <div class="panel panel-default">
+        <%= render partial: 'container_images/custom_host_entries/form', locals: { f: f } %>
+        <div class="panel-footer">
+          <%= link_to t('actions.cancel'), "#{container_image_path(@entry.container_image)}", class: 'btn btn-default', style: 'margin-right: 10px;' %>
+          <%= submit_tag t('actions.update'), class: 'btn btn-success pull-right' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <%= render partial: 'application/model_errors', locals: { errors: @entry.errors, obj: 'host entry' } unless @entry.errors.count.zero? %>
+</div>

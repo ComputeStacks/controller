@@ -5,7 +5,7 @@ class DeploymentsController < AuthController
 
   def index
     @deployments = Deployment.find_all_for(current_user).sort_by_name
-    @pending_orders = current_user.orders.pending.where(deployment: nil)
+    @pending_orders = current_user.orders.pending_projects
     if request.xhr?
       render template: "deployments/index/deployment_list", layout: false
     end

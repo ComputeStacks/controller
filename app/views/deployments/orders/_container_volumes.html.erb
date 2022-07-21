@@ -6,13 +6,15 @@
     <div class="row">
       <div class="col-sm-6 col-xs-12">
         <div class="code-font-minimal">
-          <% container[:volumes].each do |volume| %>
-            <% if volume[:source].blank? %>
-              <%= volume[:source].blank? ? "Create Volume #{volume[:label]} and mount at " : "Mount Volume #{volume[:source]} at " %><%= volume[:mount_path] %>
-            <% else %>
-              <%= volume[:source] =~ /project/ ? "Clone " : "Mount " %><%= "Volume #{volume[:source]} at " %><%= volume[:mount_path] %>
+          <ul class="list-unstyled">
+            <% container[:volumes].each do |volume| %>
+              <% if volume[:source].blank? %>
+                <li><%= volume[:source].blank? ? "Create Volume #{volume[:label]} and mount at " : "Mount Volume #{volume[:source]} at " %><%= volume[:mount_path] %>.</li>
+              <% else %>
+                <li><%= volume[:source] =~ /project/ ? "Clone " : "Mount " %><%= "Volume #{volume[:source]} at " %><%= volume[:mount_path] %>.</li>
+              <% end %>
             <% end %>
-          <% end %>
+          </ul>
         </div>
       </div>
     </div>

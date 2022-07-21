@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-md-12 text-right">
-    <%= link_to "Add Domain", "/container_domains/new?deployment_id=#{@deployment.token}", class: 'btn btn-primary btn-sm' %>
+    <%= link_to "Add Domain", new_container_domain_path(@deployment), class: 'btn btn-primary btn-sm' %>
   </div>
 </div>
 <div class="row">

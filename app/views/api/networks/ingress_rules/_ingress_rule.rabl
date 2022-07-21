@@ -9,6 +9,7 @@ attributes :id,
            :restrict_cf,
            :tcp_lb,
            :created_at,
+           :region_id,
            :container_service_id,
            :updated_at
 

@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   resources :container_images do
     scope module: 'container_images' do
       resources :collaborators,
+                :custom_host_entries,
                 :env_params,
                 :image_relationships,
                 :image_validation,
@@ -55,7 +56,7 @@ Rails.application.routes.draw do
         delete 'protect' => 'protect#destroy'
         resources :protect, :sso, :users
       end
-      resources :alerts, :connect, :containers, :events, :environmental, :resize_service, :service_logs, :scale_service, :settings
+      resources :alerts, :connect, :containers, :events, :environmental, :host_entries, :resize_service, :service_logs, :scale_service, :settings
     end
   end
 

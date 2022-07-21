@@ -28,9 +28,8 @@ module ContainerServices
         )
         return false
       end
-      clean_nat_ports # Will continue on failure
+      clean_ingress_rules
       pause_subscriptions
-      clean_net_policy
       return false unless delete_containers
       return true if service.destroy
       event.event_details.create!(
@@ -67,25 +66,11 @@ module ContainerServices
       end
     end
 
-    # @return [Boolean]
-    def clean_nat_ports
-      success = true
+    def clean_ingress_rules
       service.ingress_rules.each do |i|
-        unless i.public_port.zero?
-          unless i.toggle_nat!
-            success = false
-            event.event_details.create!(
-              data: i.errors.full_messages.join(' '),
-              event_code: 'a861fc0361cc160d'
-            )
-          end
-        end
+        i.skip_policy_updates = true
+        i.destroy
       end
-      success
-    end
-
-    def clean_net_policy
-      NetworkWorkers::TrashPolicyWorker.perform_async service.region.id, service.name
     end
 
     # @return [Boolean]

@@ -8,6 +8,8 @@ module Containers
       return nil if deployment.nil?
       return nil if container_image.nil?
 
+      return nil unless setup_custom_hosts!(audit)
+
       # Ensure we have an ip address
       if local_ip.blank?
         generate_container_ip!
@@ -49,10 +51,10 @@ module Containers
           }
         }
       }
-      runtime_env.each do |k,v|
+      runtime_env.each do |k, v|
         (c['Env'] ||= []) << "#{k}=#{v}"
       end
-      service.volumes.where(nodes: {id: node.id}).joins(:nodes).distinct.each do |vol|
+      service.volumes.where(nodes: { id: node.id }).joins(:nodes).distinct.each do |vol|
         vm = vol.volume_maps.find_by container_service: service
         next if vm.nil?
         (c['HostConfig']['Binds'] ||= []) << "#{vm.volume.name}:#{vm.mount_path.strip}:#{vm.mount_ro ? 'ro' : 'rw'}"
@@ -87,11 +89,8 @@ module Containers
       c['HostConfig']['MemorySwap'] = mem_swap
       c['HostConfig']['MemorySwappiness'] = mem_swappiness if mem_swappiness
 
-      if Rails.env.production?
-        c['HostConfig']['ExtraHosts'] = ["metadata.internal:#{node.primary_ip}"]
-      else
-        c['HostConfig']['ExtraHosts'] = ["controller.cstacks.local:#{node.primary_ip}", "metadata.internal:#{node.primary_ip}"]
-      end
+      c['HostConfig']['ExtraHosts'] = custom_host_entries
+
       c['HostConfig'].merge! node.container_io_limits
       c
     rescue => e
@@ -114,17 +113,88 @@ module Containers
       return nil if service.command&.strip.blank?
       raw_command = service.command.strip
       data = Liquid::Template.parse(raw_command)
-      vars = {'service_name_short' => var_lookup('build.self.service_name_short')}
+      vars = { 'service_name_short' => var_lookup('build.self.service_name_short') }
       service.setting_params.each do |param|
         vars[param.name] = var_lookup("build.settings.#{param.name}")
       end
       data.render(vars)
     end
 
+    # List host entries for docker
+    # @return [Array]
+    def custom_host_entries
+      h = service.host_entries.map do |i|
+        "#{i.hostname}:#{i.ipaddr}"
+      end
+      if Rails.env.production?
+        h << "metadata.internal:#{node.primary_ip}"
+      else
+        h << "controller.cstacks.local:#{node.primary_ip}"
+        h << "metadata.internal:#{node.primary_ip}"
+      end
+      h
+    end
+
     private
+
+    def setup_custom_hosts!(audit = nil)
+      existing_host_rules = service.host_entries
+      container_image.host_entries.each do |h|
+        next unless existing_host_rules.select { |i| i.template == h }.empty?
+
+        next if h.source_image.nil?
+
+        host_ip = nil
+        deployment.services.each do |s|
+          if s.container_image == h.source_image
+            host_ip = s.containers.first.local_ip
+          end
+        end
+        next if host_ip.nil?
+
+        # Orphaned host entries can be skipped from creation, and also
+        # re-mapped to a template.
+        if service.host_entries.where(hostname: h.hostname).exists?
+          existing_record = service.host_entries.find_by template: nil, hostname: h.hostname, keep_updated: true
+          if existing_record
+            existing_record.update(
+              template: h,
+              ipaddr: host_ip
+            )
+          end
+        else
+          service.host_entries.create!(
+            template: h,
+            hostname: h.hostname,
+            ipaddr: host_ip
+          )
+        end
+      end
+      true
+    rescue => e
+      ExceptionAlertService.new(e, 'ab4f48d8615f2ef7').perform
+      l = event_logs.create!(
+        status: 'alert',
+        notice: true,
+        locale: 'deployment.errors.fatal',
+        event_code: 'ab4f48d8615f2ef7',
+        audit: audit
+      )
+      l.event_details.create!(data: "Error generating custom hosts for #{name}: #{e.message}", event_code: 'ab4f48d8615f2ef7')
+      l.deployments << deployment if deployment
+      l.users << user if user
+      nil
+    end
 
     def runtime_env
       result = []
+      vars = {
+        'service_name_short' => var_lookup('build.self.service_name_short'),
+        'default_domain' => var_lookup('build.self.default_domain')
+      }
+      service.setting_params.each do |param|
+        vars[param.name] = var_lookup param.name
+      end
       service.env_params.each do |i|
         case i.param_type
         when 'variable'
@@ -134,7 +204,7 @@ module Containers
           end
           result << [i.name, val]
         when 'static'
-          result << [i.name, i.value]
+          result << [i.name, Liquid::Template.parse(i.value).render(vars)]
         end
       end
       result + metadata_env_params

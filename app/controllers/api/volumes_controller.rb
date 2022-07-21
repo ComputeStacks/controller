@@ -42,7 +42,23 @@ class Api::VolumesController < Api::ApplicationController
   #     * `borg_rollback`: `Array<String>`
   #     * `updated_at`: DateTime
   #     * `created_at`: DateTime
-
+  #     * `volume_maps`: Array
+  #         * `id`: Integer
+  #         * `mount_ro`: Bool | Mount read only
+  #         * `mount_path`: String
+  #         * `container_service`: Object
+  #             * `id`: Integer
+  #             * `csrn`: String
+  #             * `name`: String
+  #             * `label`: String
+  #     * `template`: Object
+  #         * `id`: Integer
+  #         * `csrn`: String
+  #         * `container_image`: Object
+  #             * `id`: Integer
+  #             * `csrn`: String
+  #             * `label`: String
+  #
   def index
     @volumes = paginate Volume.find_all_for(current_user).active
   end
@@ -83,7 +99,23 @@ class Api::VolumesController < Api::ApplicationController
   #     * `borg_rollback`: `Array<String>`
   #     * `updated_at`: DateTime
   #     * `created_at`: DateTime
-
+  #     * `volume_maps`: Array
+  #         * `id`: Integer
+  #         * `mount_ro`: Bool | Mount read only
+  #         * `mount_path`: String
+  #         * `container_service`: Object
+  #             * `id`: Integer
+  #             * `csrn`: String
+  #             * `name`: String
+  #             * `label`: String
+  #     * `template`: Object
+  #         * `id`: Integer
+  #         * `csrn`: String
+  #         * `container_image`: Object
+  #             * `id`: Integer
+  #             * `csrn`: String
+  #             * `label`: String
+  #
   def show; end
 
   private

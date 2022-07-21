@@ -155,6 +155,10 @@ module Containers
               param = {'type' => "raw", 'value' => dep_host_ip}
             when "project_id"
               param = {'type' => 'raw', 'value' => dep_service&.deployment&.id}
+            when "default_domain"
+              param = {'type' => 'raw', 'value' => dep_service.default_domain}
+            when "default_domain_with_proto"
+              param = {'type' => 'raw', 'value' => "https://#{dep_service.default_domain}"}
             end # END var[3]
           end # END var[2]
         end # END var[2] == parameters

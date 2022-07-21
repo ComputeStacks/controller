@@ -92,6 +92,7 @@ class Deployment::ContainerService < ApplicationRecord
   include Auditable
   include Authorization::ContainerService
   include ContainerServices::CalicoServicePolicy
+  include ContainerServices::CleanupNetPolicy
   include ContainerServices::NodeSelector
   include ContainerServices::ServiceConfig
   include ContainerServices::ServiceIngress
@@ -136,8 +137,16 @@ class Deployment::ContainerService < ApplicationRecord
        foreign_key: 'container_service_id',
        dependent:   :destroy
 
+  has_many :host_entries,
+           class_name: 'ContainerService::HostEntry',
+           foreign_key: 'container_service_id',
+           dependent: :destroy
+
   has_many :volume_maps
   has_many :volumes, through: :volume_maps
+
+  has_many :owned_volume_maps, -> { where is_owner: true }, class_name: 'VolumeMap', foreign_key: 'container_service_id'
+  has_many :owned_volumes, through: :owned_volume_maps, source: :volume
 
   has_many :secrets, -> { where(rel_model: 'Deployment::ContainerService') }, foreign_key: 'rel_id', dependent: :destroy
 
@@ -299,7 +308,7 @@ class Deployment::ContainerService < ApplicationRecord
   private
 
   def flag_volumes
-    volumes.each do |i|
+    owned_volumes.each do |i|
       i.to_trash = true
       i.trashed_by = current_audit if current_audit
       unless i.save

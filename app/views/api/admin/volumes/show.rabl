@@ -1,6 +1,3 @@
 object @volume
-extends 'api/volumes/vol'
+extends 'api/admin/volumes/vol'
 
-child :user do
-  extends 'api/admin/users/short'
-end

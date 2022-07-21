@@ -80,13 +80,15 @@ module ProvisionServices
         containers: [],
         subscriptions: [],
         load_balancers: [],
-        volumes: []
+        volumes: [],
+        volume_map: [] # [ { template: csrn, volume: csrn } ]
       }
       self.result = {
         containers: [],
         subscriptions: [],
         load_balancers: [],
-        volumes: []
+        volumes: [],
+        volume_map: [] # [ { template: csrn, volume: csrn } ]
       }
       # data = {
       #   qty: Integer,
@@ -272,7 +274,7 @@ module ProvisionServices
         # Sanity check -- we're not going to mount multiple volumes into the same path.
         next if container_service.volume_maps.where(mount_path: vol.mount_path).exists?
 
-        existing_volume = nil
+        existing_volume = nil # Volume
         project.volumes.where.not(template: nil).each do |i|
           if i.template.csrn == vol.csrn
             existing_volume = i
@@ -291,7 +293,34 @@ module ProvisionServices
         custom_vol_req = data[:volume_config].select { |i| i[:csrn] == vol.csrn }[0]
 
         if custom_vol_req
-          existing_volume = Csrn.locate(custom_vol_req[:source]) unless custom_vol_req[:source].blank?
+          unless custom_vol_req[:source].blank?
+            existing_volume = Csrn.locate(custom_vol_req[:source])
+
+            # Locate volume in provisioned volumes
+            if existing_volume.is_a?(ContainerImage::VolumeParam)
+              mapped_vol = provision_state[:volume_map].select { |i| i[:template] == existing_volume.csrn }[0]
+              if mapped_vol
+                existing_volume = Csrn.locate mapped_vol[:volume]
+              end
+            end
+
+            # Locate volume in project
+            if existing_volume.is_a?(ContainerImage::VolumeParam) && project
+              project.volumes.each do |pvol|
+                if pvol.template&.csrn == existing_volume.csrn
+                  existing_volume = pvol
+                  break
+                end
+              end
+            end
+
+            # If we still didn't find it, error out.
+            if existing_volume.is_a?(ContainerImage::VolumeParam)
+              errors << "Failed to locate requested volume: #{custom_vol_req[:source]} for #{container_service.container_image.label}"
+              return false
+            end
+
+          end
           vol_action = custom_vol_req[:action] unless custom_vol_req[:action].blank?
           unless custom_vol_req[:mount_ro].blank?
             mount_ro = ActiveRecord::Type::Boolean.new.cast(custom_vol_req[:mount_ro])
@@ -347,6 +376,7 @@ module ProvisionServices
             return false
           end
           result[:volumes] << new_vol
+          result[:volume_map] << { template: new_vol.template.csrn, volume: new_vol.csrn }
           primary_mount = true
           provision_volume_job = VolumeServices::ProvisionVolumeService.new(new_vol, event)
 
@@ -380,6 +410,10 @@ module ProvisionServices
         end
 
       end
+    rescue => e
+      ExceptionAlertService.new(e, '38e27fb46115333a').perform
+      errors << "Fatal error provisioning volumes: #{e.message}"
+      false
     end
 
     def rollback!

@@ -16,6 +16,7 @@ Rails.application.routes.draw do
     resources :container_images do
       scope module: 'container_images' do
         resources :collaborators,
+                  :custom_host_entries,
                   :env_params,
                   :image_relationships,
                   :ingress_params,
@@ -30,6 +31,7 @@ Rails.application.routes.draw do
                   :containers,
                   :events,
                   :ingress_rules,
+                  :host_entries,
                   :load_balancers,
                   :logs,
                   :metadata,

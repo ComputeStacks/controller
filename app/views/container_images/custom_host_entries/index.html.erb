@@ -1,0 +1,28 @@
+<% content_for :title, "Custom Host Entries" %>
+
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb pull-left">
+      <li><%= link_to t('deployments.shared.main_nav.images'), "/container_images" %></li>
+      <li><%= link_to @image.label, "/container_images/#{@image.id}" %></li>
+      <li class="active">Custom Host Entries</li>
+    </ol>
+    <ol class="breadcrumb breadcrumb-action text-right">
+      <li><%= link_to raw("<i class='fa fa-cubes'></i>&nbsp;&nbsp;&nbsp;Add Host Entry"), "/container_images/#{@image.id}/custom_host_entries/new", class: 'btn btn-sm btn-default' %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <h5>Host Entries</h5>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <div class="panel panel-default">
+      <%= render partial: "container_images/custom_host_entries/list", locals: { entries: @entries, image: @image } %>
+    </div>
+  </div>
+</div>

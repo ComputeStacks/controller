@@ -60,7 +60,7 @@
       <div role="tabpanel" class="tab-pane" id="domains">
         <div class="row">
           <div class="col-md-12 text-right" style="margin-bottom:15px;">
-            <%= link_to "New Domain", "#{admin_deployments_path(@deployment)}/domains/new", class: 'btn btn-success btn-sm' %>
+            <%= link_to "New Domain", admin_new_container_domain_path(@deployment), class: 'btn btn-success btn-sm' %>
           </div>
         </div>
         <div class="row">

@@ -1,5 +1,7 @@
-collection @volumes
-attributes :id, :label, :created_at, :updated_at
-child :user do
-  extends 'api/admin/users/short'
+object false
+
+node :volumes do
+  @volumes.map do |i|
+    partial "api/admin/volumes/vol", object: i
+  end
 end

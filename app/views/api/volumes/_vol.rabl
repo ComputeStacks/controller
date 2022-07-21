@@ -6,7 +6,7 @@ attributes :id, :csrn, :name, :label, :user_id,
            :borg_pre_backup, :borg_post_backup, :borg_pre_restore, :borg_post_restore,
            :borg_rollback, :created_at, :updated_at
 
-child :volume_maps do
+child :volume_maps, object_root: false do
   attributes :id, :mount_ro, :mount_path
   child :container_service do
     attributes :id, :csrn, :name, :label

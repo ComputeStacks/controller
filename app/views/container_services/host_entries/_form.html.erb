@@ -1,0 +1,32 @@
+<div class="panel-body">
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <%= f.label :hostname, "Hostname" %>
+        <%= f.text_field :hostname, class: 'form-control', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="<%= @has_template ? 'col-sm-8 col-xs-12' : 'col-xs-12' %>">
+      <div class="form-group">
+        <%= f.label :ipaddr, "IP Address" %>
+        <%= f.text_field :ipaddr, class: 'form-control' %>
+      </div>
+    </div>
+    <% if @has_template %>
+    <div class="col-sm-4 col-xs-12">
+      <div class="form-group">
+        <%= f.label :keep_updated, "Keep Updated?" %>
+        <%= f.check_box :keep_updated, class: 'form-control' %>
+        <span class="help-block">
+          Keep IP updated with image <%= link_to @entry.template.container_image.label, "/container_images/#{@entry.template.container_image.id}" %>?
+        </span>
+      </div>
+    </div>
+    <% end %>
+  </div>
+
+</div>

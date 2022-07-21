@@ -4,6 +4,7 @@ module Orders
 
     included do
       scope :pending, -> { where( Arel.sql( %Q(status IN ('#{pending_statuses.join("','")}')) )) }
+      scope :pending_projects, -> { where Arel.sql(%Q(deployment_id IS NULL AND status IN ('#{(pending_statuses + ['processing']).join("','")}'))) }
     end
 
     class_methods do

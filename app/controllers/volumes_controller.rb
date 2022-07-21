@@ -43,7 +43,7 @@ class VolumesController < AuthController
       :borg_freq, :borg_strategy, :borg_backup_error, :borg_restore_error,
       :borg_keep_hourly, :borg_keep_daily, :borg_keep_weekly, :borg_keep_monthly,
       :borg_pre_backup, :borg_post_backup, :borg_pre_restore, :borg_post_restore,
-      :borg_rollback, :borg_enabled, :label, :to_trash
+      :borg_rollback, :borg_enabled, :label, :to_trash, :borg_keep_annually
     )
   end
 

@@ -60,7 +60,7 @@ class Admin::ContainerImages::VolumeParamsController < Admin::ApplicationControl
 
   def volume_params
     params.require(:container_image_volume_param).permit(
-      :mount_path, :label, :enable_sftp, :borg_enabled, :borg_freq, :borg_strategy,
+      :mount_path, :label, :enable_sftp, :borg_enabled, :borg_freq, :borg_strategy, :borg_keep_annually,
       :borg_keep_hourly, :borg_keep_daily, :borg_keep_weekly, :borg_keep_monthly, :borg_backup_error,
       :borg_restore_error, borg_pre_backup: [], borg_post_backup: [], borg_pre_restore: [],
       borg_post_restore: [], borg_rollback: []

@@ -26,7 +26,10 @@ module ContainerImages
     end
 
     def ingress_param_load_balancer(ingress)
-      return 'Global' if ingress.external_access && ingress.load_balancer_rule.nil?
+      if ingress.external_access && ingress.load_balancer_rule.nil?
+        return 'Global' if ingress.proto == 'http'
+        return ingress.tcp_lb ? 'Global' : 'None'
+      end
       if ingress.external_access && ingress.internal_load_balancer
         return link_to(ingress.internal_load_balancer.label, container_image_path(ingress.internal_load_balancer))
       end

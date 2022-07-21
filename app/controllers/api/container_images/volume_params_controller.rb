@@ -29,6 +29,8 @@ class Api::ContainerImages::VolumeParamsController < Api::ContainerImages::BaseC
   #     * `borg_pre_restore`: `Array<String>`
   #     * `borg_post_restore`: `Array<String>`
   #     * `borg_rollback`: `Array<String>`
+  #     * `mount_ro`: Bool
+  #     * `source_volume_id`: Integer | VolumeParam, not Volume.
   #     * `updated_at`: DateTime
   #     * `created_at`: DateTime
   #
@@ -61,6 +63,8 @@ class Api::ContainerImages::VolumeParamsController < Api::ContainerImages::BaseC
   #     * `borg_pre_restore`: `Array<String>`
   #     * `borg_post_restore`: `Array<String>`
   #     * `borg_rollback`: `Array<String>`
+  #     * `mount_ro`: Bool
+  #     * `source_volume_id`: Integer | VolumeParam, not Volume.
   #     * `updated_at`: DateTime
   #     * `created_at`: DateTime
   #
@@ -90,6 +94,8 @@ class Api::ContainerImages::VolumeParamsController < Api::ContainerImages::BaseC
   #     * `borg_pre_restore`: `Array<String>`
   #     * `borg_post_restore`: `Array<String>`
   #     * `borg_rollback`: `Array<String>`
+  #     * `mount_ro`: Bool
+  #     * `source_volume_id`: Integer | VolumeParam, not Volume.
   #
   def update
     if @volume.update(volume_params)
@@ -125,6 +131,8 @@ class Api::ContainerImages::VolumeParamsController < Api::ContainerImages::BaseC
   #     * `borg_pre_restore`: `Array<String>`
   #     * `borg_post_restore`: `Array<String>`
   #     * `borg_rollback`: `Array<String>`
+  #     * `mount_ro`: Bool
+  #     * `source_volume_id`: Integer | VolumeParam, not Volume.
   #
   def create
     @volume = @image.volumes.new(volume_params)
@@ -159,6 +167,7 @@ class Api::ContainerImages::VolumeParamsController < Api::ContainerImages::BaseC
   def volume_params
     params.require(:volume_param).permit(
                                                    :mount_path, :enable_sftp, :label, :borg_enabled, :borg_freq, :borg_strategy,
+                                                   :source_volume_id, :mount_ro, :borg_keep_annually,
                                                    :borg_keep_hourly, :borg_keep_weekly, :borg_keep_monthly, :borg_backup_error,
                                                    :borg_restore_error, borg_pre_backup: [], borg_post_backup: [], borg_pre_restore: [],
                                                    borg_post_restore: [], borg_rollback: []

@@ -1,0 +1,21 @@
+<div class="panel-body">
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <%= f.label :hostname, "Hostname" %>
+        <%= f.text_field :hostname, class: 'form-control', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label>Source Image</label>
+        <%= f.select :source_image_id, options_from_collection_for_select(@image.dependencies, :id, :label, @entry.source_image&.id), {}, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+</div>

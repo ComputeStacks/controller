@@ -6,7 +6,7 @@ module Containers
     def billing_volume_usage
       total_containers = service.containers.count.to_f
       total_containers = total_containers.zero? ? 1 : total_containers
-      service.volumes.sum(:usage) / total_containers
+      service.owned_volumes.sum(:usage) / total_containers
     end
 
     def billing_local_disk_usage

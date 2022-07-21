@@ -31,7 +31,7 @@ module ContainerServices
       container.set_inactive!
       if container.is_a?(Deployment::Sftp)
         container.update to_trash: true
-        sftp_port_clean
+        clean_ingress_rules
       end
       trash_container
     rescue => e
@@ -88,9 +88,10 @@ module ContainerServices
       end
     end
 
-    def sftp_port_clean
+    def clean_ingress_rules
       container.ingress_rules.each do |i|
-        i.toggle_nat! unless i.public_port.zero? # Ensure we free up the port
+        i.skip_policy_updates = true
+        i.destroy
       end
     end
 

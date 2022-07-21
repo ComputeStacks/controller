@@ -17,7 +17,7 @@ module Projects
     end
 
     def working?
-      event_logs.active.exists?
+      event_logs.running.exists?
     end
 
     def has_active_alerts?

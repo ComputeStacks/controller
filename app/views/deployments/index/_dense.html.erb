@@ -1,12 +1,12 @@
 <% @pending_orders.each do |i| %>
-  <% next if i.order_data.dig('deployment','name').nil? %>
+  <% next if i.order_data.dig('project','name').nil? %>
   <div class="row">
     <div class="col-md-12">
       <div class="panel panel-default">
         <div class="panel-heading" style="padding:1px;"></div>
         <div class="panel-body" style="cursor: pointer;" onclick='window.location="/orders/<%= i.id %>";'>
           <span style="cursor: pointer;padding-right:10px;" onclick='window.location="/orders/<%= i.id %>";'>
-            <strong><%= i.order_data['deployment']['name'] %></strong>
+            <strong><%= i.order_data['project']['name'] %></strong>
           </span>
           <span>
             <%= t 'deployments.index.deployment_list.deployments.pending_order' %>

@@ -106,7 +106,7 @@ module ContainerImageHelper
   def image_table_buttons(image)
     btns = [
       link_to("<i class='fa fa-clone'></i> #{t('container_images.clone')}".html_safe, "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/new?container_image[parent_image_id]=#{image.id}", class: 'btn btn-sm btn-default'),
-      link_to(tag.i(nil, class: 'fa fa-wrench'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{image.id}/edit", class: 'btn btn-sm btn-warning')
+      link_to(tag.i(nil, class: 'fa fa-cogs'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{image.id}", class: 'btn btn-sm btn-default')
     ]
     if image.can_administer?(current_user)
       btns << link_to(tag.i(nil, class: 'fa fa-trash'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{image.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger')
