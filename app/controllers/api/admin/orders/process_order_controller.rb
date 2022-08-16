@@ -13,7 +13,7 @@ class Api::Admin::Orders::ProcessOrderController < Api::Admin::ApplicationContro
       ip_addr: request.remote_ip,
       event: 'updated'
     )
-    ProcessOrderWorker.perform_async @order.to_global_id.uri, @audit.to_global_id.uri
+    ProcessOrderWorker.perform_async @order.to_global_id.to_s, @audit.to_global_id.to_s
     respond_to do |f|
       f.json { render json: {}, status: :accepted }
       f.xml { render xml: {}, status: :accepted }

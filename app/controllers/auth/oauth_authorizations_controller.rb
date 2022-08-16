@@ -25,7 +25,7 @@ class Auth::OauthAuthorizationsController < Doorkeeper::AuthorizationsController
           status: auth.status
         )
       else
-        redirect_to redirect_path
+        redirect_to redirect_path, allow_other_host: true
       end
     else
       render json: auth.body, status: auth.status

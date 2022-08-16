@@ -10,18 +10,20 @@ module DeployServices
 
     attr_accessor :project,
                   :event,
+                  :volume_clones,
                   :errors
 
     def initialize(project, event)
       self.project = project
       self.event = event
+      self.volume_clones = []
       self.errors = []
     end
 
     def perform
 
       # Apply Project Service Policy
-      NetworkWorkers::ProjectPolicyWorker.perform_async project.to_global_id.uri
+      NetworkWorkers::ProjectPolicyWorker.perform_async project.to_global_id.to_s
 
       # Collect all the services that we need to deploy
       services = []
@@ -66,6 +68,35 @@ module DeployServices
       end
 
       ProjectServices::StoreMetadata.new(project).perform
+
+      # Clone Volumes
+      volume_clones.each do |i|
+        v = Volume.find_by(id: i[:vol_id])
+        if v.nil?
+          errors << "Volume #{i[:vol_id]} not found, unable to restore."
+          next
+        end
+        cv = VolumeServices::CloneVolumeService.new(v, event)
+        if i[:source_vol_id]
+          sv = Volume.find_by id: i[:source_vol_id]
+          if sv.nil?
+            errors << "Source Volume #{i[:source_vol_id]} not found, unable to restore."
+            next
+          end
+          cv.source_volume = sv
+        else
+          errors << "Missing source volume, unable to restore: #{i}"
+          next
+        end
+        cv.source_snapshot = i[:source_snap] if i[:source_snap]
+        unless cv.perform
+          if cv.errors.empty?
+            errors << "Fatal error restoring volume #{i[:vol_id]}"
+          else
+            errors + cv.errors
+          end
+        end
+      end
 
       errors.empty?
     end

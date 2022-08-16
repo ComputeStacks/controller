@@ -123,30 +123,30 @@ class PowerCycleContainerService
     if delay.nil?
       case action
       when 'build'
-        ContainerWorkers::ProvisionWorker.perform_async container.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::ProvisionWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s
       when 'rebuild'
-        ContainerWorkers::RebuildWorker.perform_async container.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::RebuildWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s
       when 'restart'
-        ContainerWorkers::RestartWorker.perform_async container.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::RestartWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s
       when 'start'
-        ContainerWorkers::StartWorker.perform_async container.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::StartWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s
       when 'stop'
-        ContainerWorkers::StopWorker.perform_async container.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::StopWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s
       else
         return false
       end
     else
       case action
       when 'build'
-        ContainerWorkers::ProvisionWorker.perform_in delay, container.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::ProvisionWorker.perform_in delay, container.to_global_id.to_s, event.to_global_id.to_s
       when 'rebuild'
-        ContainerWorkers::RebuildWorker.perform_in delay, container.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::RebuildWorker.perform_in delay, container.to_global_id.to_s, event.to_global_id.to_s
       when 'restart'
-        ContainerWorkers::RestartWorker.perform_in delay, container.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::RestartWorker.perform_in delay, container.to_global_id.to_s, event.to_global_id.to_s
       when 'start'
-        ContainerWorkers::StartWorker.perform_in delay, container.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::StartWorker.perform_in delay, container.to_global_id.to_s, event.to_global_id.to_s
       when 'stop'
-        ContainerWorkers::StopWorker.perform_in delay, container.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::StopWorker.perform_in delay, container.to_global_id.to_s, event.to_global_id.to_s
       else
         return false
       end

@@ -76,3 +76,5 @@ yarn-debug.log*
 rgloader
 lib/dev/bin/
 lib/dev/keys/
+plugins/
+.yarn/

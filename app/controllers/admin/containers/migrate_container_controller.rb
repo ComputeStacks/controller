@@ -16,7 +16,7 @@ class Admin::Containers::MigrateContainerController < Admin::Containers::BaseCon
     event.containers << @container
     event.deployments << @container.deployment
     event.container_services << @container.service
-    ContainerWorkers::MigrateContainerWorker.perform_async @container.to_global_id.uri, event.to_global_id.uri
+    ContainerWorkers::MigrateContainerWorker.perform_async @container.to_global_id.to_s, event.to_global_id.to_s
     redirect_to "/admin/containers/#{@container.id}", notice: I18n.t('containers.high_availability.migration.success')
   end
 

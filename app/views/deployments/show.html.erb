@@ -21,10 +21,12 @@
   <div class="col-xs-6">
     <h4>
       <%= truncate @deployment.name, length: 75 %>
-      <% if @deployment.has_clustered_storage? %>
-        <span style="font-size:12px;vertical-align:text-top;">
-          &nbsp;&nbsp;<%= deployment_ha_label @deployment %>
-        </span>
+      <% if @deployment.region&.has_clustered_storage? %>
+        <% if @deployment.has_clustered_storage? %>
+          <span style="font-size:12px;vertical-align:text-top;">
+            &nbsp;&nbsp;<%= deployment_ha_label @deployment %>
+          </span>
+        <% end %>
       <% end %>
       <% unless @deployment.is_resource_owner?(current_user) %>
         <span style="font-size:12px;vertical-align:text-top;">

@@ -12,6 +12,7 @@ module Projects
       return 'deleting' if trashed? || deleting?
       return 'working' if working?
       return 'alert' if has_failed_jobs? # TODO: Ignore failed backup jobs if container is not running
+      return 'alert' if provisioning_failed?
       return 'warning' if has_active_alerts?
       'ok'
     end
@@ -39,6 +40,12 @@ module Projects
 
     def mark_trashed!
       update status: 'deleting'
+    end
+
+    # Track the most recent provisioning attempt.
+    def provisioning_failed?
+      return false unless event_logs.where(locale: 'order.provision').exists?
+      event_logs.where(locale: 'order.provision').order(created_at: :desc).first.failed?
     end
 
     # Most recent event failed

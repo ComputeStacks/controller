@@ -64,10 +64,24 @@ class OrderSession
   # Add a given image, and all dependencies
   #
   # @param [ContainerImage] image
-  # @param [Array] volume_overrides Pass volumes we expect to be cloned in this image
-  def add_image(image, volume_overrides = [])
+  # @param [Hash] opts
+  #     {
+  #       volume_overrides: [],
+  #       source: ""
+  #      }
+  def add_image(image, opts = {})
     return if image_selected?(image.id)
-    to_add = [ image ]
+    opts = opts.with_indifferent_access
+    volume_overrides = opts[:volume_overrides] ? opts[:volume_overrides] : []
+    # Container Source
+    source_csrn = opts[:source]
+    source_service = source_csrn.blank? ? nil : Csrn.locate(opts[:source])
+    source = if source_service && source_service.is_a?(Deployment::ContainerService)
+               source_service.can_view?(user) ? source_service : nil
+             else
+               nil
+             end
+    to_add = [image]
     image.dependencies.each do |i|
       next if image_selected?(i.id)
       unless new_project?
@@ -79,13 +93,20 @@ class OrderSession
       end
       to_add << i unless to_add.include?(i)
     end unless skip_dep
+    source_settings = {}
+    if source
+      source.setting_params.each do |ii|
+        source_settings[ii.name] = ii.decrypted_value
+      end
+    end
     to_add.each do |i|
       settings = {}
-      i.setting_params.where(param_type: 'static').each do |ii|
+      i.setting_params.each do |ii|
+        next if ii.param_type == 'password' && source.nil?
         settings[ii.name] = {
           type: ii.param_type,
           default_value: ii.value,
-          value: nil,
+          value: source_settings[ii.name],
           label: ii.label
         }
       end
@@ -115,6 +136,7 @@ class OrderSession
       images << {
         label: "",
         container_id: i.id,
+        source: source ? source_csrn : nil,
         container_name: i.label,
         params: settings,
         volumes: vols,
@@ -195,14 +217,14 @@ class OrderSession
     order_data[:project_id] = project.id if project&.id
 
     images.each do |image|
-      qty = image[:qty].to_i
       c = {
         image_id: image[:container_id].to_i,
-        qty: qty.zero? ? 1 : qty,
+        source: image[:source], # Deployment::ContainerService.csrn
         params: [],
         volumes: image[:volumes],
         resources: {}
       }
+      c[:qty] = image[:qty].to_i.zero? ? 1 : image[:qty].to_i
       c[:resources][:product_id] = image[:package_id] if image[:package_id]
       c[:resources][:cpu] = image[:cpu] if image[:cpu]
       c[:resources][:memory] = image[:mem] if image[:mem]
@@ -210,7 +232,8 @@ class OrderSession
       image[:params].each do |k, v|
         c[:params] << {
           key: k,
-          value: v[:value]
+          value: v[:value],
+          type: v[:type]
         }
       end
 
@@ -276,7 +299,7 @@ class OrderSession
         image_count = d[:images] ? (d[:images].count + 1) : 2 # add 1 additional for the SFTP container
 
         self.region = location.next_region requested_packages, user, image_count
-      elsif region_validate && ( region_validate.location == location )
+      elsif region_validate && (region_validate.location == location)
         self.region = region_validate
       end
     end
@@ -294,14 +317,14 @@ class OrderSession
   # Ensure the data we are getting from the cache is valid
   def valid_cache_hash?(data)
     return false unless (
-    [
-      :id,
-      :user_id,
-      :order_id,
-      :project,
-      :images,
-      :location_id
-    ] - data.keys).empty?
+      [
+        :id,
+        :user_id,
+        :order_id,
+        :project,
+        :images,
+        :location_id
+      ] - data.keys).empty?
 
     return false unless ([:id, :name] - data[:project].keys).empty?
     return false if data[:user_id].blank? # We require this!
@@ -309,7 +332,7 @@ class OrderSession
   end
 
   def default_project_name
-    "#{NamesGenerator.name("").gsub("-"," ").gsub(/[A-Za-z']+/,&:capitalize)} (#{Date.today.strftime("%Y%m%d")})"
+    "#{NamesGenerator.name("").gsub("-", " ").gsub(/[A-Za-z']+/, &:capitalize)} (#{Date.today.strftime("%Y%m%d")})"
   end
 
 end

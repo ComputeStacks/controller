@@ -80,8 +80,13 @@ module ContainerServices
         when 'static'
           sp.value = additional_params.dig(sp.name, 'value') ? additional_params[sp.name]['value'] : i.value
         when 'password'
-          pw = SecureRandom.urlsafe_base64(10).gsub("_", "").gsub("-", "")
-          pw = pw + SecureRandom.random_number(100).to_s if pw.scan(/\d+/).first.nil?
+          pw = nil
+          if additional_params.dig(sp.name, 'value')
+            pw = additional_params[sp.name]['value']
+          else
+            pw = SecureRandom.urlsafe_base64(10).gsub("_", "").gsub("-", "")
+            pw = pw + SecureRandom.random_number(100).to_s if pw.scan(/\d+/).first.nil?
+          end
           sp.value = Secret.encrypt!(pw)
         else
           event.event_details.create!(
@@ -137,6 +142,43 @@ module ContainerServices
       ExceptionAlertService.new(e, '6423245e9105c964').perform
       if event
         event.event_details.create!(data: "Error building environment config for service: #{name}\n\n #{e.message}", event_code: '6423245e9105c964')
+        event.container_services << self unless event.container_services.include?(self)
+        event.deployments << deployment if deployment && !event.deployments.include?(deployment)
+      end
+      false
+    end
+
+    ##
+    # Generate static environmental parameters from a source service
+    #
+    # @param [Deployment::ContainerService] source
+    # @param [EventLog] event
+    def gen_cloned_config!(source, event)
+      success = true
+      source.env_params.where(param_type: 'static').each do |i|
+        ep = env_params.new(
+          name: i.name,
+          label: i.label,
+          param_type: i.param_type,
+          value: i.value,
+          parent_param: i.parent_param,
+          skip_metadata_refresh: true
+        )
+        unless ep.save
+          event.event_details.create!(
+            data: "Failed to generate cloned environmental config for service: #{i.name}: #{ep.errors.full_messages.join(' ')}",
+            event_code: '1be81a3f6c609cbd'
+          )
+          event.container_services << self unless event.container_services.include?(self)
+          event.deployments << deployment if deployment && !event.deployments.include?(deployment)
+          success = false
+        end
+      end
+      success
+    rescue => e
+      ExceptionAlertService.new(e, '74a0bde929159a9c').perform
+      if event
+        event.event_details.create!(data: "Error building cloned environment config for service: #{name}\n\n #{e.message}", event_code: '74a0bde929159a9c')
         event.container_services << self unless event.container_services.include?(self)
         event.deployments << deployment if deployment && !event.deployments.include?(deployment)
       end

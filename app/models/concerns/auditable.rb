@@ -51,12 +51,16 @@ module Auditable
   end
 
   def log_destroy_event
+    rd = self.serializable_hash
+    unless rd.dig('tag_list').nil?
+      rd['tag_list'] = rd['tag_list'].to_a
+    end
     self.current_audit = Audit.create!(
       user: current_user,
       ip_addr: current_user.last_request_ip,
       event: 'deleted',
       rel_model: self.class.name,
-      raw_data: self.serializable_hash
+      raw_data: rd
     ) if current_user && !current_audit
   end
 

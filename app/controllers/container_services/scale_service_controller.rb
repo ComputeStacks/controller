@@ -14,7 +14,7 @@ class ContainerServices::ScaleServiceController < ContainerServices::BaseControl
         event_code: '16fb2bd5a38082ee'
     )
     event.deployments << @service.deployment if @service.deployment
-    ContainerServiceWorkers::ScaleServiceWorker.perform_async @service.to_global_id.uri, event.to_global_id.uri
+    ContainerServiceWorkers::ScaleServiceWorker.perform_async @service.to_global_id.to_s, event.to_global_id.to_s
     redirect_to container_service_path(@service), notice: I18n.t('crud.queued_plural', resource: I18n.t('obj.containers'))
   end
 

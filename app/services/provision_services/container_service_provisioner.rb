@@ -50,6 +50,7 @@ module ProvisionServices
                   :subscription,
                   :qty,
                   :node,
+                  :source, # source container service
                   :errors,
                   :volume_maps,
                   ##
@@ -75,20 +76,23 @@ module ProvisionServices
       self.subscription = nil
       self.event = event
       self.node = nil
+      self.source = nil
       self.volume_maps = {}
       self.provision_state = {
         containers: [],
         subscriptions: [],
         load_balancers: [],
         volumes: [],
-        volume_map: [] # [ { template: csrn, volume: csrn } ]
+        volume_map: [], # [ { template: csrn, volume: csrn } ]
+        volume_clones: [] # [ { vol_id: int, source_vol_id: int, source_snap: string } ]
       }
       self.result = {
         containers: [],
         subscriptions: [],
         load_balancers: [],
         volumes: [],
-        volume_map: [] # [ { template: csrn, volume: csrn } ]
+        volume_map: [], # [ { template: csrn, volume: csrn } ]
+        volume_clones: [] # [ { vol_id: int, source_vol_id: int, source_snap: string } ]
       }
       # data = {
       #   qty: Integer,
@@ -117,7 +121,6 @@ module ProvisionServices
       return rollback! unless valid?
       return rollback! unless init_subscription?
       return rollback! unless init_service!
-      # map_volumes if volume_maps.empty?
       return rollback! unless select_node!
       return rollback! unless init_private_lbs!
       return rollback! unless setup_service_config!
@@ -170,6 +173,12 @@ module ProvisionServices
         errors << "failed to generate ingress rules"
         return false
       end
+      if source
+        unless container_service.gen_cloned_config!(source, event)
+          errors << "failed to generate cloned env configuration for #{source.csrn}"
+          return false
+        end
+      end
       true
     end
 
@@ -179,28 +188,6 @@ module ProvisionServices
       NetworkWorkers::ServicePolicyWorker.perform_async container_service.id
       true
     end
-
-    # Pre-determine which volumes will be mounted, and identify which
-    # node they reside on.
-    # def map_volumes
-    #   skip_volumes = data[:volume_config].filter_map {|i| i[:csrn] if i[:action] == "skip" }
-    #   req_volume_templates = container_service.container_image.volumes.filter_map { |i| i.csrn unless skip_volumes.include?(i.csrn) }
-    #   v = {}
-    #   created_volumes = provision_state[:volumes].filter_map { |i| i.template.csrn if i.template }
-    #
-    #   # We need to have a hash of template csrn's to created volumes
-    #   volume_resources = {}
-    #   provision_state[:volumes].each do |i|
-    #     next unless i.template
-    #     volume_resources[i.template.csrn] = i
-    #   end
-    #
-    #   # Volumes that we need and have been created
-    #   (req_volume_templates & created_volumes).each do |i|
-    #     v[i] = volume_resources[i]
-    #   end
-    #
-    # end
 
     # Select the node this service will use
     #
@@ -386,8 +373,11 @@ module ProvisionServices
           ) unless Rails.env.production?
 
           if vol_action == 'clone' # Regardless of state, pass if cloning.
-            provision_volume_job.source_volume = existing_volume
-            provision_volume_job.source_snapshot = source_snapshot
+            result[:volume_clones] << {
+              vol_id: new_vol.id,
+              source_vol_id: existing_volume&.id,
+              source_snap: source_snapshot.blank? ? nil : source_snapshot
+            }
           end
         end
 
@@ -466,6 +456,19 @@ module ProvisionServices
       unless image.can_view? user
         errors << "Invalid image: #{data[:image_id]}"
         return false
+      end
+      unless data[:source_csrn].blank?
+        s = Csrn.locate data[:source_csrn]
+        if s && s.is_a?(Deployment::ContainerService)
+          if s.can_view?(user)
+            self.source = s
+          else
+            errors << "User does not have permission to clone #{data[:source_csrn]}"
+          end
+        else
+          errors << "Invalid source service #{data[:source_csrn]}"
+          return false
+        end
       end
       true
     end

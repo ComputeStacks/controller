@@ -162,7 +162,6 @@ module Volumes
     # Determine which node should initiate backups
     def consul_select_node
       if container_service.nil? || containers.empty?
-        return "" unless borg_strategy == 'file' # disable if agent is required
         return "" if nodes.online.empty?
         nodes.online.first.hostname
       else

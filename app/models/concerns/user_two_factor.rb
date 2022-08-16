@@ -3,7 +3,7 @@ module UserTwoFactor
   extend ActiveSupport::Concern
 
   def has_2fa?
-    !self.security_keys.empty? || self.authy_enabled || totp_enabled?
+    !self.security_keys.empty? || totp_enabled?
   end
 
   def require_2fa_auth?

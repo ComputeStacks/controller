@@ -123,6 +123,7 @@ class Deployments::OrdersController < AuthController
 
     @order_session.images.each do |i|
       i[:params].each_pair do |k,v|
+        next if v[:type] == 'password'
         el = order_params[:service][:"container-#{i[:container_id]}-param-#{k}"]
         v[:value] = el unless el.blank?
       end

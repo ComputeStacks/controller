@@ -226,10 +226,10 @@ class Network::IngressRule < ApplicationRecord
       NetworkWorkers::SftpPolicyWorker.perform_async(sftp_container.id) if sftp_container
     end
     if sftp_container
-      NodeWorkers::ReloadIptableWorker.perform_async sftp_container.node&.to_global_id.uri
+      NodeWorkers::ReloadIptableWorker.perform_async sftp_container.node&.to_global_id.to_s
     elsif container_service
       container_service.nodes.each do |n|
-        NodeWorkers::ReloadIptableWorker.perform_async n.to_global_id.uri
+        NodeWorkers::ReloadIptableWorker.perform_async n.to_global_id.to_s
       end
     end
   end

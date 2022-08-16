@@ -111,7 +111,10 @@ module Projects
         next if i.pw_auth == user.c_sftp_pass
         i.current_audit = current_audit
         i.pw_auth = user.c_sftp_pass
-        unless i.save
+        if i.save
+          # Ensure pass auth is updated.
+          SftpServices::MetadataSshHostKeys.new(i).perform
+        else
           errors.add(:base, "Error updating sftp container #{i.id}: #{i.errors.full_messages.join(', ')}")
           return rollback_new_owner!(sub_state)
         end

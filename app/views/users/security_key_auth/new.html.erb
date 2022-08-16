@@ -6,7 +6,6 @@
       <%= form_tag "/users/security_key_auth", method: :post, id: "securityGatewayAuthForm" do %>
         <div class="panel-body text-center">
           <input type="hidden" name="type" value="<%= @selected_auth %>">
-          <%= render partial: "users/security_key_auth/authy" if @selected_auth == "authy" %>
           <%= render partial: "users/security_key_auth/totp" if @selected_auth == "totp" %>
           <%= render partial: "users/security_key_auth/security_key" if @selected_auth == "webauthn" %>
         </div>

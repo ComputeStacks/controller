@@ -105,7 +105,7 @@ Deployment.all.each do |project|
   ProjectServices::StoreMetadata.new(project).perform
   ProjectServices::GenMetadataToken.new(project).perform
   ProjectServices::MetadataSshKeys.new(project).perform
-  NetworkWorkers::ProjectPolicyWorker.perform_async project.to_global_id.uri
+  NetworkWorkers::ProjectPolicyWorker.perform_async project.to_global_id.to_s
   project.services.each do |service|
     NetworkWorkers::ServicePolicyWorker.perform_async service.id
   end

@@ -159,7 +159,7 @@ Node < ApplicationRecord
     region.volumes.active.each do |vol|
       unless vol.nodes.include? self
         vol.nodes << self
-        VolumeWorkers::ProvisionVolumeWorker.perform_async vol.to_global_id.uri
+        VolumeWorkers::ProvisionVolumeWorker.perform_async vol.to_global_id.to_s
       end
     end
   end

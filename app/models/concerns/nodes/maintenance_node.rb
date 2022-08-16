@@ -48,7 +48,7 @@ module Nodes
         disconnected: true,
         disconnected_at: Time.now
       )
-      NodeWorkers::EvacuateNodeWorker.perform_async to_global_id.uri
+      NodeWorkers::EvacuateNodeWorker.perform_async to_global_id.to_s
     end
 
     def online!
@@ -58,11 +58,11 @@ module Nodes
         online_at: Time.now
       )
       toggle_evacuation! if under_evacuation?
-      NodeWorkers::HealthCheckWorker.perform_async to_global_id.uri
-      NodeWorkers::RecoverVolumeWorker.perform_in 5.minutes, to_global_id.uri
+      NodeWorkers::HealthCheckWorker.perform_async to_global_id.to_s
+      NodeWorkers::RecoverVolumeWorker.perform_in 5.minutes, to_global_id.to_s
       # Ensure node has most recent lb config
       if region.load_balancer
-        LoadBalancerWorkers::DeployConfigWorker.perform_async region.load_balancer.to_global_id.uri
+        LoadBalancerWorkers::DeployConfigWorker.perform_async region.load_balancer.to_global_id.to_s
       end
     end
 

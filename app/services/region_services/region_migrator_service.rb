@@ -146,7 +146,7 @@ module RegionServices
       container_names = []
       (region.containers + region.sftp_containers).each do |c|
         container_names << c.name unless container_names.include? c.name
-        ContainerWorkers::StopWorker.perform_async c.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::StopWorker.perform_async c.to_global_id.to_s, event.to_global_id.to_s
       end
       stop_detail = event.event_details.create!(
         data: "Attempting to stop containers: \n\n #{container_names.join("\n")}",
@@ -318,7 +318,7 @@ module RegionServices
         NetworkWorkers::ServicePolicyWorker.perform_async s.id
         sleep 1
         unless projects.include? s.deployment
-          NetworkWorkers::ProjectPolicyWorker.perform_async s.deployment.to_global_id.uri
+          NetworkWorkers::ProjectPolicyWorker.perform_async s.deployment.to_global_id.to_s
           projects << s.deployment
         end
         sleep 1
@@ -327,7 +327,7 @@ module RegionServices
       new_region.containers.each do |c|
         next if @skipped_services.include? c.service
         container_names << c.name unless container_names.include? c.name
-        ContainerWorkers::RebuildWorker.perform_async c.to_global_id.uri, event.to_global_id.uri
+        ContainerWorkers::RebuildWorker.perform_async c.to_global_id.to_s, event.to_global_id.to_s
         sleep 2
       end
       event.event_details.create!(
@@ -336,7 +336,7 @@ module RegionServices
       )
       # Trigger SFTP Generation
       projects.each do |p|
-        ProjectWorkers::SftpInitWorker.perform_in(5.minutes, p.to_global_id.uri, event.to_global_id.uri)
+        ProjectWorkers::SftpInitWorker.perform_in(5.minutes, p.to_global_id.to_s, event.to_global_id.to_s)
       end
       project_names = projects.map { |i| i.name }
       event.event_details.create!(

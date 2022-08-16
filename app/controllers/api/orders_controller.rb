@@ -60,6 +60,13 @@ class Api::OrdersController < Api::ApplicationController
   #     * `action: clone` -- Clone the source volume. This will take a snapshot, and restore that to the newly created volume.
   #     * `action: mount` -- This will mount the source volume, and you have the option to mount it in readonly mode. Note, that this option also has the effect of forcing this container to be provisioned on the same node as the source volume (unless using NFS-backed volume storage).
   #
+  # Cloning:
+  # There are three ways to clone a service. Full, just the volumes, or just the configuration.
+  #
+  # * Full Clone: Pass both the `source` csrn of the source container service in the containers array, as well as, the volume source in the volumes array. Be sure to also set the volume action to `clone`.
+  # * Data Only: If you just want the data, but wish to regenerate all environmental and setting parameters, omit the source csrn in the containers array and only pass the source csrn in the volumes array with the action set to `clone`.
+  # * Configuration Only: If you wish to clone the environmental and settings parameters for a service, add the source csrn to the containers array and omit the source csrn from the volumes array. Leave the action of the volume to the defaults.
+  #
   # * `order`: Object
   #     * `project_name`: String
   #     * `skip_ssh`: Boolean
@@ -67,6 +74,7 @@ class Api::OrdersController < Api::ApplicationController
   #     * `project_id`: Integer | Only if adding to existing project
   #     * `containers`: Array
   #         * `image_id`: Integer
+  #         * `source`: String | csrn of existing service
   #         * `domains`: Array<String> | provide an optional list of domains you want added after the order is provisioned.
   #         * `resources`: Object
   #             * `package_id`: Integer

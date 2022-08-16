@@ -41,33 +41,12 @@ class Users::SecurityKeyAuthController < ApplicationController
     case params[:t]
     when 'webauthn'
       @selected_auth = 'webauthn'
-    when 'authy'
-      @selected_auth = 'authy'
     when 'totp'
       @selected_auth = 'totp'
     end
     if @selected_auth.nil? # last = highest priority
-      @selected_auth = 'authy' if current_user.authy_enabled?
       @selected_auth = 'totp' if current_user.totp_enabled?
       @selected_auth = 'webauthn' if current_user.security_keys.exists?
-    end
-    if @selected_auth == 'authy' && !current_user.authy_enabled?
-      @selected_auth = nil
-      session.delete(:req_second_factor)
-      sign_out current_user
-      redirect_to "/login", alert: I18n.t('users.security_key_auth.controller.no_authy')
-      return false
-    elsif @selected_auth == 'authy'
-      if !Setting.authy || Setting.authy_api.to_s.blank?
-        if params[:t].nil? # If authy was not selected, then it's the only one so log them out.
-          session.delete(:req_second_factor)
-          sign_out current_user
-          redirect_to "/login", alert: I18n.t('users.security_key_auth.controller.authy_disabled')
-        else # Otherwise, redirect back to pick webauth
-          redirect_to "/users/security_key_auth/new"
-        end
-        return false
-      end
     end
     if @selected_auth.nil?
       session.delete(:req_second_factor)
@@ -78,11 +57,6 @@ class Users::SecurityKeyAuthController < ApplicationController
     @available_auths = []
     @available_auths << '<a href="?t=webauthn">Security Key</a>' if current_user.security_keys.exists? && @selected_auth != 'webauthn'
     @available_auths << '<a href="?t=totp">Authenticator App</a>' if current_user.totp_enabled? && @selected_auth != 'totp'
-    if current_user.authy_enabled? && @selected_auth != 'authy' && !current_user.is_support_admin?
-      if !Setting.authy || !Setting.authy_api.to_s.blank? # Make sure Authy is enabled.
-        @available_auths << '<a href="?t=authy">Authy</a>'
-      end
-    end
     if @selected_auth == 'webauthn'
       auth_challenge = WebAuthn::Credential.options_for_get(
         allow: current_user.security_keys.map { |i| Base64.strict_decode64(i.webauthn_id) }
@@ -129,15 +103,6 @@ class Users::SecurityKeyAuthController < ApplicationController
       rescue => e # We could also get `EncodingError`
         sign_out current_user
         redirect_to "/login", alert: "Error! #{e.message}"
-        return false
-      end
-    elsif params[:type] == 'authy'
-      Authy.api_key = Setting.authy_api
-      Authy.api_uri = "https://api.authy.com/"
-      response = Authy::API.verify(id: current_user.authy_id, token: params[:response])
-      unless response.ok?
-        current_user.increment :failed_attempts
-        redirect_to "/users/security_key_auth/new?t=authy", alert: I18n.t('users.security_key_auth.controller.invalid_token')
         return false
       end
     elsif params[:type] == 'totp'

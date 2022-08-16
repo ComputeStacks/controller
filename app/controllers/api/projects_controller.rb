@@ -93,7 +93,7 @@ class Api::ProjectsController < Api::ApplicationController
     )
     @deployment.mark_trashed!
     event.deployments << @deployment
-    ProjectWorkers::TrashProjectWorker.perform_async @deployment.to_global_id.uri, event.to_global_id.uri
+    ProjectWorkers::TrashProjectWorker.perform_async @deployment.to_global_id.to_s, event.to_global_id.to_s
     api_obj_destroyed
   rescue => e
     return api_fatal_error(e, '337f9ab41ca0a9a7')

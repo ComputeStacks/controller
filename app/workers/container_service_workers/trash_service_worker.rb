@@ -14,7 +14,7 @@ module ContainerServiceWorkers
       if ContainerServices::TrashService.new(service, event).perform
         # Trigger a re-sync of the SFTP containers
         # Event will be closed out by this job
-        ProjectWorkers::SftpInitWorker.perform_async project.to_global_id.uri, event_id
+        ProjectWorkers::SftpInitWorker.perform_async project.to_global_id.to_s, event_id
         ProjectServices::StoreMetadata.new(project).perform
       else
         event.fail! 'Error deleting service'

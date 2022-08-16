@@ -32,7 +32,7 @@ module ContainerServices::WordpressServices
         return []
       end
       c = %W(/usr/local/bin/wp user list --role=administrator --json --path=/var/www/html/wordpress --allow-root)
-      data = container.container_exec!(c, nil, 30)
+      data = container.container_exec!(c, nil, 15)
       Oj.load(data)
     rescue => e
       ExceptionAlertService.new(e, '3a77b977010bea95').perform

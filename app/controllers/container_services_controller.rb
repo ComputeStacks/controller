@@ -38,7 +38,7 @@ class ContainerServicesController < AuthController
     )
     event.deployments << @service.deployment
     event.container_services << @service
-    ContainerServiceWorkers::TrashServiceWorker.perform_async @service.to_global_id.uri, event.to_global_id.uri
+    ContainerServiceWorkers::TrashServiceWorker.perform_async @service.to_global_id.to_s, event.to_global_id.to_s
     redirect_to (@deployment ? "/deployments/#{@deployment.token}" : "/deployments" ), notice: "Service queued for destruction."
   end
 

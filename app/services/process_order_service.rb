@@ -25,7 +25,8 @@ class ProcessOrderService
       subscriptions: [],
       load_balancers: [],
       volumes: [],
-      volume_map: [] # [ { template: csrn, volume: csrn } ]
+      volume_map: [], # [ { template: csrn, volume: csrn } ]
+      volume_clones: [] # [ { vol_id: int, source_vol_id: int, source_snap: string } ]
     }
   end
 
@@ -174,6 +175,7 @@ class ProcessOrderService
 
     # Actually provision the resources on the compute resources
     resource_provisioner = DeployServices::DeployProjectService.new(project, event)
+    resource_provisioner.volume_clones = result[:volume_clones]
     unless resource_provisioner.perform
       errors << "Failed to provision resources"
       resource_provisioner.errors.each do |er|
@@ -235,7 +237,7 @@ class ProcessOrderService
       data: "ProcessOrderService error output:\n\n#{errors.join("\n")}",
       event_code: "a0e582f298a0ca01"
     ) unless errors.empty?
-    ProcessAppEventWorker.perform_async 'NewOrder', order.user&.to_global_id.uri, order.to_global_id.uri
+    ProcessAppEventWorker.perform_async 'NewOrder', order.user&.to_global_id.to_s, order.to_global_id.to_s
     event.done!
     order.done!
   end

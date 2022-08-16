@@ -164,8 +164,8 @@ module OrdersHelper
                     )
                   end
                   if container_image && i['params']
-
                     i['params'].each do |k,v|
+                      next if v['type'] == 'password'
                       concat(
                         tag.tr do
                           concat(

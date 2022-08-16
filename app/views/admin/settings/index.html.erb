@@ -6,9 +6,6 @@
       <% if k == 'belco' %>
         <% next unless Feature.check('setting_belco') %>
       <% end %>
-      <% if k == 'authy' %>
-        <% next unless Setting.authy %>
-      <% end %>
       <%= render partial: 'admin/settings/index/setting_group', locals: { group: k, items: v } %>
     <% end %>
   </div>

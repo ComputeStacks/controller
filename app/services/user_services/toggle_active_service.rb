@@ -52,7 +52,7 @@ module UserServices
       user.sftp_containers.each do |container|
         PowerCycleContainerService.new(container, 'start', event.audit)
       end
-      ProcessAppEventWorker.perform_async 'UserActivated', nil, user.to_global_id.uri
+      ProcessAppEventWorker.perform_async 'UserActivated', nil, user.to_global_id.to_s
     end
 
     def suspend_user!
@@ -65,7 +65,7 @@ module UserServices
       user.sftp_containers.each do |container|
         PowerCycleContainerService.new(container, 'stop', event.audit)
       end
-      ProcessAppEventWorker.perform_async 'UserSuspended', nil, user.to_global_id.uri
+      ProcessAppEventWorker.perform_async 'UserSuspended', nil, user.to_global_id.to_s
     end
 
   end

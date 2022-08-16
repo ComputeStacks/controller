@@ -20,7 +20,8 @@ module OrderServices
         subscriptions: [],
         load_balancers: [],
         volumes: [],
-        volume_map: [] # [ { template: csrn, volume: csrn } ]
+        volume_map: [], # [ { template: csrn, volume: csrn } ]
+        volume_clones: [] # [ { vol_id: int, source_vol_id: int, source_snap: string } ]
       }
 
       # The result hash that's getting added to each cycle.
@@ -29,7 +30,8 @@ module OrderServices
         subscriptions: [],
         load_balancers: [],
         volumes: [],
-        volume_map: [] # [ { template: csrn, volume: csrn } ]
+        volume_map: [], # [ { template: csrn, volume: csrn } ]
+        volume_clones: [] # [ { vol_id: int, source_vol_id: int, source_snap: string } ]
       }
     end
 
@@ -58,7 +60,8 @@ module OrderServices
           memory: product.dig(:resources, :memory).to_i,
           settings: product[:params],
           volume_config: product[:volume_config].nil? ? [] : product[:volume_config],
-          external_id: product[:remote_service_id]
+          external_id: product[:remote_service_id],
+          source_csrn: product[:source] # CSRN of source container service
         }
       )
       job.provision_state = provision_state
@@ -105,44 +108,6 @@ module OrderServices
       false
     end
 
-    ##
-    # HasRequiredMountableVolumes?
-    #
-    # If we have mountable volumes, are they all build and ready for us?
-    #
-    # This is different than `volumes_available?` because this is looking to
-    # see if they're actually built and ready to be mounted.
-    #
-    # @return [Boolean]
-    # def has_required_mountable_volumes?
-    #   # return true if required_mountable_volumes_not_in_order.empty?
-    #   # return false if project.nil?
-    #   ActiveRecord::Base.uncached do
-    #     matched_volumes = []
-    #     (required_mountable_volumes - required_mountable_volumes_not_in_order).each do |i|
-    #       provision_state[:volumes].each do |ii| # Volume[]
-    #         obj = Csrn.locate i
-    #         # We allow passing either a Volume CSRN, or a VolumeParam csrn, so we need
-    #         # to test for both.
-    #         test_csrn = if obj.is_a?(Volume)
-    #                       ii.csrn
-    #                     elsif obj.is_a?(ContainerImage::VolumeParam)
-    #                       ii.template&.csrn
-    #                     end
-    #         matched_volumes << ii.csrn if test_csrn == i
-    #       end
-    #     end
-    #     if (required_mountable_volumes - matched_volumes).empty?
-    #       true
-    #     else
-    #       event.event_details.create!(
-    #         data: "#{product.to_yaml}\n\n#{provision_state.to_yaml}",
-    #         event_code: "6e0a8d644baff8e4"
-    #       )
-    #     end
-    #   end
-    # end
-
     private
 
     # @return [Boolean]
@@ -160,29 +125,6 @@ module OrderServices
       image = ContainerImage.find_by id: product[:container_id]
       image && image.can_view?(order.user)
     end
-
-    ##
-    # Check to ensure all required volumes are available.
-    #
-    # The primary use case for this is if you set the action to mount, and
-    # supplied the CSRN of a volume in the override volume config.
-    #
-    # @return [Boolean]
-    # def volumes_available?
-    #   ActiveRecord::Base.uncached do
-    #     return true if required_mountable_volumes_not_in_order.empty?
-    #     project_volumes = []
-    #     if project
-    #       project.volumes.each do |vol|
-    #         next unless required_mountable_volumes_not_in_order.include?(vol.csrn)
-    #         project_volumes << vol.csrn
-    #       end
-    #     end
-    #     missing_vols = required_mountable_volumes - project_volumes
-    #     errors << "Required mountable volumes will not be created by this order, and are not found in the project: #{missing_vols.join(', ')}"
-    #     missing_vols.empty?
-    #   end
-    # end
 
     # Find volumes that we require to mount.
     #
@@ -209,27 +151,6 @@ module OrderServices
       end
       req_vols
     end
-
-    # Determine which of our required volumes will be provided by the parent order.
-    #
-    # @return [Array] Array `VolumeParam`
-    # def expected_mountable_volumes_from_order
-    #   will_provide = []
-    #   order.data[:raw_order].each do |i|
-    #     image = ContainerImage.find_by id: i[:container_id]
-    #     next if image.nil?
-    #     image.volumes.each do |vol|
-    #       will_provide << vol.csrn unless will_provide.include?(vol.csrn)
-    #     end
-    #   end
-    #   will_provide
-    # end
-
-    # Determine which volumes won't be provided by this order.
-    # @return [Array] Array of `Volume` and `ContainerImage::VolumeParam`
-    # def required_mountable_volumes_not_in_order
-    #   required_mountable_volumes - expected_mountable_volumes_from_order
-    # end
 
   end
 end

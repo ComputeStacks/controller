@@ -10,4 +10,13 @@ module Deployments::OrderHelper
     data
   end
 
+  ##
+  # Skip password fields in order session
+  def order_container_has_user_params?(container)
+    container[:params].each_key do |i|
+      return true unless container[:params][i][:type] == 'password'
+    end
+    false
+  end
+
 end

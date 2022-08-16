@@ -1007,9 +1007,9 @@ sudo -u vagrant git clone https://github.com/rbenv/ruby-build.git /home/vagrant/
 echo "export PATH=/home/vagrant/.rbenv/shims:$PATH" >> /home/vagrant/.profile
 echo "export OVERMIND_SOCKET=/home/vagrant/.overmind.sock" >> /home/vagrant/.profile
 
-echo "Installing ruby 2.7 (This may take a few minutes)..."
-su - vagrant -c "rbenv install 2.7.6"
-su - vagrant -c "rbenv global 2.7.6"
+echo "Installing ruby 3.1 (This may take a few minutes)..."
+su - vagrant -c "rbenv install 3.1.2"
+su - vagrant -c "rbenv global 3.1.2"
 
 echo "Performing GitHub authentication..."
 cat << 'OUTER' > /home/vagrant/gh_auth.sh

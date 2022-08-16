@@ -13,6 +13,7 @@ module ContainerServices
     def current_state
       return 'working' if working?
       return 'alert' if has_failed_jobs?
+      return 'alert' if provisioning_failed?
       return 'active_alert' if has_active_alerts?
       return 'offline_containers' unless all_containers_online?
       return 'resource_usage' unless resources_ok?
@@ -35,6 +36,12 @@ module ContainerServices
         return false unless i.running?
       end
       true
+    end
+
+    # Track the most recent provisioning attempt.
+    def provisioning_failed?
+      return false unless event_logs.where(locale: 'order.provision').exists?
+      event_logs.where(locale: 'order.provision').order(created_at: :desc).first.failed?
     end
 
     def active?

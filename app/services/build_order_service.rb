@@ -56,6 +56,7 @@ class BuildOrderService
     params[:containers].each do |c|
       item = {
         product_type: 'container',
+        source: c[:source], # Source service CSRN
         label: c[:name],
         container_id: c[:image_id].to_i,
         qty: c[:qty],
@@ -76,7 +77,7 @@ class BuildOrderService
       # Merge params
       if c[:params] && c[:params].is_a?(Array)
         c[:params].each do |i|
-          item[:params][i[:key]] = { value: i[:value] }
+          item[:params][i[:key]] = { value: i[:value], type: i[:type] }
         end
       end
       formatted_container_data << item
@@ -124,7 +125,7 @@ class BuildOrderService
       if process_order
         order.pending!
         # Process right away
-        ProcessOrderWorker.perform_async order.to_global_id.uri, audit.to_global_id.uri
+        ProcessOrderWorker.perform_async order.to_global_id.to_s, audit.to_global_id.to_s
       end
     else
       order.errors.full_messages.each do |er|
@@ -196,7 +197,7 @@ class BuildOrderService
     end
 
     # Expected params
-    req_params = %i(image_id name resources params)
+    req_params = %i(image_id name resources params source volumes)
 
     params[:containers].each_with_index do |c,i|
 
@@ -211,6 +212,23 @@ class BuildOrderService
       if img.nil?
         errors << "Invalid image. Image ID: #{c[:image_id]} | #{c[:name]}."
         next
+      end
+
+      # Validate source (if applicable)
+      unless c[:source].blank?
+        source_service = Csrn.locate c[:source]
+        if source_service.nil?
+          errors << "Invalid source #{c[:source]}"
+          next
+        end
+        unless source_service.is_a?(Deployment::ContainerService)
+          errors << "Expected source to be a container service #{c[:source]}"
+          next
+        end
+        unless source_service.can_view?(project_user)
+          errors << "User does not have permission to clone #{c[:source]}"
+          next
+        end
       end
 
       product_id = c.dig(:resources, :product_id).nil? ? nil : c.dig(:resources, :product_id).to_i

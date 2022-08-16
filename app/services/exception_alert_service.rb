@@ -12,28 +12,27 @@ class ExceptionAlertService
 
   def perform
     if SENTRY_CONFIGURED
-      Raven::Context.clear!
-      Raven.tags_context(event_code: event_code)
-      unless CS_APP_ID.blank?
-        Raven.extra_context(
-          extra: {
-            provider: CS_APP_ID
-          }
-        )
-        if user && Feature.check('exception_user_info')
-          Raven.user_context(
-            id: "#{CS_APP_ID}-#{user.id}",
-            email: user.email,
-            ip_address: user.last_request_ip.to_s
+      Sentry.with_scope do |scope|
+        scope.set_tags event_code: event_code
+        unless CS_APP_ID.blank?
+          scope.set_context(
+            'extra',
+            {
+              provider: CS_APP_ID
+            }
           )
-        elsif user
-          Raven.user_context(
-            id: "#{CS_APP_ID}-#{user.id}"
-          )
+          if user && Feature.check('exception_user_info')
+            scope.set_user(
+              id: "#{CS_APP_ID}-#{user.id}",
+              email: user.email,
+              ip_address: user.last_request_ip.to_s
+            )
+          elsif user
+            scope.set_user( id: "#{CS_APP_ID}-#{user.id}" )
+          end
         end
+        Sentry.capture_exception e
       end
-      Raven.capture_exception(e)
-      Raven::Context.clear!
     end
     Rails.logger.warn "error=#{e.message}"
   end

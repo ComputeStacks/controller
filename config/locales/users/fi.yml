@@ -91,20 +91,6 @@ fi:
         disable: Ota API pääsy pois käytöstä
         regen: Luo uudelleen
         regen_prompt: Oletko varma? Olemassa oleva avaimesi poistuu saman tien käytöstä.
-      authy:
-        enable: Ota käyttöön Authy 2FA
-        disable: Ota Authy 2FA pois käytöstä
-        help_link: Tutustu lisää Authy 2FA:n käyttöön.
-    authy:
-      new:
-        title: Ota käyttöön Authy 2FA
-        cc: Anna maa
-        phone: Anna puhelinnumerosi
-        apps: Klikkaa asentaaksesi Authy sovellukset
-      edit:
-        title: Aktivoi Authy 2FA
-        token: Authy Tokeni
-        apps: Klikkaa asentaaksesi Authy sovellukset
     security_key:
       controller:
         removed: Turva Avain Poistettu
@@ -127,8 +113,6 @@ fi:
           l1: Jos siinä on nappi, paina sitä rekisteröityäksesi.
     security_key_auth:
       controller:
-        no_authy: "Tunnustasi ei ole yhdistetty Authy tunnukseen."
-        authy_disabled: "Authy autentikointi on poistettu käytöstä. Ole hyvä ja ota yhteyttä tukeen."
         invalid_token: Virheellinen Tokeni
       new:
         title: Todennus Portti
@@ -138,8 +122,6 @@ fi:
         u2f:
           l1: Jos siinä on nappi, paina sitä autentikoituaksesi.
           error: "Autentiokinti Virhe!<br>Päivitä sivu ja kokeile uudestaan."
-        authy:
-          title: Autentikoidu sinun Authy 2FA sovelluksella
     totp:
       title: Authenticator App
       setup: Configure Authenticator App

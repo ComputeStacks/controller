@@ -37,11 +37,35 @@ module Volumes
     end
 
     def restore_backup!(snapshot_name, source_volume_name = nil)
-      return false if snapshot_name.blank?
-      return false if nodes.online.empty?
+      if snapshot_name.blank?
+        if current_audit && current_audit.event_logs.exists?
+          current_audit.event_logs.first.event_details.create!(
+            data: "[Snapshot Restore] Error: Missing snapshot name.",
+            event_code: "8715836b24c7898c"
+          )
+        end
+        return false
+      end
+      if nodes.online.empty?
+        if current_audit && current_audit.event_logs.exists?
+          current_audit.event_logs.first.event_details.create!(
+            data: "[Snapshot Restore] Error: No online nodes found. | Total nodes: #{nodes.count} | Online nodes: #{nodes.online.count}",
+            event_code: "e747dac60227ea25"
+          )
+        end
+        return false
+      end
       update_consul! if consul_entry.nil?
       selected_node = consul_active_node
-      return false if selected_node.nil?
+      if selected_node.nil?
+        if current_audit && current_audit.event_logs.exists?
+          current_audit.event_logs.first.event_details.create!(
+            data: "[Snapshot Restore] Error: Missing active node\n\n#{consul_entry.inspect}",
+            event_code: "7b8fb2202547cc81"
+          )
+        end
+        return false
+      end
       init_consul_job!({
                          name: "volume.restore",
                          archive: snapshot_name,

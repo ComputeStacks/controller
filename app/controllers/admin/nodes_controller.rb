@@ -35,7 +35,7 @@ class Admin::NodesController < Admin::ApplicationController
           maintenance_updated: Time.now
         )
         if @node.region.has_clustered_storage?
-          NodeWorkers::EvacuateNodeWorker.perform_async @node.to_global_id.uri, audit.to_global_id.uri
+          NodeWorkers::EvacuateNodeWorker.perform_async @node.to_global_id.to_s, audit.to_global_id.to_s
         end
       else
         @node.update(

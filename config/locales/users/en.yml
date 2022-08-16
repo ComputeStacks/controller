@@ -91,20 +91,6 @@ en:
         disable: Disable API Access
         regen: Regenerate
         regen_prompt: Are you sure? This will immediately invalidate your existing token.
-      authy:
-        enable: Enable Authy 2FA
-        disable: Disable Authy 2FA
-        help_link: Click to learn more about using Authy 2FA.
-    authy:
-      new:
-        title: Enable Authy 2FA
-        cc: Country Code
-        phone: Mobile Phone
-        apps: Click Here to install the Authy Apps
-      edit:
-        title: Activate Authy 2FA
-        token: Authy Token
-        apps: Click Here to install the Authy Apps
     security_key:
       controller:
         removed: Security Key Removed
@@ -127,8 +113,6 @@ en:
           l1: If it has a button, please press it to register.
     security_key_auth:
       controller:
-        no_authy: "No Authy account associated with your user account."
-        authy_disabled: "Authy authentication is disabled. Please contact support."
         invalid_token: Invalid Token
       new:
         title: Authentication Gateway
@@ -138,8 +122,6 @@ en:
         u2f:
           l1: If it has a button, please press it to authenticate.
           error: Authentication Error! Please refresh the page and try again.
-        authy:
-          title: Authenticate with your Authy 2FA app
     totp:
       title: Authenticator App
       setup: Configure Authenticator App

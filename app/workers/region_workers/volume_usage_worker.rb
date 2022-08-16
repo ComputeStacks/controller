@@ -7,7 +7,7 @@ module RegionWorkers
     def perform(region_id = nil)
       if region_id.nil?
         Region.all.each do |region|
-          RegionWorkers::VolumeUsageWorker.perform_async region.to_global_id.uri
+          RegionWorkers::VolumeUsageWorker.perform_async region.to_global_id.to_s
         end
         return
       end

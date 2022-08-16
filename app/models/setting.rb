@@ -15,7 +15,7 @@ class Setting < ApplicationRecord
   scope :general_settings, -> { where category: 'general' }
 
   # Exclude certain categories from being visible in the demo
-  scope :excluded_for_demo, -> { where(Arel.sql %Q(category is not null and category not in ('general','mail','belco','google_analytics','authy','container_registry') )) }
+  scope :excluded_for_demo, -> { where(Arel.sql %Q(category is not null and category not in ('general','mail','belco','google_analytics','container_registry') )) }
 
   validates :name, uniqueness: true
 
@@ -253,38 +253,6 @@ class Setting < ApplicationRecord
         )
       end
       s
-    end
-
-    ##
-    # Authy
-    # @deprecated
-    def authy
-      s = Setting.find_by(name: 'authy')
-      if s.nil?
-        s = Setting.create!(
-          name: 'authy',
-          category: 'authy',
-          description: "Enable or Disable Authy 2FA.",
-          value: false,
-          encrypted: false
-        )
-      end
-      ActiveRecord::Type::Boolean.new.cast s.value
-    end
-
-    # @deprecated
-    def authy_api
-      s = Setting.find_by(name: 'authy_api')
-      if s.nil?
-        s = Setting.create!(
-          name: 'authy_api',
-          category: 'authy',
-          description: "Authy API Key",
-          value: '',
-          encrypted: false
-        )
-      end
-      s.value
     end
 
     ##

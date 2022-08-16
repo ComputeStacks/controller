@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
 
-  before_action :authenticate_user!, except: [:authy_sms, :disconnect]
-  before_action :second_factor!, except: [:authy_sms, :disconnect]
+  before_action :authenticate_user!, except: :disconnect
+  before_action :second_factor!, except: :disconnect
 
   def update
     # @user = User.find_by(id: current_user.id)
@@ -26,29 +26,6 @@ class UsersController < ApplicationController
     else
       render template: user_params[:current_password].blank? ? 'users/edit' : 'users/security/index'
     end
-  end
-
-  # @deprecated
-  def authy_sms
-    @resource = current_user.nil? ? User.find_by(id: session["user_id"]) : current_user
-    if @resource.nil?
-      render :json => {:sent => false, :message => "User couldn't be found."}
-      return false
-    end
-    response = Authy::API.request_sms(:id => @resource.authy_id, :force => true)
-    render :json => {:sent => response.ok?, :message => response.message}
-  end
-
-  # @deprecated
-  def authy_disable
-    if current_user.update_attribute :authy_enabled, false
-      audit = Audit.create_from_object!(current_user, 'updated', request.remote_ip, current_user)
-      audit.update_attribute :raw_data, 'disabled authy'
-      flash[:notice] = "Authy disabled."
-    else
-      flash[:alert] = "There was a problem. Please contact support."
-    end
-    redirect_to "/profile"
   end
 
   def disconnect

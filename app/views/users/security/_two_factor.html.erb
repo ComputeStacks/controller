@@ -1,15 +1,6 @@
 <div class="panel panel-default">
   <table class="table">
     <tbody>
-    <% if current_user.authy_enabled %>
-      <tr>
-        <td style="font-size:1.5rem; vertical-align: middle;">Authy</td>
-        <td style="font-size:1.5rem; vertical-align: middle;">Configured</td>
-        <td class="text-right">
-          <%= link_to 'Disable', '/users/authy', method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger' %>
-        </td>
-      </tr>
-    <% end %>
     <tr>
       <td style="font-size:1.5rem; vertical-align: middle;">Authenticator App</td>
       <td style="font-size:1.5rem; vertical-align: middle;"><%= current_user.totp_enabled? ? 'Configured' : 'Not Configured' %></td>

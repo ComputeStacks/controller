@@ -192,7 +192,8 @@ class Deployment::Sftp < ApplicationRecord
         'org.projectcalico.label.token' => deployment.token,
         'org.projectcalico.label.service' => name,
         'com.computestacks.deployment_id' => deployment.id.to_s,
-        'com.computestacks.image_name' => image
+        'com.computestacks.image_name' => image,
+        'com.computestacks.role' => 'bastion'
       },
       'HostConfig' => {
         'NetworkMode' => ip_address.network.name,

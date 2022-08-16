@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_07_08_193316) do
-
+ActiveRecord::Schema[7.0].define(version: 2022_08_16_045546) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -28,10 +27,10 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.text "description"
     t.decimal "value"
     t.jsonb "labels", default: {}, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.integer "event_count", default: 1, null: false
-    t.datetime "last_event", null: false
+    t.datetime "last_event", precision: nil, null: false
     t.index ["container_id"], name: "index_alert_notifications_on_container_id"
     t.index ["fingerprint"], name: "index_alert_notifications_on_fingerprint", unique: true
     t.index ["labels"], name: "index_alert_notifications_on_labels", using: :gin
@@ -49,8 +48,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
   create_table "audits", id: :serial, force: :cascade do |t|
     t.inet "ip_addr"
     t.integer "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "rel_id"
     t.string "rel_model"
     t.string "event"
@@ -75,8 +74,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "resource_type"
     t.integer "rel_id"
     t.string "rel_model"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.bigint "subscription_id"
     t.bigint "audit_id"
     t.index ["audit_id"], name: "index_billing_events_on_audit_id"
@@ -90,8 +89,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.integer "memory"
     t.integer "storage"
     t.integer "bandwidth"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "backup", default: 0, null: false
     t.integer "local_disk", default: 0, null: false
     t.integer "memory_swap"
@@ -104,16 +103,16 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "duration_unit"
     t.integer "duration_qty"
     t.boolean "new_user_only", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["billing_resource_id"], name: "index_billing_phases_on_billing_resource_id"
   end
 
   create_table "billing_plans", id: :serial, force: :cascade do |t|
     t.string "name"
     t.boolean "is_default", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "billing_resource_prices", id: :serial, force: :cascade do |t|
@@ -123,8 +122,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.decimal "max_qty"
     t.decimal "price", default: "0.0", null: false
     t.string "term", default: "month", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["billing_phase_id"], name: "index_billing_resource_prices_on_billing_phase_id"
     t.index ["billing_resource_id"], name: "index_billing_resource_prices_on_billing_resource_id"
   end
@@ -144,25 +143,25 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.decimal "val_max", default: "1.0", null: false
     t.decimal "val_step", default: "1.0", null: false
     t.decimal "val_default", default: "0.0", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["billing_plan_id"], name: "index_billing_resources_on_billing_plan_id"
     t.index ["product_id"], name: "index_billing_resources_on_product_id"
   end
 
   create_table "billing_usages", force: :cascade do |t|
     t.integer "user_id"
-    t.datetime "period_start"
-    t.datetime "period_end"
+    t.datetime "period_start", precision: nil
+    t.datetime "period_end", precision: nil
     t.bigint "subscription_product_id"
     t.string "external_id"
     t.decimal "rate", default: "0.0", null: false
     t.decimal "qty", default: "0.0", null: false
     t.decimal "total", default: "0.0", null: false
     t.boolean "processed", default: false, null: false
-    t.datetime "processed_on"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "processed_on", precision: nil
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.decimal "qty_total", default: "0.0", null: false
     t.index ["processed"], name: "index_billing_usages_on_procesed"
     t.index ["subscription_product_id"], name: "index_billing_usages_on_subscription_product_id"
@@ -173,8 +172,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.bigint "block_id", null: false
     t.text "body"
     t.string "locale", default: "en", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["block_id"], name: "index_block_contents_on_block_id"
     t.index ["locale"], name: "index_block_contents_on_locale"
   end
@@ -182,16 +181,16 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
   create_table "blocks", force: :cascade do |t|
     t.string "title"
     t.string "content_key"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "container_image_collaborators", force: :cascade do |t|
     t.bigint "container_image_id"
     t.bigint "user_id"
     t.boolean "active", default: false, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["active"], name: "index_container_image_collaborators_on_active"
     t.index ["container_image_id", "user_id"], name: "image_collab_img_user", unique: true
   end
@@ -200,8 +199,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.bigint "container_image_id"
     t.string "hostname"
     t.bigint "source_image_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["container_image_id"], name: "index_container_image_custom_host_entries_on_container_image_id"
     t.index ["source_image_id"], name: "index_container_image_custom_host_entries_on_source_image_id"
   end
@@ -212,8 +211,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "label"
     t.string "param_type", default: "static", null: false
     t.text "value"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["container_image_id"], name: "ciep_image_id"
   end
 
@@ -221,8 +220,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.integer "container_image_id"
     t.integer "requires_container_id"
     t.boolean "optional", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["container_image_id"], name: "index_container_image_image_rels_on_container_image_id"
     t.index ["requires_container_id"], name: "index_container_image_image_rels_on_requires_container_id"
   end
@@ -235,8 +234,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.boolean "backend_ssl", default: false, null: false
     t.integer "port", null: false
     t.string "tcp_proxy_opt", default: "none", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "tcp_lb", default: true, null: false
     t.index ["container_image_id"], name: "index_container_image_ingress_params_on_container_image_id"
     t.index ["external_access"], name: "index_container_image_ingress_params_on_external_access"
@@ -248,8 +247,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.boolean "is_default", default: false
     t.string "hostname"
     t.bigint "container_registry_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "active", default: true, null: false
     t.index ["active"], name: "index_container_image_providers_on_active"
     t.index ["container_registry_id"], name: "index_container_image_providers_on_container_registry_id"
@@ -263,8 +262,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "label"
     t.string "param_type", default: "static", null: false
     t.text "value"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["container_image_id"], name: "cisp_image_id"
   end
 
@@ -287,8 +286,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.text "borg_pre_restore", default: [], null: false, array: true
     t.text "borg_post_restore", default: [], null: false, array: true
     t.text "borg_rollback", default: [], null: false, array: true
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "enable_sftp", default: true, null: false
     t.boolean "mount_ro", default: false, null: false
     t.bigint "source_volume_id"
@@ -303,8 +302,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.text "description"
     t.string "image_url"
     t.boolean "active", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "role"
     t.string "role_class"
     t.boolean "featured", default: false
@@ -331,7 +330,7 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.boolean "is_load_balancer", default: false, null: false
     t.jsonb "labels", default: {}, null: false
     t.boolean "validated_tag", default: true, null: false
-    t.datetime "validated_tag_updated"
+    t.datetime "validated_tag_updated", precision: nil
     t.boolean "force_local_volume", default: false, null: false
     t.boolean "override_autoremove", default: false, null: false
     t.index ["container_image_provider_id"], name: "index_container_images_on_container_image_provider_id"
@@ -345,8 +344,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "name"
     t.string "label"
     t.integer "port"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "status", default: "new", null: false
     t.integer "user_id"
     t.text "password_encrypted"
@@ -364,8 +363,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.bigint "container_registry_id"
     t.bigint "user_id"
     t.boolean "active", default: false, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["active"], name: "index_container_registry_collaborators_on_active"
     t.index ["container_registry_id", "user_id"], name: "cr_collab_reg_user", unique: true
   end
@@ -377,8 +376,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "param_type", default: "static", null: false
     t.text "value"
     t.bigint "container_image_env_param_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["container_image_env_param_id"], name: "csec_image_param_id"
     t.index ["container_service_id"], name: "csec_service_id"
   end
@@ -389,8 +388,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "hostname"
     t.string "ipaddr"
     t.boolean "keep_updated", default: true, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["container_service_id"], name: "index_container_service_host_entries_on_container_service_id"
     t.index ["template_id"], name: "index_container_service_host_entries_on_template_id"
   end
@@ -402,8 +401,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "param_type", default: "static", null: false
     t.text "value"
     t.bigint "container_image_setting_param_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["container_image_setting_param_id"], name: "cssc_setting_param"
     t.index ["container_service_id"], name: "cssc_service_id"
   end
@@ -412,19 +411,19 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.bigint "deployment_id"
     t.bigint "user_id"
     t.boolean "active", default: false, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["active"], name: "index_deployment_collaborators_on_active"
     t.index ["deployment_id", "user_id"], name: "index_deployment_collaborators_on_deployment_id_and_user_id", unique: true
   end
 
   create_table "deployment_container_domains", id: :serial, force: :cascade do |t|
     t.string "domain"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "system_domain", default: false
     t.boolean "le_enabled", default: false, null: false
-    t.datetime "le_ready_checked"
+    t.datetime "le_ready_checked", precision: nil
     t.boolean "le_ready", default: false, null: false
     t.boolean "enabled", default: true, null: false
     t.bigint "user_id"
@@ -448,8 +447,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
   end
 
   create_table "deployment_container_links", id: :serial, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.bigint "service_id"
     t.bigint "service_resource_id"
   end
@@ -460,8 +459,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "name"
     t.string "label"
     t.string "status", default: "pending", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.decimal "cpu"
     t.integer "memory"
     t.bigint "initial_subscription_id"
@@ -500,16 +499,16 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.bigint "memory_limit", default: 0, null: false
     t.decimal "memory", default: "0.0", null: false
     t.decimal "cpu_perc", default: "0.0", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.bigint "cpu_user_usage", default: 0
     t.bigint "cpu_system_usage", default: 0
   end
 
   create_table "deployment_containers", id: :serial, force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "status"
     t.integer "failed_health_checks", default: 0, null: false
     t.inet "private_ip"
@@ -534,8 +533,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.text "pkey", null: false
     t.text "pubkey", null: false
     t.string "algo", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["sftp_container_id"], name: "index_deployment_sftp_host_keys_on_sftp_container_id"
   end
 
@@ -544,8 +543,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.integer "deployment_id"
     t.integer "node_id"
     t.string "status", default: "pending", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "to_trash", default: false
     t.string "req_state", default: "stopped", null: false
     t.boolean "built", default: false, null: false
@@ -567,20 +566,20 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.bigint "deployment_id"
     t.string "label"
     t.text "pubkey", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["deployment_id"], name: "index_deployment_ssh_keys_on_deployment_id"
   end
 
   create_table "deployment_ssls", force: :cascade do |t|
     t.bigint "container_service_id"
-    t.datetime "not_before"
-    t.datetime "not_after"
+    t.datetime "not_before", precision: nil
+    t.datetime "not_after", precision: nil
     t.string "cert_serial"
     t.string "issuer"
     t.string "subject"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.text "pkey_encrypted"
     t.text "ca"
     t.text "crt"
@@ -590,8 +589,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
   create_table "deployments", id: :serial, force: :cascade do |t|
     t.string "name"
     t.string "status", default: "new", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "token"
     t.integer "user_id"
     t.boolean "skip_ssh", default: false, null: false
@@ -611,8 +610,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.bigint "dns_zone_id"
     t.bigint "user_id"
     t.boolean "active", default: false, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["active"], name: "index_dns_zone_collaborators_on_active"
     t.index ["dns_zone_id", "user_id"], name: "index_dns_zone_collaborators_on_dns_zone_id_and_user_id", unique: true
   end
@@ -620,19 +619,19 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
   create_table "dns_zones", id: :serial, force: :cascade do |t|
     t.string "name"
     t.string "provider_ref"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "provision_driver_id"
     t.binary "saved_state"
-    t.datetime "saved_state_ts"
+    t.datetime "saved_state_ts", precision: nil
     t.integer "user_id"
   end
 
   create_table "event_log_data", force: :cascade do |t|
     t.text "data"
     t.bigint "event_log_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "event_code"
     t.index ["event_code"], name: "index_event_log_data_on_event_code"
     t.index ["event_log_id"], name: "index_event_log_data_on_event_log_id"
@@ -644,8 +643,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.boolean "notice", default: false
     t.jsonb "locale_keys", default: {}
     t.bigint "audit_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "state_reason"
     t.string "event_code"
     t.index ["audit_id"], name: "index_event_logs_on_audit_id"
@@ -692,8 +691,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
   create_table "features", id: :serial, force: :cascade do |t|
     t.string "name", limit: 255
     t.boolean "active", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "maintenance", default: false, null: false
     t.index ["name"], name: "index_features_on_name"
   end
@@ -708,8 +707,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
   create_table "lets_encrypt_accounts", force: :cascade do |t|
     t.string "email"
     t.string "account_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.text "pkey_encrypted"
   end
 
@@ -718,13 +717,13 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "domain"
     t.string "token"
     t.text "content"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "challenge_type", default: "http", null: false
     t.string "record_name"
     t.string "record_type", default: "TXT", null: false
     t.text "record_content"
-    t.datetime "expires_at"
+    t.datetime "expires_at", precision: nil
     t.bigint "domain_id"
     t.index ["domain"], name: "index_lets_encrypt_auths_on_domain"
     t.index ["domain_id"], name: "index_lets_encrypt_auths_on_domain_id"
@@ -735,11 +734,11 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
   create_table "lets_encrypts", force: :cascade do |t|
     t.integer "account_id"
     t.integer "user_id"
-    t.datetime "expires_at"
-    t.datetime "last_generated_at"
+    t.datetime "expires_at", precision: nil
+    t.datetime "last_generated_at", precision: nil
     t.text "names", default: [], null: false, array: true
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.text "pkey_encrypted"
     t.text "crt"
     t.string "common_name"
@@ -752,8 +751,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.inet "ip_addr"
     t.string "role"
     t.string "label"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["ip_addr"], name: "index_load_balancer_addrs_on_ip_addr"
     t.index ["load_balancer_id"], name: "index_load_balancer_addrs_on_load_balancer_id"
     t.index ["role"], name: "index_load_balancer_addrs_on_role"
@@ -762,8 +761,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
   create_table "load_balancers", id: :serial, force: :cascade do |t|
     t.string "name"
     t.string "label"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "region_id"
     t.text "ext_ip", default: "[]", null: false
     t.string "ext_config", default: "/etc/haproxy/haproxy.cfg"
@@ -772,14 +771,14 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "ext_cert_dir", default: "/etc/haproxy/certs"
     t.string "ext_dir", default: "/etc/haproxy"
     t.string "job_status", default: "idle", null: false
-    t.datetime "job_performed", default: "2018-05-11 21:16:37", null: false
+    t.datetime "job_performed", precision: nil, default: "2018-05-11 21:16:37", null: false
     t.integer "cpus", default: 1, null: false
     t.integer "maxconn", default: 100000, null: false
     t.integer "maxconn_c", default: 200, null: false
     t.integer "ssl_cache", default: 1000000, null: false
     t.boolean "direct_connect", default: true, null: false
     t.boolean "le", default: false, null: false
-    t.datetime "le_last_checked"
+    t.datetime "le_last_checked", precision: nil
     t.text "cert_encrypted"
     t.text "internal_ip", default: "[]", null: false
     t.boolean "proxy_cloudflare", default: true, null: false
@@ -790,7 +789,7 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.bigint "lets_encrypt_id"
     t.string "domain"
     t.boolean "domain_valid", default: true, null: false
-    t.datetime "domain_valid_check"
+    t.datetime "domain_valid_check", precision: nil
     t.string "stats_password", default: "wm0m2DOQb-Zbl4fqLGOYgqf", null: false
     t.string "stats_bind", default: "*:81", null: false
     t.boolean "proto_alpn", default: true, null: false
@@ -802,8 +801,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
   create_table "locations", force: :cascade do |t|
     t.string "name"
     t.boolean "active", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "fill_strategy", default: "least"
     t.boolean "fill_by_qty", default: true, null: false
     t.boolean "overcommit_cpu", default: true, null: false
@@ -815,14 +814,14 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "endpoint", default: "http://localhost:3100", null: false
     t.string "username"
     t.string "password"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "metric_clients", force: :cascade do |t|
     t.string "endpoint", default: "http://localhost:9090", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "username"
     t.string "password"
   end
@@ -832,8 +831,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.inet "cidr", null: false
     t.integer "rel_id"
     t.string "rel_model"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.bigint "container_id"
     t.bigint "sftp_container_id"
     t.index ["container_id"], name: "index_network_cidrs_on_container_id"
@@ -852,8 +851,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.integer "port", null: false
     t.integer "port_nat", default: 0, null: false
     t.string "tcp_proxy_opt", default: "none", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "restrict_cf", default: false, null: false
     t.boolean "tcp_lb", default: true, null: false
     t.bigint "region_id"
@@ -871,8 +870,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.boolean "is_public", default: false, null: false
     t.boolean "is_ipv4", default: true, null: false
     t.boolean "active", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "name"
     t.string "label"
     t.boolean "cross_region", default: false, null: false
@@ -893,18 +892,18 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.boolean "disconnected", default: false, null: false
     t.integer "failed_health_checks", default: 0, null: false
     t.boolean "active", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "online_at"
-    t.datetime "disconnected_at"
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "online_at", precision: nil
+    t.datetime "disconnected_at", precision: nil
     t.string "public_ip", default: "127.0.0.1", null: false
     t.integer "region_id"
     t.integer "port_begin", default: 10000, null: false
     t.integer "port_end", default: 50000, null: false
     t.boolean "maintenance", default: false
-    t.datetime "maintenance_updated"
+    t.datetime "maintenance_updated", precision: nil
     t.string "job_status", default: "idle", null: false
-    t.datetime "job_performed", default: "2018-05-12 18:22:20", null: false
+    t.datetime "job_performed", precision: nil, default: "2018-05-12 18:22:20", null: false
     t.integer "ssh_port", default: 22, null: false
     t.string "volume_device"
     t.integer "block_write_bps", default: 0
@@ -926,8 +925,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "token", null: false
     t.integer "expires_in", null: false
     t.text "redirect_uri", null: false
-    t.datetime "created_at", null: false
-    t.datetime "revoked_at"
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "revoked_at", precision: nil
     t.string "scopes"
     t.string "code_challenge"
     t.string "code_challenge_method"
@@ -942,8 +941,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "token", null: false
     t.string "refresh_token"
     t.integer "expires_in"
-    t.datetime "revoked_at"
-    t.datetime "created_at", null: false
+    t.datetime "revoked_at", precision: nil
+    t.datetime "created_at", precision: nil, null: false
     t.string "scopes"
     t.string "previous_refresh_token", default: "", null: false
     t.index ["application_id"], name: "index_oauth_access_tokens_on_application_id"
@@ -959,8 +958,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.text "redirect_uri"
     t.string "scopes", default: "", null: false
     t.boolean "confidential", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "owner_id"
     t.string "owner_type"
     t.index ["owner_id", "owner_type"], name: "index_oauth_applications_on_owner_id_and_owner_type"
@@ -973,8 +972,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.integer "user_id"
     t.inet "ip_addr"
     t.text "order_data"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "external_id"
     t.integer "location_id"
     t.boolean "req_payment", default: false, null: false
@@ -983,8 +982,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
 
   create_table "product_modules", id: :serial, force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "primary_id"
     t.index ["name"], name: "index_product_modules_on_name"
   end
@@ -1001,8 +1000,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.integer "unit"
     t.string "unit_type"
     t.boolean "is_aggregated", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "external_id"
     t.string "resource_kind"
     t.string "group"
@@ -1015,8 +1014,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "value"
     t.string "notifier", default: "email", null: false
     t.text "rules", array: true
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "provision_driver_user_auths", id: :serial, force: :cascade do |t|
@@ -1025,8 +1024,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "api_key"
     t.string "api_secret"
     t.text "details", default: "{}", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "user_id"
     t.index ["provision_driver_id"], name: "index_provision_driver_user_auths_on_provision_driver_id"
   end
@@ -1039,18 +1038,18 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "username"
     t.string "api_key"
     t.string "api_secret"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "is_online", default: true
-    t.datetime "offline_at"
-    t.datetime "online_at"
+    t.datetime "offline_at", precision: nil
+    t.datetime "online_at", precision: nil
   end
 
   create_table "regions", id: :serial, force: :cascade do |t|
     t.string "name", limit: 255
     t.boolean "active", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "provision_driver_id"
     t.text "settings", default: "{}", null: false
     t.text "features", default: "{}", null: false
@@ -1094,16 +1093,16 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.text "encrypted_data"
     t.integer "rel_id"
     t.string "rel_model"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["rel_id", "rel_model"], name: "index_secrets_on_rel_id_and_rel_model"
   end
 
   create_table "sessions", id: :serial, force: :cascade do |t|
     t.string "session_id", null: false
     t.text "data"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
@@ -1113,8 +1112,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "category"
     t.text "description"
     t.text "value"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "encrypted", default: false, null: false
     t.index ["category"], name: "index_settings_on_category"
     t.index ["name"], name: "index_settings_on_name"
@@ -1124,11 +1123,11 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.integer "product_id"
     t.bigint "subscription_id"
     t.string "external_id"
-    t.datetime "start_on"
+    t.datetime "start_on", precision: nil
     t.boolean "active", default: true, null: false
     t.string "phase_type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["active"], name: "index_subscription_products_on_active"
     t.index ["product_id"], name: "index_subscription_products_on_product_id"
     t.index ["subscription_id"], name: "index_subscription_products_on_subscription_id"
@@ -1140,8 +1139,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "external_id"
     t.boolean "active", default: true, null: false
     t.text "details"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "service_key"
     t.index ["active"], name: "index_subscriptions_on_active"
     t.index ["service_key"], name: "index_subscriptions_on_service_key"
@@ -1152,8 +1151,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "message"
     t.text "data"
     t.string "log_level", default: "info"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.bigint "audit_id"
     t.string "event_code"
     t.index ["audit_id"], name: "index_system_events_on_audit_id"
@@ -1166,8 +1165,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "value"
     t.string "notifier", default: "email", null: false
     t.text "rules", array: true
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "taggings", id: :serial, force: :cascade do |t|
@@ -1177,7 +1176,7 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "tagger_type"
     t.integer "tagger_id"
     t.string "context"
-    t.datetime "created_at"
+    t.datetime "created_at", precision: nil
     t.index ["context"], name: "index_taggings_on_context"
     t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "taggings_idx", unique: true
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
@@ -1200,8 +1199,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "name"
     t.string "username"
     t.string "password"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["user_id"], name: "index_user_api_credentials_on_user_id"
     t.index ["username"], name: "index_user_api_credentials_on_username", unique: true
   end
@@ -1211,8 +1210,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.boolean "is_default", default: false, null: false
     t.integer "billing_plan_id"
     t.boolean "active", default: true
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "q_containers", default: 250
     t.integer "q_dns_zones", default: 250
     t.integer "q_cr", default: 20
@@ -1230,8 +1229,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "value"
     t.string "notifier", default: "email", null: false
     t.text "rules", array: true
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "user_security_keys", force: :cascade do |t|
@@ -1239,8 +1238,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "public_key"
     t.integer "counter"
     t.string "label"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "webauthn_id"
     t.index ["webauthn_id"], name: "index_user_security_keys_on_webauthn_id"
   end
@@ -1249,8 +1248,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.bigint "user_id"
     t.string "label"
     t.text "pubkey", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_user_ssh_keys_on_user_id"
   end
 
@@ -1260,29 +1259,27 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "timezone", limit: 255, default: "UTC", null: false
     t.string "lang", limit: 255, default: "en", null: false
     t.boolean "active", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "authy_id", limit: 255
-    t.boolean "authy_enabled", default: false
-    t.datetime "last_request_at"
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "last_request_at", precision: nil
     t.string "token", limit: 255, null: false
     t.string "locale", limit: 255, default: "en", null: false
     t.string "email", limit: 255, default: "", null: false
     t.string "encrypted_password", limit: 255, default: "", null: false
     t.string "reset_password_token", limit: 255
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
+    t.datetime "reset_password_sent_at", precision: nil
+    t.datetime "remember_created_at", precision: nil
     t.integer "sign_in_count", default: 0, null: false
-    t.datetime "current_sign_in_at"
-    t.datetime "last_sign_in_at"
+    t.datetime "current_sign_in_at", precision: nil
+    t.datetime "last_sign_in_at", precision: nil
     t.inet "current_sign_in_ip"
     t.inet "last_sign_in_ip"
     t.string "confirmation_token", limit: 255
-    t.datetime "confirmed_at"
-    t.datetime "confirmation_sent_at"
+    t.datetime "confirmed_at", precision: nil
+    t.datetime "confirmation_sent_at", precision: nil
     t.integer "failed_attempts", default: 0, null: false
     t.string "unlock_token", limit: 255
-    t.datetime "locked_at"
+    t.datetime "locked_at", precision: nil
     t.boolean "is_admin", default: false, null: false
     t.string "currency", default: "USD", null: false
     t.string "api_key"
@@ -1290,7 +1287,7 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.integer "api_version", default: 0, null: false
     t.string "external_id"
     t.string "auth_token"
-    t.datetime "auth_token_exp"
+    t.datetime "auth_token_exp", precision: nil
     t.string "country", default: "US", null: false
     t.boolean "bypass_billing", default: false
     t.string "city"
@@ -1299,10 +1296,10 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.string "address2"
     t.string "zip"
     t.boolean "req_second_factor", default: false, null: false
-    t.datetime "last_second_factor_auth"
+    t.datetime "last_second_factor_auth", precision: nil
     t.boolean "bypass_second_factor", default: false
     t.string "vat"
-    t.datetime "phase_started"
+    t.datetime "phase_started", precision: nil
     t.integer "user_group_id"
     t.text "comments"
     t.cidr "last_request_ip"
@@ -1313,7 +1310,6 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.integer "last_otp_at", default: 1602721986
     t.string "webauthn_id"
     t.boolean "c_sftp_pass", default: true, null: false
-    t.index ["authy_id"], name: "index_users_on_authy_id"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["labels"], name: "index_users_on_labels", using: :gin
@@ -1328,8 +1324,8 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.bigint "container_service_id"
     t.boolean "mount_ro", default: false, null: false
     t.string "mount_path"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.boolean "is_owner", default: false, null: false
     t.index ["container_service_id"], name: "index_volume_maps_on_container_service_id"
     t.index ["is_owner"], name: "index_volume_maps_on_is_owner"
@@ -1341,14 +1337,14 @@ ActiveRecord::Schema.define(version: 2022_07_08_193316) do
     t.integer "user_id"
     t.integer "region_id"
     t.boolean "to_trash", default: false, null: false
-    t.datetime "trash_after"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "trash_after", precision: nil
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "name"
     t.decimal "usage", default: "0.0", null: false
-    t.datetime "usage_checked"
+    t.datetime "usage_checked", precision: nil
     t.bigint "trashed_by_id"
-    t.datetime "detached_at"
+    t.datetime "detached_at", precision: nil
     t.bigint "subscription_id"
     t.boolean "borg_enabled", default: true
     t.string "borg_freq", default: "@hourly", null: false

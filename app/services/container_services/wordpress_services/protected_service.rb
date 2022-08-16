@@ -54,7 +54,7 @@ module ContainerServices::WordpressServices
         else
           service.secrets.create!(key_name: "protected_mode_pw", data: password)
         end
-        ContainerWorkers::ContainerExecWorker.perform_async container.to_global_id.uri, event.to_global_id.uri, ["/bin/sh", "-c", "/usr/local/lsws/bin/lswsctrl reload"]
+        ContainerWorkers::ContainerExecWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s, ["/bin/sh", "-c", "/usr/local/lsws/bin/lswsctrl reload"]
         return true
       end
       errors << d
@@ -76,7 +76,7 @@ module ContainerServices::WordpressServices
       c = ["/bin/sh", "-c", "if [ -f /usr/local/lsws/conf/vhosts/Wordpress/htpasswd ]; then rm /usr/local/lsws/conf/vhosts/Wordpress/htpasswd; fi && if [ -f /usr/local/lsws/conf/vhosts/Wordpress/.protect_enabled ]; then rm /usr/local/lsws/conf/vhosts/Wordpress/.protect_enabled; fi && sed -i '/realm protected$/d' /usr/local/lsws/conf/vhosts/Wordpress/vhconf.conf"]
       d = container.container_exec!(c, nil, 10)
       if d.blank?
-        ContainerWorkers::ContainerExecWorker.perform_async container.to_global_id.uri, event.to_global_id.uri, ["/bin/sh", "-c", "/usr/local/lsws/bin/lswsctrl reload"]
+        ContainerWorkers::ContainerExecWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s, ["/bin/sh", "-c", "/usr/local/lsws/bin/lswsctrl reload"]
         return true
       end
       errors << d

@@ -1,19 +1,14 @@
 ##
 # Sentry
 #
-# TODO: Update to latest sentry gem
-#
 SENTRY_CONFIGURED = !ENV['SENTRY_DSN'].blank?
 if SENTRY_CONFIGURED
-  Raven.configure do |config|
+  Sentry.init do |config|
     config.dsn = ENV['SENTRY_DSN']
-    config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
-    config.release = "portal@#{File.read("#{Rails.root}/VERSION").strip}"
-    config.environments = %w[ default production ] # Default is used by clockwork
-    # config.environments = %w[ default test development production ] # Default is used by clockwork
-    config.logger = Logger.new(STDOUT)
-    if Rails.env.production?
-      config.async = lambda { |event| SentryJob.perform_later(event) }
-    end
+    config.breadcrumbs_logger = [:active_support_logger, :http_logger]
+    config.enabled_environments = %w[ default test development production ] # Default is used by clockwork
+    config.release = "controller@#{File.read("#{Rails.root}/VERSION").strip}"
+
+    config.traces_sample_rate = 0.5
   end
 end

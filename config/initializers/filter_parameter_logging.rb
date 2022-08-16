@@ -11,5 +11,13 @@ Rails.application.config.filter_parameters += [
   :cvv,
   :password,
   :password_confirmation,
-  :state # OAuth2 state parameter
+  :state, # OAuth2 state parameter
+  :secret,
+  :token,
+  :_key,
+  :crypt,
+  :salt,
+  :certificate,
+  :otp,
+  :ssn
 ]

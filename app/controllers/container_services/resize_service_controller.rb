@@ -54,7 +54,7 @@ class ContainerServices::ResizeServiceController < ContainerServices::BaseContro
     )
     event.deployments << @service.deployment if @service.deployment
     event.event_details.create!(data: raw_msg, event_code: 'c2cf0eb058aeff2a')
-    ContainerServiceWorkers::ResizeServiceWorker.perform_async @service.to_global_id.uri, event.to_global_id.uri, package.to_global_id.uri
+    ContainerServiceWorkers::ResizeServiceWorker.perform_async @service.to_global_id.to_s, event.to_global_id.to_s, package.to_global_id.to_s
     redirect_to container_service_path(@service), notice: I18n.t('container_services.controller.resize.queued')
   end
 

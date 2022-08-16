@@ -91,20 +91,6 @@ de:
         disable: API Zugriff deaktivieren
         regen: Regenerieren
         regen_prompt: Sind Sie sicher? Dadurch wird Ihr vorhandenes Token sofort ungültig.
-      authy:
-        enable: Authy 2FA aktivieren
-        disable: Authy 2FA deaktivieren
-        help_link: Klicken Sie hier, um mehr über die Verwendung von Authy 2FA zu erfahren.
-    authy:
-      new:
-        title: Authy 2FA aktivieren
-        cc: Ländercode
-        phone: Mobiltelefon
-        apps: Klicken Sie hier, um die Authy-Apps zu installieren
-      edit:
-        title: Authy 2FA aktivieren
-        token: Authy Token
-        apps: Klicken Sie hier, um die Authy-Apps zu installieren
     security_key:
       controller:
         removed: Sicherheitsschlüssel entfernt
@@ -127,8 +113,6 @@ de:
           l1: Wenn es eine Taste hat, drücken Sie diese bitte, um sich zu registrieren.
     security_key_auth:
       controller:
-        no_authy: "Kein Authy-Konto mit Ihrem Benutzerkonto verknüpft."
-        authy_disabled: "Die Authy-Authentifizierung ist deaktiviert. Bitte kontaktieren Sie den Support."
         invalid_token: Ungültiger Token
       new:
         title: Sicherheitstor
@@ -138,8 +122,6 @@ de:
         u2f:
           l1: Wenn es eine Taste hat, drücken Sie diese bitte zur Authentifizierung.
           error: Authentifizierungsfehler! Bitte aktualisieren Sie die Seite und versuchen Sie es erneut.
-        authy:
-          title: Authentifizierung mit Ihrer Authy 2FA App
     totp:
       title: Authenticator App
       setup: Authenticator App konfigurieren

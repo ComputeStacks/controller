@@ -45,7 +45,7 @@ module Users
     private
 
     def trigger_create_notifier
-      ProcessAppEventWorker.perform_async 'UserCreated', nil, to_global_id.uri
+      ProcessAppEventWorker.perform_async 'UserCreated', nil, to_global_id.to_s
     end
 
     def trigger_destroy_notifier

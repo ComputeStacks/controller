@@ -9,7 +9,7 @@ module VolumeWorkers
         Volume.trashable.each do |i|
           # If any nodes are offline, then wait to trash this one later.
           next if i.nodes.offline.exists?
-          VolumeWorkers::TrashVolumeWorker.perform_async i.to_global_id.uri
+          VolumeWorkers::TrashVolumeWorker.perform_async i.to_global_id.to_s
         end
         return
       end
@@ -33,11 +33,13 @@ module VolumeWorkers
       event.volumes << volume
 
       if halt_attempt
-        event.event_details.create!(
-          data: "Too many failed attempts to remove this volume. Please check previous events for errors and try again.",
-          event_code: "56a8af7da2e3b652"
-        )
-        event.cancel! "Too many failed attempts"
+        if defined?(event)
+          event.event_details.create!(
+            data: "Too many failed attempts to remove this volume. Please check previous events for errors and try again.",
+            event_code: "56a8af7da2e3b652"
+          ) if event
+          event.cancel!("Too many failed attempts") if event
+        end
         volume.update to_trash: false, trash_after: nil, trashed_by: nil
         return false
       end

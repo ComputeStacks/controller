@@ -32,7 +32,7 @@ class OrdersController < AuthController
         ip_addr: request.remote_ip,
         event: 'updated'
       )
-      ProcessOrderWorker.perform_async @order.to_global_id.uri, audit.to_global_id.uri
+      ProcessOrderWorker.perform_async @order.to_global_id.to_s, audit.to_global_id.to_s
       # event = EventLog.create!(
       #   locale: 'order.provision',
       #   audit: audit,

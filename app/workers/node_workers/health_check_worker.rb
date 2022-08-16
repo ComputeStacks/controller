@@ -8,7 +8,7 @@ module NodeWorkers
 
       if node_id.nil?
         Node.online.each do |i|
-          NodeWorkers::HealthCheckWorker.perform_async i.to_global_id.uri
+          NodeWorkers::HealthCheckWorker.perform_async i.to_global_id.to_s
         end
         return
       end
@@ -41,7 +41,7 @@ module NodeWorkers
         next unless c.active? # Ignore containers that have been stopped
         failed_attempts = c.event_logs.where( Arel.sql(%Q(created_at >= '#{1.hour.ago.iso8601}')) ).starting.failed.count
         return halt_recovery! c if failed_attempts > 3
-        ContainerWorkers::RecoverContainerWorker.perform_async c.to_global_id.uri
+        ContainerWorkers::RecoverContainerWorker.perform_async c.to_global_id.to_s
       end
 
       ##
@@ -103,7 +103,7 @@ module NodeWorkers
           if i.active?
             next if i.is_a?(Deployment::Container) && i.restore_in_progress?
             if has_network
-              ContainerWorkers::RecoverContainerWorker.perform_async i.to_global_id.uri
+              ContainerWorkers::RecoverContainerWorker.perform_async i.to_global_id.to_s
             else
               audit = Audit.create_from_object!(i, 'updated', '127.0.0.1')
               PowerCycleContainerService.new(i, 'rebuild', audit).perform
@@ -182,11 +182,11 @@ module NodeWorkers
         log_level: 'warn',
         data: {
           message: "Auto-recovery has failed too many times.",
-          obj_id: container.to_global_id.uri.to_s,
+          obj_id: container.to_global_id.to_s.to_s,
         },
         event_code: '459363d1cbcce0c3'
       )
-      ProcessAppEventWorker.perform_async 'ContainerBootFailed', container.user&.to_global_id.uri, container.to_global_id.uri
+      ProcessAppEventWorker.perform_async 'ContainerBootFailed', container.user&.to_global_id.to_s, container.to_global_id.to_s
     end
 
   end

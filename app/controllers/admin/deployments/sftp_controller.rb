@@ -16,7 +16,7 @@ class Admin::Deployments::SftpController < Admin::Deployments::BaseController
       audit: audit
     )
     event.deployments << @deployment
-    ProjectWorkers::SftpInitWorker.perform_async @deployment.to_global_id.uri, event.to_global_id.uri
+    ProjectWorkers::SftpInitWorker.perform_async @deployment.to_global_id.to_s, event.to_global_id.to_s
     redirect_to "/admin/deployments/#{@deployment.id}", notice: I18n.t('crud.queued_plural', resource: 'Project SSH containers')
   end
 

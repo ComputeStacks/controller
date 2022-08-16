@@ -25,7 +25,7 @@ module ContainerServiceWorkers
       if defined?(event) && event
         event.event_details.create!(
           data: e.message,
-          event_code: '70cde3ba6c2c9a57'
+          event_code: '0f78f7b3f13c57ae'
         )
         event.fail! e.message
         user = event.audit&.user
