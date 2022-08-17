@@ -6,6 +6,7 @@ LABEL org.opencontainers.image.source="https://github.com/ComputeStacks/controll
 LABEL org.opencontainers.image.url="https://github.com/ComputeStacks/controller"
 LABEL org.opencontainers.image.title="ComputeStacks Controller"
 
+ENV PASSENGER_VERSION 6.0.11
 ENV RACK_ENV=production
 ENV RAILS_ENV=production
 ENV SECRET_KEY_BASE=3a698257a1e32f1bb9b3fd861640c3b53cc9c57dd40b3fa360fed44d2e5da3fdb3351db2f8c881f2a04e6a7ca7e721de67d98061ffa7d394d3ad1c24ce9e09ec
@@ -38,13 +39,15 @@ RUN set -eux; \
                 pcre-dev \
         ; \
         gem install -N bundler \
-        && gem install -N passenger sassc nokogiri \
+          && gem install -N passenger -v ${PASSENGER_VERSION} \
+          && gem install -N sassc nokogiri \
         ; \
         passenger-config compile-agent --auto --optimize \
         ; \
         passenger-config install-standalone-runtime --auto --skip-cache \
         ; \
         passenger-config build-native-support \
+        ; \
         mkdir -p /usr/src/app/vendor
 
 WORKDIR /usr/src/app
