@@ -1,4 +1,4 @@
-FROM cmptstks/alpine-passenger:ruby2.7
+FROM ruby:3.1-alpine
 
 LABEL maintainer="https://github.com/ComputeStacks"
 LABEL org.opencontainers.image.authors="https://github.com/ComputeStacks"
@@ -14,7 +14,7 @@ ENV LOCALE=en
 ENV CURRENCY=USD
 ENV DATABASE_URL="postgresql://cstacks:cstacks@localhost/cstacks?pool=30"
 ENV REDIS_HOST=localhost
-#ENV RUBYOPT='-W:no-deprecated'
+ENV RUBYOPT='-W:no-deprecated'
 ENV APP_ID=build
 
 ARG github_user
@@ -29,12 +29,23 @@ RUN set -eux; \
                 supervisor \
                 vim \
                 yarn \
+                build-base \
+                ca-certificates \
+                curl \
+                curl-dev \
+                openssh \
+                pcre \
+                pcre-dev \
         ; \
+        gem install -N bundler \
+        && gem install -N passenger sassc nokogiri \
+        ; \
+        passenger-config compile-agent --auto --optimize \
+        ; \
+        passenger-config install-standalone-runtime --auto --skip-cache \
+        ; \
+        passenger-config build-native-support \
         mkdir -p /usr/src/app/vendor
-
-# Pre-install gems that require long compile times.
-RUN gem install sassc -v 2.4.0 \
-    && gem install nokogiri -v 1.12.5
 
 WORKDIR /usr/src/app
 
