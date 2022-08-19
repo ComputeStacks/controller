@@ -1,5 +1,20 @@
 # v7.2 Upgrade Notes
 
+## Update Controller
+
+New image should pull from: `cscr.cc/cs-public/platform/controller:v7.2`
+
+```
+sed -i 's/cmptstks\/controller/cscr.cc\/cs-public\/platform\/controller/g' /etc/default/computestacks
+```
+
+Change `cstacks` to use updated container:
+
+```
+sed -i 's/portal ash/portal bash/g' /usr/local/bin/cstacks
+sed -i 's/$CS_REG ash/$CS_REG bash/g' /usr/local/bin/cstacks
+```
+
 ## Update cs-agent
 
 ### Add the following to the agent config
@@ -22,7 +37,7 @@ LimitNOFILE=infinity
 ### Download and update the agent binary
 
 ```bash
-cd /tmp && wget https://cdn.computestacks.net/packages/cs-agent/cs-agent.tar.gz
+cd /tmp && wget https://f.cscdn.cc/file/cstackscdn/packages/cs-agent/cs-agent.tar.gz
 tar -xzvf cs-agent.tar.gz
 rm -f /usr/local/bin/cs-agent
 mv cs-agent /usr/local/bin/

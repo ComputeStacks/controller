@@ -24,7 +24,7 @@
   <div class="block-center col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-12">
     <div class="pull-right text-right">
       <strong><%= t 'users.security_key_auth.new.help_title' %></strong>
-      <p><%= t 'users.security_key_auth.new.support', { support_line: Setting.general_support_line } %></p>
+      <p><%= t 'users.security_key_auth.new.support', support_line: Setting.general_support_line %></p>
     </div>
     <% unless @available_auths.empty? %>
       <strong><%= t 'users.security_key_auth.new.alt_methods' %></strong>

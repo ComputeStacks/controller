@@ -124,7 +124,7 @@ class EventLog < ApplicationRecord
 
   # @return [String]
   def description
-    I18n.t("events.messages.#{locale}", locale_keys.symbolize_keys)
+    I18n.t("events.messages.#{locale}", **locale_keys.symbolize_keys)
   rescue
     "#{locale} #{locale_keys}"
   end
