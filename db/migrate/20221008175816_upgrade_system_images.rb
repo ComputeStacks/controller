@@ -7,6 +7,10 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
 
       mysql.update name: 'mariadb', label: 'MariaDB'
 
+      mysql.image_variants.each do |i|
+        i.update_column :is_default, false
+      end
+
       mysql.image_variants.create!(
         label: "10.9",
         registry_image_tag: "10.9",
@@ -56,6 +60,9 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
 
       if php
         php.update name: 'php', label: 'PHP'
+        php.image_variants.each do |i|
+          i.update_column :is_default, false
+        end
         php.image_variants.create!(
           label: "php8.1-litespeed",
           registry_image_tag: "php8.1-litespeed",
@@ -95,6 +102,9 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
     # Postgres
     if ContainerImage.where(name: 'postgres').exists?
       pg = ContainerImage.find_by(name: 'postgres')
+      pg.image_variants.each do |i|
+        i.update_column :is_default, false
+      end
       pg.image_variants.create!(
         label: "14",
         registry_image_tag: "14",
@@ -138,6 +148,9 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
     # Wordpress
     wp = ContainerImage.find_by name: 'wordpress', registry_image_path: "cmptstks/wordpress"
     if wp
+      wp.image_variants.each do |i|
+        i.update_column :is_default, false
+      end
       wp.image_variants.create!(
         label: "php8.0-litespeed",
         registry_image_tag: "php8.0-litespeed",
