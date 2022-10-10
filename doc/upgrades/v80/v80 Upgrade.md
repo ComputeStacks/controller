@@ -1,8 +1,8 @@
-# v7.2 Upgrade Notes
+# v8.0 Upgrade Notes
 
 ## Update Controller
 
-New image should pull from: `cscr.cc/cs-public/platform/controller:v7.2`
+New image should pull from: `cscr.cc/cs-public/platform/controller:v8.0`
 
 ```
 sed -i 's/cmptstks\/controller/cscr.cc\/cs-public\/platform\/controller/g' /etc/default/computestacks

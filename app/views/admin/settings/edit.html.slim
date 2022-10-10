@@ -8,7 +8,6 @@
 .row: div class="#{settings_form_cols @setting}"
   p.lead= "Edit #{@setting.name}"
 
-= render partial: "admin/settings/license_info" if @setting.name == 'license_key'
 .row
   div class="#{settings_form_cols @setting}"
     = form_for @setting, url: "/admin/settings/#{@setting.id}" do |f|

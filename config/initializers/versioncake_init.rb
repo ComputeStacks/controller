@@ -9,10 +9,10 @@ VersionCake.setup do |config|
     # ADMIN
     # r.resource %r{/api/admin/projects}, [40,41], [51..54], [60]
 
-    r.resource %r{.*}, [40,50], [51,52,53,54,60,61,62,65], [71]
+    r.resource %r{.*}, [40,50], [51,52,53,54,60,61,62,65,70,71], [80]
   end
 
   config.extraction_strategy = :http_accept_parameter
-  config.missing_version = 71
+  config.missing_version = 80
 
 end
