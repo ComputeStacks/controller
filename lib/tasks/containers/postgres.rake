@@ -12,7 +12,8 @@ namespace :containers do
         can_scale:                false,
         is_free:                  false,
         container_image_provider: dhprovider,
-        registry_image_path:      "postgres"
+        registry_image_path:      "postgres",
+        skip_variant_setup: true
       )
       pg.image_variants.create!(
         label: "14",

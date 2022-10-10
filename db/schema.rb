@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_10_08_175816) do
+ActiveRecord::Schema[7.0].define(version: 2022_10_10_212053) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -239,7 +239,9 @@ ActiveRecord::Schema[7.0].define(version: 2022_10_08_175816) do
     t.boolean "optional", default: false, null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.bigint "default_variant_id"
     t.index ["container_image_id"], name: "index_container_image_image_rels_on_container_image_id"
+    t.index ["default_variant_id"], name: "image_rels_default_variant_index"
     t.index ["requires_container_id"], name: "index_container_image_image_rels_on_requires_container_id"
   end
 

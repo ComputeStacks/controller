@@ -147,15 +147,27 @@ class OrderSession
         collection_id: collection_id
       }
     end
-    add_dependencies! unless skip_dep
+    add_dependencies!(opts) unless skip_dep
   end
 
   def add_collection(collection_id)
     collection = ContainerImageCollection.find_by id: collection_id
     return if collection.nil?
+
+    # for images that have defined a non-standard variant (e.g. mariadb 10.5 instead of the default),
+    # gather those here and reference them later during the _add each image in collection_ process.
+    h = {} # { image_id => variant }
+    collection.container_images.each do |i|
+      i.dependency_parents.each do |i_dep|
+        variant = i_dep.default_variant ? i_dep.default_variant : i_dep.dependency.default_variant
+        h[i_dep.dependency.id] = variant
+      end
+    end
+
     collection.container_images.each do |i|
       next if image_selected? i.id
-      add_image i.default_variant, { collection_id: collection.id }
+      variant = h[i.id].nil? ? i.default_variant : h[i.id]
+      add_image variant, { collection_id: collection.id }
     end
   end
 
@@ -168,16 +180,18 @@ class OrderSession
   # otherwise it will be automatically called when adding an image.
   #
   # This will also add an image's dependency dependencies.
-  def add_dependencies!
+  def add_dependencies!(opts = {})
     images.each do |h|
       image = ContainerImage.find_by id: h[:image_id]
       next if image.nil?
-      image.dependencies.each do |i_dep|
-        next if image_selected?(i_dep.id)
+      image.dependency_parents.each do |i_dep|
+        next if i_dep.container_image.nil?
+        next if image_selected?(i_dep.container_image.id)
         unless new_project?
-          next if project.container_images.include?(i_dep)
+          next if project.container_images.include?(i_dep.container_image)
         end
-        add_image i_dep.default_variant
+        variant = i_dep.default_variant ? i_dep.default_variant : i_dep.container_image.default_variant
+        add_image variant, opts
       end
     end
   end

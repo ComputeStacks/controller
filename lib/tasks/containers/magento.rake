@@ -36,8 +36,11 @@ namespace :containers do
         registry_image_path:      "cmptstks/magento-ce",
         min_cpu:                  1,
         min_memory:               1024,
-        general_block_id:         mage_block.id
+        general_block_id:         mage_block.id,
+        skip_variant_setup: true,
+        active: false
       )
+
       mage.image_variants.create!(
         label: "2.4",
         registry_image_tag: "2.4",
@@ -47,9 +50,19 @@ namespace :containers do
         is_default: true,
         skip_tag_validation: true
       )
+
+      unless ContainerImageCollection.where(label: 'Magento').exists?
+        wpc = ContainerImageCollection.create!( label: 'Magento', active: true )
+        wpc.container_images << mysql
+        wpc.container_images << mage
+        wpc.container_images << es
+      end
+
+      mariadb_105 = ContainerImage::ImageVariant.find_by(registry_image_tag: "10.5")
       mage.dependency_parents.create!(
         requires_container_id: mysql.id,
-        bypass_auth_check:     true
+        bypass_auth_check:     true,
+        default_variant: mariadb_105
       )
       mage.dependency_parents.create!(
         requires_container_id: es.id,

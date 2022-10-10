@@ -10,7 +10,8 @@ namespace :containers do
         category:               "web",
         can_scale:                true,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/node"
+        registry_image_path:      "cmptstks/node",
+        skip_variant_setup: true
       )
 
       nodejs.image_variants.create!(

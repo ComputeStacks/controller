@@ -2,7 +2,7 @@ namespace :containers do
   desc "Install laravel"
   task laravel: :environment do
 
-    unless ContainerImage.find_by(name: 'laravel').exists?
+    unless ContainerImage.where(name: 'laravel').exists?
       dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
       unless ContainerImage.where(name: 'mariadb').exists?
         Rake::Task['containers:mariadb'].execute
@@ -15,7 +15,8 @@ namespace :containers do
         category:               'web',
         can_scale:                true,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/laravel"
+        registry_image_path:      "cmptstks/laravel",
+        skip_variant_setup: true
       )
       laravel.image_variants.create!(
         label: "5",

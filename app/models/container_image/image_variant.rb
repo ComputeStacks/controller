@@ -46,6 +46,8 @@ class ContainerImage::ImageVariant < ApplicationRecord
   has_many :container_services, class_name: 'Deployment::ContainerService', dependent: :restrict_with_error
   has_many :containers, through: :container_services
 
+  has_many :image_dependents, class_name: "ContainerImage::ImageRel", foreign_key: "default_variant_id", dependent: :nullify
+
   # Validations
   validates :registry_image_tag, presence: true
 

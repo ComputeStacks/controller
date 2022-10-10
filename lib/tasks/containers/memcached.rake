@@ -12,7 +12,8 @@ namespace :containers do
         category:               "web",
         can_scale:                false,
         container_image_provider: dhprovider,
-        registry_image_path:      "memcached"
+        registry_image_path:      "memcached",
+        skip_variant_setup: true
       )
       memcache.image_variants.create!(
         label: "alpine",

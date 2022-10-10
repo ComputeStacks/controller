@@ -10,6 +10,10 @@
 # @!attribute dependency
 #   @return [ContainerImage]
 #
+# @!attribute default_variant
+#   Specify the default version for this image, which will override the image's default variant.
+#   @return [ContainerImage::ImageVariant]
+#
 class ContainerImage::ImageRel < ApplicationRecord
 
   include Auditable
@@ -22,12 +26,24 @@ class ContainerImage::ImageRel < ApplicationRecord
              class_name: "ContainerImage",
              foreign_key: "requires_container_id"
 
+  belongs_to :default_variant, class_name: 'ContainerImage::ImageVariant', optional: true
+
+  validate :valid_variant
+
   validate :can_link?
   validate :is_unique?
 
   attr_accessor :bypass_auth_check
 
   private
+
+  # Ensure the variant we're adding belongs to the image.
+  def valid_variant
+    return if default_variant.nil?
+    unless dependency == default_variant.container_image
+      errors.add(:base, "invalid variant")
+    end
+  end
 
   def is_unique?
     if container_image.dependency_parents.include?(self)

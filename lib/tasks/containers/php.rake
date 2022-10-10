@@ -12,7 +12,8 @@ namespace :containers do
         can_scale:                true,
         is_free:                  false,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/php"
+        registry_image_path:      "cmptstks/php",
+        skip_variant_setup: true
       )
 
       php.image_variants.create!(

@@ -12,7 +12,8 @@ namespace :containers do
         category:                 'web',
         can_scale:                false,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/ghost"
+        registry_image_path:      "cmptstks/ghost",
+        skip_variant_setup: true
       )
       ghost.image_variants.create!(
         label: "4",

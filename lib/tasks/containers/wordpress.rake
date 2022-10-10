@@ -25,8 +25,8 @@ namespace :containers do
         labels:                   {
           system_image_name: "wordpress-litespeed"
         },
-        validated_tag: true,
-        validated_tag_updated: Time.now
+        skip_variant_setup: true,
+        active: false
       )
 
       unless ContainerImageCollection.where(label: 'Wordpress').exists?

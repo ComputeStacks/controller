@@ -12,7 +12,8 @@ namespace :containers do
         category:               'web',
         can_scale:                true,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/nginx"
+        registry_image_path:      "cmptstks/nginx",
+        skip_variant_setup: true
       )
       nginx.image_variants.create!(
         label: "stable",

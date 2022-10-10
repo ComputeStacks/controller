@@ -26,7 +26,8 @@ namespace :containers do
         command:                  "/bin/sh -c redis-server --requirepass {{password}} --save "" --appendonly no",
         labels:                   {
           system_image_name: "redis-public"
-        }
+        },
+        skip_variant_setup: true
       )
       redis.image_variants.create!(
         label: "alpine",

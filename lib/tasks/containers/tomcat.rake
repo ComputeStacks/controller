@@ -26,8 +26,7 @@ namespace :containers do
         labels: {
           system_image_name: "tomcat-10"
         },
-        validated_tag: true,
-        validated_tag_updated: Time.now
+        skip_variant_setup: true
       )
 
       tomcat.image_variants.create!(

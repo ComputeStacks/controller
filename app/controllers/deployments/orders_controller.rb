@@ -20,8 +20,18 @@ class Deployments::OrdersController < AuthController
   # * Add containers from the index page
   # * Set the project name
   def add_containers
+
+    # Setup params
+    if order_params[:containers].nil?
+      params[:containers] = []
+    end
+
+    if order_params[:collections].nil?
+      params[:collections] = []
+    end
+
     if order_params[:collections].empty?
-      if order_params[:containers].nil? || order_params[:containers].empty?
+      if order_params[:containers].empty?
         redirect_to "/deployments/orders", alert: I18n.t('orders.projects.errors.missing_app')
         return false
       end
@@ -38,12 +48,12 @@ class Deployments::OrdersController < AuthController
     # Remove any de-selected images
     @order_session.images.delete_if do |i|
       !order_params[:containers].detect { |ii| ii.to_i == i[:image_id] }
-    end if order_params[:containers]
+    end
 
     # remove any de-selected collections
     @order_session.collections.delete_if do |i|
       !order_params[:collections].include? i.id
-    end if order_params[:collections]
+    end
 
     # Add any dependent containers to their process
     order_params[:containers].each do |i|

@@ -12,7 +12,8 @@ namespace :containers do
         can_scale:                false,
         container_image_provider: dhprovider,
         registry_image_path:      "mariadb",
-        command:                  "--max_allowed_packet=268435456"
+        command:                  "--max_allowed_packet=268435456",
+        skip_variant_setup: true
       )
 
       mysql.image_variants.create!(

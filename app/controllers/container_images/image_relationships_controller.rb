@@ -47,7 +47,6 @@ class ContainerImages::ImageRelationshipsController < ContainerImages::BaseContr
 
   def update
     redirect_to helpers.container_image_path(@container), alert: "Not allowed. Delete and re-add the relationship."
-    return false
   end
 
   def destroy

@@ -14,7 +14,8 @@ namespace :containers do
         is_free:                  true,
         can_scale:                false,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/phpmyadmin"
+        registry_image_path:      "cmptstks/phpmyadmin",
+        skip_variant_setup: true
       )
       pma.image_variants.create!(
         label: "v2",

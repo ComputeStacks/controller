@@ -9,6 +9,7 @@
 * [FEATURE] Image Variants
 * [FEATURE] Image Collections
 * [FEATURE] Image categories. When editing an image, you can define a category; images will be grouped by category on the order page.
+* [FEATURE] Specify default variant when linking images. Note: Currently only accessible via API and console.
 * [CHANGE] Both `tcp` and `udp` will share the same external NAT port.
 * [CHANGE] Previously, even if over-commit memory/cpu was enabled, ComputeStacks would still prevent placing containers on a node that did not have enough cpu or memory available. This would cause orders to fail; this will now follow the over-commit setting as well.
 * [FIX] Resolved issue that would randomly cause an ip address to be assigned to multiple containers at once, and cause a provision failure.

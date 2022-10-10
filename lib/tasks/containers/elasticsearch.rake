@@ -15,7 +15,8 @@ namespace :containers do
           container_image_provider: dhprovider,
           registry_image_path:      "elasticsearch",
           min_cpu:                  1,
-          min_memory:               1024
+          min_memory:               1024,
+          skip_variant_setup: true
         )
         elasticsearch.image_variants.create!(
           label: "8.4.3",

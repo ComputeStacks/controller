@@ -14,6 +14,7 @@ class Api::ContainerImages::ImageRelationshipsController < Api::ContainerImages:
   # * `image_relationships`: Array
   #     * `container_image_id`: Integer
   #     * `requires_container_id`: Integer
+  #     * `default_variant_id`: Integer | Override the default variant for the specified image.
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
@@ -31,6 +32,7 @@ class Api::ContainerImages::ImageRelationshipsController < Api::ContainerImages:
   # * `image_relationship`: Object
   #     * `container_image_id`: Integer
   #     * `requires_container_id`: Integer
+  #     * `default_variant_id`: Integer | Override the default variant for the specified image.
   #     * `created_at`: DateTime
   #
   def show; end
@@ -44,6 +46,7 @@ class Api::ContainerImages::ImageRelationshipsController < Api::ContainerImages:
   #
   # * `image_relationship`: Object
   #     * `requires_container_id`: Integer
+  #     * `default_variant_id`: Integer | Override the default variant for the specified image.
   #
   def update
     if @rel.update(rel_params)
@@ -64,6 +67,7 @@ class Api::ContainerImages::ImageRelationshipsController < Api::ContainerImages:
   #
   # * `image_relationship`: Object
   #     * `requires_container_id`: Integer
+  #     * `default_variant_id`: Integer | Override the default variant for the specified image.
   #
   def create
     @rel = @image.dependency_parents.new(rel_params)
@@ -97,7 +101,7 @@ class Api::ContainerImages::ImageRelationshipsController < Api::ContainerImages:
   end
 
   def rel_params
-    params.require(:image_relationship).permit(:requires_container_id)
+    params.require(:image_relationship).permit(:requires_container_id, :default_variant_id)
   end
 
 end

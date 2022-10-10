@@ -12,7 +12,8 @@ namespace :containers do
         category: 'web',
         can_scale: false,
         container_image_provider: dhprovider,
-        registry_image_path: "grafana/grafana"
+        registry_image_path: "grafana/grafana",
+        skip_variant_setup: true
       )
       graf.image_variants.create!(
         label: "latest",
