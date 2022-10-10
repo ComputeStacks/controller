@@ -8,12 +8,14 @@
 * [FEATURE] Support for custom `/etc/hosts` entries in both images and containers.
 * [FEATURE] Image Variants
 * [FEATURE] Image Collections
+* [FEATURE] Image categories. When editing an image, you can define a category; images will be grouped by category on the order page.
 * [CHANGE] Both `tcp` and `udp` will share the same external NAT port.
 * [CHANGE] Previously, even if over-commit memory/cpu was enabled, ComputeStacks would still prevent placing containers on a node that did not have enough cpu or memory available. This would cause orders to fail; this will now follow the over-commit setting as well.
 * [FIX] Resolved issue that would randomly cause an ip address to be assigned to multiple containers at once, and cause a provision failure.
 * [FIX] Annual snapshot retention was not visible in the UI.
 * [FIX] Region allocation was over counting SFTP containers.
-* [FIX] Fix broken unsuspend user api.
+* [FIX] Resolve broken unsuspend user api.
+* [FIX] Resolve issue that prevented billing event data from being included in web hooks.
 
 ***
 

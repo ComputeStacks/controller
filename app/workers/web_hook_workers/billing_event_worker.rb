@@ -10,7 +10,7 @@ module WebHookWorkers
       template = "api/admin/subscriptions/billing_events/show"
 
       if setting.value =~ URI::regexp
-        data = Rabl::Renderer.new(template, obj, {format: :json}).render
+        data = Rabl::Renderer.new(template, billing_event, {format: :json}).render
         WebHookService.new(setting, data).perform
       end
 
