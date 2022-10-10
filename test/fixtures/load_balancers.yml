@@ -17,7 +17,7 @@ default:
   direct_connect: true
   le: false
   region: regionone
-  cert_encrypted: "<%= Secret.encrypt!(File.read('/home/vagrant/.ssl_wildcard/sharedcert.pem')) %>"
+  cert_encrypted: "<%= Secret.encrypt!(File.read(LB_DEFAULT_CERT_PATH)) %>"
 
 #other:
 #  name: test-lb02

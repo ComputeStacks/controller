@@ -10,14 +10,20 @@ namespace :containers do
         label:                    "phpMyAdmin",
         description:              "phpMyAdmin",
         role:                     "pma",
-        role_class:               "dev",
+        category:               "dev",
         is_free:                  true,
         can_scale:                false,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/phpmyadmin",
-        registry_image_tag:       "v2",
+        registry_image_path:      "cmptstks/phpmyadmin"
+      )
+      pma.image_variants.create!(
+        label: "v2",
+        registry_image_tag: "v2",
         validated_tag: true,
-        validated_tag_updated: Time.now
+        validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
       )
       pma.ingress_params.create!(
         port:            80,

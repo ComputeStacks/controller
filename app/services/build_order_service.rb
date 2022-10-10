@@ -58,7 +58,7 @@ class BuildOrderService
         product_type: 'container',
         source: c[:source], # Source service CSRN
         label: c[:name],
-        container_id: c[:image_id].to_i,
+        image_variant_id: c[:image_variant].to_i,
         qty: c[:qty],
         domains: c[:domains] ? c[:domains] : [],
         resources: c[:resources],
@@ -208,9 +208,16 @@ class BuildOrderService
       end
 
       # Validate image
-      img = ContainerImage.find_for(user, {id: c[:image_id]})
+      img_variant = ContainerImage::ImageVariant.find_by id: c[:image_variant]
+      if img_variant.nil?
+        errors << "Invalid image. Image Variant ID: #{c[:image_variant]} | #{c[:name]}."
+        next
+      end
+
+      # Should never happen because image_source requires an image.
+      img = img_variant.container_image
       if img.nil?
-        errors << "Invalid image. Image ID: #{c[:image_id]} | #{c[:name]}."
+        errors << "Invalid image. Image ID: #{c[:image_variant]} | #{c[:name]}."
         next
       end
 

@@ -106,14 +106,28 @@ module Containerized
   # @param [EventLog] event
   def container_exec!(command, event, timeout = 10)
     result = []
-    docker_client.exec(command, wait: timeout) do |f,d|
-      result << d
+    response = docker_client.exec(command, wait: timeout)
+    exit_code = 0
+    result << response[0]
+    result << response[1] unless response[1].empty?
+    exit_code = response[2] if response[2] > exit_code
+    if result.count == 1
+      result = result[0]
+      if result.is_a?(Array)
+        result = result[0]
+        if result.is_a?(Array)
+          result = result[0]
+        end
+      end
     end
-    return result.join('') if event.nil?
     event.event_details.create!(
-      event_code: '',
-      data: result.join('')
-    )
+      event_code: '76ed2ba5c0ef8883',
+      data: "Exit Code: #{exit_code}\n\nResponse: #{result}"
+    ) if event
+    {
+      response: result,
+      exit_code: exit_code
+    }
   end
 
   ##

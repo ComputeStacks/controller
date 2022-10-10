@@ -1,0 +1,4 @@
+wordpress:
+  label: Wordpress
+  active: true
+  sort: 0

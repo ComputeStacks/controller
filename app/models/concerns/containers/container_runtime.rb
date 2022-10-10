@@ -6,6 +6,7 @@ module Containers
       # Sanity checks
       return nil if service.nil?
       return nil if deployment.nil?
+      return nil if image_variant.nil?
       return nil if container_image.nil?
 
       return nil unless setup_custom_hosts!(audit)
@@ -29,12 +30,12 @@ module Containers
           'org.projectcalico.label.service' => service.name,
           'com.computestacks.service_id' => service.id.to_s,
           'com.computestacks.deployment_id' => deployment.id.to_s,
-          'com.computestacks.image_name' => container_image.full_image_path
+          'com.computestacks.image_name' => image_variant.full_image_path
         },
         'Healthcheck' => {
           'Test' => ["NONE"]
         },
-        'Image' => container_image.full_image_path,
+        'Image' => image_variant.full_image_path,
         'HostConfig' => {
           'PortBindings' => {},
           'NetworkMode' => ip_address.network.name,

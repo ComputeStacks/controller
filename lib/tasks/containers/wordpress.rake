@@ -6,21 +6,20 @@ namespace :containers do
     if ContainerImage.find_by(name: 'wordpress').nil?
       dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
 
-      unless ContainerImage.where(name: 'mariadb-105').exists?
-        Rake::Task['containers:mariadb:v105'].execute
+      unless ContainerImage.where(name: 'mariadb').exists?
+        Rake::Task['containers:mariadb'].execute
       end
-      mysql = ContainerImage.find_by(name: 'mariadb-105')
+      mysql = ContainerImage.find_by(name: 'mariadb')
 
       wp = ContainerImage.create!(
         name:                     "wordpress",
         label:                    "Wordpress",
         description:              "Wordpress powered by the OpenLiteSpeed web server. Includes advanced caching and performance tuning, with out of the box support for redis object cache (requires separate container).",
         role:                     "wordpress",
-        role_class:               "web",
+        category:               "web",
         can_scale:                true,
         container_image_provider: dhprovider,
         registry_image_path:      "cmptstks/wordpress",
-        registry_image_tag:       "php7.4-litespeed",
         min_cpu:                  1,
         min_memory:               512,
         labels:                   {
@@ -29,6 +28,41 @@ namespace :containers do
         validated_tag: true,
         validated_tag_updated: Time.now
       )
+
+      unless ContainerImageCollection.where(label: 'Wordpress').exists?
+        wpc = ContainerImageCollection.create!( label: 'Wordpress', active: true )
+        wpc.container_images << mysql
+        wpc.container_images << wp
+      end
+
+      wp.image_variants.create!(
+        label: "php7.4-litespeed",
+        registry_image_tag: "php7.4-litespeed",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        version: 2,
+        skip_tag_validation: true
+      )
+
+      wp.image_variants.create!(
+        label: "php8.0-litespeed",
+        registry_image_tag: "php8.0-litespeed",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        version: 1,
+        skip_tag_validation: true
+      )
+
+      wp.image_variants.create!(
+        label: "php8.1-litespeed",
+        registry_image_tag: "php8.1-litespeed",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        is_default: true,
+        version: 0,
+        skip_tag_validation: true
+      )
+
       wp.dependency_parents.create!(
         requires_container_id: mysql.id,
         bypass_auth_check:     true

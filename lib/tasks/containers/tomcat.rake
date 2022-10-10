@@ -2,7 +2,7 @@ namespace :containers do
 
   desc "Install tomcat container"
   task tomcat: :environment do
-    if ContainerImage.find_by(name: 'tomcat-10').nil?
+    if ContainerImage.find_by(name: 'tomcat').nil?
 
       # Setup block
       block = Block.create!(title: 'Tomcat Image', content_key: 'tomcat_general')
@@ -17,12 +17,11 @@ namespace :containers do
         name: 'tomcat-10',
         description: 'Tomcat image',
         role: 'tomcat',
-        role_class: 'web',
+        category: 'web',
         can_scale: true,
         is_free: false,
         container_image_provider: dhprovider,
         registry_image_path: "cmptstks/tomcat",
-        registry_image_tag: "10",
         general_block_id: block.id,
         labels: {
           system_image_name: "tomcat-10"
@@ -30,6 +29,17 @@ namespace :containers do
         validated_tag: true,
         validated_tag_updated: Time.now
       )
+
+      tomcat.image_variants.create!(
+        label: "10",
+        registry_image_tag: "10",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
+      )
+
       tomcat.setting_params.create!(
         name: 'TOMCAT_PASSWORD',
         label: 'Tomcat PW',

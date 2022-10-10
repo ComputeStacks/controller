@@ -7,7 +7,7 @@
     </ol>
     <ol class="breadcrumb breadcrumb-action text-right">
       <% if current_user == @deployment.user %>
-        <li><%= link_to raw("<i class='fa fa-clone'></i> Clone"), "/deployments/#{@deployment.token}/clone_project", method: :create, data: { confirm: t('confirm_prompt') }, class: "btn btn-sm btn-default", style: "margin-right:5px;" %></li>
+        <li><%= link_to raw("#{icon('fa-solid', 'copy')} Clone"), "/deployments/#{@deployment.token}/clone_project", method: :create, data: { confirm: t('confirm_prompt') }, class: "btn btn-sm btn-default", style: "margin-right:5px;" %></li>
       <% end %>
       <% if current_user.is_admin %>
         <%= link_to '<i class="fa fa-external-link"></i> View In Admin'.html_safe, "/admin/deployments/#{@deployment.id}", class: 'btn btn-sm btn-default', style: 'margin-right:5px;' %>
@@ -64,7 +64,7 @@
   </div>
   <div class="col-xs-3">
     <div class="deployment-overview-sub-header"><%= t('deployments.show.header.last_event').upcase %></div>
-    <div class="deployment-overview-sub-content remote-resource refresh" data-url="/deployments/<%= @deployment.token %>/events/last_event">...</div>
+    <div class="deployment-overview-sub-content remote-resource refresh" data-url="/deployments/<%= @deployment.token %>/events/last_event"><%= icon 'fa-regular', 'ellipsis', class: 'fa-fade' %></div>
   </div>
 </div>
 

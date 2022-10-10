@@ -19,4 +19,16 @@ module Deployments::OrderHelper
     false
   end
 
+  def order_image_select_option(variant, order_session)
+    is_selected = if order_session.image_variant_selected?(variant.id)
+                    true
+                  else
+                    variant.is_default
+                  end
+    tag.option value: variant.id, selected: is_selected do
+      variant.label.blank? ? variant.registry_image_tag : variant.label
+    end
+
+  end
+
 end

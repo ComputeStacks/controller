@@ -4,14 +4,25 @@ module ImageWorkers
 
     sidekiq_options retry: 4, queue: 'default'
 
-    def perform(image_id)
-      image = ContainerImage.find_by(id: image_id)
-      return false if image.nil?
+    def perform(image_or_variant_id)
+      obj = GlobalID::Locator.locate image_or_variant_id
+      return false if obj.nil?
 
-      image.skip_tag_validation = true
-      image.validated_tag = image.registry_image_available?
-      image.validated_tag_updated = Time.now
-      image.save
+      case obj
+      when ContainerImage
+        obj.image_variants.each do |i|
+          i.skip_tag_validation = true
+          i.validated_tag = i.registry_image_available?
+          i.validated_tag_updated = Time.now
+          i.save
+        end
+      when ContainerImage::ImageVariant
+        obj.skip_tag_validation = true
+        obj.validated_tag = obj.registry_image_available?
+        obj.validated_tag_updated = Time.now
+        obj.save
+      end
+
     end
 
   end

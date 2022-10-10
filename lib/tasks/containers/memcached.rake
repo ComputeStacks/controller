@@ -9,13 +9,19 @@ namespace :containers do
         label:                    "Memcache",
         description:              "Memcached is an in-memory key-value store for small chunks of arbitrary data (strings, objects) from results of database calls, API calls, or page rendering.",
         role:                     "memcached",
-        role_class:               "web",
+        category:               "web",
         can_scale:                false,
         container_image_provider: dhprovider,
-        registry_image_path:      "memcached",
-        registry_image_tag:       "alpine",
+        registry_image_path:      "memcached"
+      )
+      memcache.image_variants.create!(
+        label: "alpine",
+        registry_image_tag: "alpine",
         validated_tag: true,
-        validated_tag_updated: Time.now
+        validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
       )
       memcache.ingress_params.create!(
         port:  11211,

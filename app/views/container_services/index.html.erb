@@ -30,12 +30,12 @@
             <div class="pull-left" style="width:35px;margin-right:10px;margin-top:-2px;">
               <%= service_img_icon_tag i %>
             </div>
-            <span style="cursor: pointer;" onclick='window.location="<%= container_service_path(i) %>";' title="<%= i.name %>"><%= i.container_image.label.upcase %></span>
+            <span style="cursor: pointer;" onclick='window.location="<%= container_service_path(i) %>";' title="<%= i.name %>"><%= service_image_friendly_name(i).upcase %></span>
             &nbsp;&nbsp;|&nbsp;&nbsp; <%= link_to i.label, container_service_path(i) %>
             <div class="pull-right hidden-xs">
               <%= service_list_status i %>
               <%= link_to('Login', container_service_connect_index_path(i), title: "Login") if service_show_login(i) %>
-            &nbsp;&nbsp;<%= link_to "<i class='fa fa-cogs'></i>".html_safe, container_service_path(i), title: i.name %>
+            &nbsp;&nbsp;<%= link_to icon('fa-solid', 'gear').html_safe, container_service_path(i), title: i.name %>
             </div>
           </div>
         </div>

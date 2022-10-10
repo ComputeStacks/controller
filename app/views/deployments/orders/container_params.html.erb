@@ -15,9 +15,9 @@
 
   <% @order_session.images.each do |container| %>
     <% next if container[:free] == 'yes' && container[:params].empty? %>
-    <input id="image-<%= container[:container_id] %>" type="hidden" name="image_map[<%= container[:container_id] %>]" value="<%= container[:container_id] %>">
+    <input id="image-<%= container[:image_variant_id] %>" type="hidden" name="image_map[<%= container[:image_variant_id] %>]" value="<%= container[:image_variant_id] %>">
     <% unless container[:free] == 'yes' %>
-    <input id="p<%= container[:container_id] %>" class='container-package-input' data-index="<%= container[:container_id] %>" type="hidden" name="package[<%= container[:container_id] %>]" value="<%= container['free'] == 'yes' ? 0 : container[:package_id] %>">
+    <input id="p<%= container[:image_variant_id] %>" class='container-package-input' data-index="<%= container[:image_variant_id] %>" type="hidden" name="package[<%= container[:image_variant_id] %>]" value="<%= container['free'] == 'yes' ? 0 : container[:package_id] %>">
     <% end %>
     <div class="row"><div class="col-sm-12">
       <div class="panel panel-primary">

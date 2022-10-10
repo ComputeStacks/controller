@@ -26,7 +26,7 @@
           <td><%= i.users.count %></td>
           <td><%= l i.created_at, format: :short %></td>
           <td class="text-right">
-            <%= link_to raw("<i class='fa fa-clone'></i> Clone"), "#{new_admin_user_group_url}?clone=#{i.id}", title: 'Clone Group', class: 'btn btn-sm btn-default', style: 'margin-right:10px;' %>
+            <%= link_to raw("#{icon('fa-solid', 'copy')} Clone"), "#{new_admin_user_group_url}?clone=#{i.id}", title: 'Clone Group', class: 'btn btn-sm btn-default', style: 'margin-right:10px;' %>
             <div class="btn-group">
               <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_admin_user_group_path(i), class: 'btn btn-sm btn-default' %>
               <%= link_to raw("<i class='fa fa-trash'></i>"), admin_user_group_path(i), method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-sm btn-danger' %>

@@ -47,11 +47,18 @@ Rails.application.routes.draw do
       resources :image_validation, :providers
     end
 
+    resources :container_image_collections do
+      scope module: 'container_image_collections' do
+        resources :container_image
+      end
+    end
+
     resources :container_images do
       scope module: 'container_images' do
         resources :collaborators,
                   :env_params,
                   :image_relationships,
+                  :image_variants,
                   :ingress_params,
                   :setting_params,
                   :volume_params,

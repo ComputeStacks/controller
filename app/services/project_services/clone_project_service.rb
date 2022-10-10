@@ -72,7 +72,7 @@ module ProjectServices
             action: vol_action, source: vol_source, mount_path: vm.mount_path, mount_ro: vm.mount_ro
           }
         end
-        order_session.add_image i.container_image, { volume_overrides: vols, source: i.csrn }
+        order_session.add_image i.image_variant, { volume_overrides: vols, source: i.csrn }
       end
       # The previous should already have all dependencies. However, if the image has a new dependency, this will make
       # sure the order won't fail due to missing dependencies.

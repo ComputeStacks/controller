@@ -28,8 +28,8 @@ class OrderValidator < ActiveModel::Validator
       # Find max cpu we need.
       max_cpu = 0.0
       order.order_data['raw_order'].each do |i|
-        image = ContainerImage.find_by(id: i['container_id'])
-        if image.nil?
+        image_variant = ContainerImage::ImageVariant.find_by(id: i['image_variant_id'])
+        if image_variant.nil?
           errors.add(:base, "Unknown image.")
           next
         end

@@ -1,0 +1,14 @@
+<table class="table">
+  <thead>
+  <tr>
+    <th colspan="2">Label</th>
+    <th>Tag</th>
+    <% if image.can_edit? current_user %>
+      <th></th>
+    <% end %>
+  </tr>
+  </thead>
+  <tbody class="remote-resource refresh" data-url="/container_images/<%= image.id %>/image_variants">
+    <%= render partial: "container_images/image_variants/list", locals: { image: image } %>
+  </tbody>
+</table>

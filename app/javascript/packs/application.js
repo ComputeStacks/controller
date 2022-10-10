@@ -14,5 +14,6 @@
 //
 // const images = require.context('../images', true)
 // const imagePath = (name) => images(name, true)
+import "../src/container_images/image_variants"
 import "../src/credentials"
 import "../src/order_volumes"

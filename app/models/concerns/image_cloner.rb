@@ -22,6 +22,22 @@ module ImageCloner
     parent_image = ContainerImage.find_by(id: parent_image_id)
     return false unless parent_image.is_a?(ContainerImage) && parent_image != self
     local_errors = []
+
+    parent_image.image_variants.each do |i|
+      next if image_variants.where(registry_image_tag: i.registry_image_tag).exists?
+      new_variant = i.dup
+      new_variant.current_user = current_user
+      new_variant.container_image_id = self.id
+      new_variant.save
+    end
+
+    parent_image.host_entries.each do |i|
+      new_entry = i.dup
+      new_entry.current_user = current_user
+      new_entry.container_image_id = self.id
+      new_entry.save
+    end
+
     parent_image.dependency_parents.each do |i|
       new_param = i.dup
       new_param.current_user = current_user

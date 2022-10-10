@@ -97,6 +97,7 @@ fr:
           scale: "[%{label}] Failed to scale containers."
           resize: "[%{label}] Failed to resize containers."
           delete: "[%{label}] Failed to delete service."
+        variant_migrate: "[%{image}] Migrating from %{old} to %{variant}"
       snapshots:
         restore: "Restoring snapshot %{snapshot} to volume %{volume}."
       system:

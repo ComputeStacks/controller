@@ -9,13 +9,19 @@ namespace :containers do
         name: 'grafana',
         label: 'grafana',
         role: 'grafana',
-        role_class: 'web',
+        category: 'web',
         can_scale: false,
         container_image_provider: dhprovider,
-        registry_image_path: "grafana/grafana",
+        registry_image_path: "grafana/grafana"
+      )
+      graf.image_variants.create!(
+        label: "latest",
         registry_image_tag: "latest",
         validated_tag: true,
-        validated_tag_updated: Time.now
+        validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
       )
       graf.setting_params.create!(
         name: 'plugins',

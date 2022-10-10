@@ -49,6 +49,7 @@ class ContainerServicesController < AuthController
     @service = Deployment::ContainerService.find_for current_user, id: params[:id]
     return redirect_to("/deployments", alert: "Not found") if @service.nil?
     @deployment = @service.deployment
+    @service.current_user = current_user
   end
 
   def not_found_responder
@@ -56,11 +57,11 @@ class ContainerServicesController < AuthController
   end
 
   def service_params
-    params.require(:deployment_container_service).permit(:label, :master_domain_id, :command, :tag_list)
+    params.require(:deployment_container_service).permit(:label, :master_domain_id, :command, :tag_list, :image_variant_id)
   end
 
   def admin_service_params
-    params.require(:deployment_container_service).permit(:label, :master_domain_id, :command, :tag_list, :override_autoremove)
+    params.require(:deployment_container_service).permit(:label, :master_domain_id, :command, :tag_list, :image_variant_id, :override_autoremove)
   end
 
 end

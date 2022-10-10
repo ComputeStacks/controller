@@ -15,6 +15,7 @@ class PowerCycleContainerService
   attr_accessor :audit,
                 :action,
                 :container,
+                :event,
                 :delay, # eg: 30.seconds
                 :errors
 
@@ -26,47 +27,17 @@ class PowerCycleContainerService
     self.container = container
     self.action = action
     self.delay = nil
+    self.event = nil
     self.errors = []
   end
 
   # @return [Boolean]
   def perform
-    event = EventLog.new(
-      locale_keys: {
-        label: container.is_a?(Deployment::Sftp) ? 'SFTP' : container.label,
-        container: container.name
-      },
-      status: "pending"
-    )
-    event.audit = audit if audit
-
     self.action = 'rebuild' if %w(start restart).include?(action) && !container.built?
 
-    case action
-    when 'build'
-      event.event_code = '3b6c028e41b0875b'
-      event.locale = 'container.build'
-    when 'rebuild'
-      event.event_code = '14bbe1dc184afba0'
-      event.locale = 'container.rebuild'
-    when 'restart'
-      event.event_code = 'd611b2bbf50bd48c'
-      event.locale = 'container.restart'
-    when 'start'
-      event.event_code = 'f59498e7717c7106'
-      event.locale = 'container.start'
-    when 'stop'
-      event.event_code = '0b264bd661e2d449'
-      event.locale = 'container.stop'
-    else
-      event.event_code = '79eb562a7e6d5d61'
-      event.locale = 'unknown'
-    end
-
-    unless event.save
-      self.errors << "Fatal error setting up job."
-      return false
-    end
+    self.event = audit.event_logs.first if audit && audit.event_logs.count == 1
+    build_event! if event.nil?
+    return false unless errors.empty? # Errors could be added by build_event
 
     if container.is_a?(Deployment::Container)
       event.containers << container unless event.containers.include? container
@@ -155,6 +126,42 @@ class PowerCycleContainerService
   end
 
   private
+
+  def build_event!
+    self.event = EventLog.new(
+      locale_keys: {
+        label: container.is_a?(Deployment::Sftp) ? 'SFTP' : container.label,
+        container: container.name
+      },
+      status: "pending"
+    )
+    event.audit = audit if audit
+
+    case action
+    when 'build'
+      event.event_code = '3b6c028e41b0875b'
+      event.locale = 'container.build'
+    when 'rebuild'
+      event.event_code = '14bbe1dc184afba0'
+      event.locale = 'container.rebuild'
+    when 'restart'
+      event.event_code = 'd611b2bbf50bd48c'
+      event.locale = 'container.restart'
+    when 'start'
+      event.event_code = 'f59498e7717c7106'
+      event.locale = 'container.start'
+    when 'stop'
+      event.event_code = '0b264bd661e2d449'
+      event.locale = 'container.stop'
+    else
+      event.event_code = '79eb562a7e6d5d61'
+      event.locale = 'unknown'
+    end
+
+    unless event.save
+      self.errors << "Fatal error setting up job."
+    end
+  end
 
   # @return [Boolean]
   def validate!

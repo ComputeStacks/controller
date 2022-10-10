@@ -1,0 +1,64 @@
+<div class="panel-body">
+
+  <div class="row">
+    <div class="col-sm-8 col-xs-12">
+      <div class="form-group">
+        <%= f.label :label, "Label" %>
+        <%= f.text_field :label, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-sm-4 col-xs-12">
+      <div class="form-group">
+        <%= f.label :is_default, "Make Default" %>
+        <%= f.check_box :is_default, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <%= f.label :registry_image_tag, "Registry Tag" %>
+        <%= f.text_field :registry_image_tag, class: 'form-control' %>
+        <span class="help-block">Example: <code>latest</code></span>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <div class="row">
+    <div class="col-md-12">
+      <p class="lead">Custom Migration Hooks</p>
+      When moving between versions, you can optionally configure custom scripts to be run at certain stages.
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <%= f.label :before_migrate, "Before Migration Script" %>
+        <%= f.text_field :before_migrate, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <%= f.label :after_migrate, "After Migration Script" %>
+        <%= f.text_field :after_migrate, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <%= f.label :rollback_migrate, "Rollback Migration Script" %>
+        <%= f.text_field :rollback_migrate, class: 'form-control' %>
+        <span class="help-block">If a before script fails, this will run to return the container to the previous version.</span>
+      </div>
+    </div>
+  </div>
+
+</div>

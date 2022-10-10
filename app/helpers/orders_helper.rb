@@ -1,7 +1,12 @@
 module OrdersHelper
 
+  def order_image_dependency_map(image)
+    image.dependencies.filter_map { |i| i.id }.join(', ')
+  end
+
   # Generate order confirmation image
-  def order_confirmation_image(order)
+  def order_confirmation_image
+    return "/assets/icons/stacks/docker.png" unless Rails.env.production?
     "#{CS_CDN_URL}/images/icons/stacks/docker.png"
   end
 
@@ -15,7 +20,7 @@ module OrdersHelper
     result = []
     region = Region.find_by(id: order.order_data['region_id'])
     data.each_with_index do |i, k|
-      container_image = ContainerImage.find_by(id: i['container_id'])
+      container_image = ContainerImage::ImageVariant.find_by(id: i['image_variant_id'])&.container_image
       image_name = container_image.nil? ? 'Unknown' : container_image.label
       product = Product.find_by(id: i.dig('resources', 'product_id'))
       result << tag.div(class: 'order_wrapper') do

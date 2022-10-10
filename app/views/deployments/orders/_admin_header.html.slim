@@ -1,7 +1,8 @@
 - if @order_session
-  = "Order ID: #{@order_session.id}"
+  = "Order Session ID: #{@order_session.id}"
   br
   = "Project: #{@order_session.project&.id} #{@order_session.project&.name}"
+  br
 - if @order
   = "Order ID: #{@order.id}"
   br

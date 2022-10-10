@@ -1,4 +1,6 @@
 module ContainerImages
+  # Validate Registry
+  # In use by ContainerImage::ImageVariant
   module ImageRegistryValidator
     extend ActiveSupport::Concern
 
@@ -8,7 +10,7 @@ module ContainerImages
     end
 
     def registry_image_available?
-      registry_image_client.tag_available?(registry_image_tag)
+      container_image.registry_image_client.tag_available?(registry_image_tag)
     rescue => e
       ExceptionAlertService.new(e, '4aff131c93ac3aaf').perform
       false
@@ -17,7 +19,7 @@ module ContainerImages
     private
 
     def update_tag_validation!
-      ImageWorkers::ValidateTagWorker.perform_async id
+      ImageWorkers::ValidateTagWorker.perform_async to_global_id.to_s
     end
 
   end

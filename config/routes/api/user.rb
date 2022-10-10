@@ -18,6 +18,7 @@ Rails.application.routes.draw do
         resources :collaborators,
                   :custom_host_entries,
                   :env_params,
+                  :image_variants,
                   :image_relationships,
                   :ingress_params,
                   :setting_params,
@@ -104,6 +105,7 @@ Rails.application.routes.draw do
 
     resources :container_image_providers,
               :collaborations,
+              :image_collections,
               :load_balancers,
               :locations,
               :orders,

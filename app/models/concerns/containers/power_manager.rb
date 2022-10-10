@@ -4,7 +4,7 @@ module Containers
 
     def start!(event)
       return false if halt_if_duplicated_power_event?(event)
-      update_attribute :req_state, 'running'
+      update req_state: 'running'
       c = docker_client_with_event(event)
       return false if c.nil?
       if respond_to?(:subscription) && subscription
@@ -18,7 +18,7 @@ module Containers
     # @param [Boolean] allow_none if true, we will return true if the container does not exist.
     def stop!(event, allow_none = false)
       return false if halt_if_duplicated_power_event?(event)
-      update_attribute :req_state, 'stopped'
+      update req_state: 'stopped'
       c = docker_client_with_event(event, allow_none)
       return true if c.nil? && allow_none
       return false if c.nil?
@@ -28,7 +28,7 @@ module Containers
 
     def restart!(event)
       return false if halt_if_duplicated_power_event?(event)
-      update_attribute :req_state, 'running'
+      update req_state: 'running'
       c = docker_client_with_event(event)
       return false if c.nil?
       if respond_to?(:subscription) && subscription
@@ -72,7 +72,7 @@ module Containers
     def power_cycle_response(requested_state, rsp, event)
       if rsp.info['State']['Error'].blank?
         update_attribute :status, (requested_state == 'off' ? 'stopped' : 'running')
-        event.done!
+        event.done! if event.running?
       else
         update_attribute :status, 'stopped'
         if requested_state == 'on' && (rsp.info['State']['Error'] =~ /Address already assigned in block/ || rsp.info['State']['Error'] =~ /already exists in network/)

@@ -13,7 +13,7 @@
       td.text-right= @container.role
     tr
       th= t 'container_images.show.overview.role_class'
-      td.text-right= container_category(@container.role_class)
+      td.text-right= @container.category.capitalize
     tr
       th= t 'container_images.show.overview.scale'
       td.text-right= @container.can_scale ? t('common.yes') : t('common.no')
@@ -46,5 +46,5 @@
 
 - unless @container.description.blank?
   .panel.panel-default: .panel-body
-    p: strong= t 'container_images.show.overview.desc' 
+    p: strong= t 'container_images.show.overview.desc'
     p= @container.description.html_safe

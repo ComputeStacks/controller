@@ -2,7 +2,7 @@
 
 <div class="panel panel-default">
   <div class="panel-body">
-    <%= link_to '<i class="fa fa-cogs"></i>'.html_safe, "#{volume_path(volume)}/edit", class: 'pull-right' %>
+    <%= link_to icon('fa-solid', 'gear').html_safe, "#{volume_path(volume)}/edit", class: 'pull-right' %>
     <strong><%= t 'volumes.backups.title' %></strong>
     <% unless volume.borg_enabled %>
       <div class="alert alert-warning" style="margin-top:25px;margin-bottom:0;">

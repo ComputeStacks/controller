@@ -21,7 +21,11 @@ class ContainerImagesController < AuthController
       redirect_to helpers.container_image_path(@container), notice: "Successfully updated container."
     else
       flash[:alert] = @container.errors.full_messages.join('. ')
-      render template: 'container_images/edit'
+      if params.dig(:container_image, :variant_pos)
+        redirect_to "/container_images/#{@container.id}"
+      else
+        render template: 'container_images/edit'
+      end
     end
   end
 
@@ -38,6 +42,7 @@ class ContainerImagesController < AuthController
         @parent_image = ContainerImage.find_by("id = ? AND (user_id is null OR user_id = ?)", new_container_params[:parent_image_id], current_user.id)
         if @parent_image
           @container = @parent_image.dup
+          @container.registry_image_tag = @parent_image.default_variant.registry_image_tag
           @container.parent_image_id = @parent_image.id
           @container.user = current_user
           @container.current_user = current_user
@@ -58,6 +63,7 @@ class ContainerImagesController < AuthController
 
     @container = current_user.container_images.new(
       current_user: current_user,
+      registry_image_tag: "latest",
       can_scale: true,
       container_image_provider: ContainerImageProvider.find_default&.first,
     ) unless @container
@@ -68,7 +74,6 @@ class ContainerImagesController < AuthController
     @container.current_user = current_user
 
     if @container.save
-      ImageWorkers::ValidateTagWorker.perform_async @container.id
       redirect_to helpers.container_image_path(@container)
     else
       render template: 'container_images/new'
@@ -107,19 +112,19 @@ class ContainerImagesController < AuthController
 
   def container_params
     params.require(:container_image).permit(
-      :label, :description, :command, :role, :role_class, :can_scale, :active, :enable_sftp,
+      :label, :description, :command, :role, :category, :can_scale, :active, :enable_sftp,
       :parent_image_id, :registry_username, :registry_password, :registry_custom, :registry_image_path,
       :registry_image_tag, :registry_auth, :container_image_provider_id, :min_cpu, :min_memory, :tag_list,
-      :force_local_volume
+      :force_local_volume, variant_pos: []
     )
   end
 
   def admin_container_params
     params.require(:container_image).permit(
-      :label, :description, :command, :role, :role_class, :can_scale, :active, :enable_sftp,
+      :label, :description, :command, :role, :category, :can_scale, :active, :enable_sftp,
       :parent_image_id, :registry_username, :registry_password, :registry_custom, :registry_image_path,
       :registry_image_tag, :registry_auth, :container_image_provider_id, :min_cpu, :min_memory, :tag_list,
-      :force_local_volume, :override_autoremove, :is_free
+      :force_local_volume, :override_autoremove, :is_free, variant_pos: []
     )
   end
 

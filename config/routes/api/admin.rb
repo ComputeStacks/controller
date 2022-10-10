@@ -98,7 +98,13 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :container_services, :domains, :event_logs, :products, :user_groups, :volumes
+      resources :container_services,
+                :domains,
+                :event_logs,
+                :image_collections,
+                :products,
+                :user_groups,
+                :volumes
     end
   end
 

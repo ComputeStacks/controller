@@ -17,19 +17,25 @@ namespace :containers do
         name:                     'redis',
         description:              'Redis in-memory key/value store. This image does not save data to disk.',
         role:                     'redis',
-        role_class:               'cache',
+        category:               'cache',
         can_scale:                false,
         is_free:                  false,
         container_image_provider: dhprovider,
         registry_image_path:      "redis",
-        registry_image_tag:       "alpine",
         remote_block_id:          block.id,
-        command:                  "/bin/sh -c redis-server --requirepass {{password}}",
+        command:                  "/bin/sh -c redis-server --requirepass {{password}} --save "" --appendonly no",
         labels:                   {
           system_image_name: "redis-public"
-        },
+        }
+      )
+      redis.image_variants.create!(
+        label: "alpine",
+        registry_image_tag: "alpine",
         validated_tag: true,
-        validated_tag_updated: Time.now
+        validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
       )
       redis.setting_params.create!(
         name:       'password',

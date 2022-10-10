@@ -5,8 +5,10 @@ Rails.application.routes.draw do
       resources :collaborators,
                 :custom_host_entries,
                 :env_params,
+                :image_collections,
                 :image_relationships,
                 :image_validation,
+                :image_variants,
                 :ingress_params,
                 :setting_params,
                 :volume_params
@@ -106,6 +108,6 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :certificates
+  resources :certificates, :container_image_collections
 
 end

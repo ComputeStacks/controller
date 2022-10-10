@@ -5,6 +5,7 @@
 #   @return [Integer]
 #
 # @!attribute active
+#   Visible on order form? This does not disable existing containers, nor does it prevent this image from being used in an image collection.
 #   @return [Boolean]
 #
 # @!attribute is_load_balancer
@@ -52,8 +53,8 @@
 # @!attribute role
 #   @return [String] Used for generating variable names
 #
-# @!attribute role_class
-#   @return [web,database,cache,dev,misc] Used to organize images on order screen.
+# @!attribute category
+#   @return [String] Used to organize images on order screen.
 #
 # @!attribute container_image_provider
 #   @return [ContainerImageProvider]
@@ -115,18 +116,19 @@ class ContainerImage < ApplicationRecord
   include Auditable
   include Authorization::ContainerImage
   include ContainerImages::ImageParamManager
-  include ContainerImages::ImageRegistryValidator
   include ImageCloner
   include ProviderForContainerImage
   include UrlPathFinder
 
   scope :is_public, -> { where(user: nil) }
   scope :non_lbs, -> { where( Arel.sql("container_images.is_load_balancer = false") ) }
-  scope :available, -> { where( Arel.sql("container_images.active = true AND container_images.validated_tag = true AND container_images.validated_tag_updated is not null") ) }
+  scope :available, -> { where active: true }
   scope :sorted, -> { order( Arel.sql('lower(container_images.label)') ) }
 
-  has_many :deployed_services, class_name: 'Deployment::ContainerService', dependent: :restrict_with_error
-  has_many :deployed_containers, through: :deployed_services, source: :containers
+  has_many :image_variants, class_name: 'ContainerImage::ImageVariant', dependent: :destroy
+
+  has_many :deployed_services, through: :image_variants, source: :container_services, dependent: :restrict_with_error
+  has_many :deployed_containers, through: :image_variants, source: :containers
 
   has_many :dependency_parents, class_name: "ContainerImage::ImageRel", foreign_key: "container_image_id", dependent: :destroy
   has_many :dependencies, through: :dependency_parents, source: :dependency
@@ -151,6 +153,8 @@ class ContainerImage < ApplicationRecord
   has_many :container_image_collaborators
   has_many :collaborators, through: :container_image_collaborators, source: :collaborator
 
+  has_and_belongs_to_many :container_image_collections
+
   # Content Sections
   belongs_to :general_block, class_name: 'Block', optional: true
   belongs_to :remote_block, class_name: 'Block', optional: true
@@ -159,13 +163,13 @@ class ContainerImage < ApplicationRecord
 
   before_validation :set_name
 
+  validate :ensure_tag, on: :create
+  validates :category, presence: true
   validates :name, uniqueness: true
   validates :name, presence: true
   validates :label, presence: true
-  validates :registry_image_tag, presence: true
   validates :registry_image_path, presence: true
   validates :role, presence: true
-  validates :role_class, inclusion: { in: %w(web database cache dev misc) }
   validates :min_cpu, numericality: { greater_than_or_equal_to: 0.0 }
   validates :min_memory, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
@@ -175,7 +179,15 @@ class ContainerImage < ApplicationRecord
   accepts_nested_attributes_for :setting_params
   accepts_nested_attributes_for :volumes
 
+  before_destroy :clean_variants, prepend: true
   before_destroy :clean_collaborators
+
+  before_save :update_variant_sorting
+  before_save :format_category
+
+  # Setup initial variant after creation
+  after_create_commit :setup_default_tag
+  attr_accessor :registry_image_tag, :skip_variant_setup, :variant_pos
 
   def csrn
     "csrn:caas:template:image:#{resource_name}:#{id}"
@@ -184,6 +196,29 @@ class ContainerImage < ApplicationRecord
   def resource_name
     return "null" if name.blank?
     name.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+  end
+
+  def default_variant
+    image_variants.find_by is_default: true
+  end
+
+  def has_default_variant?
+    image_variants.where(is_default: true).exists?
+  end
+
+  # Returns valid pull status
+  # possible values are: `:valid`, `:invalid`, `:pending`, and `:partial`
+  def variant_pull_status
+    if image_variants.where(validated_tag: false).exists?
+      return :pending if has_pending_pull_validations?
+      image_variants.where(validated_tag: true).exists? ? :partial : :invalid
+    else
+      :valid
+    end
+  end
+
+  def has_pending_pull_validations?
+    image_variants.where(validated_tag_updated: nil).exists?
   end
 
   def uses_load_balancer?
@@ -197,6 +232,7 @@ class ContainerImage < ApplicationRecord
     file_icon_name = "ghost" if role == "ghost"
     file_icon_name = "joomla" if role == "joomla"
     file_icon_name = "nextcloud" if role == "nextcloud"
+    return "/assets/icons/stacks/#{file_icon_name}.png" unless Rails.env.production?
     "#{CS_CDN_URL}/images/icons/stacks/#{file_icon_name}.png"
   end
 
@@ -213,6 +249,14 @@ class ContainerImage < ApplicationRecord
       "user" => user&.full_name,
       "image" => label
     }
+  end
+
+  def self.by_category(query)
+    result = {}
+    query.each do |i|
+      (result[i.category] ||= []) << i
+    end
+    result.sort
   end
 
   private
@@ -244,6 +288,55 @@ class ContainerImage < ApplicationRecord
         errors.add(:base, %Q(Error deleting collaborator #{i.id} - #{i.errors.full_messages.join("\n")}))
       end
     end
+  end
+
+  # Ensure we have a tag
+  def ensure_tag
+    if !skip_variant_setup && registry_image_tag.blank?
+      errors.add(:base, "Missing image tag")
+    end
+  end
+
+  # Create initial default tag on commit
+  def setup_default_tag
+    image_variants.create!(
+      registry_image_tag: registry_image_tag,
+      label: registry_image_tag,
+      version: 0,
+      is_default: true
+    ) unless skip_variant_setup
+  end
+
+  # Ensure clean destruction of variants before deleting image
+  def clean_variants
+    image_variants.each do |i|
+      i.skip_default_delete = true
+      unless i.destroy
+        errors.add(:base, "error with variant #{i.label}: #{i.errors.full_messages.join(" ")}")
+        throw :abort
+      end
+    end
+  end
+
+  def update_variant_sorting
+    return unless variant_pos.is_a?(Array)
+    k = 0
+    variant_pos.each do |i|
+      v = image_variants.find_by id: i
+      if v.nil?
+        errors.add(:base, "Unknown variant #{i}")
+        next
+      end
+      unless v.update version: k
+        errors.add(:base, "Error saving variant #{v.id}: #{v.errors.full_messages.join(' ')}")
+      end
+      k += 1
+    end
+  end
+
+  def format_category
+    return if category.blank?
+    self.category = category.strip.downcase
   end
 
 end

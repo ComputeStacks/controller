@@ -11,6 +11,8 @@
   </div>
 
 <% end %>
+<style>
+</style>
 <div class="row" style="margin-bottom:15px;">
 
   <div class="<%= @container.can_edit?(current_user) ? 'col-sm-6' : 'col-sm-12' %>">
@@ -33,7 +35,7 @@
           <%= link_to raw("<i class='fa fa-user-plus'></i> #{t('collaborators.collaborate').capitalize}"), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{@container.id}/collaborators", class: 'btn btn-sm btn-default', title: 'Manage collaborations', style: "margin-right:5px;" %>
         <% end %>
         <%= link_to(raw("<i class='fa fa-download'></i> Pull Image"), "/admin/container_images/#{@container.id}/pull", method: :post, class: 'btn btn-sm btn-default', title: 'Force update of image on all nodes', style: "margin-right:5px;") if current_user.is_admin %>
-        <%= link_to raw("<i class='fa fa-clone'></i> #{t('container_images.clone')}"), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/new?container_image[parent_image_id]=#{@container.id}", class: 'btn btn-sm btn-primary', style: "margin-right:5px;" %>
+        <%= link_to raw("#{icon('fa-solid', 'copy')} #{t('container_images.clone')}"), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/new?container_image[parent_image_id]=#{@container.id}", class: 'btn btn-sm btn-primary', style: "margin-right:5px;" %>
         <%= link_to raw('<i class="fa fa-wrench"></i>'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{@container.id}/edit", class: 'btn btn-sm btn-default', style: "margin-right:5px;" %>
         <% if @container.can_administer?(current_user) %>
           <%= link_to raw('<i class="fa fa-trash"></i>'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{@container.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
@@ -92,6 +94,35 @@
         <strong><%= t 'container_images.params.env.table.title' %></strong>
       </div>
       <%= render partial: 'container_images/env_params/list', locals: {data: @container.env_params.sorted, image: @container} %>
+    </div>
+
+    <div class="panel panel-default">
+      <%= form_for @container, url: container_image_path(@container) do |f| %>
+        <div class="panel-body">
+          <% if @container.can_edit?(current_user) %>
+            <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_variant_path(@container), class: "pull-right btn btn-xs btn-default" %>
+            <div id="updateImageVariantPosBtn" class="btn-group pull-right" style="margin-right:10px;display:none;">
+              <%= submit_tag t('actions.update'), class: 'btn btn-xs btn-success'%>
+              <%= link_to t('actions.cancel'), "/container_images/#{@container.id}", class: 'btn btn-xs btn-default' %>
+            </div>
+          <% end %>
+          <strong>Image Variants</strong>
+        </div>
+        <table class="table">
+          <thead>
+          <tr>
+            <th colspan="<%= @container.image_variants.count < 2 ? '2' : '3' %>">Label</th>
+            <th>Tag</th>
+            <% if @container.can_edit? current_user %>
+              <th></th>
+            <% end %>
+          </tr>
+          </thead>
+          <tbody <% if @container.can_edit?(current_user) %>id="imageVariantList"<% end %>>
+            <%= render partial: "container_images/image_variants/list", locals: { image: @container, sortable: @container.image_variants.count > 1 } %>
+          </tbody>
+        </table>
+      <% end %>
     </div>
 
   </div>

@@ -54,7 +54,7 @@ module OrderServices
           qty: product[:qty].to_i.zero? ? 1 : product[:qty].to_i,
           label: product[:label],
           region_id: order.data[:region_id],
-          image_id: product[:container_id],
+          image_variant_id: product[:image_variant_id],
           product_id: product_id,
           cpu: product.dig(:resources, :cpu).to_f,
           memory: product.dig(:resources, :memory).to_i,
@@ -85,12 +85,6 @@ module OrderServices
 
       # An array of VolumeParam CSRNs
       available_volumes = provision_state[:volume_map].map { |i| i[:template] }
-      if Rails.env.development?
-        event.event_details.create!(
-          data: "[DEBUG] #{product[:container_id]}\n\nrequired\n#{required_mountable_volumes.to_yaml}\n\navailable\n#{available_volumes.to_yaml}",
-          event_code: "e63b84b01c9b375f"
-        )
-      end
       return true if (required_mountable_volumes - available_volumes).empty?
 
       # If we're looking for a volume CSRN, then we need to check the project
@@ -99,12 +93,6 @@ module OrderServices
       project_volumes = project.volumes.map { |i| i.csrn }
       return true if (remaining_volumes - project_volumes).empty? # Do we have volume CSRNs, and are they satisfied?
 
-      (remaining_volumes - project_volumes).each do |i|
-        event.event_details.create!(
-          data: "[DEBUG] #{product[:container_id]} waiting on #{i}",
-          event_code: "e63b84b01c9b375f"
-        )
-      end if Rails.env.development?
       false
     end
 
@@ -122,8 +110,8 @@ module OrderServices
 
     # @return [Boolean]
     def image_exists?
-      image = ContainerImage.find_by id: product[:container_id]
-      image && image.can_view?(order.user)
+      image_variant = ContainerImage::ImageVariant.find_by id: product[:image_variant_id]
+      image_variant && image_variant.container_image.can_view?(order.user)
     end
 
     # Find volumes that we require to mount.
@@ -133,7 +121,9 @@ module OrderServices
     #
     # @return [Array] Array of `Volume` and `ContainerImage::VolumeParam`
     def required_mountable_volumes
-      image = ContainerImage.find_by id: product[:container_id]
+      image_variant = ContainerImage::ImageVariant.find_by id: product[:image_variant_id]
+      return [] if image_variant.nil? # should never happen
+      image = image_variant.container_image
       return [] if image.nil? # should never happen
 
       # Ignore volumes explicitly skipped.

@@ -9,7 +9,6 @@ jQuery ->
       { data: "name" },
       { data: "owner" },
       { data: "image" },
-      { data: "tag" },
       { data: "button_group" }
     ]
 

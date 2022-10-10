@@ -38,7 +38,7 @@
     </a>
     <% if Feature.check('backups', current_user) %>
       <a href="#" class="btn btn-sm btn-success" data-toggle="modal" data-target="#volumeCreateBackup">
-        <i class="fa fa-clone"></i>
+        <%= icon('fa-solid', 'copy') %>
         <%= t 'volumes.backups.new' %>
       </a>
     <% end %>

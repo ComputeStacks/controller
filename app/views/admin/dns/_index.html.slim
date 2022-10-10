@@ -22,7 +22,7 @@
               td= l i.created_at.in_time_zone(Time.zone), format: :long
               td.text-right
                 .btn-group
-                  = link_to raw("<i class='fa fa-cogs'></i>"), "/admin/dns/#{i.id}-#{i.name.parameterize}", class: 'btn btn-sm btn-default'
+                  = link_to icon('fa-solid', 'gear').html_safe, "/admin/dns/#{i.id}-#{i.name.parameterize}", class: 'btn btn-sm btn-default'
                   = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{i.id}-#{i.name.parameterize}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger'
         - else
           - @zones.each do |i|

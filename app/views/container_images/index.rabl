@@ -1,6 +1,5 @@
 collection @images, root: 'data', object_root: false
 attributes :id
-attribute registry_image_tag: :tag
 
 node :name do |i|
   %Q(#{table_image_icon(i)} <a href="/container_images/#{i.id}">#{i.label}</a>)

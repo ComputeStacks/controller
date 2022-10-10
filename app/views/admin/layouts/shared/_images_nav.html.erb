@@ -5,6 +5,9 @@
       <li class="<%= controller.controller_name == 'container_images' ? 'active' : '' %>">
         <%= link_to "Overview", admin_container_images_url %>
       </li>
+      <li class="<%= controller.controller_name == 'container_image_collections' ? 'active' : '' %>">
+        <%= link_to "Image Collections", admin_container_image_collections_path %>
+      </li>
       <li class="<%= controller.controller_name == 'container_registry' ? 'active' : '' %>">
         <%= link_to "Container Registries", admin_registries_path %>
       </li>
@@ -27,6 +30,10 @@
     <% elsif controller.controller_name == 'container_registry' %>
       <ol class="breadcrumb breadcrumb-action text-right">
         <li><%= link_to "Add Registry", new_admin_registry_path, class: "btn btn-sm btn-default" %></li>
+      </ol>
+    <% elsif controller.controller_name == 'container_image_collections' %>
+      <ol class="breadcrumb breadcrumb-action text-right">
+        <li><%= link_to "Create Collection", new_admin_container_image_collection_path, class: "btn btn-sm btn-default" %></li>
       </ol>
     <% else %>
       <ol class="breadcrumb breadcrumb-action text-right" style="height:45px;"><li>&nbsp;</li></ol>

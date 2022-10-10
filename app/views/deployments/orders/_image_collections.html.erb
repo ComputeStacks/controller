@@ -1,0 +1,18 @@
+<div class="row">
+  <% collections.each do |collection| %>
+    <input type="checkbox" name="collections[]" value="<%= collection.id %>" id="collection-<%= collection.id %>" style="display:none;" <% if order_session.collection_selected? collection.id %>checked="checked"<% end %> />
+    <div class="col-md-6 col-xs-12">
+      <div class="panel panel-default container-collection-selector container-order-card <% if order_session.collection_selected? collection.id %>active<% end %>" data-id="<%= collection.id %>" id="collection_elem_<%= collection.id %>">
+        <div class="panel-body text-center">
+          <p class="lead"><%= collection.label %></p>
+          <% collection.image_icons.each do |icon| %>
+            <img style="width:40px;height:40px;"
+                 title="<%= icon.label %>"
+                 onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
+                 src="<%= icon.icon_url %>">
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -1,27 +1,53 @@
 module ContainerImages
   module ImageRegValidationHelper
 
-    def image_valid_tag_label(image, hide_valid = false)
-      if image.validated_tag && image.validated_tag_updated
-        return nil if hide_valid
-        %Q(<span class="label label-success"><i class="fa #{image_valid_tag_icon(image)} fa-fw"></i></span>).html_safe
-      elsif image.validated_tag_updated
-        %Q(<span class="label label-danger"><i class="fa #{image_valid_tag_icon(image)} fa-fw"></i></span>).html_safe
+    def image_default_image_path(image)
+      if image.image_variants.count == 1
+        image.default_variant.full_image_path
       else
-        %Q(<span class="label label-default"><i class="fa #{image_valid_tag_icon(image)} fa-fw"></i></span>).html_safe
+        "#{image.provider_path}#{image.provider_path.blank? ? '' : '/'}#{image.registry_image_path}"
       end
     end
 
+    def image_valid_tag_label(image, hide_valid = false)
+      status_class = case image.variant_pull_status
+                     when :valid
+                       hide_valid ? nil : 'success'
+                     when :partial
+                       'warning'
+                     when :pending
+                       'default'
+                     when :invalid
+                       'danger'
+                     else
+                       nil
+                     end
+      status_icon = case image.variant_pull_status
+                    when :valid
+                      'fa-check'
+                    when :partial
+                      'fa-exclamation-triangle'
+                    when :pending
+                      'fa-refresh fa-spin'
+                    when :invalid
+                      'danger'
+                    else
+                      nil
+                    end
+      return nil if status_class.nil?
+      %Q(<span class="label label-#{status_class}"><i class="fa #{status_icon} fa-fw"></i></span>).html_safe
+    end
+
     def image_valid_tag_message(image)
-      if image.validated_tag_updated && !image.validated_tag
-        link = "#{request =~ /admin/ ? '/admin/' : '/'}container_images/#{image.id}/image_validation"
-        %Q(
-					<small class='text-danger'>Unable to pull image from registry.
-					Last attempted: #{l(image.validated_tag_updated)}
-					&middot; #{link_to("Try Again", link, method: :post)}
-					</small>).html_safe
-      elsif !image.validated_tag_updated
-        %q(<small class='text-muted'>Validating connection to image registry...</small>).html_safe
+      case image.variant_pull_status
+      when :partial
+        %q(<small class='text-danger'>Some image variants are not available.</small>).html_safe
+      when :pending
+        %q(<small class='text-muted'>Pending registry validation...</small>).html_safe
+      when :invalid
+        %q(<small class='text-muted'>Error connecting to registry, ensure settings are correct.</small>).html_safe
+      else
+        nil
       end
     end
 
@@ -43,23 +69,18 @@ module ContainerImages
       end
     end
 
-    def image_valid_tag_icon(image)
-      if image.validated_tag && image.validated_tag_updated
-        'fa-check'
-      elsif image.validated_tag_updated
-        'fa-ban'
-      else
-        'fa-refresh fa-spin'
-      end
-    end
-
     def table_image_icon(image)
-      if image.validated_tag && image.validated_tag_updated
+      case image.variant_pull_status
+      when :valid
         tag.i nil, class: 'fa fa-check-circle', style: 'color: green;'
-      elsif image.validated_tag_updated
+      when :partial
+        tag.i nil, class: 'fa-exclamation-triangle'
+      when :pending
+        tag.i nil, class: 'fa-refresh fa-spin'
+      when :invalid
         tag.i nil, class: 'fa fa-ban'
       else
-        tag.i nil, class: 'fa-refresh fa-spin'
+        nil
       end
     end
 

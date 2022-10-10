@@ -11,7 +11,7 @@
 # * ident => users, auth, ...
 #
 # Services:
-# * template => image, params, ...
+# * template => image, image_variant, params, ...
 # * project => container, domain, ingress rules, ...
 # * subscription => billing events, usage items, ...
 #
@@ -60,6 +60,8 @@ class Csrn
             ContainerImage::EnvParam.find_by id: id[5]
           when "image"
             ContainerImage.find_by id: id[5]
+          when "image_variant"
+            ContainerImage::ImageVariant.find_by id: id[5]
           when "ingress"
             ContainerImage::IngressParam.find_by id: id[5]
           when "setting"

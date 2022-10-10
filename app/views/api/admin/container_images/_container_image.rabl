@@ -11,12 +11,11 @@ attributes :id,
            :min_memory,
            :registry_custom,
            :registry_image_path,
-           :registry_image_tag,
            :registry_auth,
            :registry_username,
            :is_load_balancer,
            :role,
-           :role_class,
+           :category,
            :labels,
            :validated_tag,
            :validated_tag_updated,
@@ -51,10 +50,9 @@ end
 node :required_by do |i|
   i.parent_containers.pluck(:id)
 end
-node :image_url do |i|
-  i.full_image_path
+child :image_variants do
+  extends 'api/container_images/image_variants/_variant'
 end
-
 node :links do |i|
   {
     container_image_provider: "/api/container_image_providers/#{i.container_image_provider_id}"

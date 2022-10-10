@@ -1,0 +1,25 @@
+<input type="checkbox" name="containers[]" value="<%= c.id %>" id="container-<%= c.id %>" style="display:none;" <% if order_session.order_image_selected? c.id %>checked="checked"<% end %> />
+
+<div class="col-lg-4 col-md-6 col-xs-12">
+  <div class="panel panel-default container-image-selector container-order-card <% if order_session.order_image_selected? c.id %>active<% end %>" data-id="<%= c.id %>" id="image_<%= c.id %>" data-required='{"images": [<%= order_image_dependency_map c %>]}'>
+
+    <div class="panel-body">
+      <div class="row" style="display: flex; align-items: center;">
+        <div class="col-sm-2 col-xs-2"><img style="width:100%;height:100%;max-width:50px;" onerror="this.src='<%= container_image_default_icon %>';this.onerror='';" src="<%= c.icon_url %>" /></div>
+        <div class="col-sm-10 col-xs-10">
+          <strong><%= c.label %></strong>
+          <% if c.is_free %>
+            <span class="label label-success" style="font-size:10px;vertical-align: text-top;text-transform: uppercase;"><%= t 'common.free' %></span>
+          <% end %>
+          <br>
+          <select name="image_variant[<%= c.id %>]" data-id="<%= c.id %>" class="form-control order-variant-selector" style="font-size:12px;font-weight:300;">
+            <% c.image_variants.each do |i| %>
+              <%= order_image_select_option i, order_session %>
+            <% end %>
+          </select>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

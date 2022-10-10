@@ -3,22 +3,25 @@ namespace :containers do
   desc "Install ghost"
   task ghost: :environment do
 
-    unless ContainerImage.where("labels @> ?", { system_image_name: "ghost-4" }.to_json).exists?
+    unless ContainerImage.where(name: "ghost").exists?
       dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
       ghost      = ContainerImage.create!(
-        name:                     'ghost-4',
+        name:                     'ghost',
         label:                    'Ghost',
         role:                     'ghost',
-        role_class:               'web',
+        category:                 'web',
         can_scale:                false,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/ghost",
-        registry_image_tag:       "4",
+        registry_image_path:      "cmptstks/ghost"
+      )
+      ghost.image_variants.create!(
+        label: "4",
+        registry_image_tag: "4",
         validated_tag: true,
         validated_tag_updated: Time.now,
-        labels: {
-          system_image_name: "ghost-4"
-        }
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
       )
       ghost.ingress_params.create!(
         port:            2368,

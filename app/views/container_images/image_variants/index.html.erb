@@ -1,0 +1,51 @@
+<% content_for :title, "Image Variants" %>
+
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb pull-left">
+      <li><%= link_to t('obj.images'), "#{request.path =~ /admin/ && current_user.is_admin ? '/admin' : ''}/container_images" %></li>
+      <li><%= link_to @image.label, container_image_path(@image) %></li>
+      <li class="active">Image Variants</li>
+    </ol>
+    <ol class="breadcrumb breadcrumb-action text-right">
+      <li><%= link_to raw("<i class='fa fa-cubes'></i>&nbsp;&nbsp;&nbsp;Add Variant"), "/container_images/#{@image.id}/image_variants/new", class: 'btn btn-sm btn-default' %></li>
+    </ol>
+  </div>
+<% end %>
+
+<%= form_for @image, url: "/container_images/#{@image.id}" do |f| %>
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <% if @image.can_edit?(current_user) %>
+      <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_variant_path(@image), class: "pull-right btn btn-xs btn-default" %>
+      <div id="updateImageVariantPosBtn" class="btn-group pull-right" style="margin-right:10px;display:none;">
+        <%= submit_tag t('actions.update'), class: 'btn btn-xs btn-success'%>
+        <%= link_to t('actions.cancel'), "/container_images/#{@image.id}/image_variants", class: 'btn btn-xs btn-default' %>
+      </div>
+    <% end %>
+    <h5>Image Variants</h5>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <div class="panel panel-default">
+      <table class="table">
+        <thead>
+        <tr>
+          <th colspan="<%= @image.image_variants.count < 2 ? '2' : '3' %>">Label</th>
+          <th>Tag</th>
+          <% if @image.can_edit? current_user %>
+            <th></th>
+          <% end %>
+        </tr>
+        </thead>
+        <tbody <% if @image.can_edit?(current_user) %>id="imageVariantList"<% end %>>
+        <%= render partial: "container_images/image_variants/list", locals: { image: @image, sortable: @image.image_variants.count > 1 } %>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+<% end %>

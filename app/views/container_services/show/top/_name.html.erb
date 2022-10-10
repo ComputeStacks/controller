@@ -10,7 +10,7 @@
 <p class="lead hidden-xs">
   <%= @service.label %>
   <span style="font-size:1.2rem;">
-    <%= link_to @service.container_image.label, "/container_images/#{@service.container_image.id}" %>
+    <%= link_to service_image_friendly_name(@service), "/container_images/#{@service.container_image.id}" %>
   </span>
   <% if @service.region.has_clustered_storage? %>
     <span style="font-size:12px;vertical-align:top;"><%= service_ha_label @service %></span>

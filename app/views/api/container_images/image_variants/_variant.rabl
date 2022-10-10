@@ -1,0 +1,12 @@
+attributes :id,
+           :label,
+           :is_default,
+           :version,
+           :registry_image_tag,
+           :before_migrate,
+           :after_migrate,
+           :rollback_migrate,
+           :validated_tag,
+           :validated_tag_updated,
+           :created_at,
+           :updated_at

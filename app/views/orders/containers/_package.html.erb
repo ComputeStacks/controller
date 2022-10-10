@@ -36,7 +36,7 @@
       </div>
     </div>
     <div class="panel-footer">
-      <%= button_tag 'CHOOSE', type: 'button', class: 'btn btn-default btn-block container-package-selection', data: {package_id: package.product_id, i: container[:container_id], choose: I18n.t('actions.choose'), selected: I18n.t('actions.selected')}, id: "cpackage-btn-#{container[:container_id]}-#{package.product_id}" %>
+      <%= button_tag 'CHOOSE', type: 'button', class: 'btn btn-default btn-block container-package-selection', data: {package_id: package.product_id, i: container[:image_variant_id], choose: I18n.t('actions.choose'), selected: I18n.t('actions.selected')}, id: "cpackage-btn-#{container[:image_variant_id]}-#{package.product_id}" %>
     </div>
   </div>
 

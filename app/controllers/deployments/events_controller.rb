@@ -15,6 +15,7 @@ class Deployments::EventsController < Deployments::BaseController
 
   def last_event
     @last_event = @deployment.last_event
+    @active_events = @deployment.event_logs.running.count
     respond_to do |format|
       format.html { render template: 'deployments/events/last_event', layout: false }
       format.json { render json: @last_event }

@@ -5,8 +5,12 @@ module DeploymentsHelper
   end
 
   def deployment_last_event(deployment)
-    e = deployment.event_logs.order(updated_at: :desc).limit(1).first
-    e.nil? ? t('common.never') : distance_of_time_in_words_to_now(e.created_at.in_time_zone(Time.zone), include_seconds: true)
+    if deployment.event_logs.running.count.zero?
+      e = deployment.last_event
+      e.nil? ? t('common.never') : distance_of_time_in_words_to_now(e.in_time_zone(Time.zone), include_seconds: true)
+    else
+      "#{pluralize(deployment.event_logs.running.count, 'active event', 'active events')}"
+    end
   end
 
   def deployment_icons(deployment)

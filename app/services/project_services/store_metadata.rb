@@ -73,7 +73,7 @@ module ProjectServices
             id: i.container_image.id,
             label: i.container_image.label,
             role: i.container_image.role,
-            category: i.container_image.role_class,
+            category: i.container_image.category,
             tags: i.container_image.tags
           },
           containers: containers,

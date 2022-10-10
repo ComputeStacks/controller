@@ -1,0 +1,25 @@
+<% images.each do |k,v| %>
+
+  <% unless images.count == 1 %>
+    <div class="row">
+      <div class="col-md-12">
+        <strong><%= k.capitalize %></strong>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="row">
+        <% v.each do |image| %>
+          <%= render partial: "deployments/orders/image", locals: { c: image, order_session: order_session } %>
+          <% content_tag :div, nil, class: 'clearfix visible-md-block'  if k == v.count && ((k + 1) % 3).zero? %>
+          <% content_tag :div, nil, class: 'clearfix visible-sm-block'  if k == v.count && ((k + 1) % 2).zero? %>
+          <% content_tag :div, nil, class: 'clearfix visible-xs-block'  if k == v.count && ((k + 1) % 2).zero? %>
+          <% content_tag :div, nil, class: 'clearfix visible-lg-block'  if k == v.count && ((k + 1) % 4).zero? %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+<% end %>

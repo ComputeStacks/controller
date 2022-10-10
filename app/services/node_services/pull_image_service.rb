@@ -3,12 +3,14 @@ module NodeServices
 
     attr_accessor :node,
                   :container_image,
+                  :image_variant,
                   :errors,
                   :raw_image # Useful for pulling system images
 
-    def initialize(node, container_image = nil)
+    def initialize(node, image_variant = nil)
       self.node = node
-      self.container_image = container_image
+      self.image_variant = image_variant
+      self.container_image = image_variant&.container_image
       self.raw_image = nil
       self.errors = []
     end
@@ -82,10 +84,10 @@ module NodeServices
       return false if container_image.nil? && raw_image.nil?
       return true if container_image.nil?
 
-      if !container_image.validated_tag && container_image.exists_on_node?(node)
+      if !image_variant.validated_tag && image_variant.exists_on_node?(node)
         # Even if our validation failed, allow it to proceed if it exists on node.
         return true
-      elsif !container_image.validated_tag
+      elsif !image_variant.validated_tag
         return false
       end
 
@@ -93,7 +95,7 @@ module NodeServices
     end
 
     def image_path
-      container_image.nil? ? raw_image : container_image.full_image_path
+      image_variant.nil? ? raw_image : image_variant.full_image_path
     end
 
     def image_auth

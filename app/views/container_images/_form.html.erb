@@ -22,6 +22,7 @@
       <div class="from-group">
         <%= f.label :active, t('container_images.form.active') %>
         <%= f.check_box :active, class: 'form-control' %>
+        <span class="help-block">Visible on order form? This does not disable existing containers, nor does it prevent this image from being used in an image collection.</span>
       </div>
     </div>
   </div>
@@ -64,8 +65,8 @@
 
     <div class="col-sm-6 col-xs-12">
       <div class="form-group">
-        <%= f.label :role_class, t('container_images.form.role_class') %>
-        <%= f.select :role_class, options_for_select([[t('container_images.categories.apps'), 'web'], [t('container_images.categories.databases'), 'database'], [t('container_images.categories.kv'), 'cache'], [t('container_images.categories.dev'), 'dev'], [t('container_images.categories.other'), 'misc']], @container.role_class), {}, class: 'form-control'  %>
+        <%= f.label :category, t('container_images.form.role_class') %>
+        <%= f.text_field :category, class: 'form-control'  %>
       </div>
     </div>
 

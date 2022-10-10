@@ -1,0 +1,24 @@
+<% image.image_variants.each do |i| %>
+  <tr>
+    <% if sortable %>
+      <input type="hidden" name="container_image[variant_pos][]" value="<%= i.id %>" />
+      <td class="sort-handle" style="cursor:move;width:35px;"><%= icon 'fa-solid', 'sort' %></td>
+    <% end %>
+    <td class="refresh remote-resource" data-url="/container_images/<%= image.id %>/image_variants/<%= i.id %>"><%= image_variant_valid_tag_label i %></td>
+    <td>
+      <%= i.label.blank? ? i.registry_image_tag : i.label %>
+      <% if i.is_default %>
+        <span class="label label-success">Default</span>
+      <% end %>
+    </td>
+    <td class="code-font-minimal"><%= i.registry_image_tag %></td>
+    <% if image.can_edit? current_user %>
+      <td class="text-right">
+        <div class="btn-group">
+          <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, "/container_images/#{image.id}/image_variants/#{i.id}/edit", class: 'btn btn-xs btn-default' %>
+          <%= link_to '<i class="fa fa-trash"></i>'.html_safe, "/container_images/#{image.id}/image_variants/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+        </div>
+      </td>
+    <% end %>
+  </tr>
+<% end %>

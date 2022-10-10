@@ -1,0 +1,62 @@
+<% content_for :title, "Image Collections" %>
+<%= render partial: 'admin/layouts/shared/images_nav' %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <p class="lead">
+      Image Collections
+    </p>
+  </div>
+</div>
+
+<hr />
+<% if @collections.empty? %>
+  <div class="row">
+    <div class="col-xs-12 text-center">
+      <p class="lead">No Collections Found</p>
+    </div>
+  </div>
+<% end %>
+<% @collections.each do |i| %>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-xs-6">
+              <div class="lead">
+                <%= link_to i.label, admin_container_image_collection_path(i) %>
+                <% unless i.dependencies_met? %>
+                  <%= icon 'fa-solid', 'triangle-exclamation' %>
+                <% end %>
+              </div>
+            </div>
+            <div class="col-xs-6 text-right">
+              <div class="btn-group">
+                <%= link_to icon('fa-regular', 'cog'), admin_container_image_collection_path(i), class: 'btn btn-sm btn-default' %>
+                <%= link_to icon('fa-regular', 'wrench'), edit_admin_container_image_collection_path(i), class: 'btn btn-sm btn-default' %>
+                <%= link_to icon('fa-regular', 'trash'), admin_container_image_collection_path(i), class: 'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm_prompt') } %>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xs-12">
+              <% i.image_icons.each do |icon| %>
+                <img style="width:20px;height:20px;"
+                     title="<%= icon.label %>"
+                     onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
+                     src="<%= icon.icon_url %>">
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%# will_paginate @collections %>
+  </div>
+</div>

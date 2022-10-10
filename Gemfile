@@ -119,6 +119,8 @@ gem 'dnsruby', '= 1.61.9' # https://github.com/alexdalitz/dnsruby
 
 gem 'prometheus-api-client', '= 0.6.2'
 
+gem 'font-awesome-sass', '= 6.2.0'
+
 group :development do
   gem 'passenger', '~> 6.0' # Now managed by container
   gem 'yard', '= 0.9.28'

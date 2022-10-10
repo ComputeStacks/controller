@@ -13,8 +13,8 @@ module ProvisionServices
       if container.is_a?(Deployment::Container)
 
         # Ensure container image exists and is updated (for custom images)
-        if container.container_image.pull_image?(container.node)
-          image_service = NodeServices::PullImageService.new(container.node, container.container_image)
+        if container.image_variant.pull_image?(container.node)
+          image_service = NodeServices::PullImageService.new(container.node, container.image_variant)
           unless image_service.perform
             event.event_details.create!(
               data: image_service.errors.empty? ? "Failed to pull image" : "Error pulling image:\n\n#{image_service.errors.join("\n")}",
@@ -22,7 +22,7 @@ module ProvisionServices
             )
             event.fail! 'Failed to pull image'
             # Also revalidate the image...
-            ImageWorkers::ValidateTagWorker.perform_async(container.container_image.id)
+            ImageWorkers::ValidateTagWorker.perform_async(container.image_variant.to_global_id.to_s)
             return false
           end
         end

@@ -24,10 +24,6 @@ module VolumeServices
 
     # @return [Boolean]
     def perform
-      event.event_details.create!(
-        data: "[DEBUG] ProvisionVolumeService\n\nVolume: #{volume.id} | SourceVolume: #{source_volume&.id} | Snapshot: #{source_snapshot}",
-        event_code: "7ab0bb2642a70951"
-      ) unless Rails.env.production?
       volume.current_audit = event.audit
       source_volume.current_audit = event.audit if source_volume
       client = volume.volume_client

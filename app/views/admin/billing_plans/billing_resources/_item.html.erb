@@ -71,7 +71,7 @@
           <td><%= phase.regions.count %></td>
           <td><%= phase.prices.count %></td>
           <td><%= phase.available_currencies.count > 1 ? link_to("multiple", "#{base_url}/billing_phases/#{phase.id}", style: "text-decoration:underline;color:#333;") : phase.available_currencies.first %></td>
-          <td class="text-right"><%= link_to tag.i(nil, class: 'fa fa-cogs'), "#{base_url}/billing_phases/#{phase.id}" %></td>
+          <td class="text-right"><%= link_to icon('fa-solid', 'gear'), "#{base_url}/billing_phases/#{phase.id}" %></td>
         </tr>
       <% end %>
       </tbody>

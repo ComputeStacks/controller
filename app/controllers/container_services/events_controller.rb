@@ -15,6 +15,7 @@ class ContainerServices::EventsController < ContainerServices::BaseController
 
   def last_event
     @last_event = @service.last_event
+    @active_events = @service.event_logs.running.count
     respond_to do |format|
       format.html { render template: 'container_services/events/last_event', layout: false }
       format.json { render json: @last_event }

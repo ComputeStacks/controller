@@ -9,13 +9,19 @@ namespace :containers do
         name:                     'nginx',
         label:                    'nginx',
         role:                     'nginx',
-        role_class:               'web',
+        category:               'web',
         can_scale:                true,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/nginx",
-        registry_image_tag:       "stable",
+        registry_image_path:      "cmptstks/nginx"
+      )
+      nginx.image_variants.create!(
+        label: "stable",
+        registry_image_tag: "stable",
         validated_tag: true,
-        validated_tag_updated: Time.now
+        validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
       )
       nginx.ingress_params.create!(
         port:            80,

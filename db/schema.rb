@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_08_16_045546) do
+ActiveRecord::Schema[7.0].define(version: 2022_10_08_175816) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -195,6 +195,23 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_16_045546) do
     t.index ["container_image_id", "user_id"], name: "image_collab_img_user", unique: true
   end
 
+  create_table "container_image_collections", force: :cascade do |t|
+    t.string "label"
+    t.boolean "active", default: true, null: false
+    t.integer "sort", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_container_image_collections_on_active"
+    t.index ["sort"], name: "index_container_image_collections_on_sort"
+  end
+
+  create_table "container_image_collections_images", id: false, force: :cascade do |t|
+    t.bigint "container_image_collection_id", null: false
+    t.bigint "container_image_id", null: false
+    t.index ["container_image_collection_id", "container_image_id"], name: "image_collection_on_images_index"
+    t.index ["container_image_id", "container_image_collection_id"], name: "image_on_image_collections_index"
+  end
+
   create_table "container_image_custom_host_entries", force: :cascade do |t|
     t.bigint "container_image_id"
     t.string "hostname"
@@ -224,6 +241,23 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_16_045546) do
     t.datetime "updated_at", precision: nil, null: false
     t.index ["container_image_id"], name: "index_container_image_image_rels_on_container_image_id"
     t.index ["requires_container_id"], name: "index_container_image_image_rels_on_requires_container_id"
+  end
+
+  create_table "container_image_image_variants", force: :cascade do |t|
+    t.string "label"
+    t.boolean "is_default", default: false, null: false
+    t.integer "version", default: 0, null: false
+    t.string "registry_image_tag"
+    t.text "before_migrate"
+    t.text "after_migrate"
+    t.text "rollback_migrate"
+    t.boolean "validated_tag", default: false, null: false
+    t.datetime "validated_tag_updated"
+    t.bigint "container_image_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["container_image_id"], name: "index_container_image_image_variants_on_container_image_id"
+    t.index ["is_default"], name: "index_container_image_image_variants_on_is_default"
   end
 
   create_table "container_image_ingress_params", force: :cascade do |t|
@@ -305,7 +339,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_16_045546) do
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.string "role"
-    t.string "role_class"
     t.boolean "featured", default: false
     t.integer "container_registry_id"
     t.boolean "lb_req", default: false
@@ -321,7 +354,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_16_045546) do
     t.bigint "container_image_provider_id"
     t.string "registry_custom"
     t.string "registry_image_path"
-    t.string "registry_image_tag", default: "latest"
     t.boolean "registry_auth", default: false
     t.decimal "min_cpu", default: "0.0", null: false
     t.integer "min_memory", default: 0, null: false
@@ -329,15 +361,13 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_16_045546) do
     t.text "registry_password_encrypted"
     t.boolean "is_load_balancer", default: false, null: false
     t.jsonb "labels", default: {}, null: false
-    t.boolean "validated_tag", default: true, null: false
-    t.datetime "validated_tag_updated", precision: nil
     t.boolean "force_local_volume", default: false, null: false
     t.boolean "override_autoremove", default: false, null: false
+    t.string "category"
+    t.index ["category"], name: "index_container_images_on_category"
     t.index ["container_image_provider_id"], name: "index_container_images_on_container_image_provider_id"
     t.index ["is_load_balancer"], name: "index_container_images_on_is_load_balancer"
     t.index ["labels"], name: "index_container_images_on_labels", using: :gin
-    t.index ["registry_image_path", "registry_image_tag"], name: "by_image_and_tag"
-    t.index ["validated_tag", "validated_tag_updated"], name: "container_image_tag_validation_index"
   end
 
   create_table "container_registries", id: :serial, force: :cascade do |t|
@@ -455,7 +485,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_16_045546) do
 
   create_table "deployment_container_services", force: :cascade do |t|
     t.bigint "deployment_id"
-    t.bigint "container_image_id"
     t.string "name"
     t.string "label"
     t.string "status", default: "pending", null: false
@@ -475,8 +504,9 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_16_045546) do
     t.boolean "auto_scale_horizontal", default: true, null: false
     t.decimal "auto_scale_max", default: "0.0", null: false
     t.boolean "override_autoremove", default: false, null: false
-    t.index ["container_image_id"], name: "index_deployment_container_services_on_container_image_id"
+    t.bigint "image_variant_id"
     t.index ["deployment_id"], name: "index_deployment_container_services_on_deployment_id"
+    t.index ["image_variant_id"], name: "index_deployment_container_services_on_image_variant_id"
     t.index ["is_load_balancer"], name: "index_deployment_container_services_on_is_load_balancer"
     t.index ["labels"], name: "index_deployment_container_services_on_labels", using: :gin
     t.index ["load_balancer_id"], name: "index_deployment_container_services_on_load_balancer_id"

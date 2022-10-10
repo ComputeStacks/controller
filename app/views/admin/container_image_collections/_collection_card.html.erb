@@ -1,0 +1,9 @@
+<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+  <div class="panel panel-default">
+    <div class="panel-heading" style="padding:2px;"></div>
+    <div class="panel-body">
+      <p class="lead"><%= image.label %></p>
+      <%= link_to "Remove", admin_container_image_collection_container_image_path(collection, image), method: :delete, class: 'btn btn-block btn-danger' %>
+    </div>
+  </div>
+</div>

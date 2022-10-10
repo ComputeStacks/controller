@@ -16,7 +16,7 @@
         <%= render partial: 'container_images/custom_host_entries/form', locals: { f: f } %>
         <div class="panel-footer">
           <%= link_to t('actions.cancel'), "#{container_image_path(@entry.container_image)}", class: 'btn btn-default', style: 'margin-right: 10px;' %>
-          <%= submit_tag t('actions.update'), class: 'btn btn-success pull-right' %>
+          <%= submit_tag t('actions.create'), class: 'btn btn-success pull-right' %>
         </div>
       </div>
     <% end %>

@@ -5,16 +5,16 @@
 <% else %>
 
   <div class="btn-group" style="margin-right:15px;">
-    <%= link_to tag.i(nil, class: 'fa fa-area-chart fa-fw'), "#{container_service_path(@service)}/charts", class: 'btn btn-sm btn-default' %>
-    <%= link_to tag.i(nil, class: 'fa fa-table fa-fw'), "#{container_service_path(@service)}/service_logs", class: 'btn btn-sm btn-default' %>
+    <%= link_to icon('fa-solid', 'chart-line'), "#{container_service_path(@service)}/charts", class: 'btn btn-sm btn-default' %>
+    <%= link_to icon('fa-solid', 'table-list'), "#{container_service_path(@service)}/service_logs", class: 'btn btn-sm btn-default' %>
   </div>
 
   <% unless @service.container_image.service_container? || @service.is_load_balancer %>
 
     <div class="btn-group">
       <%= service_auto_scale_btn @service %>
-      <%= link_to "<i class='fa fa-sliders'></i> #{t('container_services.actions.resize')}".html_safe, "#{container_service_path(@service)}/resize_service", class: 'btn btn-sm btn-primary' %>
-      <%= link_to "<i class='fa fa-exchange'></i> #{t('container_services.actions.scale')}".html_safe, "#{container_service_path(@service)}/scale_service", class: 'btn btn-sm btn-primary' if @service.can_scale? %>
+      <%= link_to "#{icon('fa-solid', 'sliders')} #{t('container_services.actions.resize')}".html_safe, "#{container_service_path(@service)}/resize_service", class: 'btn btn-sm btn-primary' %>
+      <%= link_to "#{icon('fa-solid', 'arrow-right-arrow-left')} #{t('container_services.actions.scale')}".html_safe, "#{container_service_path(@service)}/scale_service", class: 'btn btn-sm btn-primary' if @service.can_scale? %>
     </div>
   <% end %>
 

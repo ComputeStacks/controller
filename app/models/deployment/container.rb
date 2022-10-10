@@ -86,7 +86,8 @@ class Deployment::Container < ApplicationRecord
   has_one :region, through: :service
   has_one :load_balancer, through: :service
 
-  has_one :container_image, through: :service
+  has_one :image_variant, through: :service
+  has_one :container_image, through: :image_variant
   has_one :deployment, through: :service
   has_many :collaborators, through: :deployment
   has_many :domains, through: :service

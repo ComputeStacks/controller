@@ -28,7 +28,8 @@ module MockRegistry
     ]
     data.each do |i|
       i[:tags].each do |tag|
-        container_check = container_image_provider.container_images.find_by(registry_image_path: i[:image], registry_image_tag: tag[:tag])
+        container_check = container_image_provider.container_images.find_by registry_image_path: i[:image]
+        container_check = container_check.image_variants.find_by registry_image_tag: tag[:tag] if container_check
         unless container_check.nil?
           tag.merge!({
                      container: {

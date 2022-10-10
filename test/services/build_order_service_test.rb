@@ -5,7 +5,7 @@ class BuildOrderServiceTest < ActiveSupport::TestCase
   test 'can generate an order' do
     order_session = OrderSession.new users(:admin)
     order_session.project.name = 'Test'
-    order_session.add_image container_images(:wordpress)
+    order_session.add_image container_image_image_variants(:wordpress_default)
     order_session.images.each do |i|
       i[:package_id] = products(:containersmall).id
     end

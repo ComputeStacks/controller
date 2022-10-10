@@ -1,0 +1,46 @@
+pma_default:
+  is_default: true
+  version: 0
+  registry_image_tag: litespeed
+  container_image: pma
+wordpress_default:
+  is_default: true
+  version: 0
+  registry_image_tag: php7.3-litespeed
+  container_image: wordpress
+nginx_default:
+  is_default: true
+  version: 0
+  registry_image_tag: latest
+  container_image: nginx
+nginx_shared_default:
+  is_default: true
+  version: 0
+  registry_image_tag: latest
+  container_image: nginx_shared
+mariadb_default:
+  is_default: true
+  version: 0
+  registry_image_tag: 10.5
+  container_image: mariadb
+custom_default:
+  is_default: true
+  version: 0
+  registry_image_tag: php7.3-litespeed
+  container_image: custom
+deletable_default:
+  is_default: true
+  version: 0
+  registry_image_tag: php7.3-litespeed
+  container_image: deletable
+elasticsearch_default:
+  is_default: true
+  version: 0
+  registry_image_tag: 6.4.3
+  container_image: elasticsearch
+es_load_balancer_default:
+  is_default: true
+  version: 0
+  registry_image_tag: latest
+  container_image: es_load_balancer
+

@@ -18,26 +18,26 @@
           .panel-body
             ul.list-unstyled
               li
-                i.fa.fa-bolt.fa-fw
+                i.fa-regular.fa-bolt.fa-fw
                 | &nbsp;&nbsp;
                 = t '.deployments.status'
                 b.pull-right= t 'deployments.index.deployment_list.deployments.pending_order'
               li
-                i.fa.fa-clock-o.fa-fw
+                i.fa-regular.fa-clock.fa-fw
                 | &nbsp;&nbsp;
                 = t '.deployments.last_event'
                 b.pull-right= distance_of_time_in_words_to_now(i.updated_at, include_seconds: true)
               li
-                i.fa.fa-cube.fa-fw
+                i.fa-regular.fa-cube.fa-fw
                 | &nbsp;&nbsp;
                 = t 'obj.containers'
                 b.pull-right= i.order_data['raw_order'].count
               li
-                i.fa.fa-globe.fa-fw
+                i.fa-regular.fa-globe.fa-fw
                 | &nbsp;&nbsp;
                 = t 'obj.region'
                 b.pull-right ...
-            div= link_to raw("<i class='fa fa-cogs'></i> #{t('actions.manage')}"), "/orders/#{i.id}", class: "btn btn-default btn-block"
+            div= link_to raw("#{icon('fa-solid', 'gear')} #{t('actions.manage')}"), "/orders/#{i.id}", class: "btn btn-default btn-block"
 
     - @deployments.each do |i|
       .col-lg-3.col-md-4.col-sm-6.col-xs-12
@@ -52,18 +52,18 @@
           .panel-body
             ul.list-unstyled
               li
-                i.fa.fa-cube.fa-fw
+                i.fa-regular.fa-cube.fa-fw
                 | &nbsp;&nbsp;
                 = t('obj.services')
                 b.pull-right= i.services.where(is_load_balancer: false).count
               li
-                i.fa.fa-clock-o.fa-fw
+                i.fa-regular.fa-clock.fa-fw
                 | &nbsp;&nbsp;
                 = t '.deployments.last_event'
                 b.pull-right= deployment_last_event i
               li
-                i.fa.fa-globe.fa-fw
+                i.fa-regular.fa-globe.fa-fw
                 | &nbsp;&nbsp;
                 = i.locations.count == 1 ? t('obj.region') : t('obj.regions')
                 b.pull-right= i.locations.empty? ? '...' : i.locations.pluck(:name).join(', ')
-            div style="font-size:12px;"= link_to raw("<i class='fa fa-cogs'></i> #{t('actions.manage')}"), "/deployments/#{i.token}", :class => "btn btn-default btn-sm btn-block"
+            div style="font-size:12px;"= link_to raw("#{icon('fa-solid', 'gear')} #{t('actions.manage')}"), "/deployments/#{i.token}", :class => "btn btn-default btn-sm btn-block"

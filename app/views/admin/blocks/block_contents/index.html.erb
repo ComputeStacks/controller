@@ -34,8 +34,8 @@
             <td><%= truncate sanitize(i.body, tags: []), length: 50 %></td>
             <td class="text-right">
               <div class="btn-group">
-                <%= link_to "<i class='fa fa-clone'></i> clone".html_safe, "#{@base_url}/block_contents/new?from=#{i.id}", class: 'btn btn-sm btn-default' %>
-                <%= link_to "<i class='fa fa-cogs'></i>".html_safe, "#{@base_url}/block_contents/#{i.id}", class: 'btn btn-sm btn-default' %>
+                <%= link_to "#{icon('fa-solid', 'copy')} clone".html_safe, "#{@base_url}/block_contents/new?from=#{i.id}", class: 'btn btn-sm btn-default' %>
+                <%= link_to icon('fa-solid', 'gear').html_safe, "#{@base_url}/block_contents/#{i.id}", class: 'btn btn-sm btn-default' %>
                 <%= link_to "<i class='fa fa-wrench'></i>".html_safe, "#{@base_url}/block_contents/#{i.id}/edit", class: 'btn btn-sm btn-default' %>
                 <%= link_to "<i class='fa fa-trash'></i>".html_safe, "#{@base_url}/block_contents/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') },  class: 'btn btn-sm btn-danger' %>
               </div>

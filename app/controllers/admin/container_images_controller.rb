@@ -50,7 +50,11 @@ class Admin::ContainerImagesController < Admin::ApplicationController
       redirect_to helpers.container_image_path(@container), success: "Successfully updated container."
     else
       flash[:alert] = @container.errors.full_messages.join('. ')
-      render template: 'admin/container_images/edit'
+      if params.dig(:container_image, :variant_pos)
+        redirect_to helpers.container_image_path(@container)
+      else
+        render template: 'admin/container_images/edit'
+      end
     end
   end
 
@@ -105,7 +109,6 @@ class Admin::ContainerImagesController < Admin::ApplicationController
     @container.current_user = current_user
 
     if @container.save
-      ImageWorkers::ValidateTagWorker.perform_async @container.id
       redirect_to helpers.container_image_path(@container), success: "Successfully created image"
     else
       render template: 'admin/container_images/new'
@@ -134,11 +137,11 @@ class Admin::ContainerImagesController < Admin::ApplicationController
 
   def container_params
     params.require(:container_image).permit(
-      :label, :description, :role, :role_class, :can_scale, :active, :command,
+      :label, :description, :role, :category, :can_scale, :active, :command,
       :parent_image_id, :registry_username, :registry_password, :registry_custom, :registry_image_path,
       :registry_image_tag, :registry_auth, :container_image_provider_id, :min_cpu, :min_memory, :user_id,
       :general_block_id, :remote_block_id, :domains_block_id, :ssh_block_id, :tag_list, :is_load_balancer,
-      :is_free, :force_local_volume, :override_autoremove
+      :is_free, :force_local_volume, :override_autoremove, variant_pos: []
     )
   end
 

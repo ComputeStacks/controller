@@ -105,9 +105,10 @@ class Deployment < ApplicationRecord
 
   belongs_to :user
   has_many :services, class_name: 'Deployment::ContainerService', dependent: :destroy
-  has_many :load_balancers, -> { distinct }, through: :services
+  has_many :load_balancers, through: :services
   has_many :ingress_rules, through: :services
-  has_many :container_images, through: :services
+  has_many :image_variants, through: :services
+  has_many :container_images, through: :image_variants
   has_many :setting_params, through: :services
   has_many :networks, -> { distinct }, through: :services
 
@@ -199,7 +200,7 @@ class Deployment < ApplicationRecord
   def image_icons(clear_cache = false)
     cache_key = "proj_icons_#{self.id}"
     Rails.cache.fetch(cache_key, force: clear_cache, expires: 6.hours) do
-      container_images.where(is_load_balancer: false).order(:name).distinct
+      container_images.where(is_load_balancer: false).order(:name).uniq
     end
   end
 

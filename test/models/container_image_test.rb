@@ -28,6 +28,7 @@ class ContainerImageTest < ActiveSupport::TestCase
     assert_not_nil parent_image
 
     new_image = parent_image.dup
+    new_image.registry_image_tag = parent_image.default_variant.registry_image_tag
     new_image.current_user = user
     new_image.name = "#{parent_image.name}-clone"
     new_image.label = "#{parent_image.label}-clone"

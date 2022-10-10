@@ -4,10 +4,10 @@ namespace :containers do
 
     if ContainerImage.find_by(name: 'whmcs').nil?
 
-      unless ContainerImage.where(name: 'mariadb-105').exists?
-        Rake::Task['containers:mariadb:v105'].execute
+      unless ContainerImage.where(name: 'mariadb').exists?
+        Rake::Task['containers:mariadb'].execute
       end
-      mysql = ContainerImage.find_by(name: 'mariadb-105')
+      mysql = ContainerImage.find_by(name: 'mariadb')
 
       dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
       whmcs      = ContainerImage.create!(
@@ -15,15 +15,23 @@ namespace :containers do
         label:                    'WHMCS',
         description:              "WHMCS is a web hosting automation and billing engine.",
         role:                     'whmcs',
-        role_class:               'web',
+        category:               'web',
         can_scale:                true,
         is_free:                  false,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/whmcs",
-        registry_image_tag:       "php7.4-litespeed",
-        validated_tag: true,
-        validated_tag_updated: Time.now
+        registry_image_path:      "cmptstks/whmcs"
       )
+
+      whmcs.image_variants.create!(
+        label: "php8.1-litespeed",
+        registry_image_tag: "php8.1-litespeed",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
+      )
+
       whmcs.dependency_parents.create!(
         requires_container_id: mysql.id,
         bypass_auth_check:     true

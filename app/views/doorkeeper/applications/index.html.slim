@@ -28,5 +28,5 @@
                 td.align-middle.text-right
                   = render 'delete_form', application: application, submit_btn_css: 'btn btn-danger btn-sm pull-right'
                   .btn-group style="margin-right:10px;"
-                    = link_to tag.i(nil, class: 'fa fa-cogs'), oauth_application_path(application), class: 'btn btn-primary btn-sm'
+                    = link_to icon('fa-solid', 'gear'), oauth_application_path(application), class: 'btn btn-primary btn-sm'
                     = link_to tag.i(nil, class: 'fa fa-wrench'), edit_oauth_application_path(application), class: 'btn btn-default btn-sm'

@@ -16,7 +16,7 @@ class ContainerImageControllerTest < ActionDispatch::IntegrationTest
         label: 'redis-dev',
         active: true,
         role: 'redis',
-        role_class: 'cache',
+        category: 'cache',
         registry_image_path: 'cs/portal/redis',
         registry_custom: reg_url,
         registry_image_tag: 'alpine',

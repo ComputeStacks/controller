@@ -5,7 +5,7 @@ mysql:
   cpu: 1
   memory: 1024
   active: true
-  container_image: mariadb
+  image_variant: mariadb_default
   deployment: project_test
   region: regionone
   auto_scale: true
@@ -18,7 +18,7 @@ wordpress:
   cpu: 1
   memory: 1024
   active: true
-  container_image: wordpress
+  image_variant: wordpress_default
   deployment: project_test
   region: regionone
   load_balancer: default
@@ -32,7 +32,7 @@ wordpress_custom:
   cpu: 1
   memory: 1024
   active: true
-  container_image: custom
+  image_variant: custom_default
   deployment: project_test
   region: regionone
   load_balancer: default
@@ -46,7 +46,7 @@ nginx:
   cpu: 1
   memory: 512
   active: true
-  container_image: nginx
+  image_variant: nginx_default
   deployment: project_test
   region: regionone
   load_balancer: default
@@ -60,7 +60,7 @@ user_nginx:
   cpu: 1
   memory: 512
   active: true
-  container_image: nginx
+  image_variant: nginx_default
   deployment: user_project_test
   region: regionone
   load_balancer: default
@@ -72,7 +72,7 @@ pma:
   cpu: 1
   memory: 512
   active: true
-  container_image: pma
+  image_variant: pma_default
   deployment: project_test
   region: regionone
   load_balancer: default

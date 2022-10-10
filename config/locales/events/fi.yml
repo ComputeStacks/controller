@@ -97,6 +97,7 @@ fi:
           scale: "[%{label}] Konttien skaalaus epäonnistui."
           resize: "[%{label}] Konttien koonmuutos epäonnistui."
           delete: "[%{label}] Palvelun poisto epäonnistui."
+        variant_migrate: "[%{image}] Migrating from %{old} to %{variant}"
       snapshots:
         restore: "Restoring snapshot %{snapshot} to volume %{volume}."
       system:

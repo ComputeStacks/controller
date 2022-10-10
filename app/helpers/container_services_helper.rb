@@ -1,5 +1,10 @@
 module ContainerServicesHelper
 
+  def service_image_friendly_name(service)
+    n = service.image_variant.friendly_name
+    n.gsub("-latest","")
+  end
+
   ##
   # Will we display an error page when viewing this service?
   #

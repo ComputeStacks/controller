@@ -3,16 +3,16 @@ namespace :containers do
   desc "Install magento 2.4 container"
   task magento: :environment do
 
-    unless ContainerImage.where(name: 'magento-ce-24').exists?
+    unless ContainerImage.where(name: 'magento-ce').exists?
       dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
-      unless ContainerImage.where(name: 'mariadb-104').exists?
-        Rake::Task['containers:mariadb:v104'].execute
+      unless ContainerImage.where(name: 'mariadb').exists?
+        Rake::Task['containers:mariadb'].execute
       end
-      unless ContainerImage.where("labels @> ?", { system_image_name: "elasticsearch-7" }.to_json).exists?
-        Rake::Task['containers:elasticsearch:v7'].execute
+      unless ContainerImage.where(name: "elasticsearch").exists?
+        Rake::Task['containers:elasticsearch'].execute
       end
-      mysql = ContainerImage.find_by(name: 'mariadb-104')
-      es = ContainerImage.find_by("labels @> ?", { system_image_name: "elasticsearch-7" }.to_json)
+      mysql = ContainerImage.find_by(name: 'mariadb')
+      es = ContainerImage.find_by(name: "elasticsearch")
 
       mage_block = Block.find_by(title: 'Magento 2 Setup')
 
@@ -26,22 +26,27 @@ namespace :containers do
       end
 
       mage = ContainerImage.create!(
-        name:                     "magento-ce-24",
-        label:                    "Magento CE 2.4",
-        description:              "Magento CE 2.4",
+        name:                     "magento-ce",
+        label:                    "Magento CE",
+        description:              "Magento CE",
         role:                     "magento",
-        role_class:               "web",
+        category:               "web",
         can_scale:                true,
         container_image_provider: dhprovider,
         registry_image_path:      "cmptstks/magento-ce",
-        registry_image_tag:       "2.4",
         min_cpu:                  1,
         min_memory:               1024,
-        general_block_id:         mage_block.id,
-        validated_tag: true,
-        validated_tag_updated: Time.now
+        general_block_id:         mage_block.id
       )
-
+      mage.image_variants.create!(
+        label: "2.4",
+        registry_image_tag: "2.4",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
+      )
       mage.dependency_parents.create!(
         requires_container_id: mysql.id,
         bypass_auth_check:     true
@@ -223,7 +228,8 @@ namespace :containers do
         borg_keep_hourly:  1,
         borg_keep_daily:   7,
         borg_keep_weekly:  4,
-        borg_keep_monthly: 0
+        borg_keep_monthly: 0,
+        borg_keep_annually: 0
       )
       mage.volumes.create!(
         label:             'webconfig',
@@ -235,7 +241,8 @@ namespace :containers do
         borg_keep_hourly:  1,
         borg_keep_daily:   7,
         borg_keep_weekly:  4,
-        borg_keep_monthly: 0
+        borg_keep_monthly: 0,
+        borg_keep_annually: 0
       )
 
     end

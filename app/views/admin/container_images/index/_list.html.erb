@@ -16,12 +16,10 @@
       </td>
       <td>
         <%= link_to i.label, admin_container_image_path(i) %>
-        <%= content_tag(:span, 'DISABLED', class: 'label label-danger') unless i.active %>
+        <%= content_tag(:span, 'HIDDEN', class: 'label label-default') unless i.active %>
         <%= content_tag(:span, 'FREE', class: 'label label-success') if i.is_free %>
         <%= content_tag(:span, 'LoadBalancer', class: 'label label-warning') if i.is_load_balancer %>
         <%= image_valid_tag_label i, true %>
-        <br>
-        <small><%= i.image_path_with_tag.gsub(":latest", "") %></small>
       </td>
       <td style="vertical-align: middle;">
         <%= i.container_image_provider.nil? ? 'Custom' : i.container_image_provider.name %>
@@ -30,8 +28,8 @@
       <td style="vertical-align: middle;"><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
       <td class="text-right" style="vertical-align: middle;">
         <div class="btn-group">
-          <%= link_to raw("<i class='fa fa-clone'></i>"), "/admin/container_images/new?container_image[parent_image_id]=#{i.id}", class: 'btn btn-sm btn-default' %>
-          <%= link_to raw("<i class='fa fa-cogs'></i>"), admin_container_image_path(i), class: 'btn btn-sm btn-default' %>
+          <%= link_to icon('fa-solid', 'copy').html_safe, "/admin/container_images/new?container_image[parent_image_id]=#{i.id}", class: 'btn btn-sm btn-default' %>
+          <%= link_to icon('fa-solid', 'gear'), admin_container_image_path(i), class: 'btn btn-sm btn-default' %>
           <%= link_to raw("<i class='fa fa-trash'></i>"), admin_container_image_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
         </div>
       </td>

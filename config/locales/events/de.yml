@@ -97,6 +97,7 @@ de:
           scale: "[%{label}] Die Skalierung der Container ist fehlgeschlagen."
           resize: "[%{label}] Die Größenänderung von Containern ist fehlgeschlagen."
           delete: "[%{label}] Der Dienst konnte nicht gelöscht werden."
+        variant_migrate: "[%{image}] Migrating from %{old} to %{variant}"
       snapshots:
         restore: "Wiederherstellen des Snapshots %{snapshot} auf Volume %{volume}."
       system:

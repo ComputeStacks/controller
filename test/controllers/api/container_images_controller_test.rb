@@ -3,10 +3,10 @@ require 'test_helper'
 class Api::ContainerImagesControllerTest < ActionDispatch::IntegrationTest
 
   include ApiTestControllerBase
-  
+
   test "list container images" do
-    get "/api/container_images", 
-      as: :json, 
+    get "/api/container_images",
+      as: :json,
       headers: @basic_auth_headers
     assert_response :success
     data = JSON.parse(response.body)
@@ -64,7 +64,7 @@ class Api::ContainerImagesControllerTest < ActionDispatch::IntegrationTest
         registry_image_path: "cmptstks/nginx",
         registry_image_tag: "latest",
         role: "nginx",
-        role_class: "web",
+        category: "web",
         ingress_params_attributes: [{
           port: 80,
           proto: 'http',

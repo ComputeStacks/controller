@@ -7,7 +7,10 @@
 # @!attribute [r] is_load_balancer
 #   @return [Boolean]
 #
-# @!attribute container_image
+# @!attribute image_variant
+#   @return [ContainerImage::ImageVariant]
+#
+# @!attribute [r] container_image
 #   @return [ContainerImage]
 #
 # @!attribute [r] has_domain_management
@@ -99,6 +102,7 @@ class Deployment::ContainerService < ApplicationRecord
   include ContainerServices::ServiceLogs
   include ContainerServices::ServiceMetrics
   include ContainerServices::ServiceUsage
+  include ContainerServices::ServiceVariant
   include ContainerServices::StateManager
   include ContainerServices::Wordpress
 
@@ -106,7 +110,8 @@ class Deployment::ContainerService < ApplicationRecord
   scope :web_only, -> { where(network_ingress_rules: { external_access: true, proto: 'http' }).joins(:ingress_rules).distinct }
   scope :load_balancers, -> { where(is_load_balancer: true) }
 
-  belongs_to :container_image
+  belongs_to :image_variant, class_name: 'ContainerImage::ImageVariant'
+  has_one :container_image, through: :image_variant
   belongs_to :deployment
   belongs_to :region
   belongs_to :master_domain, class_name: 'Deployment::ContainerDomain', optional: true

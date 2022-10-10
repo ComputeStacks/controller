@@ -73,7 +73,7 @@ class Api::OrdersController < Api::ApplicationController
   #     * `location_id`: Integer
   #     * `project_id`: Integer | Only if adding to existing project
   #     * `containers`: Array
-  #         * `image_id`: Integer
+  #         * `image_variant_id`: Integer
   #         * `source`: String | csrn of existing service
   #         * `domains`: Array<String> | provide an optional list of domains you want added after the order is provisioned.
   #         * `resources`: Object
@@ -134,7 +134,7 @@ class Api::OrdersController < Api::ApplicationController
   def new_deployment_params
     params.require(:order).permit(
       :project_name, :skip_ssh, :location_id, :project_id, containers: [
-      :image_id, :name, :container_image_id, :product_id, :package_id,
+      :image_variant_id, :name, :container_image_id, :product_id, :package_id,
       resources: [
         :product_id, :package_id
       ],

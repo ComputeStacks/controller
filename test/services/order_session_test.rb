@@ -7,11 +7,11 @@ class OrderSessionTest < ActiveSupport::TestCase
   end
 
   test 'can add images' do
-    @order_session.add_image container_images(:wordpress)
-    assert_includes @order_session.images.map { |i| i[:container_id] }, container_images(:wordpress).id
+    @order_session.add_image container_image_image_variants(:wordpress_default)
+    assert_includes @order_session.images.map { |i| i[:image_id] }, container_images(:wordpress).id
 
     # MariaDB is required by Wordpress, so ensure we also have that
-    assert_includes @order_session.images.map { |i| i[:container_id] }, container_images(:mariadb).id
+    assert_includes @order_session.images.map { |i| i[:image_id] }, container_images(:mariadb).id
   end
 
   test 'can find existing order' do
@@ -19,7 +19,7 @@ class OrderSessionTest < ActiveSupport::TestCase
   end
 
   test 'can generate valid order' do
-    @order_session.add_image container_images(:elasticsearch)
+    @order_session.add_image container_image_image_variants(:elasticsearch_default)
     order_data = @order_session.to_order
     refute_empty order_data[:containers]
     assert_includes order_data[:containers].map { |i| i[:image_id] }, container_images(:elasticsearch).id

@@ -12,7 +12,8 @@ class OrderSession
                 :skip_dep, # dont add dependency images
                 :skip_ssh, # defaults to false
                 :region, # Used to find prices
-                :images # Container Images
+                :images, # Container Images
+                :collections # image collections
 
   def initialize(user, id = nil)
     return nil unless user.is_a? User
@@ -32,7 +33,8 @@ class OrderSession
     #
     # [
     #   {
-    #    container_id: Integer,
+    #    image_id: Integer,
+    #    image_variant_id: Integer,
     #    container_name: String,
     #    package_id: Integer,
     #    label: String,
@@ -54,6 +56,7 @@ class OrderSession
     #  }
     # ]
     self.images = []
+    self.collections = []
 
     load_state!
 
@@ -69,10 +72,16 @@ class OrderSession
   #       volume_overrides: [],
   #       source: ""
   #      }
-  def add_image(image, opts = {})
-    return if image_selected?(image.id)
+  def add_image(image_variant, opts = {})
+    return if image_variant_selected?(image_variant.id)
+    images.each do |i|
+      if i[:image_id] == image_variant.container_image.id
+        images.delete i
+      end
+    end
     opts = opts.with_indifferent_access
     volume_overrides = opts[:volume_overrides] ? opts[:volume_overrides] : []
+    collection_id = opts[:collection_id]
     # Container Source
     source_csrn = opts[:source]
     source_service = source_csrn.blank? ? nil : Csrn.locate(opts[:source])
@@ -81,18 +90,7 @@ class OrderSession
              else
                nil
              end
-    to_add = [image]
-    image.dependencies.each do |i|
-      next if image_selected?(i.id)
-      unless new_project?
-        next if project.container_images.include?(i)
-      end
-      # Check for their dependencies
-      i.dependencies.each do |ii|
-        to_add << ii unless to_add.include?(ii)
-      end
-      to_add << i unless to_add.include?(i)
-    end unless skip_dep
+    to_add = [ image_variant ]
     source_settings = {}
     if source
       source.setting_params.each do |ii|
@@ -101,7 +99,7 @@ class OrderSession
     end
     to_add.each do |i|
       settings = {}
-      i.setting_params.each do |ii|
+      i.container_image.setting_params.each do |ii|
         next if ii.param_type == 'password' && source.nil?
         settings[ii.name] = {
           type: ii.param_type,
@@ -111,7 +109,7 @@ class OrderSession
         }
       end
       vols = []
-      i.volumes.each do |ii|
+      i.container_image.volumes.each do |ii|
         cloned_vol = volume_overrides.select { |vo| vo[:mount_path] == ii.mount_path }[0]
         vol_action = if cloned_vol
                        cloned_vol[:action]
@@ -135,17 +133,29 @@ class OrderSession
       end
       images << {
         label: "",
-        container_id: i.id,
+        image_id: i.container_image.id,
+        image_variant_id: i.id,
         source: source ? source_csrn : nil,
-        container_name: i.label,
+        container_name: i.friendly_name,
         params: settings,
         volumes: vols,
-        free: i.is_free ? 'yes' : 'no',
-        icon: i.icon_url,
-        min_cpu: i.min_cpu,
-        min_mem: i.min_memory,
-        qty: 1
+        free: i.container_image.is_free ? 'yes' : 'no',
+        icon: i.container_image.icon_url,
+        min_cpu: i.container_image.min_cpu,
+        min_mem: i.container_image.min_memory,
+        qty: 1,
+        collection_id: collection_id
       }
+    end
+    add_dependencies! unless skip_dep
+  end
+
+  def add_collection(collection_id)
+    collection = ContainerImageCollection.find_by id: collection_id
+    return if collection.nil?
+    collection.container_images.each do |i|
+      next if image_selected? i.id
+      add_image i.default_variant, { collection_id: collection.id }
     end
   end
 
@@ -154,18 +164,20 @@ class OrderSession
   #
   # Ensure we have all required dependencies.
   #
-  # When using `skip_dep`, you should also call this
-  # to make sure all dependencies are met prior to handing off to user.
+  # When using `skip_dep`, you should also call this directly,
+  # otherwise it will be automatically called when adding an image.
+  #
+  # This will also add an image's dependency dependencies.
   def add_dependencies!
     images.each do |h|
-      image = ContainerImage.find_by id: h[:container_id]
+      image = ContainerImage.find_by id: h[:image_id]
       next if image.nil?
-      image.dependencies.each do |i|
-        next if image_selected?(i.id)
+      image.dependencies.each do |i_dep|
+        next if image_selected?(i_dep.id)
         unless new_project?
-          next if project.container_images.include?(i)
+          next if project.container_images.include?(i_dep)
         end
-        add_image i
+        add_image i_dep.default_variant
       end
     end
   end
@@ -176,8 +188,24 @@ class OrderSession
     project&.id.nil?
   end
 
+  def image_variant_selected?(image_variant_id)
+    images.detect { |i| i[:image_variant_id] == image_variant_id.to_i }
+  end
+
   def image_selected?(image_id)
-    images.detect { |i| i[:container_id] == image_id.to_i }
+    images.detect { |i| i[:image_id] == image_id.to_i }
+  end
+
+  # For displaying selected image on order form
+  def order_image_selected?(image_id)
+    return false unless image_selected?(image_id)
+    i = images.select { |i| i[:image_id] == image_id.to_i }
+    return false unless i[0][:collection_id].nil?
+    true
+  end
+
+  def collection_selected?(collection_id)
+    images.detect { |i| i[:collection_id] == collection_id.to_i }
   end
 
   # Given the current set of images, can we skip
@@ -218,7 +246,8 @@ class OrderSession
 
     images.each do |image|
       c = {
-        image_id: image[:container_id].to_i,
+        image_id: image[:image_id].to_i,
+        image_variant: image[:image_variant_id].to_i,
         source: image[:source], # Deployment::ContainerService.csrn
         params: [],
         volumes: image[:volumes],

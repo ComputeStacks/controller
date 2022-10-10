@@ -1,4 +1,13 @@
-vagrant_vm_ip = `ip -j addr show dev eth0 | jq -r '.[0].addr_info | map(select(.family == "inet"))[0].local'`
+vagrant_vm_ip = if RUBY_PLATFORM =~ /linux/ # Anything else and we're running local, so just use 127.0.0.1
+                  `ip -j addr show dev eth0 | jq -r '.[0].addr_info | map(select(.family == "inet"))[0].local'`
+                else
+                  '127.0.0.1'
+                end
+lb_cert_path = if `whoami`.strip == 'vagrant'
+                 '/home/vagrant/.ssl_wildcard/sharedcert.pem'
+               else
+                 "#{Rails.root.to_s}/lib/dev/test_wildcard_ssl/sharedcert-test-crt"
+               end
 puts "Creating default location and region..."
 location = Location.create! name: "dev"
 
@@ -135,14 +144,12 @@ mysql = ContainerImage.create!(
   name: 'mariadb-105',
   label: 'MariaDB 10.5',
   role: 'mysql',
-  role_class: 'database',
+  category: 'database',
   can_scale: false,
   container_image_provider: dh_provider,
   registry_image_path: "mariadb",
   registry_image_tag: "10.5",
-  command: "--max_allowed_packet=268435456",
-  validated_tag: true,
-  validated_tag_updated: Time.now
+  command: "--max_allowed_packet=268435456"
 )
 mysql.setting_params.create!(
   name: 'mysql_password',
@@ -179,7 +186,7 @@ wp = ContainerImage.create!(
   label: "Wordpress",
   description: "Wordpress powered by the OpenLiteSpeed web server. Includes advanced caching and performance tuning, with out of the box support for redis object cache (requires separate container).",
   role: "wordpress",
-  role_class: "web",
+  category: "web",
   can_scale: true,
   container_image_provider: dh_provider,
   registry_image_path: "cmptstks/wordpress",
@@ -188,9 +195,7 @@ wp = ContainerImage.create!(
   min_memory: 512,
   labels: {
     system_image_name: "wordpress-litespeed"
-  },
-  validated_tag: true,
-  validated_tag_updated: Time.now
+  }
 )
 wp.dependency_parents.create!(
   requires_container_id: mysql.id,
@@ -316,7 +321,7 @@ redis = ContainerImage.create!(
   name: 'redis',
   description: 'Redis in-memory key/value store. This image does not save data to disk.',
   role: 'redis',
-  role_class: 'cache',
+  category: 'cache',
   can_scale: false,
   is_free: false,
   container_image_provider: dh_provider,
@@ -324,9 +329,7 @@ redis = ContainerImage.create!(
   registry_image_tag: "alpine",
   labels: {
     system_image_name: "redis-public"
-  },
-  validated_tag: true,
-  validated_tag_updated: Time.now
+  }
 )
 redis.ingress_params.create!(
   port: 6379,
@@ -347,14 +350,12 @@ pma = ContainerImage.create!(
   label: "phpMyAdmin",
   description: "phpMyAdmin",
   role: "pma",
-  role_class: "dev",
+  category: "dev",
   is_free: true,
   can_scale: false,
   container_image_provider: dh_provider,
   registry_image_path: "cmptstks/phpmyadmin",
-  registry_image_tag: "litespeed",
-  validated_tag: true,
-  validated_tag_updated: Time.now
+  registry_image_tag: "litespeed"
 )
 pma.env_params.create!(
   name: 'BASE_URL',
@@ -404,13 +405,11 @@ nginx = ContainerImage.create!(
   name: 'nginx',
   label: 'nginx',
   role: 'nginx',
-  role_class: 'web',
+  category: 'web',
   can_scale: true,
   container_image_provider: dh_provider,
   registry_image_path: "cmptstks/nginx",
-  registry_image_tag: "stable",
-  validated_tag: true,
-  validated_tag_updated: Time.now
+  registry_image_tag: "stable"
 )
 nginx.ingress_params.create!(
   port: 80,
@@ -429,6 +428,10 @@ nginx.volumes.create!(
   borg_keep_weekly: 4,
   borg_keep_monthly: 0
 )
+
+ContainerImage::ImageVariant.all.each do |i|
+  i.update validated_tag: true, validated_tag_updated: Time.now, skip_tag_validation: true
+end
 
 puts "Setting up billing products..."
 
@@ -580,7 +583,7 @@ LoadBalancer.create! label: 'dev',
                      internal_ip: [ '127.0.0.1', vagrant_vm_ip.gsub("\n","") ],
                      public_ip: '127.0.0.1',
                      direct_connect: true,
-                     cert_encrypted: Secret.encrypt!(File.read("/home/vagrant/.ssl_wildcard/sharedcert.pem"))
+                     cert_encrypted: Secret.encrypt!(File.read(lb_cert_path))
 
 puts "Creating default admin user..."
 group = UserGroup.create! name: 'default',

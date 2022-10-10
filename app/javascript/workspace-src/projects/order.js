@@ -57,7 +57,7 @@ $(document).ready(function() {
   });
 
   $('.container-image-selector').click(function() {
-    var i, req_elem, required_images, the_element;
+    let i, req_elem, required_images, the_element;
     the_element = $(this).attr('data-id');
     required_images = $.parseJSON($(this).attr('data-required'));
     if ($(this).hasClass('active')) {

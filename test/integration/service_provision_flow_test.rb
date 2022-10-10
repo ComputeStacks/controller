@@ -6,12 +6,12 @@ class ServiceProvisionFlowTest < ActionDispatch::IntegrationTest
 
     # Build order session
     order_session = OrderSession.new users(:admin)
-    order_session.add_image container_images(:wordpress)
+    order_session.add_image container_image_image_variants(:wordpress_default)
     order_session.project.name = 'Test Order'
 
     order_session.images.each do |image|
       image[:package_id] = products(:containersmall).id
-      next unless image[:container_name] == 'Wordpress'
+      next unless image[:image_id] == container_image_image_variants(:wordpress_default).container_image.id
       image[:params]['username'][:value] = 'devuser'
     end
 
@@ -90,16 +90,16 @@ class ServiceProvisionFlowTest < ActionDispatch::IntegrationTest
 
     # Build order session
     order_session = OrderSession.new users(:admin)
-    order_session.add_image container_images(:nginx_shared)
+    order_session.add_image container_image_image_variants(:nginx_shared_default)
     order_session.project.name = 'Test nginx Order'
 
     order_session.images.each do |image|
       image[:package_id] = products(:containersmall).id
     end
 
-    assert_includes order_session.images.collect {|i| i[:container_id]}, container_images(:nginx_shared).id
+    assert_includes order_session.images.collect {|i| i[:image_id]}, container_images(:nginx_shared).id
     # Ensure it added our required dependency
-    assert_includes order_session.images.collect {|i| i[:container_id]}, container_images(:nginx).id
+    assert_includes order_session.images.collect {|i| i[:image_id]}, container_images(:nginx).id
 
     # Create Order
     audit = Audit.create!(

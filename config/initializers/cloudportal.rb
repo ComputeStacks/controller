@@ -9,6 +9,15 @@ rescue
   COMPUTESTACKS_VERSION = "0"
 end
 
+# Load some defaults for test/dev
+unless Rails.env.production?
+  LB_DEFAULT_CERT_PATH = if `whoami`.strip == 'vagrant'
+                           '/home/vagrant/.ssl_wildcard/sharedcert.pem' # This is created with vagrant provision.
+                         else
+                           "#{Rails.root.to_s}/lib/dev/test_wildcard_ssl/sharedcert-test-crt"
+                         end
+end
+
 CS_CDN_URL = "https://f.cscdn.cc/file/cstackscdn/cloud-portal"
 
 NS_LIST = if Rails.env.production?

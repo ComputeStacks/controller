@@ -68,12 +68,13 @@ systemctl enable consul && systemctl start consul
 
 echo "Setting up NVM & nodejs..."
 su - vagrant -c "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | PROFILE=/Users/vagrant/profile bash"
+su - vagrant -c "nvm install v16.17.0"
+su - vagrant -c "corepack enable"
 
-#cat << 'EOF' >> ~/.profile
-#export NVM_DIR="$HOME/.nvm"
-#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-#EOF
+# TODO: Add this to /home/vagrant/.profile
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 systemctl stop pdns
 

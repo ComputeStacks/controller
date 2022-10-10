@@ -15,6 +15,8 @@ module ProvisionServices
   #   return [EventLog]
   # @!attribute container_service
   #   @return [Deployment::ContainerService]
+  # @!attribute image_variant
+  #   @return [ContainerImage::ImageVariant]
   # @!attribute image
   #   @return [ContainerImage]
   # @!attribute user
@@ -42,6 +44,7 @@ module ProvisionServices
                   :event,
                   :container_service,
                   :image,
+                  :image_variant,
                   :user,
                   :project_user,
                   :region,
@@ -98,7 +101,7 @@ module ProvisionServices
       #   qty: Integer,
       #   label: String,
       #   region_id: Integer,
-      #   image_id: Integer,
+      #   image_variant_id: Integer,
       #   product_id: Integer,
       #   cpu: Decimal,
       #   memory: Integer,
@@ -367,11 +370,6 @@ module ProvisionServices
           primary_mount = true
           provision_volume_job = VolumeServices::ProvisionVolumeService.new(new_vol, event)
 
-          event.event_details.create!(
-            data: "[DEBUG] ContainerServiceProvisioner - ProvisionVolume\n\nAction: #{vol_action} | Existing Volume: #{existing_volume&.id}",
-            event_code: "76f351a7a6098f90"
-          ) unless Rails.env.production?
-
           if vol_action == 'clone' # Regardless of state, pass if cloning.
             result[:volume_clones] << {
               vol_id: new_vol.id,
@@ -448,13 +446,14 @@ module ProvisionServices
         errors << "Invalid region"
         return false
       end
-      self.image = ContainerImage.find_by(id: data[:image_id])
-      if image.nil?
-        errors << "Unknown image: #{data[:image_id]}"
+      self.image_variant = ContainerImage::ImageVariant.find_by(id: data[:image_variant_id])
+      if image_variant.nil?
+        errors << "Unknown image: #{data[:image_variant_id]}"
         return false
       end
+      self.image = image_variant.container_image
       unless image.can_view? user
-        errors << "Invalid image: #{data[:image_id]}"
+        errors << "Invalid image: #{data[:image_variant_id]}"
         return false
       end
       unless data[:source_csrn].blank?
@@ -544,7 +543,7 @@ module ProvisionServices
     def init_service!
       service_name = NamesGenerator.name(project.id)
       self.container_service = project.services.new(
-        container_image: image,
+        image_variant: image_variant,
         name: service_name,
         label: data[:label].blank? ? service_name : data[:label],
         cpu: cpu,

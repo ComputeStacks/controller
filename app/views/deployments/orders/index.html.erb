@@ -1,0 +1,86 @@
+<style>
+  .container-order-card.active select {
+    color: #fff;
+  }
+</style>
+<% content_for :title, t('deployments.shared.main_nav.new_deployment') %>
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li class="active"><%= t 'header.nav.apps' %></li>
+      <li class="pull-right no-spacer" style="margin-top:-3px;">
+        <%= link_to t('orders.projects.containers.custom_app'), "/container_images/new", class: 'btn btn-sm btn-primary' %>
+        <%= link_to "#{icon('fa-solid', 'ban')} #{t('orders.projects.cancel')}".html_safe, "/deployments/orders/cancel", class: "btn btn-sm btn-warning" %>
+      </li>
+    </ol>
+  </div>
+<% end %>
+
+<%= form_tag "/deployments/orders/containers", method: :post do %>
+
+  <%= hidden_field_tag 'deployment_type', 'shared' if @deployment.nil? %>
+  <%= render partial: "deployments/orders/location_selector", locals: { order_session: @order_session, locations: @locations } if @locations.count > 1 %>
+  <%= hidden_field_tag 'location_id', @locations.first.id if @locations.count == 1 %>
+
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1">
+      <p class="lead">
+        <%= t 'orders.projects.containers.choose_apps' if @deployment.nil? %>
+        <%= t 'orders.projects.containers.existing_html', project: @deployment.name if @deployment %>
+      </p>
+    </div>
+  </div>
+
+  <% unless @own_images.empty? %>
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+        <div class="row">
+          <div class="col-md-12">
+            <p><%= t('orders.projects.containers.my_images').upcase %></p>
+          </div>
+        </div>
+        <%= render partial: "deployments/orders/image_grid", locals: { images: @own_images, order_session: @order_session } %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1">
+      <div class="row">
+        <div class="col-md-12">
+          <p><%= t('orders.projects.containers.public_apps').upcase %></p>
+        </div>
+      </div>
+      <%= render partial: "deployments/orders/image_collections", locals: { collections: @collections, order_session: @order_session } %>
+      <%= render partial: "deployments/orders/image_grid", locals: { images: @all_images, order_session: @order_session } %>
+    </div>
+  </div>
+
+  <% if current_user.is_admin %>
+    <div class="row" style="margin-top:15px;">
+      <div class="col-md-10 col-md-offset-1" style="color:#ccc;font-size:12px;">
+        <%= render partial: "deployments/orders/admin_header" %>
+      </div>
+    </div>
+  <% end %>
+
+  <div style="height:25px;" class="row"></div>
+
+  <div class="row footer navbar-fixed-bottom" style="background-color:#e4e6e6;border-top:1px solid #ccc;padding: 10px 15px;">
+    <div class="col-md-10 col-md-offset-1">
+      <div class="row">
+        <div class="col-md-8">
+          <% if @order_session.new_project? %>
+            <input class="form-control footer-input-el" name="deployment" placeholder="<%= t('orders.projects.containers.deployment_name') %>" value="<%= @order_session.project&.name %>" autofocus="autofocus" />
+          <% else %>
+            <input class="form-control footer-input-el" value="<%= @order_session.project&.name %>" disabled="disabled" />
+          <% end %>
+        </div>
+        <div class="col-md-4 text-right">
+          <%= submit_tag t('actions.continue'), class: 'btn btn-success' %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<% end %>

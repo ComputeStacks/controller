@@ -10,6 +10,22 @@ jQuery ->
     $(this).addClass 'active'
     false
 
+  # Prevent de-selection of image when changing variant
+  $('select.order-variant-selector').click (e) ->
+    cid = $(this).attr('data-id')
+    pid = "#image_" + cid
+    if $(pid).hasClass('active')
+      return e.stopPropagation()
+
+  # Selecting a variant should select the image.
+  $('select.order-variant-selector').change ->
+    cid = $(this).attr('data-id')
+    pid = "#image_" + cid
+    el = document.querySelector pid
+    if !$(pid).hasClass('active')
+      newEvent = new Event("click")
+      return el.dispatchEvent(newEvent)
+
   $('.container-image-selector').click ->
     the_element = $(this).attr('data-id')
     required_images = $.parseJSON($(this).attr('data-required'))
@@ -24,6 +40,16 @@ jQuery ->
         if !req_elem.hasClass('active')
           req_elem.addClass 'active'
           $("input#container-" + required_images.images[i]).prop 'checked', true
+    return
+
+  $('.container-collection-selector').click ->
+    the_element = $(this).attr('data-id')
+    if $(this).hasClass('active')
+      $(this).removeClass 'active'
+      $("input#collection-" + the_element).prop 'checked', false
+    else
+      $(this).addClass 'active'
+      $("input#collection-" + the_element).prop 'checked', true
     return
 
   $('.container-location-selector').click ->

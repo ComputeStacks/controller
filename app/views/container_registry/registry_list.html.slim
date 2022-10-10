@@ -28,4 +28,4 @@
             = "#{t('common.username').upcase} / #{t('common.password').upcase}"
             br
             code= link_to "click to view", "/container_registry/#{i.id}/registry_connect"
-        div= link_to raw("<i class='fa fa-cogs'></i> #{t('actions.manage')}"), "/container_registry/#{i.id}-#{i.name.parameterize}", class: "btn btn-default btn-block"
+        div= link_to raw("#{icon('fa-solid', 'gear')} #{t('actions.manage')}"), "/container_registry/#{i.id}-#{i.name.parameterize}", class: "btn btn-default btn-block"
