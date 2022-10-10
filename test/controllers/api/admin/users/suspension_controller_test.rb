@@ -4,13 +4,26 @@ class Api::Admin::Users::SuspensionControllerTest < ActionDispatch::IntegrationT
 
   include ApiTestControllerBase
 
-  # test 'can list all' do
-  #
-  #   get "/api/admin/", as: :json, headers: @basic_auth_headers
-  #
-  #   assert_response :success
-  #   data = JSON.parse(response.body)
-  #   # assert_not_empty data['user_groups']
-  #
-  # end
+  test 'can suspend and unsuspend user' do
+
+    user = users(:suspendable_user)
+
+    post "/api/admin/users/#{user.id}/suspension", as: :json, headers: @basic_auth_headers
+
+    assert_response :success
+
+    user.reload
+
+    refute user.active
+
+    delete "/api/admin/users/#{user.id}/suspension", as: :json, headers: @basic_auth_headers
+
+    assert_response :success
+
+    user.reload
+
+    assert user.active
+
+  end
+
 end

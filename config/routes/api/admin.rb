@@ -35,6 +35,7 @@ Rails.application.routes.draw do
 
       resources :users do
         scope module: 'users' do
+          delete 'suspension', to: 'suspension#destroy'
           resources :api_credentials, :prices, :ssh_keys, :suspension, :user_sso
         end
         # get 'orders(/filter/:filter)', to: 'orders#index'

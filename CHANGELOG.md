@@ -13,6 +13,7 @@
 * [FIX] Resolved issue that would randomly cause an ip address to be assigned to multiple containers at once, and cause a provision failure.
 * [FIX] Annual snapshot retention was not visible in the UI.
 * [FIX] Region allocation was over counting SFTP containers.
+* [FIX] Fix broken unsuspend user api.
 
 ***
 
