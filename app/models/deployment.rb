@@ -199,7 +199,7 @@ class Deployment < ApplicationRecord
 
   def image_icons(clear_cache = false)
     cache_key = "proj_icons_#{self.id}"
-    Rails.cache.fetch(cache_key, force: clear_cache, expires: 6.hours) do
+    Rails.cache.fetch(cache_key, force: clear_cache, expires: 10.minutes) do
       container_images.where(is_load_balancer: false).order(:name).uniq
     end
   end

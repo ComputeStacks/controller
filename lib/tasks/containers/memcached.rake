@@ -16,7 +16,7 @@ namespace :containers do
         skip_variant_setup: true
       )
       memcache.image_variants.create!(
-        label: "alpine",
+        label: "latest",
         registry_image_tag: "alpine",
         validated_tag: true,
         validated_tag_updated: Time.now,

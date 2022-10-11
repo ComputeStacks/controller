@@ -36,7 +36,7 @@ namespace :containers do
       end
 
       wp.image_variants.create!(
-        label: "php7.4-litespeed",
+        label: "php 7.4",
         registry_image_tag: "php7.4-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
@@ -45,7 +45,7 @@ namespace :containers do
       )
 
       wp.image_variants.create!(
-        label: "php8.0-litespeed",
+        label: "php 8.0",
         registry_image_tag: "php8.0-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
@@ -54,7 +54,7 @@ namespace :containers do
       )
 
       wp.image_variants.create!(
-        label: "php8.1-litespeed",
+        label: "php 8.1",
         registry_image_tag: "php8.1-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,

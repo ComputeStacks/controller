@@ -62,6 +62,15 @@ namespace :containers do
         skip_tag_validation: true
       )
 
+      mysql.image_variants.create!(
+        label: "10.4",
+        registry_image_tag: "10.4",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        version: 5,
+        skip_tag_validation: true
+      )
+
       mysql.setting_params.create!(
         name:       'mysql_password',
         label:      'Root Password',

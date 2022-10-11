@@ -24,8 +24,8 @@ namespace :containers do
       )
 
       whmcs.image_variants.create!(
-        label: "php8.1-litespeed",
-        registry_image_tag: "php8.1-litespeed",
+        label: "php 7.4",
+        registry_image_tag: "php7.4-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 0,

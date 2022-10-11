@@ -58,15 +58,17 @@ namespace :containers do
         wpc.container_images << es
       end
 
-      mariadb_105 = ContainerImage::ImageVariant.find_by(registry_image_tag: "10.5")
+      mariadb_104 = ContainerImage::ImageVariant.find_by(registry_image_tag: "10.4")
       mage.dependency_parents.create!(
         requires_container_id: mysql.id,
         bypass_auth_check:     true,
-        default_variant: mariadb_105
+        default_variant: mariadb_104
       )
+      es_6 = ContainerImage::ImageVariant.find_by(registry_image_tag: "6.8.23")
       mage.dependency_parents.create!(
         requires_container_id: es.id,
-        bypass_auth_check:     true
+        bypass_auth_check:     true,
+        default_variant: es_6
       )
       mage.setting_params.create!(
         name:       'ssh_password',

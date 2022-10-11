@@ -17,7 +17,8 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
         validated_tag: true,
         validated_tag_updated: Time.now,
         is_default: true,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        version: 0
       ) unless mysql.image_variants.where(registry_image_tag: "10.9").exists?
 
       mysql.image_variants.create!(
@@ -25,7 +26,8 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
         registry_image_tag: "10.8",
         validated_tag: true,
         validated_tag_updated: Time.now,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        version: 1
       ) unless mysql.image_variants.where(registry_image_tag: "10.8").exists?
 
       mysql.image_variants.create!(
@@ -33,7 +35,8 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
         registry_image_tag: "10.7",
         validated_tag: true,
         validated_tag_updated: Time.now,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        version: 2
       ) unless mysql.image_variants.where(registry_image_tag: "10.7").exists?
 
       mysql.image_variants.create!(
@@ -41,7 +44,8 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
         registry_image_tag: "10.6",
         validated_tag: true,
         validated_tag_updated: Time.now,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        version: 3
       ) unless mysql.image_variants.where(registry_image_tag: "10.6").exists?
 
       mysql.image_variants.create!(
@@ -49,8 +53,18 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
         registry_image_tag: "10.5",
         validated_tag: true,
         validated_tag_updated: Time.now,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        version: 4
       ) unless mysql.image_variants.where(registry_image_tag: "10.5").exists?
+
+      mysql.image_variants.create!(
+        label: "10.4",
+        registry_image_tag: "10.4",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        skip_tag_validation: true,
+        version: 5
+      ) unless mysql.image_variants.where(registry_image_tag: "10.4").exists?
 
     end
 
@@ -64,44 +78,49 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
           i.update_column :is_default, false
         end
         php.image_variants.create!(
-          label: "php8.1-litespeed",
+          label: "8.1",
           registry_image_tag: "php8.1-litespeed",
           validated_tag: true,
           validated_tag_updated: Time.now,
           is_default: true,
-          skip_tag_validation: true
+          skip_tag_validation: true,
+          version: 0
         ) unless php.image_variants.where(registry_image_tag: "php8.1-litespeed").exists?
 
         php.image_variants.create!(
-          label: "php8.0-litespeed",
+          label: "8.0",
           registry_image_tag: "php8.0-litespeed",
           validated_tag: true,
           validated_tag_updated: Time.now,
-          skip_tag_validation: true
+          skip_tag_validation: true,
+          version: 1
         ) unless php.image_variants.where(registry_image_tag: "php8.0-litespeed").exists?
 
         php.image_variants.create!(
-          label: "php7.4-litespeed",
+          label: "7.4",
           registry_image_tag: "php7.4-litespeed",
           validated_tag: true,
           validated_tag_updated: Time.now,
-          skip_tag_validation: true
+          skip_tag_validation: true,
+          version: 2
         ) unless php.image_variants.where(registry_image_tag: "php7.4-litespeed").exists?
 
         php.image_variants.create!(
-          label: "php7.3-litespeed",
-          registry_image_tag: "php7.4-litespeed",
+          label: "7.3",
+          registry_image_tag: "php7.3-litespeed",
           validated_tag: true,
           validated_tag_updated: Time.now,
-          skip_tag_validation: true
+          skip_tag_validation: true,
+          version: 3
         ) unless php.image_variants.where(registry_image_tag: "php7.3-litespeed").exists?
       end
 
     end
 
     # Postgres
-    if ContainerImage.where(name: 'postgres').exists?
-      pg = ContainerImage.find_by(name: 'postgres')
+    pg = ContainerImage.find_by(name: 'postgres')
+    pg = ContainerImage.find_by(name: "postgres-12") if pg.nil?
+    unless pg.nil?
       pg.image_variants.each do |i|
         i.update_column :is_default, false
       end
@@ -130,7 +149,7 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
         ) unless pg.image_variants.where(registry_image_tag: "12").exists?
       end
       pg.image_variants.create!(
-        label: "11-bullseye",
+        label: "11",
         registry_image_tag: "11-bullseye",
         validated_tag: true,
         validated_tag_updated: Time.now,
@@ -152,20 +171,22 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
         i.update_column :is_default, false
       end
       wp.image_variants.create!(
-        label: "php8.0-litespeed",
+        label: "php 8.0",
         registry_image_tag: "php8.0-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        version: 1
       ) unless wp.image_variants.where(registry_image_tag: "php8.0-litespeed").exists?
 
       wp.image_variants.create!(
-        label: "php8.1-litespeed",
+        label: "php 8.1",
         registry_image_tag: "php8.1-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
         is_default: true,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        version: 0
       ) unless wp.image_variants.where(registry_image_tag: "php8.1-litespeed").exists?
 
       unless ContainerImageCollection.where(label: 'Wordpress').exists?

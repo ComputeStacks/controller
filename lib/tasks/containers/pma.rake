@@ -18,7 +18,7 @@ namespace :containers do
         skip_variant_setup: true
       )
       pma.image_variants.create!(
-        label: "v2",
+        label: "latest",
         registry_image_tag: "v2",
         validated_tag: true,
         validated_tag_updated: Time.now,

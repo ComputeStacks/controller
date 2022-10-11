@@ -17,8 +17,8 @@ namespace :containers do
       )
 
       php.image_variants.create!(
-        label: "php8.1-litespeed",
-        registry_image_tag: "php8.1-litespeed",
+        label: "8.1",
+        registry_image_tag: "8.1-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 0,
@@ -27,8 +27,8 @@ namespace :containers do
       )
 
       php.image_variants.create!(
-        label: "php8.0-litespeed",
-        registry_image_tag: "php8.0-litespeed",
+        label: "8.0",
+        registry_image_tag: "8.0-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 1,
@@ -36,8 +36,8 @@ namespace :containers do
       )
 
       php.image_variants.create!(
-        label: "php7.4-litespeed",
-        registry_image_tag: "php7.4-litespeed",
+        label: "7.4",
+        registry_image_tag: "7.4-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 2,
@@ -45,8 +45,8 @@ namespace :containers do
       )
 
       php.image_variants.create!(
-        label: "php7.3-litespeed",
-        registry_image_tag: "php7.4-litespeed",
+        label: "7.3",
+        registry_image_tag: "7.3-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 3,
