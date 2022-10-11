@@ -59,10 +59,6 @@ module ContainerServices
     private
 
     def pre_migration!
-      event.event_details.create!(
-        data: "[DEBUG] pre_migration",
-        event_code: "19a352680301dc2a"
-      ) if Rails.env.development?
       Timeout::timeout(300) do
         # Exec pre migrate script
         before_migrate = service.variant_pre_script container
@@ -99,16 +95,14 @@ module ContainerServices
     end
 
     def rebuild!(fail_to_rollback = true)
-      event.event_details.create!(
-        data: "[DEBUG]  #{fail_to_rollback ? 'rebuild' : 'rollback rebuild'}",
-        event_code: "6aa16b57fc8b811e"
-      ) if Rails.env.development?
-
       # When arriving from rollback, we need to refresh the image.
       unless fail_to_rollback
         self.service.reload
         self.container.reload
       end
+
+      # Ensure image exists on node
+      return false unless ProvisionServices::ImageReadyService.new(container, event).perform
 
       Timeout::timeout(300) do
         # Rebuild
@@ -162,17 +156,12 @@ module ContainerServices
     end
 
     def post_migration!
-      event.event_details.create!(
-        data: "[DEBUG] post_migration",
-        event_code: "9bd4cb58b37d1543"
-      ) if Rails.env.development?
       Timeout::timeout(300) do
         # Exec pre migrate script
         after_migrate = service.variant_post_script container
         unless after_migrate.blank?
           if container && !Rails.env.test?
             result = container.container_exec! after_migrate, nil, 180
-            Rails.logger.warn "[FOO] response: #{result.inspect}"
             event.event_details.create!(
               data: result[:response].split('\n').join("\n"),
               event_code: "2c095a61c526be4f"
@@ -205,10 +194,6 @@ module ContainerServices
     # Sanity checks without rollback
     # @return [Boolean]
     def valid?
-      if audit.nil? || event.nil?
-        Rails.logger.warn "[FOO] Missing Key Reqs: #{audit.inspect} | #{event.inspect}"
-        return false
-      end
       if previous_variant.nil?
         event.event_details.create!(
           data: "Missing previous variant",
@@ -243,11 +228,6 @@ module ContainerServices
     end
 
     def rollback!(container_rollback = false)
-      event.event_details.create!(
-        data: "[DEBUG] rollback",
-        event_code: "a270a7701b757915"
-      ) if Rails.env.development?
-      Rails.logger.warn "[FOO] Rollback | pv: #{previous_variant.inspect}"
       service.update current_audit: audit,
                      skip_variant_migration: true,
                      image_variant: previous_variant
@@ -298,10 +278,6 @@ module ContainerServices
       )
       event.deployments << service.deployment
       event.container_services << service
-      event.event_details.create!(
-        data: "[DEBUG] build event",
-        event_code: "80a92c4180ee27fb"
-      )
     end
 
   end

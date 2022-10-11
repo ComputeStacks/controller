@@ -186,11 +186,11 @@ class OrderSession
       next if image.nil?
       image.dependency_parents.each do |i_dep|
         next if i_dep.container_image.nil?
-        next if image_selected?(i_dep.container_image.id)
+        next if image_selected?(i_dep.dependency.id)
         unless new_project?
-          next if project.container_images.include?(i_dep.container_image)
+          next if project.container_images.include?(i_dep.dependency)
         end
-        variant = i_dep.default_variant ? i_dep.default_variant : i_dep.container_image.default_variant
+        variant = i_dep.default_variant ? i_dep.default_variant : i_dep.dependency.default_variant
         add_image variant, opts
       end
     end
