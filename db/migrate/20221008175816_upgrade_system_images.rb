@@ -79,40 +79,58 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
         end
         php.image_variants.create!(
           label: "8.1",
-          registry_image_tag: "php8.1-litespeed",
+          registry_image_tag: "8.1-litespeed",
           validated_tag: true,
           validated_tag_updated: Time.now,
           is_default: true,
           skip_tag_validation: true,
-          version: 0
+          version: 0,
+          after_migrate: "/usr/local/bin/migrate_php_version",
+          rollback_migrate: "echo \"Please rebuild container and try again\""
         ) unless php.image_variants.where(registry_image_tag: "php8.1-litespeed").exists?
 
         php.image_variants.create!(
           label: "8.0",
-          registry_image_tag: "php8.0-litespeed",
+          registry_image_tag: "8.0-litespeed",
           validated_tag: true,
           validated_tag_updated: Time.now,
           skip_tag_validation: true,
-          version: 1
+          version: 1,
+          after_migrate: "/usr/local/bin/migrate_php_version",
+          rollback_migrate: "echo \"Please rebuild container and try again\""
         ) unless php.image_variants.where(registry_image_tag: "php8.0-litespeed").exists?
 
-        php.image_variants.create!(
-          label: "7.4",
-          registry_image_tag: "php7.4-litespeed",
-          validated_tag: true,
-          validated_tag_updated: Time.now,
-          skip_tag_validation: true,
-          version: 2
-        ) unless php.image_variants.where(registry_image_tag: "php7.4-litespeed").exists?
+        php_74 = php.image_variants.find_by(registry_image_tag: "7.4-litespeed")
+        if php_74
+          php_74.update version: 2, after_migrate: "/usr/local/bin/migrate_php_version", rollback_migrate: "echo \"Please rebuild container and try again\""
+        else
+          php.image_variants.create!(
+            label: "7.4",
+            registry_image_tag: "7.4-litespeed",
+            validated_tag: true,
+            validated_tag_updated: Time.now,
+            skip_tag_validation: true,
+            version: 2,
+            after_migrate: "/usr/local/bin/migrate_php_version",
+            rollback_migrate: "echo \"Please rebuild container and try again\""
+          )
+        end
 
-        php.image_variants.create!(
-          label: "7.3",
-          registry_image_tag: "php7.3-litespeed",
-          validated_tag: true,
-          validated_tag_updated: Time.now,
-          skip_tag_validation: true,
-          version: 3
-        ) unless php.image_variants.where(registry_image_tag: "php7.3-litespeed").exists?
+        php_73 = php.image_variants.find_by(registry_image_tag: "7.3-litespeed")
+        if php_73
+          php_73.update version: 3, after_migrate: "/usr/local/bin/migrate_php_version", rollback_migrate: "echo \"Please rebuild container and try again\""
+        else
+          php.image_variants.create!(
+            label: "7.3",
+            registry_image_tag: "7.3-litespeed",
+            validated_tag: true,
+            validated_tag_updated: Time.now,
+            skip_tag_validation: true,
+            version: 3,
+            after_migrate: "/usr/local/bin/migrate_php_version",
+            rollback_migrate: "echo \"Please rebuild container and try again\""
+          )
+        end
       end
 
     end
@@ -170,14 +188,6 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
       wp.image_variants.each do |i|
         i.update_column :is_default, false
       end
-      wp.image_variants.create!(
-        label: "php 8.0",
-        registry_image_tag: "php8.0-litespeed",
-        validated_tag: true,
-        validated_tag_updated: Time.now,
-        skip_tag_validation: true,
-        version: 1
-      ) unless wp.image_variants.where(registry_image_tag: "php8.0-litespeed").exists?
 
       wp.image_variants.create!(
         label: "php 8.1",
@@ -186,8 +196,31 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
         validated_tag_updated: Time.now,
         is_default: true,
         skip_tag_validation: true,
-        version: 0
+        version: 0,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
       ) unless wp.image_variants.where(registry_image_tag: "php8.1-litespeed").exists?
+
+      wp.image_variants.create!(
+        label: "php 8.0",
+        registry_image_tag: "php8.0-litespeed",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        skip_tag_validation: true,
+        version: 1,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
+      ) unless wp.image_variants.where(registry_image_tag: "php8.0-litespeed").exists?
+
+      wp_74 = wp.image_variants.find_by(registry_image_tag: "php7.4-litespeed")
+      if wp_74
+        wp_74.update version: 2, after_migrate: "/usr/local/bin/migrate_php_version", rollback_migrate: "echo \"Please rebuild container and try again\""
+      end
+
+      wp_73 = wp.image_variants.find_by(registry_image_tag: "php7.3-litespeed")
+      if wp_73
+        wp_73.update version: 3, after_migrate: "/usr/local/bin/migrate_php_version", rollback_migrate: "echo \"Please rebuild container and try again\""
+      end
 
       unless ContainerImageCollection.where(label: 'Wordpress').exists?
         mysql = ContainerImage.find_by(name: 'mariadb')

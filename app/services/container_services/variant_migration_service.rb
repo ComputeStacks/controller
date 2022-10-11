@@ -234,7 +234,11 @@ module ContainerServices
 
       self.service.reload
 
-      return true unless container_rollback
+      unless container_rollback
+        event.fail!("Fatal error")
+        self.event.reload
+        return true
+      end
 
       rollback_success = rebuild! false
 
@@ -251,6 +255,9 @@ module ContainerServices
           end
         end
       end
+
+      self.event.reload
+      event.fail!("Fatal error") unless event.failed?
     rescue Timeout::Error
       event.event_details.create!(
         data: "Timeout during rollback",
@@ -276,6 +283,7 @@ module ContainerServices
         status: 'running',
         audit: audit
       )
+      event.supervised = true
       event.deployments << service.deployment
       event.container_services << service
     end

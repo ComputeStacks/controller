@@ -8,7 +8,7 @@ module ContainerImages
 
     def edit_container_image_variant_path(variant)
       return "/container_images" if variant.nil?
-      "#{container_image_env_path(variant)}/edit"
+      "#{container_image_variant_path(variant)}/edit"
     end
 
     def container_image_variant_path(variant)

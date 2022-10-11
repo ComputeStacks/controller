@@ -120,10 +120,15 @@ module Containerized
     if result.count == 1
       result = result[0]
       if result.is_a?(Array)
-        result = result[0]
-        if result.is_a?(Array)
-          result = result[0]
+        d = []
+        result.each do |ii|
+          d << if ii.kind_of?(Array)
+                 ii.join(" ")
+               else
+                 ii
+               end
         end
+        result = d.join(" ")
       end
     end
     event.event_details.create!(

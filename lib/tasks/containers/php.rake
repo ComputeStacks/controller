@@ -23,7 +23,9 @@ namespace :containers do
         validated_tag_updated: Time.now,
         version: 0,
         is_default: true,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
       )
 
       php.image_variants.create!(
@@ -32,7 +34,9 @@ namespace :containers do
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 1,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
       )
 
       php.image_variants.create!(
@@ -41,7 +45,9 @@ namespace :containers do
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 2,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
       )
 
       php.image_variants.create!(
@@ -50,7 +56,9 @@ namespace :containers do
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 3,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
       )
 
       php.setting_params.create!(

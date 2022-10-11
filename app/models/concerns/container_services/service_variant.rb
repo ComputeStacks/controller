@@ -32,23 +32,16 @@ module ContainerServices
       setting_params.each do |param|
         vars[param.name] = c.var_lookup("build.settings.#{param.name}")
       end
-      rsp = data.render(vars).split(" ")
-      Rails.logger.warn "[FOO] #{rsp}"
-      rsp
+      data.render(vars).split(" ")
     end
 
     # Migrate service to new image variant
     def migrate_to_variant
-      Rails.logger.warn "[FOO] 1"
       return if skip_variant_migration
-      Rails.logger.warn "[FOO] 2"
       return unless image_variant_id_previously_changed?
-      Rails.logger.warn "[FOO] 3"
       return if current_audit.nil?
       prev_variant = image_variant_id_previously_was
-      Rails.logger.warn "[FOO] 4 | #{image_variant_id_previously_was}"
       return unless prev_variant
-      Rails.logger.warn "[FOO] 5 | #{image_variant_id}"
       ContainerServiceWorkers::VariantMigrationWorker.perform_async id, current_audit.id, prev_variant
     end
 

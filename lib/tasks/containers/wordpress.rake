@@ -41,7 +41,9 @@ namespace :containers do
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 2,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
       )
 
       wp.image_variants.create!(
@@ -50,7 +52,9 @@ namespace :containers do
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 1,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
       )
 
       wp.image_variants.create!(
@@ -60,7 +64,9 @@ namespace :containers do
         validated_tag_updated: Time.now,
         is_default: true,
         version: 0,
-        skip_tag_validation: true
+        skip_tag_validation: true,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
       )
 
       wp.dependency_parents.create!(

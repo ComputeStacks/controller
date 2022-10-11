@@ -14,6 +14,9 @@
 # @!attribute event_code
 #   `echo $(openssl rand -hex 8) | tr -d '\n' | pbcopy`
 #   @return [String]
+# @!attribute supervised
+#   Flag to prevent child processes from prematurely closing an active event
+#   @return [Boolean]
 class EventLog < ApplicationRecord
 
   include Events::CodeState
@@ -74,6 +77,8 @@ class EventLog < ApplicationRecord
   has_many :event_details, class_name: 'EventLogDatum', dependent: :destroy
 
   accepts_nested_attributes_for :event_details
+
+  attr_accessor :supervised
 
   # Return an array of all related associations.
   #

@@ -72,7 +72,7 @@ module Containers
     def power_cycle_response(requested_state, rsp, event)
       if rsp.info['State']['Error'].blank?
         update_attribute :status, (requested_state == 'off' ? 'stopped' : 'running')
-        event.done! if event.running?
+        event.done! if event.running? && !event.supervised
       else
         update_attribute :status, 'stopped'
         if requested_state == 'on' && (rsp.info['State']['Error'] =~ /Address already assigned in block/ || rsp.info['State']['Error'] =~ /already exists in network/)

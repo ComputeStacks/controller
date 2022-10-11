@@ -15,8 +15,8 @@
     <% if image.can_edit? current_user %>
       <td class="text-right">
         <div class="btn-group">
-          <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, "/container_images/#{image.id}/image_variants/#{i.id}/edit", class: 'btn btn-xs btn-default' %>
-          <%= link_to '<i class="fa fa-trash"></i>'.html_safe, "/container_images/#{image.id}/image_variants/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+          <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_image_variant_path(i), class: 'btn btn-xs btn-default' %>
+          <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_variant_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
         </div>
       </td>
     <% end %>
