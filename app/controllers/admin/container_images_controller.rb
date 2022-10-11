@@ -31,11 +31,11 @@ class Admin::ContainerImagesController < Admin::ApplicationController
       containers
     end
 
-    containers = case params[:regvalid]
+    containers = case params[:visible]
     when 'yes'
-      containers.where(validated_tag: true).where.not(validated_tag_updated: nil)
+      containers.where(active: true)
     when 'no'
-      containers.where(validated_tag: false)
+      containers.where(active: false)
     else
       containers
     end

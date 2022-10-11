@@ -3,7 +3,11 @@ module ContainerImages
 
     # @param [ContainerImage::ImageRel] dependency
     def image_relationship_label(dependency)
-      dependency.default_variant.nil? ? dependency.dependency.label : "#{dependency.dependency.label} (#{dependency.default_variant.label})"
+      if dependency.default_variant.nil?
+        "#{dependency.dependency.label} (#{dependency.dependency.default_variant.label})"
+      else
+        "#{dependency.dependency.label} (#{dependency.default_variant.label})"
+      end
     end
 
   end

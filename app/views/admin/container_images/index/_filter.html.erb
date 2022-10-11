@@ -18,10 +18,10 @@
   </div>
   <div class="col-md-2 col-sm-3 col-xs-4">
     <label>VISIBILITY</label>
-    <select name="regvalid" title="Filter by status." class="form-control chosen-select-standard">
+    <select name="visible" title="Filter by status." class="form-control chosen-select-standard">
       <option value="">Show All</option>
-      <option value="yes" <% if params[:regvalid] == 'yes' %>selected="selected"<% end %>>Visible</option>
-      <option value="no" <% if params[:regvalid] == 'no' %>selected="selected"<% end %>>Hidden</option>
+      <option value="yes" <% if params[:visible] == 'yes' %>selected="selected"<% end %>>Visible</option>
+      <option value="no" <% if params[:visible] == 'no' %>selected="selected"<% end %>>Hidden</option>
     </select>
   </div>
   <div class="col-md-2 col-sm-3 col-col-xs-4">
