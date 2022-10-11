@@ -21,6 +21,12 @@ class WebHookJob < ApplicationJob
       data = Rabl::Renderer.new(template, obj, { format: :json }).render if data.blank?
       WebHookService.new(setting, data).perform
     end
+  rescue HTTP::ConnectionError => e
+    SystemEvent.create!(
+      message: "Fatal error performing webhook",
+      data: e.message,
+      event_code: "5a5cac710536c1a3"
+    )
   rescue => e
     ExceptionAlertService.new(e, '244f99e153d92fe5').perform
   end

@@ -41,7 +41,6 @@ module NodeServices
       errors << e.message
       false
     rescue Docker::Error::ServerError => e
-      ExceptionAlertService.new(e, '1fca3e3e13408e13').perform unless e.message =~ /auth/
       SystemEvent.create!(
         message: "Registry Error: Unable to connect",
         log_level: 'warn',

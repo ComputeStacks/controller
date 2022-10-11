@@ -51,6 +51,12 @@ module Containerized
                    end
     return false if build_client.nil?
     Docker::Container.create(build_client, node.client).is_a? Docker::Container
+  rescue Docker::Error::ConflictError => e
+    event.event_details.create!(
+      data: e.message,
+      event_code: "f6e058590c10e99e"
+    )
+    false
   end
 
   # @param [EventLog] event

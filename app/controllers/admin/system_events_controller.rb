@@ -4,7 +4,7 @@ class Admin::SystemEventsController < Admin::ApplicationController
 
   def index
     @events_for = nil
-    @events = SystemEvent.all.paginate(:page => params[:page], :per_page => 30).order(created_at: :desc)
+    @events = SystemEvent.all.paginate(:page => params[:page], :per_page => 30).order(updated_at: :desc)
   end
 
   def show

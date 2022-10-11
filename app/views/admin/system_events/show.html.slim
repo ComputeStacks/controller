@@ -19,6 +19,9 @@
       tr
         td Created
         td= l @event.created_at.in_time_zone(Time.zone), format: :long
+      tr
+        td Updated
+        td= l @event.updated_at.in_time_zone(Time.zone), format: :long
       - if @event.audit
         tr
           td Performed By

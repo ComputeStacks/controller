@@ -27,6 +27,12 @@ module NotifierServices
     def perform
       data = { text: (subject.nil? ? alert_msg : app_event_msg) }.to_json
       WebHookService.new(nil, data, webhook_url).perform
+    rescue HTTP::TimeoutError
+      event.event_details.create!(
+        data: "Timeout reached while connecting to endpoint.",
+        event_code: "9af966f3e388d28f"
+      ) if event
+      false
     rescue => e
       ExceptionAlertService.new(e, '20502fa52261d51d').perform
       event.event_details.create!(

@@ -41,6 +41,32 @@ module VolumeServices
         event.fail! 'Fatal Error'
         false
       end
+    rescue Docker::Error::ConflictError => e
+      unless volume
+        msg = e.message =~ /volume is in use/ ? "Volume is in use, unable to delete." : e.message
+        ec = "ba4fba2593684508-#{volume.id}"
+        system_event = SystemEvent.find_by(event_code: ec)
+        if system_event
+          d = system_event.data
+          if d[:count].is_a?(Integer)
+            d[:count] += 1
+          elsif d[:count].is_a?(String)
+            d[:count].to_i += 1
+          end
+          system_event.update data: d
+        else
+          SystemEvent.create!(
+            message: "Error deleting volume #{volume.id} (#{volume.label})",
+            data: {
+              error: msg,
+              volume: volume.id,
+              count: 1
+            },
+            event_code: ec
+          )
+        end
+      end
+      false
     rescue Excon::Error::Socket, Errno::ECONNREFUSED, IO::EINPROGRESSWaitWritable => connection_error
       SystemEvent.create!(
         message: "Error Deleting volume.",

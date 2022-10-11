@@ -55,6 +55,8 @@ class ApplicationController < ActionController::Base
     else
       Time.use_zone('UTC', &block)
     end
+  rescue
+    Time.use_zone('UTC', &block)
   end
 
   private

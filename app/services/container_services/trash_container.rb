@@ -51,7 +51,7 @@ module ContainerServices
       sleep(2)
       container.delete_from_node!(event)
       trash_local_container!
-    rescue Docker::Error::TimeoutError => e
+    rescue Docker::Error::ConflictError, Docker::Error::TimeoutError => e
       if fail_counter < 3
         self.fail_counter += 1
         sleep(2)
