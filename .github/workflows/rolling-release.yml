@@ -28,6 +28,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 5432:5432
       redis:
         # Docker Hub image
         image: redis
@@ -37,6 +39,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 6379:6379
 
     steps:
       - name: Checkout repository
@@ -69,7 +73,6 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          network: bridge
           tags: |
             cmptstks/controller:test
           cache-from: type=gha
