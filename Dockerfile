@@ -36,9 +36,6 @@ RUN set -ex; \
             supervisor \
     ; \
     gem install -N passenger sassc nokogiri \
-      && passenger-config compile-agent --auto --optimize \
-      && passenger-config install-standalone-runtime --auto --skip-cache \
-      && passenger-config build-native-support \
     ; \
     mkdir -p /usr/src/app/vendor; \
     ln -s /usr/bin/yarnpkg /usr/local/bin/yarn; \

@@ -28,19 +28,16 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 5432:5432
       redis:
         # Docker Hub image
         image: redis
+        network: "container:postgres"
         # Set health checks to wait until redis has started
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 6379:6379
 
     steps:
       - name: Checkout repository
@@ -73,12 +70,9 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          network: host
+          network: "container:postgres"
           tags: |
-            cmptstks/controller:${{ env.IMAGE_TAG }}
-            cmptstks/controller:latest
-            ghcr.io/${{ env.GH_REPO }}:${{ env.IMAGE_TAG }}
-            ghcr.io/${{ env.GH_REPO }}:latest
+            cmptstks/controller:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
