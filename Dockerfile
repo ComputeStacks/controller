@@ -9,4 +9,4 @@ RUN set -ex; \
     apt-get install -y \
             redis \
     ; \
-    redis-cli -h redis PING
+    redis-cli -h localhost PING
