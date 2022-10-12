@@ -31,9 +31,9 @@ jobs:
       redis:
         # Docker Hub image
         image: redis
-        network: "container:postgres"
         # Set health checks to wait until redis has started
         options: >-
+          --network "container:postgres"
           --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
