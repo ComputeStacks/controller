@@ -23,8 +23,7 @@ module ContainerImageHelper
   end
 
   def container_image_default_icon
-    return "/assets/icons/stacks/docker.png" unless Rails.env.production?
-    "#{CS_CDN_URL}/images/icons/stacks/docker.png"
+    "/assets/icons/stacks/docker.png"
   end
 
   def image_content_general(image)

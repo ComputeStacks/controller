@@ -6,8 +6,7 @@ module OrdersHelper
 
   # Generate order confirmation image
   def order_confirmation_image
-    return "/assets/icons/stacks/docker.png" unless Rails.env.production?
-    "#{CS_CDN_URL}/images/icons/stacks/docker.png"
+    "/assets/icons/stacks/docker.png"
   end
 
   # Generate order confirmation table

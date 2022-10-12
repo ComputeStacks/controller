@@ -232,8 +232,7 @@ class ContainerImage < ApplicationRecord
     file_icon_name = "ghost" if role == "ghost"
     file_icon_name = "joomla" if role == "joomla"
     file_icon_name = "nextcloud" if role == "nextcloud"
-    return "/assets/icons/stacks/#{file_icon_name}.png" unless Rails.env.production?
-    "#{CS_CDN_URL}/images/icons/stacks/#{file_icon_name}.png"
+    "/assets/icons/stacks/#{file_icon_name}.png"
   end
 
   def has_custom_blocks?

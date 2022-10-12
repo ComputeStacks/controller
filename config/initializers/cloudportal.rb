@@ -18,8 +18,6 @@ unless Rails.env.production?
                          end
 end
 
-CS_CDN_URL = "https://f.cscdn.cc/file/cstackscdn/cloud-portal"
-
 NS_LIST = if Rails.env.production?
             %w(8.8.8.8 1.1.1.1 8.8.4.4 64.6.64.6 208.67.222.222 1.0.0.1)
           else

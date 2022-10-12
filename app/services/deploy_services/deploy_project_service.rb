@@ -98,6 +98,9 @@ module DeployServices
         end
       end
 
+      # Clear project icon cache
+      project.image_icons true
+
       errors.empty?
     end
 
