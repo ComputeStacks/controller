@@ -22,10 +22,6 @@ module ContainerImageHelper
     %Q(<img src="#{image_path image.icon_url}" style="#{style}" title="#{image.label}" alt="#{image.label}" />).html_safe
   end
 
-  def container_image_default_icon
-    image_path ContainerImage.default_avatar_path
-  end
-
   def image_content_general(image)
     unless image.general_block.nil? || image.general_block.block_contents.find_by(locale: I18n.locale).nil?
       content = image.general_block.block_contents.find_by(locale: I18n.locale)
