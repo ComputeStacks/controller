@@ -115,6 +115,7 @@ class ContainerImage < ApplicationRecord
 
   include Auditable
   include Authorization::ContainerImage
+  include ContainerImages::ImageAvatar
   include ContainerImages::ImageParamManager
   include ImageCloner
   include ProviderForContainerImage
@@ -225,16 +226,6 @@ class ContainerImage < ApplicationRecord
     ingress_params.where(external_access: true).exists?
   end
 
-  def icon_url
-    file_icon_name = name.split("_").first.split('-').first.strip.downcase
-    file_icon_name = "elasticsearch" if role == "elasticsearch" || name == "elastic"
-    file_icon_name = "redis" if role == "redis"
-    file_icon_name = "ghost" if role == "ghost"
-    file_icon_name = "joomla" if role == "joomla"
-    file_icon_name = "nextcloud" if role == "nextcloud"
-    "/assets/icons/stacks/#{file_icon_name}.png"
-  end
-
   def has_custom_blocks?
     !(general_block.nil? && remote_block.nil? && ssh_block.nil? && domains_block.nil?)
   end
@@ -336,6 +327,20 @@ class ContainerImage < ApplicationRecord
   def format_category
     return if category.blank?
     self.category = category.strip.downcase
+  end
+
+  def icon_exists?(icon_path)
+    if Rails.env.production?
+      all_assets = Rails.application.assets_manifest.find_sources(icon_path)
+
+      if all_assets
+        Rails.application.assets_manifest.assets.keys.include?(icon_path)
+      else
+        false
+      end
+    else
+      Rails.application.assets.find_asset(icon_path) != nil
+    end
   end
 
 end

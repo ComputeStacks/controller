@@ -12,14 +12,7 @@
     <div class="col-md-12">
       <div class="panel panel-default">
         <div class="panel-body">
-          <img
-            class="pull-left hidden-xs"
-            style="max-width:25px;max-height:28px;padding-right:5px;margin-right:5px;margin-top:3px;"
-            src="<%= i.container_image.icon_url %>"
-            onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
-            alt="<%= i.container_image.label %>"
-            title="<%= i.container_image.label %>"
-            />
+          <%= image_tag i.container_image.icon_url, style: "max-width:25px;max-height:28px;padding-right:5px;margin-right:5px;margin-top:3px;", class: "pull-left hidden-xs", title: i.container_image.label, alt: i.container_image.label %>
           <strong><ins><%= link_to i.label, admin_container_service_path(i), style: 'font-size:1.5rem;color:#333;' %></ins></strong>
           <div class="pull-right">
             <% unless i.package.nil? %>

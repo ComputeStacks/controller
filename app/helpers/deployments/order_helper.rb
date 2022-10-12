@@ -1,5 +1,11 @@
 module Deployments::OrderHelper
 
+  def order_image_icon_path(image_id)
+    image = ContainerImage.find_by id: image_id
+    return ContainerImage.default_avatar_path if image.nil?
+    image.icon_url
+  end
+
   def order_packages_for_resources(cpu, mem)
     data = {}
     packages = current_user.billing_plan.packages_by_resource cpu.to_f, mem.to_i

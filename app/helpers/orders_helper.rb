@@ -4,11 +4,6 @@ module OrdersHelper
     image.dependencies.filter_map { |i| i.id }.join(', ')
   end
 
-  # Generate order confirmation image
-  def order_confirmation_image
-    "/assets/icons/stacks/docker.png"
-  end
-
   # Generate order confirmation table
   #
   # @param [Order] order

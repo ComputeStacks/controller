@@ -6,10 +6,7 @@
         <div class="panel-body text-center">
           <p class="lead"><%= collection.label %></p>
           <% collection.image_icons.each do |icon| %>
-            <img style="width:40px;height:40px;"
-                 title="<%= icon.label %>"
-                 onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
-                 src="<%= icon.icon_url %>">
+            <%= image_tag icon.icon_url, style: "width:40px;height:40px;", title: icon.label, alt: icon.label %>
           <% end %>
         </div>
       </div>

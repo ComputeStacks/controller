@@ -1,11 +1,4 @@
-<img
-  class="pull-left hidden-xs"
-  style="max-width:50px;max-height:38px;padding-right:5px;margin-right:10px;margin-top:-3px;"
-  src="<%= @service.container_image.icon_url %>"
-  onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
-  alt="<%= @service.container_image.label %>"
-  title="<%= @service.container_image.label %>"
-  />
+<%= image_tag @service.container_image.icon_url, style: "max-width:50px;max-height:38px;padding-right:5px;margin-right:10px;margin-top:-3px;", class: "pull-left hidden-xs", title: @service.container_image.label, alt: @service.container_image.label %>
 
 <p class="lead hidden-xs">
   <%= @service.label %>

@@ -140,7 +140,6 @@ class OrderSession
         params: settings,
         volumes: vols,
         free: i.container_image.is_free ? 'yes' : 'no',
-        icon: i.container_image.icon_url,
         min_cpu: i.container_image.min_cpu,
         min_mem: i.container_image.min_memory,
         qty: 1,

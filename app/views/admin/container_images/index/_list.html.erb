@@ -12,7 +12,7 @@
   <% containers.each do |i| %>
     <tr>
       <td style="width: 30px; vertical-align: middle;">
-        <img alt="<%= i.label %>" class="img-circle" style="width:30px;" onerror="this.src='<%= container_image_default_icon %>';this.onerror='';" src="<%= i.icon_url %>">
+        <%= image_tag i.icon_url, style: "width:30px", class: 'img-circle', title: i.label, alt: i.label %>
       </td>
       <td>
         <%= link_to i.label, admin_container_image_path(i) %>

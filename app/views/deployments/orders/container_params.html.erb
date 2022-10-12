@@ -23,10 +23,7 @@
       <div class="panel panel-primary">
         <div class="panel-body" >
           <div class="pull-right hidden-xs hidden-sm">
-            <img style="width:60px;position:absolute;margin-left:-65px;"
-                 onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
-                 src="<%= container[:icon] %>"
-              />
+            <%= image_tag order_image_icon_path(container[:image_id]), style: "width:60px;position:absolute;margin-left:-65px;" %>
           </div>
           <div style="text-transform: uppercase;font-size:18px;font-weight:300;text-indent: 5px;letter-spacing: 1.5px">
             <%= container[:container_name] %>

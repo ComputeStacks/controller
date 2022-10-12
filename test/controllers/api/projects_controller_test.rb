@@ -8,5 +8,8 @@ class Api::ProjectsControllerTest < ActionDispatch::IntegrationTest
     get "/api/projects", as: :json, headers: @basic_auth_headers
 
     assert_response :success
+
+    data = JSON.parse(response.body)
+    refute_empty data['projects']
   end
 end

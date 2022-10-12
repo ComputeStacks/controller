@@ -19,11 +19,11 @@ module ContainerImageHelper
               # default (medium)
               'width:25px;height:25px;'
             end
-    %Q(<img src="#{image.icon_url}" style="#{style}" title="#{image.label}" onerror="this.src='#{container_image_default_icon}';this.onerror='';" alt="#{image.label}" />).html_safe
+    %Q(<img src="#{image_path image.icon_url}" style="#{style}" title="#{image.label}" alt="#{image.label}" />).html_safe
   end
 
   def container_image_default_icon
-    "/assets/icons/stacks/docker.png"
+    image_path ContainerImage.default_avatar_path
   end
 
   def image_content_general(image)

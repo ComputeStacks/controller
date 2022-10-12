@@ -43,7 +43,7 @@ module ContainerServicesHelper
 
   # @param [Deployment::ContainerService] service
   def service_img_icon_tag(service)
-    %Q(<img src="#{service.container_image.icon_url}" style="cursor:pointer;max-width:35px;height:20px;padding-right:10px;" title="#{service.name}" onclick="window.location='#{container_service_path(service)}';" onerror="this.src='#{container_image_default_icon}';this.onerror='';" alt="#{service.name}" class="img-circle" />).html_safe
+    %Q(<img src="#{image_path service.container_image.icon_url}" style="cursor:pointer;max-width:35px;height:20px;padding-right:10px;" title="#{service.name}" onclick="window.location='#{container_service_path(service)}';" alt="#{service.name}" class="img-circle" />).html_safe
   end
 
   # @param [Deployment::ContainerService] service

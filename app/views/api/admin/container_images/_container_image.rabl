@@ -4,7 +4,6 @@ attributes :id,
            :command,
            :container_image_provider_id,
            :description,
-           :icon_url,
            :is_free,
            :label,
            :min_cpu,
@@ -22,6 +21,10 @@ attributes :id,
            :override_autoremove,
            :created_at,
            :updated_at
+
+node :icon_url do |i|
+  image_path i.icon_url
+end
 
 child :user do |i|
   extends 'api/admin/users/short'

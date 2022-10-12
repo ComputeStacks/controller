@@ -7,7 +7,7 @@
         <h4 class="panel-title"><%= @order.can_process? ? t('orders.show.title.confirmation') : t('orders.show.title.details') %></h4>
       </div>
       <div class="panel-body" style="min-height:250px;">
-        <div class="order-os-image"><%= image_tag order_confirmation_image %></div>
+        <div class="order-os-image"><%= image_tag ContainerImage.default_avatar_path %></div>
         <%= order_confirmation(@order) %>
         <div class="clearfix">&nbsp;</div>
       </div>

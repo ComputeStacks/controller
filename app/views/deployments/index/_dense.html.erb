@@ -48,10 +48,7 @@
                 <%= deployment_status i %> &nbsp;&nbsp; | &nbsp;&nbsp;
               <% end %>
               <% deployment_icons(i).each_with_index do |c,k| %>
-                <img style="width:20px;height:20px;"
-                     title="<%= c.label %>"
-                     onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
-                     src="<%= c.icon_url %>">
+                <%= image_tag c.icon_url, style: "width:20px;height:20px;", title: c.label, alt: c.label %>
               <% end %>
             </div>
           </div>

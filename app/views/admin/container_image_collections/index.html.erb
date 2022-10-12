@@ -42,10 +42,7 @@
           <div class="row">
             <div class="col-xs-12">
               <% i.image_icons.each do |icon| %>
-                <img style="width:20px;height:20px;"
-                     title="<%= icon.label %>"
-                     onerror="this.src='<%= container_image_default_icon %>';this.onerror='';"
-                     src="<%= icon.icon_url %>">
+                <%= image_tag icon.icon_url, style: "width:20px;height:20px;", title: icon.label %>
               <% end %>
             </div>
           </div>

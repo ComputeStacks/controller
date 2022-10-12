@@ -4,7 +4,6 @@ attributes :id,
            :command,
            :container_image_provider_id,
            :description,
-           :icon_url,
            :is_free,
            :label,
            :min_cpu,
@@ -21,6 +20,10 @@ attributes :id,
            :validated_tag_updated,
            :created_at,
            :updated_at
+
+node :icon_url do |i|
+  image_path i.icon_url
+end
 
 node :system_image do |i|
   i.user.nil?

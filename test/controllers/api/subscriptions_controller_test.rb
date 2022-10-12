@@ -8,5 +8,7 @@ class Api::SubscriptionsControllerTest < ActionDispatch::IntegrationTest
     get "/api/subscriptions", as: :json, headers: @basic_auth_headers
 
     assert_response :success
+    data = JSON.parse(response.body)
+    refute_empty data['subscriptions']
   end
 end
