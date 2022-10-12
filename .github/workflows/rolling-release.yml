@@ -79,7 +79,10 @@ jobs:
           allow: network.host
           network: host
           tags: |
-            cmptstks/controller:foo
+            cmptstks/controller:${{ env.IMAGE_TAG }}
+            cmptstks/controller:latest
+            ghcr.io/${{ env.GH_REPO }}:${{ env.IMAGE_TAG }}
+            ghcr.io/${{ env.GH_REPO }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
