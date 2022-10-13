@@ -1073,5 +1073,8 @@ docker pull cmptstks/mariadb-backup:10.3
 docker pull cmptstks/mariadb-backup:10.4
 docker pull cmptstks/mariadb-backup:10.5
 docker pull cmptstks/mariadb-backup:10.6
+docker pull cmptstks/mariadb-backup:10.7
+docker pull cmptstks/mariadb-backup:10.8
+docker pull cmptstks/mariadb-backup:10.9
 docker pull cmptstks/xtrabackup:2.4
 docker pull cmptstks/xtrabackup:8.0
