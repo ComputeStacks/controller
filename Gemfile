@@ -141,7 +141,7 @@ end
 
 source "https://rubygems.pkg.github.com/computestacks" do
   gem "autodns", "2.1.1"
-  gem "docker_registry", "0.3.2"
+  gem "docker_registry", "0.3.3"
   gem "docker_ssh", "0.7.1"
   gem "docker_volume_local", "0.2.5"
   gem "docker_volume_nfs", "0.2.7"

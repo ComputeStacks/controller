@@ -1,11 +1,13 @@
 <table class="table">
-  <thead>
-  <tr>
-    <th>Hostname</th>
-    <th>Source Image</th>
-    <th></th>
-  </tr>
-  </thead>
+  <% unless entries.empty? %>
+    <thead>
+    <tr>
+      <th>Hostname</th>
+      <th>Source Image</th>
+      <th></th>
+    </tr>
+    </thead>
+  <% end %>
   <tbody>
   <% if entries.empty? %>
     <tr>

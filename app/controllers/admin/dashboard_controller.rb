@@ -16,6 +16,7 @@ class Admin::DashboardController < Admin::ApplicationController
 
     @events = EventLog.failed.recent.count
     @alerts = AlertNotification.active.admin_only.count
+    @invalid_plans = BillingPlan.invalid_plans
 
     if request.xhr?
       render template: 'admin/dashboard/health', layout: false

@@ -1,4 +1,4 @@
-attributes :id, :billing_phase_id, :billing_resource_id, :currency, :max_qty, :price, :created_at, :updated_at
+attributes :id, :billing_phase_id, :billing_resource_id, :currency, :max_qty, :price, :term, :created_at, :updated_at
 child :regions, object_root: false do
   attributes :id, :name
 end

@@ -1,4 +1,4 @@
-attributes :id, :name, :created_at, :updated_at
+attributes :id, :name, :term, :created_at, :updated_at
 child :user_groups, object_root: false do
   attributes :id, :name, :created_at, :updated_at
 end

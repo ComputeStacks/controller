@@ -1,5 +1,14 @@
 module ContainerImageHelper
 
+  def container_images_path
+    if request.path =~ /admin/ && current_user.is_admin?
+      "/admin/container_images"
+    else
+      "/container_images"
+    end
+  end
+
+  # @param [ContainerImage] image
   def container_image_path(image)
     return "/container_images" if image.nil?
     if request.path =~ /admin/ && current_user.is_admin?
@@ -7,6 +16,15 @@ module ContainerImageHelper
     else
       "/container_images/#{image.id}-#{image.name.parameterize}"
     end
+  end
+
+  def new_container_image_path
+    "#{container_images_path}/new"
+  end
+
+  # @param [ContainerImage] image
+  def edit_container_image_path(image)
+    "#{container_image_path(image)}/edit"
   end
 
   # @param [ContainerImage] image
@@ -88,7 +106,7 @@ module ContainerImageHelper
     if image.can_administer?(current_user)
       btns << link_to(tag.i(nil, class: 'fa fa-trash'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{image.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger')
     else
-      btns << link_to(tag.i(nil, class: 'fa fa-trash-o'), "/container_images/#{image.id}", disabled: 'disabled', title: 'only owners can delete', class: 'btn btn-sm btn-danger')
+      btns << link_to(tag.i(nil, class: 'fa fa-trash'), "/container_images/#{image.id}", disabled: 'disabled', title: 'only owners can delete', class: 'btn btn-sm btn-danger')
     end
     %Q(
       <div class="text-right" style="vertical-align: middle;">

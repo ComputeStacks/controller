@@ -1,0 +1,28 @@
+<% content_for :title, "Image Plugins" %>
+
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb pull-left">
+      <li><%= link_to t('deployments.shared.main_nav.images'), container_images_path %></li>
+      <li><%= link_to @image.label, container_image_path(@image) %></li>
+      <li class="active">Image Plugins</li>
+    </ol>
+    <ol class="breadcrumb breadcrumb-action text-right">
+      <li><%= link_to raw("<i class='fa fa-cubes'></i>&nbsp;&nbsp;&nbsp;Add Host Entry"), new_container_image_plugin_path(@image), class: 'btn btn-sm btn-default' %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <h5>Image Plugins</h5>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+    <div class="panel panel-default">
+      <%= render partial: "container_images/image_plugins/list", locals: { plugins: @plugins, image: @image } %>
+    </div>
+  </div>
+</div>

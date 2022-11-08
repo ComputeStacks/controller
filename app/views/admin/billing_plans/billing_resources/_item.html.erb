@@ -6,7 +6,7 @@
           <div class="pull-right text-right">
             <div class="btn-group">
                <%= link_to tag.i(nil, class: 'fa fa-wrench'), "/admin/billing_plans/#{resource.billing_plan_id}/billing_resources/#{resource.id}/edit", class: 'btn btn-default btn-sm' %>
-              <%= link_to tag.i(nil, class: 'fa fa-trash-o'), "/admin/billing_plans/#{resource.billing_plan_id}/billing_resources/#{resource.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
+              <%= link_to tag.i(nil, class: 'fa fa-trash'), "/admin/billing_plans/#{resource.billing_plan_id}/billing_resources/#{resource.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
             </div>
           </div>
           <span style="font-size:2rem;"><%= resource.product.label %></span>

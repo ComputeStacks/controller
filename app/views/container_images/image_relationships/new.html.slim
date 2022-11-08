@@ -1,6 +1,6 @@
 .row.has-breadcrumb
   ol.breadcrumb
-    li= link_to t('obj.images'), "#{request.path =~ /admin/ && current_user.is_admin ? '/admin' : ''}/container_images"
+    li= link_to t('obj.images'), container_images_path
     li= link_to @container.label, container_image_path(@container)
     li.active= t 'container_images.params.related.form.title'
 

@@ -55,6 +55,11 @@ module Containers
       runtime_env.each do |k, v|
         (c['Env'] ||= []) << "#{k}=#{v}"
       end
+      if service.monarx_available?
+        (c['Env'] ||= []) << "MONARX_ID=#{Setting.monarx_agent_key}"
+        c['Env'] << "MONARX_SECRET=#{Setting.monarx_agent_secret}"
+        c['Env'] << "MONARX_AGENT=#{service.name}"
+      end
       service.volumes.where(nodes: { id: node.id }).joins(:nodes).distinct.each do |vol|
         vm = vol.volume_maps.find_by container_service: service
         next if vm.nil?

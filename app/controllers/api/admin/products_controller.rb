@@ -12,6 +12,7 @@ class Api::Admin::ProductsController < Api::Admin::ApplicationController
   # * `products`: Array
   #     * `id`: Integer
   #     * `label`: String
+  #     * `kind`: String `<package, image, resource>`
   #     * `resource_kind`: String - backup,bandwidth,cpu,ipaddr,memory,storage,local_disk (only for non-packages)
   #     * `unit`: Integer - (only for non-packages)
   #     * `unit_type`: String - (only for non-packages)
@@ -42,6 +43,7 @@ class Api::Admin::ProductsController < Api::Admin::ApplicationController
   # * `product`: Object
   #     * `id`: Integer
   #     * `label`: String
+  #     * `kind`: String `<package, image, resource>`
   #     * `resource_kind`: String - backup,bandwidth,cpu,ipaddr,memory,storage,local_disk (only for non-packages)
   #     * `unit`: Integer - (only for non-packages)
   #     * `unit_type`: String - (only for non-packages)
@@ -72,6 +74,7 @@ class Api::Admin::ProductsController < Api::Admin::ApplicationController
   #
   # * `product`: Object
   #     * `label`: String
+  #     * `kind`: String `<package, image, resource>`
   #     * `resource_kind`: String - backup,bandwidth,cpu,ipaddr,memory,storage,local_disk (only for non-packages)
   #     * `unit`: Integer - (only for non-packages)
   #     * `unit_type`: String - (only for non-packages)
@@ -102,6 +105,7 @@ class Api::Admin::ProductsController < Api::Admin::ApplicationController
   #
   # * `product`: Object
   #     * `label`: String
+  #     * `kind`: String `<package, image, resource>`
   #     * `resource_kind`: String - backup,bandwidth,cpu,ipaddr,memory,storage,local_disk (only for non-packages)
   #     * `unit`: Integer - (only for non-packages)
   #     * `unit_type`: String - (only for non-packages)

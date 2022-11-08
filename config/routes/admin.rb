@@ -57,6 +57,7 @@ Rails.application.routes.draw do
       scope module: 'container_images' do
         resources :collaborators,
                   :env_params,
+                  :image_plugins,
                   :image_relationships,
                   :image_variants,
                   :ingress_params,

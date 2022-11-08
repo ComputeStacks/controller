@@ -3,8 +3,8 @@
   <% content_for :breadcrumb do %>
     <div class="row has-breadcrumb">
       <ol class="breadcrumb">
-        <li><%= link_to t('obj.images'), (request.path =~ /admin/ ? "/admin/container_images" : "/container_images") %></li>
-        <li><%= link_to @image.label, (request.path =~ /admin/ ? "/admin/container_images/#{@image.id}" : "/container_images/#{@image.id}") %></li>
+        <li><%= link_to t('obj.images'), container_images_path %></li>
+        <li><%= link_to @image.label, container_image_path(@image) %></li>
         <li class="active"><%= t('collaborators.collaborator.plural').capitalize %></li>
       </ol>
     </div>

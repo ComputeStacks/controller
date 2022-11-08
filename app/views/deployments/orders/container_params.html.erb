@@ -30,11 +30,12 @@
           </div>
         </div>
         <%= render partial: "deployments/orders/container_params", locals: { container: container } if order_container_has_user_params?(container) %>
+
         <%= render partial: "deployments/orders/container_volumes", locals: { container: container } unless container[:volumes].empty? %>
         <% unless container[:free] == 'yes' %>
           <div class="panel-body">
             <div class="row">
-              <div class="col-xs-12"><strong>COMPUTE RESOURCES</strong></div>
+              <div class="col-xs-12"><strong>BILLING</strong></div>
             </div>
             <div class="row">
               <% if order_packages_for_resources(container[:min_cpu], container[:min_mem]).empty? %>
@@ -53,6 +54,18 @@
               </div>
             <% end %>
             <div class="panel-body">
+              <% unless order_image_product(container).nil? %>
+                <% if order_image_product(container).allow_user?(current_user) %>
+                  <%=
+                    render partial: "orders/containers/image",
+                           locals: {
+                             region: @region,
+                             container: container,
+                             project_owner: @project_owner
+                           }
+                  %>
+                <% end %>
+              <% end %>
               <% packages.each do |p| %>
                 <%= render partial: 'orders/containers/package', locals: { project_owner: @project_owner, package: p, region: @region, container: container } %>
               <% end %>

@@ -1,18 +1,27 @@
 module ContainerImages::VolumeParamsHelper
 
-  def new_container_image_volume_path(image)
-    return nil if image.nil?
-    "#{container_image_path(image)}/volume_params/new"
+  # @param [ContainerImage] image
+  def container_image_volumes_path(image)
+    return container_images_path if image.nil?
+    "#{container_image_path(image)}/volume_params"
   end
 
+  # @param [ContainerImage] image
+  def new_container_image_volume_path(image)
+    return container_images_path if image.nil?
+    "#{container_image_volumes_path(image)}/new"
+  end
+
+  # @param [ContainerImage::VolumeParam] volume
   def edit_container_image_volume_path(volume)
-    return "/container_images" if volume.nil?
+    return container_images_path if volume.nil?
     "#{container_image_volume_path(volume)}/edit"
   end
 
+  # @param [ContainerImage::VolumeParam] volume
   def container_image_volume_path(volume)
-    return "/container_images" if volume.nil?
-    "#{container_image_path(volume.container_image)}/volume_params/#{volume.id}"
+    return container_images_path if volume.nil?
+    "#{container_image_volumes_path(volume.container_image)}/#{volume.id}"
   end
 
   def borg_strategies

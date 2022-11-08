@@ -18,6 +18,7 @@
         <%= link_to i.label, admin_container_image_path(i) %>
         <%= content_tag(:span, 'HIDDEN', class: 'label label-default') unless i.active %>
         <%= content_tag(:span, 'FREE', class: 'label label-success') if i.is_free %>
+        <%= content_tag(:span, icon('fa-solid', 'sack-dollar'), class: 'label label-success') unless i.is_free || i.product.nil? %>
         <%= content_tag(:span, 'LoadBalancer', class: 'label label-warning') if i.is_load_balancer %>
         <%= image_valid_tag_label i, true %>
       </td>

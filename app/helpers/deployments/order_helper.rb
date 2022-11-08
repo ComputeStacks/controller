@@ -16,6 +16,21 @@ module Deployments::OrderHelper
     data
   end
 
+  # Same as _for_resources, but this can accept just a service
+  # and allow it to be scoped to the service owner, rather than
+  # current_user
+  #
+  # @param [Deployment::ContainerService] service
+  def order_packages_for_service(service)
+    data = {}
+    packages = service.available_packages
+    packages.each do |i|
+      g = i.product.group.nil? ? '' : i.product.group
+      (data[g] ||= []) << i
+    end
+    data
+  end
+
   ##
   # Skip password fields in order session
   def order_container_has_user_params?(container)
@@ -34,7 +49,14 @@ module Deployments::OrderHelper
     tag.option value: variant.id, selected: is_selected do
       variant.label.blank? ? variant.registry_image_tag : variant.label
     end
+  end
 
+  def order_image_product(container)
+    image = ContainerImage.find_by id: container[:image_id]
+    return nil if image.nil?
+    return nil unless image.can_view? current_user
+    return nil if image.product.nil?
+    image.product
   end
 
 end

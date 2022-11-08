@@ -16,6 +16,7 @@ class Admin::BillingPlans::BillingPhases::BillingResourcePricesController < Admi
     @price = BillingResourcePrice.new
     @price.billing_phase = @phase
     @price.billing_resource = @phase.billing_resource
+    @price.term = @price.default_term
     @regions = Region.all.order(name: :asc)
   end
 

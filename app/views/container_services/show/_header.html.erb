@@ -1,12 +1,12 @@
 <div class="col-xs-12 hidden-xs" style="margin-bottom:30px;">
   <div class="row deployment-overview-sub hidden-xs" style="margin-top:5px;">
     <div class="col-xs-3">
-      <div class="deployment-overview-sub-header"><%= t('obj.region').upcase %></div>
-      <div class="deployment-overview-sub-content"><%= @service.region&.name %></div>
-    </div>
-    <div class="col-xs-3">
       <div class="deployment-overview-sub-header"><%= t('container_services.header.price').upcase %></div>
       <div class="deployment-overview-sub-content"><%= format_currency @service.run_rate %> /<%= t 'billing.month' %></div>
+    </div>
+    <div class="col-xs-3">
+      <div class="deployment-overview-sub-header"><%= t('obj.region').upcase %></div>
+      <div class="deployment-overview-sub-content"><%= @service.region&.name %></div>
     </div>
     <% unless @service.package.nil? %>
       <div class="col-xs-3">

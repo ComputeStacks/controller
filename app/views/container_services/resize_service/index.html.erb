@@ -30,7 +30,7 @@
       <div class="row">
         <div class="col-md-12 container-package-selector-wrap" style="margin-left:-15px;">
           <input id="p0" class='container-package-input' data-index="0" type="hidden" name="package[0]" value="<%= @service.package.product_id %>">
-          <% order_packages_for_resources(@service.container_image.min_cpu, @service.container_image.min_memory).each do |group,packages| %>
+          <% order_packages_for_service(@service).each do |group,packages| %>
             <% unless group.blank? %>
               <div style="color:#333; text-align: left;padding-left:15px;border-radius: 0px;">
                 <div class="panel-body"><%= group %></div>

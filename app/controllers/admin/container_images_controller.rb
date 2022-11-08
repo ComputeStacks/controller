@@ -38,7 +38,16 @@ class Admin::ContainerImagesController < Admin::ApplicationController
       containers.where(active: false)
     else
       containers
-    end
+                 end
+
+    containers = case params[:product]
+                 when 'yes'
+                   containers.joins(:product)
+                 when 'no'
+                   containers.where("product_id is NULL")
+                 else
+                   containers
+                 end
 
     @containers = containers.sorted.paginate page: params[:page], per_page: 30
   end
@@ -141,12 +150,12 @@ class Admin::ContainerImagesController < Admin::ApplicationController
       :parent_image_id, :registry_username, :registry_password, :registry_custom, :registry_image_path,
       :registry_image_tag, :registry_auth, :container_image_provider_id, :min_cpu, :min_memory, :user_id,
       :general_block_id, :remote_block_id, :domains_block_id, :ssh_block_id, :tag_list, :is_load_balancer,
-      :is_free, :force_local_volume, :override_autoremove, variant_pos: []
+      :is_free, :force_local_volume, :product_id, :override_autoremove, variant_pos: []
     )
   end
 
   def new_container_params
-    params.require(:container_image).permit(:container_image_provider_id, :registry_image_path, :registry_image_tag, :parent_image_id, :tag_list, :is_load_balancer, :is_free, :force_local_volume)
+    params.require(:container_image).permit(:container_image_provider_id, :registry_image_path, :registry_image_tag, :parent_image_id, :tag_list, :is_load_balancer, :is_free, :force_local_volume, :product_id)
   rescue ActionController::ParameterMissing
     nil
   end

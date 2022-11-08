@@ -13,6 +13,11 @@
       = link_to raw("<i class='fa fa-wrench'></i>"), "#{@base_url}/edit", class: "btn btn-sm btn-default"
       = link_to raw("<i class='fa fa-trash'></i>"), "#{@base_url}", method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-sm btn-danger"
 
+- unless @billing_plan.missing_required_products.empty?
+  .row: .col-xs-12: .alert.alert-danger.app-flash
+    | Missing required products:&nbsp;
+    = @billing_plan.missing_required_products.join(", ")
+
 - if @billing_plan.billing_resources.empty?
   .row style="margin-top:25px;": .col-md-12.text-center: h4
     | No resources

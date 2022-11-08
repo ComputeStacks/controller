@@ -3,6 +3,11 @@
     .col-sm-12: .form-group
       = label_tag :name, 'Name'
       = f.text_field :name, required: true, class: 'form-control'
+  - if @billing_plan.id.nil?
+    .row
+      .col-sm-12: .form-group
+        = label_tag :term, 'Billing Term'
+        = f.select :term, options_for_select([["Hourly", "hour"], ["Monthly", "month"]], @billing_plan.term), {}, class: "form-control"
 
 .panel-footer
   = link_to t('actions.cancel'), "#{@billing_plan.id.nil? ? "/admin/billing_plans" : "/admin/billing_plans/#{@billing_plan.id}"}", class: 'btn btn-default', style: 'margin-right:10px;'

@@ -61,6 +61,7 @@ module BillingUsageServices
           items << {
               id: usage.id,
               rate: usage.rate.to_f,
+              rate_period: usage.rate_period.to_i,
               qty: usage.qty.to_f,
               total: usage.total.to_f,
               period_start: usage.period_start.utc,

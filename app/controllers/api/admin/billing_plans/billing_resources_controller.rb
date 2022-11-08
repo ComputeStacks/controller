@@ -14,6 +14,7 @@ class Api::Admin::BillingPlans::BillingResourcesController < Api::Admin::Billing
   #     * `id`
   #     * `billing_plan_id`: Integer
   #     * `external_id`: String
+  #     * `prorate`: Boolean
   #     * `product_id`: Integer
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
@@ -32,6 +33,7 @@ class Api::Admin::BillingPlans::BillingResourcesController < Api::Admin::Billing
   #     * `id`
   #     * `billing_plan_id`: Integer
   #     * `external_id`: String
+  #     * `prorate`: Boolean
   #     * `product_id`: Integer
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
@@ -49,7 +51,8 @@ class Api::Admin::BillingPlans::BillingResourcesController < Api::Admin::Billing
   #     * `billing_plan_id`: Integer
   #     * `external_id`: String
   #     * `product_id`: Integer
-
+  #     * `prorate`: Boolean
+  #
   def update
     return api_obj_error(@billing_resource.errors.full_messages) unless @billing_resource.update(resource_params)
     respond_to do |format|
@@ -65,7 +68,7 @@ class Api::Admin::BillingPlans::BillingResourcesController < Api::Admin::Billing
   # * `billing_resource`: Object
   #     * `external_id`: String
   #     * `product_id`: Integer
-
+  #     * `prorate`: Boolean
   def create
     @billing_resource = @billing_plan.billing_resources.new(resource_params)
     @billing_resource.current_user = current_user
@@ -90,7 +93,7 @@ class Api::Admin::BillingPlans::BillingResourcesController < Api::Admin::Billing
   private
 
   def resource_params
-    params.require(:billing_resource).permit(:product_id, :external_id)
+    params.require(:billing_resource).permit(:product_id, :external_id, :prorate)
   end
 
   def find_billing_resource

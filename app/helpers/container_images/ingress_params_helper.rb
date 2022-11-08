@@ -1,6 +1,30 @@
 module ContainerImages
   module IngressParamsHelper
 
+    # @param [ContainerImage] image
+    def container_image_ingress_params_path(image)
+      return container_images_path if image.nil?
+      "#{container_image_path(image)}/ingress_params"
+    end
+
+    # @param [ContainerImage] image
+    def new_container_image_ingress_param_path(image)
+      return container_images_path if image.nil?
+      "#{container_image_ingress_params_path(image)}/new"
+    end
+
+    # @param [ContainerImage::IngressParam] ingress
+    def edit_container_image_ingress_param_path(ingress)
+      return container_images_path if ingress.nil?
+      "#{container_image_ingress_param_path(ingress)}/edit"
+    end
+
+    # @param [ContainerImage::IngressParam] ingress
+    def container_image_ingress_param_path(ingress)
+      return container_images_path if ingress.nil?
+      "#{container_image_path(ingress.container_image)}/ingress_params/#{ingress.id}"
+    end
+
     def ingress_param_proto_options(rule = nil)
       rule_list = [
         %w[HTTP(S) http],
@@ -34,21 +58,6 @@ module ContainerImages
         return link_to(ingress.internal_load_balancer.label, container_image_path(ingress.internal_load_balancer))
       end
       'None'
-    end
-
-    def new_container_image_ingress_param_path(image)
-      return nil if image.nil?
-      "#{container_image_path(image)}/ingress_params/new"
-    end
-
-    def edit_container_image_ingress_param_path(ingress)
-      return "/container_images" if ingress.nil?
-      "#{container_image_ingress_param_path(ingress)}/edit"
-    end
-
-    def container_image_ingress_param_path(ingress)
-      return "/container_images" if ingress.nil?
-      "#{container_image_path(ingress.container_image)}/ingress_params/#{ingress.id}"
     end
 
   end

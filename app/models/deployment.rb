@@ -10,7 +10,8 @@
 #   @return [String]
 #
 # @!attribute current_state
-#   @return [working,deleting,alert,ok]
+#   One of: working, deleting ,alert, ok.
+#   @return [String]
 #
 # @!attribute skip_ssh
 #   @return [Boolean] If true, no sftp container will be provisioned.

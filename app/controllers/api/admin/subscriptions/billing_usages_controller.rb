@@ -17,6 +17,7 @@ class Api::Admin::Subscriptions::BillingUsagesController < Api::Admin::Subscript
   #     * `period_end`: DateTime
   #     * `external_id`: String
   #     * `rate`: Decimal
+  #     * `rate_period`: Integer | This value will tell you what term the rate is, and is used to determine the hourly price. For example, if `rate` is an hourly price, `rate_period` will be `1`. If monthly, `rate_period` will be 730. (rate / rate_period) == hourly rate.
   #     * `qty`: Decimal - Billable QTY (less what would be included in their package)
   #     * `qty_total`: Decimal - Total QTY recorded
   #     * `total`: Decimal
@@ -76,6 +77,7 @@ class Api::Admin::Subscriptions::BillingUsagesController < Api::Admin::Subscript
   #     * `period_end`: DateTime
   #     * `external_id`: String
   #     * `rate`: Decimal
+  #     * `rate_period`: Integer
   #     * `qty`: Decimal - Billable QTY (less what would be included in their package)
   #     * `qty_total`: Decimal - Total QTY recorded
   #     * `total`: Decimal

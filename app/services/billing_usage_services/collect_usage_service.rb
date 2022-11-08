@@ -53,6 +53,7 @@ module BillingUsageServices
 
       # Ensure container subscriptions has storage & backup products.
       if obj.is_a?(Deployment::Container)
+        # Metered resources will always be in hours (even if price is month or year).
         storage_product = Product.lookup(user.billing_plan, 'storage')
         local_disk_product = Product.lookup user.billing_plan, 'local_disk'
         backup_product = Product.lookup(user.billing_plan, 'backup')

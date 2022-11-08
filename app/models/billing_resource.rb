@@ -29,6 +29,12 @@
 #
 # @!attribute val_default
 #   @return [Decimal]
+##
+# @!attribute prorate
+#   For non-hourly resources, you can optionally choose to enable prorata billing
+#   when a user upgrades/downgrades, or cancels a resource.
+#   NOTE: New subscriptions are _always_ prorated to the first of the month.
+#   @return [Boolean]
 #
 class BillingResource < ApplicationRecord
 
@@ -55,6 +61,18 @@ class BillingResource < ApplicationRecord
 
   attr_accessor :skip_default_phase
   after_create :create_default_phase, unless: :skip_default_phase
+
+  # @return [Boolean]
+  def billed_hourly?
+    return true if billing_plan.nil? # Default to hourly if billing_plan is nil.
+    billing_plan.billed_hourly?
+  end
+
+  # @return [Boolean]
+  def billed_monthly?
+    return false if billing_plan.nil?
+    billing_plan.billed_monthly?
+  end
 
   ## Create an array of phases
   # Used to force the order we want.

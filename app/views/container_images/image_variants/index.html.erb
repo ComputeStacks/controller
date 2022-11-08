@@ -3,7 +3,7 @@
 <% content_for :breadcrumb do %>
   <div class="row has-breadcrumb">
     <ol class="breadcrumb pull-left">
-      <li><%= link_to t('obj.images'), "#{request.path =~ /admin/ && current_user.is_admin ? '/admin' : ''}/container_images" %></li>
+      <li><%= link_to t('obj.images'), container_images_path %></li>
       <li><%= link_to @image.label, container_image_path(@image) %></li>
       <li class="active">Image Variants</li>
     </ol>
@@ -13,7 +13,7 @@
   </div>
 <% end %>
 
-<%= form_for @image, url: "/container_images/#{@image.id}" do |f| %>
+<%= form_for @image, url: container_image_path(@image) do |f| %>
 <div class="row">
   <div class="col-lg-8 col-lg-offset-2 col-md-12">
     <% if @image.can_edit?(current_user) %>

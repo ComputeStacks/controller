@@ -94,6 +94,7 @@ class Deployment::ContainerService < ApplicationRecord
 
   include Auditable
   include Authorization::ContainerService
+  include ContainerServicePlugins::Monarx
   include ContainerServices::CalicoServicePolicy
   include ContainerServices::CleanupNetPolicy
   include ContainerServices::NodeSelector
@@ -212,6 +213,10 @@ class Deployment::ContainerService < ApplicationRecord
 
   def requires_sftp_containers?
     volumes.where(enable_sftp: true).exists?
+  end
+
+  def available_packages
+    user.billing_plan.packages_by_resource container_image.min_cpu.to_f, container_image.min_memory.to_i
   end
 
   # Helpers

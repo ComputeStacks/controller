@@ -1,7 +1,7 @@
 <% content_for :breadcrumb do %>
   <div class="row has-breadcrumb">
     <ol class="breadcrumb">
-      <li><%= link_to t('obj.images'), "#{request.path =~ /admin/ && current_user.is_admin ? '/admin' : ''}/container_images" %></li>
+      <li><%= link_to t('obj.images'), container_images_path %></li>
       <li><%= link_to @env.container_image.label, container_image_path(@env.container_image) %></li>
       <li class="active"><%= t 'container_images.params.env.breadcrumb.new' %></li>
     </ol>

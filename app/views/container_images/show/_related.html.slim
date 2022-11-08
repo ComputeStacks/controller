@@ -1,7 +1,7 @@
 .panel.panel-default
   .panel-body
     - if @container.can_edit?(current_user)
-      a.btn.btn-xs.btn-default.pull-right href="#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{@container.id}/image_relationships/new" style="margin-top:-3px;margin-right:-7px;"
+      a.btn.btn-xs.btn-default.pull-right href="#{new_container_image_relationship_path(@container)}" style="margin-top:-3px;margin-right:-7px;"
         i.fa.fa-plus
     p: strong= t 'container_images.params.related.table.title'
     - if @container.dependency_parents.empty?
@@ -12,7 +12,7 @@
       - @container.dependency_parents.each do |i|
         tr
           td= link_to image_relationship_label(i), container_image_path(i.dependency)
-          td.text-right= link_to raw('<i class="fa fa-trash"></i>'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{@container.id}/image_relationships/#{i.dependency.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: "btn btn-xs btn-danger" if current_user.is_admin? || @container.user == current_user
+          td.text-right=
 
 - unless @container.parent_containers.empty?
   - if @container.can_edit?(current_user)

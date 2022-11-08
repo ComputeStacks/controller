@@ -1,0 +1,28 @@
+<table class="table">
+  <% unless plugins.empty? %>
+    <thead>
+    <tr>
+      <th colspan="2">Name</th>
+    </tr>
+    </thead>
+  <% end %>
+  <tbody>
+  <% if plugins.empty? %>
+    <tr>
+      <td colspan="3" class="text-center">No Active Plugins</td>
+    </tr>
+  <% end %>
+  <% plugins.each do |i| %>
+
+    <tr>
+      <td><%= i.name %></td>
+      <td class="text-right">
+        <div class="btn-group">
+          <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_plugin_path(image, i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+        </div>
+      </td>
+    </tr>
+
+  <% end %>
+  </tbody>
+</table>

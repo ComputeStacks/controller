@@ -32,7 +32,7 @@ class BillingResourcePrice < ApplicationRecord
 
   has_one :product, through: :billing_resource
 
-  before_save :set_term
+  before_save :set_term!
 
   before_validation :ensure_unique_max_qty
 
@@ -45,28 +45,66 @@ class BillingResourcePrice < ApplicationRecord
     %W( #{ENV['CURRENCY']} )
   end
 
-  def post_paid?
-    per_hour? || product.is_aggregated
+  # @return [Float]
+  def price_in_hourly
+    price / rate_term.to_f
   end
 
-  def pre_paid?
-    !post_paid?
+  # @return [Integer]
+  def rate_term
+    case term
+    when 'month'
+      730
+    when 'year'
+      8760
+    else
+      1 # hourly
+    end
+  end
+
+  # @return [Float]
+  def prorated_total(period_start, period_end, qty = 1)
+    p = price_in_hourly
+    BillingResourcePrice.prorated_total p, price_precision, period_start, period_end, qty
+  end
+
+  # @return [Float]
+  def self.prorated_total(p, price_precision, period_start, period_end, qty)
+    return 0e0 if p.zero?
+    # Convert time difference into fractional hour.
+    l = TimeHelpers.fractional_compare period_start, period_end, price_precision
+    # Multiply price by fractional hour to get adjusted price, then multiply by quantity.
+    (p * l) * qty
   end
 
   def per_hour?
-    self.term == 'hour'
+    term == 'hour'
   end
 
   def per_month?
-    self.term == 'month'
+    term == 'month'
   end
 
   def per_year?
-    self.term == 'year'
+    term == 'year'
   end
 
   def price_precision
-    4
+    per_hour? ? 4 : 2
+  end
+
+  # Helper method to determine what our default term should be
+  # Users can not set a term directly on a price.
+  def default_term
+    if product.nil?
+      'hour'
+    elsif product.is_aggregated
+      'month'
+    elsif product.kind == 'resource'
+      'hour'
+    else
+      billing_plan.term
+    end
   end
 
   private
@@ -81,8 +119,8 @@ class BillingResourcePrice < ApplicationRecord
     end
   end
 
-  def set_term
-    self.term = product&.is_aggregated ? 'month' : 'hour'
+  def set_term!
+    self.term = default_term
   end
 
   def ensure_unique_max_qty
@@ -111,7 +149,7 @@ class BillingResourcePrice < ApplicationRecord
               end
       if billing_phase.prices.where( Arel.sql( query ) ).joins(:regions).exists?
         errors.add(:max_qty, 'value already exists')
-      end
+      end if billing_phase
     end
 
   end

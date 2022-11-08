@@ -1,0 +1,47 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_relationship_path(image), class: "pull-right btn btn-xs btn-default" %>
+    <strong><%= t 'container_images.params.related.table.title' %></strong>
+  </div>
+  <table class="table">
+    <% unless image.dependency_parents.empty? %>
+      <thead>
+      <tr>
+        <th colspan="2">Image</th>
+      </tr>
+      </thead>
+    <% end %>
+    <tbody>
+      <% if image.dependency_parents.empty? %>
+        <tr>
+          <td colspan="2" class="text-center"><%= t 'container_images.params.related.table.none' %></td>
+        </tr>
+      <% end %>
+      <% image.dependency_parents.each do |i| %>
+        <tr>
+          <td><%= link_to image_relationship_label(i), container_image_path(i.dependency) %></td>
+          <td class="text-right">
+            <%= link_to raw('<i class="fa fa-trash"></i>'), "#{container_image_relationship_path(i)}", method: :delete, data: {confirm: t('confirm_prompt')}, class: "btn btn-xs btn-danger" if current_user.is_admin? || image.user == current_user %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<% unless image.parent_containers.empty? %>
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <strong><%= t 'container_images.params.related.table.inverse' %></strong>
+    </div>
+    <table class="table">
+      <tbody>
+        <tr>
+          <td>
+            <%= image_relationship_parent_list image %>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+<% end %>

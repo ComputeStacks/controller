@@ -53,6 +53,7 @@ class Api::ContainerImagesController < Api::ApplicationController
   #     * `updated_at`: DateTime
   #     * `required_containers`: `Array<Integer>`
   #     * `required_by`: `Array<Integer`
+  #     * `product`: Object | admin only
   #     * `image_variants`: Array
   #         * `id`: Integer
   #         * `label`: String
@@ -143,6 +144,7 @@ class Api::ContainerImagesController < Api::ApplicationController
   #     * `registry_username`: String
   #     * `registry_password`: String
   #     * `is_free`: Boolean (Admin)
+  #     * `product_id`: Integer (Admin only)
   #     * `override_autoremove`: Boolean (Admin)
   #
   def update
@@ -183,6 +185,7 @@ class Api::ContainerImagesController < Api::ApplicationController
   #     * `registry_username`: String
   #     * `registry_password`: String
   #     * `is_free`: Boolean (Admin)
+  #     * `product_id`: Integer (Admin only)
   #     * `override_autoremove`: Boolean (Admin)
   #     * `env_params_attributes`: Array
   #         * `name`: String
@@ -292,6 +295,7 @@ class Api::ContainerImagesController < Api::ApplicationController
       :registry_image_path,
       :registry_image_tag,
       :role,
+      :product_id,
       :category,
       :tag_list,
       :is_free,
@@ -359,6 +363,7 @@ class Api::ContainerImagesController < Api::ApplicationController
       :override_autoremove,
       :role,
       :category,
+      :product_id,
       :tag_list,
       dependency_parents:        [:requires_container_id],
       env_params_attributes:     [:name, :label, :param_type, :env_value, :static_value],

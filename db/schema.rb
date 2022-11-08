@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_10_10_212053) do
+ActiveRecord::Schema[7.0].define(version: 2022_10_28_035927) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -113,6 +113,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_10_10_212053) do
     t.boolean "is_default", default: false, null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.string "term", default: "hour", null: false
   end
 
   create_table "billing_resource_prices", id: :serial, force: :cascade do |t|
@@ -145,6 +146,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_10_10_212053) do
     t.decimal "val_default", default: "0.0", null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.boolean "prorate", default: false, null: false
     t.index ["billing_plan_id"], name: "index_billing_resources_on_billing_plan_id"
     t.index ["product_id"], name: "index_billing_resources_on_product_id"
   end
@@ -163,6 +165,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_10_10_212053) do
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.decimal "qty_total", default: "0.0", null: false
+    t.integer "rate_period", default: 1, null: false
     t.index ["processed"], name: "index_billing_usages_on_procesed"
     t.index ["subscription_product_id"], name: "index_billing_usages_on_subscription_product_id"
     t.index ["user_id"], name: "index_billing_usages_on_user_id"
@@ -278,6 +281,22 @@ ActiveRecord::Schema[7.0].define(version: 2022_10_10_212053) do
     t.index ["load_balancer_rule_id"], name: "index_container_image_ingress_params_on_load_balancer_rule_id"
   end
 
+  create_table "container_image_plugins", force: :cascade do |t|
+    t.string "name", null: false
+    t.boolean "active", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_container_image_plugins_on_active"
+    t.index ["name"], name: "index_container_image_plugins_on_name", unique: true
+  end
+
+  create_table "container_image_plugins_images", id: false, force: :cascade do |t|
+    t.bigint "container_image_plugin_id", null: false
+    t.bigint "container_image_id", null: false
+    t.index ["container_image_id", "container_image_plugin_id"], name: "image_on_image_plugin_index", unique: true
+    t.index ["container_image_plugin_id", "container_image_id"], name: "image_plugin_on_image_index", unique: true
+  end
+
   create_table "container_image_providers", force: :cascade do |t|
     t.string "name"
     t.boolean "is_default", default: false
@@ -366,10 +385,12 @@ ActiveRecord::Schema[7.0].define(version: 2022_10_10_212053) do
     t.boolean "force_local_volume", default: false, null: false
     t.boolean "override_autoremove", default: false, null: false
     t.string "category"
+    t.bigint "product_id"
     t.index ["category"], name: "index_container_images_on_category"
     t.index ["container_image_provider_id"], name: "index_container_images_on_container_image_provider_id"
     t.index ["is_load_balancer"], name: "index_container_images_on_is_load_balancer"
     t.index ["labels"], name: "index_container_images_on_labels", using: :gin
+    t.index ["product_id"], name: "index_container_images_on_product_id"
   end
 
   create_table "container_registries", id: :serial, force: :cascade do |t|

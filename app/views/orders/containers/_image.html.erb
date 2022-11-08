@@ -1,0 +1,24 @@
+<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="border-right:1px solid #e4e6e6;">
+  <div class="panel panel-primary">
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-xs-12 text-center">
+          <h5>
+            <%= order_image_product(container).label %>
+          </h5>
+          <span style="color:black;">
+                            <%= display_current_price(region, order_image_product(container)) %>
+                          </span>
+        </div>
+      </div>
+      <% if !order_image_product(container).price_phases(project_owner, region)[:trial].empty? || !order_image_product(container).price_phases(project_owner, region)[:discount].empty? %>
+        <div class="row">
+          <hr>
+          <div class="col-md-12">
+            <%= render partial: 'orders/containers/package_price_table', locals: { container: container, region: region, product: order_image_product(container), phases: order_image_product(container).price_phases(project_owner, @region) } %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -12,8 +12,19 @@ module Admin::BillingPlansHelper
     price = phase.prices.order(Arel.sql("max_qty asc nulls last")).first if price.nil? && phase.prices.exists? # Fallback to not including default currency.
     return 0.0 if price.nil?
     return 0.0 if price.price.zero?
-    p = '%.5f' % price.price
-    phase.product&.resource_kind == 'bandwidth' ? p : "#{p} /#{I18n.t("billing.#{price.term}")}"
+
+    if phase.product.is_aggregated # Aggregated units are displayed to 5 digits.
+      '%.5f' % price.price
+    elsif price.term == 'month' && phase.available_currencies.count == 1
+      # Monthly price, and we know the currency == display in a friendly way with currency symbol
+      "#{Monetize.parse("#{phase.available_currencies.first} #{price.price}").format} /#{I18n.t("billing.#{price.term}")}"
+    elsif price.term == 'month'
+      # multiple currencies, display without currency symbol and 2 digits.
+      "#{'%.2f' % price.price} /#{I18n.t("billing.#{price.term}")}"
+    else
+      # All others will be without currency symbol and to 5 digits.
+      "#{'%.5f' % price.price} /#{I18n.t("billing.#{price.term}")}"
+    end
   rescue => e
     ExceptionAlertService.new(e, '2502c997f429c904').perform
     0.0
@@ -40,11 +51,8 @@ module Admin::BillingPlansHelper
           end
         end
         p_formatted = Monetize.parse("#{currency} #{price.price}").format
-        if price.pre_paid?
-          p_formatted = "#{p_formatted} /#{I18n.t("billing.#{price.term}")}"
-        else
-          p_formatted = price.product.is_aggregated ? "#{p_formatted[0]}#{price.price}" : "#{p_formatted[0]}#{'%.6f' % price.price} /#{I18n.t("billing.#{price.term}")}"
-        end
+        float_precision = price.term == 'hour' ? '%.6f' : '%.2f'
+        p_formatted = price.product.is_aggregated ? "#{p_formatted[0]}#{price.price}" : "#{p_formatted[0]}#{float_precision % price.price} /#{I18n.t("billing.#{price.term}")}"
         val[header_index + 1] = {
           'title' => p_formatted,
           'href' => "#{@base_url}/billing_phases/#{@phase.id}/billing_resource_prices/#{price.id}/edit"

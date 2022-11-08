@@ -41,6 +41,26 @@
           = link_to raw('<i class="fa fa-trash"></i>'), "/admin/products/#{i.id}", method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm'
 
 
+- unless @images.empty?
+  hr
+  .row: .col-md-12: div: h4 Images
+  .row: .col-md-12: table#product-images-table.table
+    thead
+      tr
+        th Name
+        th Image
+        th
+    tbody
+      - @images.each do |i|
+        tr
+          td= i.label
+          td= admin_product_image_link_list i
+          td.text-right
+            .btn-group
+              = link_to raw('<i class="fa fa-wrench"></i>'), "/admin/products/#{i.id}", class: 'btn btn-default btn-sm'
+              = link_to raw('<i class="fa fa-trash"></i>'), "/admin/products/#{i.id}", method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm'
+
+
 hr
 .row: .col-md-12: div: h4 Other Products
 

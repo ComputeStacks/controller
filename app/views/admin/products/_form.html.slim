@@ -13,28 +13,20 @@
       = f.text_field :external_id, class: 'form-control'
 
       span.help-block Reference for external billing system
-  - if @product.kind == 'package' && %w(edit update).include?(controller.action_name)
-    .row
-      .col-xs-12: .form-group
-        = label_tag :kind, 'Kind'
-        = select(:product, :kind, [['Package', 'package']], {}, { class: 'form-control', disabled: 'disabled' })
-  - else
+  - if @product.id.nil?
     .row
       .col-sm-6: .form-group
         = label_tag :kind, 'Kind'
-        - if %w(edit update).include?(controller.action_name)
-          = select(:product, :kind, [['Metered Resource', 'resource']], {}, { class: 'form-control', disabled: 'disabled' })
-        - else
-          = select(:product, :kind, [['Package', 'package'], ['Metered Resource', 'resource']], {}, { class: 'form-control' })
-
+        = f.select :kind, options_for_select([%w(Image image), ["Metered Resource", "resource"], %w(Package package)], @product.kind), {}, class: "form-control"
       .col-sm-6: .form-group
         = label_tag :resource_kind, 'Resource'
         = select(:product, :resource_kind, Product.resource_kinds, { include_blank: true }, { class: 'form-control' })
         span.help-block Only when Kind is Metered Resource.
-
+  - if @product.id.nil? || @product.kind == 'resource'
     hr style="border-color:#ccc;"
-    .row: .col-md-12 Metered Resources Only
-    hr
+    - if @product.id.nil?
+      .row: .col-md-12 For Metered Resources Only
+      hr
     .row
       .col-sm-6: .form-group
         = label_tag :unit, 'Unit'

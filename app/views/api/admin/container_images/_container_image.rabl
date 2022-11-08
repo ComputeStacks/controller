@@ -16,14 +16,16 @@ attributes :id,
            :role,
            :category,
            :labels,
-           :validated_tag,
-           :validated_tag_updated,
            :override_autoremove,
            :created_at,
            :updated_at
 
 node :icon_url do |i|
   image_path i.icon_url
+end
+
+child :product do |i|
+  extends 'api/admin/products/product'
 end
 
 child :user do |i|

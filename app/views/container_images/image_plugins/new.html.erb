@@ -1,0 +1,35 @@
+<div class="row has-breadcrumb">
+  <ol class="breadcrumb">
+    <li><%= link_to t('obj.images'), container_images_path %></li>
+    <li><%= link_to @image.label, container_image_path(@image) %></li>
+    <li class="active">Enable Plugin</li>
+  </ol>
+</div>
+
+<div class="row">
+  <div class="col-md-8 col-md-offset-2">
+    <p class="lead">Enable Plugin</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8 col-md-offset-2">
+    <div class="panel panel-default">
+      <%= form_tag "#{container_image_path(@image)}/image_plugins", method: :post %>
+        <div class="panel-body">
+          <div class="form-group">
+            <label for="add_plugin_id">Plugin</label>
+            <select id="add_plugin_id" name="add_plugin_id" class="form-control">
+              <% @plugins.each do |i| %>
+                <option value="<%= i.id %>"><%= i.name %></option>
+            </select>
+          </div>
+        </div>
+        <div class="panel-footer">
+          <%= link_to t('actions.cancel'), "#{container_image_path(@image)}", class: 'btn btn-default', style: 'margin-right: 10px;' %>
+          <%= submit_tag t('actions.submit'), class: 'btn btn-success pull-right' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+---
+include:
+- "app/**/*.rb"
+- "config/**/*.rb"
+- "lib/core_ext/**/*.rb"
+- "lib/includes/**/*.rb"

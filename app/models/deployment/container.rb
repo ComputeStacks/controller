@@ -68,6 +68,7 @@ class Deployment::Container < ApplicationRecord
   include Containers::ContainerSubscription
   include Containers::ContainerUsage
   include Containers::ContainerVariables
+  include Containers::Monarx
   include Containers::PowerManager
   include Containers::StateManager
   include UrlPathFinder

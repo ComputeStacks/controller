@@ -17,12 +17,13 @@ class Api::Admin::BillingPlans::BillingResources::BillingPhases::BillingResource
   #     * `currency`: String
   #     * `max_qty`: Decimal
   #     * `price`: Decimal
+  #     * `term`: String | hour,month
   #     * `regions`: Array
   #         * `id`: Integer
   #         * `name`: String
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
-
+  #
   def index
     @prices = paginate @billing_phase.prices.sorted
     respond_to :json, :xml
@@ -40,12 +41,13 @@ class Api::Admin::BillingPlans::BillingResources::BillingPhases::BillingResource
   #     * `currency`: String
   #     * `max_qty`: Decimal
   #     * `price`: Decimal
+  #     * `term`: String | hour,month
   #     * `regions`: Array
   #         * `id`: Integer
   #         * `name`: String
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
-
+  #
   def show
     respond_to :json, :xml
   end

@@ -10,8 +10,7 @@ module ContainerServices
     def bandwidth_this_period
       expire_by_env = Rails.env.production? ? 1.hour : 2.minutes
       Rails.cache.fetch("service_bandwidth_#{id}", expires_in: expire_by_env) do
-        sample_date = ((Date.today - 1.month).end_of_month).to_time + 24.hours # Will produce 1/1/2018 00:00:00
-        bw_usage = BillingUsage.where("products.resource_kind = 'bandwidth' AND subscription_products.subscription_id IN(?) AND period_end >= ?", subscriptions.map(&:id), sample_date).joins(:subscription_product, :product).sum(:qty_total)
+        bw_usage = BillingUsage.where("products.resource_kind = 'bandwidth' AND subscription_products.subscription_id IN(?) AND period_end >= ?", subscriptions.map(&:id), TimeHelpers.first_day_of_month).joins(:subscription_product, :product).sum(:qty_total)
         bw_usage
       end
     end
@@ -34,14 +33,10 @@ module ContainerServices
       volumes.sum(:usage)
     end
 
-    def run_rate
+    def run_rate(reset_cache = false)
       cache_key = "s_run_rate_#{id}"
-      Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
-        total = BigDecimal('0.0')
-        subscriptions.each do |i|
-          total += i.run_rate
-        end
-        total
+      Rails.cache.fetch(cache_key, force: reset_cache, expires_in: 2.hours) do
+        subscriptions.all_active.inject(0) { |sum,item| sum += item.run_rate }
       end
     end
 

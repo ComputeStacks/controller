@@ -10,6 +10,10 @@
 # @!attribute is_default
 #   @return [Boolean] deprecated
 #
+# @!attribute term
+#   Sets price term for all items in this billing plan.
+#   @return [String] hour,month
+#
 class BillingPlan < ApplicationRecord
 
   include Auditable
@@ -25,11 +29,56 @@ class BillingPlan < ApplicationRecord
   has_many :billing_phases, through: :billing_resources
 
   validates :name, presence: true
+  validates :term, inclusion: { in: %w(hour month), message: 'Must be one of: hour or month.' }
 
   after_save :update_default_plan
   after_save :clone_plan
 
+  after_update_commit :cascade_price_changes
+
   attr_accessor :clone
+
+  def self.invalid_plans
+    result = []
+    BillingPlan.joins(:users).each do |i|
+      result << i unless i.available?
+    end
+    result
+  end
+
+  # Determine if all required products are added and it's ready to use.
+  # @return [Boolean]
+  def available?
+    if Product.lookup(self, 'bandwidth').nil?
+      return false
+    end
+    if Product.lookup(self, 'storage').nil?
+      return false
+    end
+    if Product.lookup(self, 'local_disk').nil?
+      return false
+    end
+    true
+  end
+
+  # @return [Array]
+  def missing_required_products
+    p = []
+    p << 'bandwidth' if Product.lookup(self, 'bandwidth').nil?
+    p << 'storage' if Product.lookup(self, 'storage').nil?
+    p << 'local_disk' if Product.lookup(self, 'local_disk').nil?
+    p
+  end
+
+  # @return [Boolean]
+  def billed_hourly?
+    term == 'hour'
+  end
+
+  # @return [Boolean]
+  def billed_monthly?
+    term == 'month'
+  end
 
   ##
   # Determine if the Product is available in this billing plan.
@@ -62,6 +111,7 @@ class BillingPlan < ApplicationRecord
       nr.billing_plan_id = id
       nr.skip_default_phase = true
       nr.save
+
       i.prices.each do |ii|
         nph = ii.billing_phase.dup
         nph.billing_resource = nr
@@ -72,6 +122,19 @@ class BillingPlan < ApplicationRecord
         npr.billing_phase = nph
         npr.regions = ii.regions
         npr.save
+      end
+    end
+  end
+
+  # When changing a billing plan term, we also
+  # need to cascade the update to all subordinate prices.
+  def cascade_price_changes
+    if term_previously_changed?
+      billing_resources.each do |br|
+        br.prices.each do |p|
+          next if p.product.is_aggregated
+          p.update term: term
+        end
       end
     end
   end

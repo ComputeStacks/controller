@@ -1,6 +1,7 @@
 class Deployments::OrdersController < AuthController
 
   before_action :load_order_session
+  before_action :validate_billing_plan
 
   def index
 
@@ -195,6 +196,16 @@ class Deployments::OrdersController < AuthController
 
   def order_params
     params.permit(:location_id, :deployment_type, :deployment, containers: [], package: {}, service: {}, image_map: {}, image_variant: {}, collections: [])
+  end
+
+  def validate_billing_plan
+    if current_user.billing_plan.nil?
+      return fail_and_redirect!("You do not have a billing plan, unable to place an order. Please contact support.")
+    end
+    unless current_user.billing_plan.available?
+      return fail_and_redirect!("Your billing plan is misconfigured. Please contact support.")
+    end
+    true
   end
 
   def load_order_session

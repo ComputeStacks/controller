@@ -1,0 +1,71 @@
+<div class="panel-body">
+
+  <div class="row">
+
+    <div class="<% if price.product&.kind == 'resource' %>col-sm-4 <% end %>col-xs-12">
+      <div class="form-group">
+        <%= f.label :price, 'Price' %>
+        <%= f.text_field :price, class: 'form-control', required: true %>
+        <%= f.hidden_field :term %>
+        <span class="help-block"><%= resource_price_form_helper price %></span>
+      </div>
+    </div>
+
+    <% if price.product&.kind == 'resource' %>
+
+      <div class="col-sm-4 col-xs-12">
+        <div class="form-group">
+          <%= f.label :max_qty, "Maximum Allowed Quantity" %>
+          <%= f.number_field :max_qty, class: 'form-control' %>
+        </div>
+      </div>
+
+      <div class="col-sm-4 col-xs-12">
+        <div class="form-group">
+          <label>No Set Limit</label>
+          <input class="form-control" name="unlimited" type="checkbox" <% if @price.max_qty.nil? %>checked="checked"<% end %> />
+        </div>
+      </div>
+
+    <% end %>
+
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="form-group">
+        <label>Currency</label>
+        <select name="billing_resource_price[currency]" class="form-control chosen-select-standard">
+          <%
+            selected = @price.id.nil? ? ENV['CURRENCY'] : @price.currency
+            available_currencies.each do |v,k|
+          %>
+          <option value="<%= k %>" <% if selected == k %>selected="selected"<% end %>><%= v %></option>
+          <% end %>
+        </select>
+        <span class="help-block">Currency is determined by the user's currency setting.</span>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+
+        <label>Regions</label>
+        <%= collection_select(:price, :region_ids, @regions, :id, :name, {}, { class: 'form-control chosen-select-standard', multiple: true, name: 'billing_resource_price[region_ids][]' }) %>
+        <span class="help-block">Multiple regions can be attached to a single price.</span>
+
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), @price.billing_phase.prices.empty? ? "/admin/billing_plans/#{@billing_plan.id}" : "/admin/billing_plans/#{@billing_plan.id}/billing_phases/#{@price.billing_phase.id}", class: 'btn btn-default', style: 'margin-right:10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success' %>
+  <%= link_to "Delete", "#{@base_url}/billing_resource_prices/#{@price.id}", method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-danger pull-right' if controller.action_name == 'edit' %>
+</div>

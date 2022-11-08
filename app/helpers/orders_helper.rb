@@ -16,6 +16,7 @@ module OrdersHelper
     data.each_with_index do |i, k|
       container_image = ContainerImage::ImageVariant.find_by(id: i['image_variant_id'])&.container_image
       image_name = container_image.nil? ? 'Unknown' : container_image.label
+      image_product = container_image.product
       product = Product.find_by(id: i.dig('resources', 'product_id'))
       result << tag.div(class: 'order_wrapper') do
         tag.div(class: "order-item #{k > 0 ? 'order-wrap-border' : ''}") do
@@ -35,11 +36,13 @@ module OrdersHelper
                         concat(
                             tag.td(image_name, class: 'order-child-table-item', style: 'font-weight:bold;')
                         )
-                        concat(
-                            tag.td(class: 'text-right') do
-                              product.nil? ? I18n.t('common.free') : formatted_product_price(region, product)
-                            end
-                        )
+                        if image_product
+                          concat(
+                              tag.td(class: 'text-right', style: 'font-weight:bold;') do
+                                image_product.nil? ? I18n.t('common.free') : formatted_product_price(region, image_product)
+                              end
+                          )
+                        end
                       end
                   )
                   i['volume_config'].each do |vol|
@@ -62,9 +65,21 @@ module OrdersHelper
                   end
                   if product&.package
                     concat(
+                      tag.tr do
+                        concat(
+                          tag.td(product.label, class: 'order-child-table-item', style: 'font-weight:bold;')
+                        )
+                        concat(
+                          tag.td(class: 'text-right', style: 'font-weight:bold;') do
+                            product.nil? ? I18n.t('common.free') : formatted_product_price(region, product)
+                          end
+                        )
+                      end
+                    )
+                    concat(
                         tag.tr do
                           concat(
-                              tag.td('CPU', class: 'order-child-table-item')
+                              tag.td('-> CPU', class: 'order-child-table-item', style: 'text-indent: 10px;')
                           )
                           concat(
                               tag.td("#{product.package.cpu} #{product.package.cpu.to_f > 1 ? 'CORES' : 'CORE'}", class: 'text-right')
@@ -74,7 +89,7 @@ module OrdersHelper
                     concat(
                         tag.tr do
                           concat(
-                              tag.td(I18n.t('attributes.mem'), class: 'order-child-table-item')
+                              tag.td("-> #{I18n.t('attributes.mem')}", class: 'order-child-table-item', style: 'text-indent: 10px;')
                           )
                           concat(
                               tag.td("#{product.package.memory.to_f / 1024.0} GB", class: 'text-right')
@@ -84,7 +99,7 @@ module OrdersHelper
                     concat(
                         tag.tr do
                           concat(
-                              tag.td(I18n.t('attributes.disk'), class: 'order-child-table-item')
+                              tag.td("-> #{I18n.t('attributes.disk')}", class: 'order-child-table-item', style: 'text-indent: 10px;')
                           )
                           concat(
                               tag.td("#{product.package.storage} GB", class: 'text-right')
@@ -94,7 +109,7 @@ module OrdersHelper
                     concat(
                       tag.tr do
                         concat(
-                          tag.td(I18n.t('attributes.local_disk'), class: 'order-child-table-item')
+                          tag.td("-> #{I18n.t('attributes.local_disk')}", class: 'order-child-table-item', style: 'text-indent: 10px;')
                         )
                         concat(
                           tag.td("#{product.package.local_disk} GB", class: 'text-right')
@@ -104,7 +119,7 @@ module OrdersHelper
                     concat(
                         tag.tr do
                           concat(
-                              tag.td(I18n.t('attributes.transfer'), class: 'order-child-table-item')
+                              tag.td("-> #{I18n.t('attributes.transfer')}", class: 'order-child-table-item', style: 'text-indent: 10px;')
                           )
                           concat(
                               tag.td("#{product.package.bandwidth} GB", class: 'text-right')

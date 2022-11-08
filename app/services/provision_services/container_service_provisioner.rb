@@ -478,7 +478,15 @@ module ProvisionServices
         self.memory = data[:memory]
         return true
       end
+      image_product = if image.product
+                        image.product.allow_user?(project_user) ? image.product : nil
+                      else
+                        nil
+                      end
       service_products = []
+
+      service_products << image_product if image_product
+
       bw = Product.lookup(project_user.billing_plan, 'bandwidth')
       if bw.nil?
         errors << "Missing bandwidth product in billing plan."

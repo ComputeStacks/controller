@@ -12,6 +12,7 @@
       <thead>
         <tr>
           <th>Name</th>
+          <th>Billing Term</th>
           <th>User Groups</th>
           <th>Users</th>
           <th>Currencies</th>
@@ -21,7 +22,11 @@
       <tbody>
       <% @billing_plans.each do |i| %>
         <tr onclick="window.location='/admin/billing_plans/<%= i.id %>';" style="cursor: pointer;">
-          <td><%= i.name %></td>
+          <td <% unless i.available? %>style="color: red;"<% end %>>
+            <%= i.name %>
+            <% unless i.available? %><span class="label label-danger"><%= icon 'fa-solid', 'circle-exclamation' %></span><% end %>
+          </td>
+          <td><%= I18n.t("billing.#{i.term}") %></td>
           <td><%= billing_plan_groups i %></td>
           <td><%= i.users.count %></td>
           <td><%= i.available_currencies.join(', ') %></td>

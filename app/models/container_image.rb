@@ -115,6 +115,7 @@ class ContainerImage < ApplicationRecord
 
   include Auditable
   include Authorization::ContainerImage
+  include ImagePlugins::ImagePlugin
   include ContainerImages::ImageAvatar
   include ContainerImages::ImageParamManager
   include ImageCloner
@@ -138,6 +139,7 @@ class ContainerImage < ApplicationRecord
   has_many :parent_containers, through: :required_by_parent, source: :container_image
 
   belongs_to :user, optional: true
+  belongs_to :product, optional: true
 
   has_many :env_params, class_name: 'ContainerImage::EnvParam', dependent: :destroy
   has_many :ingress_params, class_name: 'ContainerImage::IngressParam', dependent: :destroy
@@ -165,6 +167,7 @@ class ContainerImage < ApplicationRecord
   before_validation :set_name
 
   validate :ensure_tag, on: :create
+  validate :valid_product
   validates :category, presence: true
   validates :name, uniqueness: true
   validates :name, presence: true
@@ -341,6 +344,17 @@ class ContainerImage < ApplicationRecord
     else
       Rails.application.assets.find_asset(icon_path) != nil
     end
+  end
+
+  def valid_product
+    return if product_id.blank?
+    p = Product.find_by id: product_id
+    if p.nil?
+      errors.add(:product_id, 'invalid')
+    elsif !p.is_image?
+      errors.add(:product_id, 'is not an image product')
+    end
+
   end
 
 end

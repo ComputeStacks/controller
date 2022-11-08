@@ -7,6 +7,12 @@
       span.help-block Reference for external billing system
 
     .col-sm-6: .form-group
+      = label_tag :prorate, 'Prorate on cancellation?'
+      = f.check_box :prorate, class: 'form-control'
+      span.help-block When cancelling, or during an upgrade/downgrade, should we credit unused usage?
+
+  .row
+    .col-sm-12: .form-group
       = label_tag :product_id, 'Product'
       - if available_products(@billing_plan, @billing_resource.product).empty?
         p: em Error! No products available.

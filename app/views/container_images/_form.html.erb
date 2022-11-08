@@ -120,21 +120,32 @@
       </div>
     </div>
 
-    <div class="col-sm-4 col-xs-7">
-      <div class="form-group">
-        <%= f.label :registry_image_path, t('container_images.form.registry.image') %>
-        <%= tag.span '*', style: 'color:red;' %>
-        <%= f.text_field :registry_image_path, class: 'form-control', placeholder: 'my/image' %>
+    <% if image.id.nil? %>
+      <div class="col-sm-4 col-xs-7">
+        <div class="form-group">
+          <%= f.label :registry_image_path, t('container_images.form.registry.image') %>
+          <%= tag.span '*', style: 'color:red;' %>
+          <%= f.text_field :registry_image_path, class: 'form-control', placeholder: 'my/image' %>
+        </div>
       </div>
-    </div>
 
-    <div class="col-sm-3 col-xs-5">
-      <div class="form-group">
-        <%= f.label :registry_image_tag, t('container_images.form.registry.tag') %>
-        <%= tag.span '*', style: 'color:red;' %>
-        <%= f.text_field :registry_image_tag, class: 'form-control' %>
+      <div class="col-sm-3 col-xs-5">
+        <div class="form-group">
+          <%= f.label :registry_image_tag, t('container_images.form.registry.tag') %>
+          <%= tag.span '*', style: 'color:red;' %>
+          <%= f.text_field :registry_image_tag, class: 'form-control' %>
+        </div>
       </div>
-    </div>
+    <% else %>
+      <div class="col-sm-7 col-xs-12">
+        <div class="form-group">
+          <%= f.label :registry_image_path, t('container_images.form.registry.image') %>
+          <%= tag.span '*', style: 'color:red;' %>
+          <%= f.text_field :registry_image_path, class: 'form-control', placeholder: 'my/image' %>
+        </div>
+      </div>
+    <% end %>
+
   </div>
 
   <% if request.path =~ /admin/ && current_user.is_admin %>
@@ -152,6 +163,24 @@
 
     <%= render partial: "container_images/blocks/form", locals: { f: f } %>
 
+    <% if image.id.nil? || image.user.nil? %>
+      <div class="row">
+
+        <div class="col-xs-12">
+
+          <div class="form-group">
+            <%= f.label :product_id, "Associate with Product" %>
+            <%= f.collection_select :product_id, Product.images.sorted, :id, :label, { include_blank: true }, { class: 'form-control chosen-select-standard' } %>
+          </div>
+
+        </div>
+
+      </div>
+
+    <% end %>
+
+
+
   <% end %>
 
   <hr>
@@ -168,6 +197,7 @@
       <%= f.text_field :command, class: 'form-control' %>
     </div>
   </div>
+
 
   <hr>
 

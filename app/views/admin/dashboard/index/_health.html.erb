@@ -13,5 +13,11 @@
         <td><%= @alerts %></td>
       </tr>
     <% end %>
+    <% unless @invalid_plans.empty? %>
+      <tr>
+        <td><%= link_to 'Invalid Billing Plans', '/admin/billing_plans' %></td>
+        <td><%= @invalid_plans.count %></td>
+      </tr>
+    <% end %>
   </table>
 </div>

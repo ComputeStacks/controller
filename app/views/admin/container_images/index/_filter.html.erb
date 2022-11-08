@@ -24,6 +24,14 @@
       <option value="no" <% if params[:visible] == 'no' %>selected="selected"<% end %>>Hidden</option>
     </select>
   </div>
+  <div class="col-md-2 col-sm-3 col-xs-4">
+    <label>HAS PRODUCT</label>
+    <select name="product" title="Filter by status." class="form-control chosen-select-standard">
+      <option value="">Show All</option>
+      <option value="yes" <% if params[:product] == 'yes' %>selected="selected"<% end %>>Yes</option>
+      <option value="no" <% if params[:product] == 'no' %>selected="selected"<% end %>>No</option>
+    </select>
+  </div>
   <div class="col-md-2 col-sm-3 col-col-xs-4">
     <%= submit_tag "Filter", class: 'btn btn-primary', style: 'margin-top:20px;' %>
   </div>

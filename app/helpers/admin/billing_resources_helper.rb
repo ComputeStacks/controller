@@ -14,11 +14,16 @@ module Admin::BillingResourcesHelper
     link_to package.product.name, admin_package_path(package)
   end
 
-  def resource_price_form_helper(billing_resource)
-    if billing_resource.product.is_aggregated
+  def resource_price_form_helper(price)
+    if price.billing_resource.product.is_aggregated
       "Price is per-unit, as it's consumed. It will be aggregated and billed monthly."
     else
-      "Price is per-hour"
+      case price.term
+      when 'hour'
+        "Price is per-hour"
+      when 'month'
+        "Price is per-month"
+      end
     end
   end
 

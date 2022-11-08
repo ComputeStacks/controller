@@ -90,7 +90,7 @@ class Subscription < ApplicationRecord
         bu = i.billing_usages.first
         next if bu.nil?
         total += bu.hourly_run_rate
-      when 'package'
+      else
         total += i.run_rate
       end
     end
@@ -101,13 +101,6 @@ class Subscription < ApplicationRecord
   def related
     return [] if linked_obj.nil? || linked_obj.service.nil?
     linked_obj.service.subscriptions.where.not(id: id) if linked_obj.is_a? Deployment::Container
-  end
-
-  def post_paid?
-    return true if package.nil?
-    sb = subscription_products.where("products.kind = 'package'").joins(:product).first
-    return true if sb.nil? # shouldn't happen
-    sb.current_price.post_paid?
   end
 
   def linked_obj
@@ -123,7 +116,11 @@ class Subscription < ApplicationRecord
     subscription_products.where(products: { kind: 'package' }).joins(:product).first
   end
 
-  # stops billing
+  def image_subscription
+    subscription_products.where(products: { kind: 'image' }).joins(:product).first
+  end
+
+  # stops billing (except monthly!)
   def pause!
     subscription_products.each do |i|
       i.pause!
@@ -139,6 +136,9 @@ class Subscription < ApplicationRecord
 
   def cancel!
     update active: false
+    subscription_products.each do |sp|
+      sp.prorate_usage!
+    end
   end
 
   ##
@@ -149,12 +149,21 @@ class Subscription < ApplicationRecord
     current_package = package
     return false if current_package.nil? # package-to-package only.
     current_product = current_package.product
+    return false if current_product == new_package
     return false if new_package.product.nil?
     return false if new_package.nil?
-    sub_product = self.subscription_products.find_by(product: current_product)
+    sub_product = subscription_products.find_by(product: current_product)
     return false if sub_product.nil? # Error! Shouldn't be here.
+
     # Migrate the subscription.
-    sub_product.update_attribute :product, new_package.product
+    sub_product.update product: new_package.product
+
+    # Prorate existing usage (if allowed)
+    sub_product.prorate_usage!
+
+    # Setup new usage for monthly item
+    sub_product.init_usage!
+
     event = sub_product.billing_events.create!(
       source_product: current_product,
       destination_product: new_package.product,

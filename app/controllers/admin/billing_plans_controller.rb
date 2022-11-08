@@ -28,8 +28,8 @@ class Admin::BillingPlansController < Admin::ApplicationController
 
   def update
     @billing_plan.current_user = current_user
-    if @billing_plan.update(plan_params)
-      flash[:success] = "Plan Update"
+    if @billing_plan.update(plan_update_params)
+      flash[:success] = "Plan Updated"
     else
       flash[:alert] = "Error! #{@billing_plan.errors.full_messages.join(' ')}"
     end
@@ -37,7 +37,7 @@ class Admin::BillingPlansController < Admin::ApplicationController
   end
 
   def create
-    @billing_plan = BillingPlan.new(name: plan_params[:name])
+    @billing_plan = BillingPlan.new(name: plan_params[:name], term: plan_params[:term])
     @billing_plan.clone = BillingPlan.find_by(id: plan_params[:clone]) if plan_params[:clone]
     @billing_plan.current_user = current_user
     if @billing_plan.save
@@ -61,7 +61,11 @@ class Admin::BillingPlansController < Admin::ApplicationController
   private
 
   def plan_params
-    params.require(:billing_plan).permit(:name, :clone)
+    params.require(:billing_plan).permit(:name, :clone, :term)
+  end
+
+  def plan_update_params
+    params.require(:billing_plan).permit(:name)
   end
 
   def load_plan

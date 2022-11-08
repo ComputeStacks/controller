@@ -2,8 +2,8 @@
 <% content_for :breadcrumb do %>
   <div class="row has-breadcrumb">
     <ol class="breadcrumb">
-      <li><%= link_to t('obj.images'), (request.path =~ /admin/ ? "/admin/container_images" : "/container_images") %></li>
-      <li><%= link_to @image.label, (request.path =~ /admin/ ? "/admin/container_images/#{@image.id}" : "/container_images/#{@image.id}") %></li>
+      <li><%= link_to t('obj.images'), container_images_path %></li>
+      <li><%= link_to @image.label, container_image_path(@image) %></li>
       <li class="active"><%= t('collaborators.collaborator.plural').capitalize %></li>
     </ol>
   </div>
@@ -19,11 +19,11 @@
 
 <div class="row">
   <div class="<%= @collab.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
-    <%= form_for @collab, url: (request.path =~ /admin/ ? "/admin/container_images/#{@image.id}/collaborators" : "/container_images/#{@image.id}/collaborators") do |f| %>
+    <%= form_for @collab, url: container_image_collaborators_path(@image) do |f| %>
       <div class="panel panel-default">
         <%= render partial: 'collaborators/form', locals: { f: f } %>
         <div class="panel-footer">
-          <%= link_to t('actions.cancel'), (request.path =~ /admin/ ? "/admin/container_images/#{@image.id}/collaborators" : "/container_images/#{@image.id}/collaborators"), class: 'btn btn-default', style: 'margin-right: 10px;' %>
+          <%= link_to t('actions.cancel'), container_image_collaborators_path(@image), class: 'btn btn-default', style: 'margin-right: 10px;' %>
           <%= submit_tag t('actions.invite'), class: 'btn btn-success pull-right' %>
         </div>
       </div>

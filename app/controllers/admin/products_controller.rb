@@ -4,7 +4,8 @@ class Admin::ProductsController < Admin::ApplicationController
 
   def index
     @packages = Product.packages.sorted
-    @products = Product.where.not(kind: 'package').sorted
+    @images = Product.images.sorted
+    @products = Product.where.not(kind: 'package').where.not(kind: 'image').sorted
   end
 
   def show

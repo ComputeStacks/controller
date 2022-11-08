@@ -16,6 +16,7 @@
 #   @return [String] Used by third-party integrations
 #
 # @!attribute rate
+#   total = rate * qty
 #   @return [Decimal]
 #
 # @!attribute qty
@@ -26,6 +27,13 @@
 #
 # @!attribute total
 #   @return [Decimal]
+##
+# @!attribute rate_period
+#   Used to determine the _hourly_ rate.
+#   Possible values:
+#     * When rate is an hourly price, value is 1 (default).
+#     * When rate is a monthly price, value is 730.
+#   @return [Integer]
 #
 # @!attribute processed
 #   @return [Boolean]

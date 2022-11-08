@@ -21,7 +21,7 @@ class CollectUsageTest < ActionDispatch::IntegrationTest
       # Verify price is correctly stored
       current_price = i.subscription_product.current_price(i.qty)
       refute_nil current_price
-      assert_equal current_price.price, i.rate
+      assert_equal current_price.price.to_f, i.rate
 
       ##
       # Verify total is correct

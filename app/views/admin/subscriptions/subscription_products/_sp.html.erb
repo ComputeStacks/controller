@@ -36,10 +36,9 @@
       <% usage_item = sp.billing_usages.first %>
       <div class="row deployment-overview-sub" style="margin-top:15px;margin-bottom:15px;">
         <div class="col-md-3">
-          <div class="deployment-overview-sub-header">LAST COLLECTION</div>
+          <div class="deployment-overview-sub-header">USAGE PERIOD</div>
           <div class="deployment-overview-sub-content">
-            <%= l sp.current_period.in_time_zone current_user.tz %>
-            <%#l usage_item.created_at %>
+            <%= l sp.current_period.in_time_zone('UTC'), format: :short %>
           </div>
         </div>
         <div class="col-md-3">
@@ -96,7 +95,7 @@
             Kind
             <b class="pull-right"><%= sp.product.kind %></b>
           </li>
-          <% unless sp.product.kind == 'package' %>
+          <% if sp.product_is_resource? %>
             <li>
               Resource
               <b class="pull-right"><%= sp.product.resource_kind %></b>

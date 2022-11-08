@@ -23,6 +23,8 @@ class Setting < ApplicationRecord
 
   after_update_commit :check_billing_module
 
+  after_update_commit :plugin_changes
+
   def decrypted_value
     return self.value unless self.encrypted
     self.value.nil? ? nil : Secret.decrypt!(self.value)
@@ -513,6 +515,105 @@ class Setting < ApplicationRecord
       v > 90 ? 90 : v
     end
 
+    def monarx_init!
+      monarx_enabled?
+      monarx_agent_key
+      monarx_agent_secret
+      monarx_api_key
+      monarx_api_secret
+      monarx_enterprise_id
+
+      unless ContainerImagePlugin.where(name: 'monarx').exists?
+        ContainerImagePlugin.create! name: 'monarx', active: false
+      end
+
+    end
+
+
+    def monarx_enabled?
+      s = Setting.find_by name: 'monarx_active', category: 'plugins'
+      if s.nil?
+        s = Setting.create!(
+          name: 'monarx_active',
+          category: 'plugins',
+          description: 'Enable Monarx',
+          value: 'f',
+          encrypted: false
+        )
+      end
+      ActiveRecord::Type::Boolean.new.cast s.value
+    end
+
+    def monarx_api_key
+      s = Setting.find_by name: 'monarx_api_key', category: 'plugins'
+      if s.nil?
+        s = Setting.create!(
+          name: 'monarx_api_key',
+          category: 'plugins',
+          description: "Monarx API Key",
+          value: "",
+          encrypted: true
+        )
+      end
+      s.value.blank? ? nil : Secret.decrypt!(s.value)
+    end
+
+    def monarx_api_secret
+      s = Setting.find_by name: 'monarx_api_secret', category: 'plugins'
+      if s.nil?
+        s = Setting.create!(
+          name: 'monarx_api_secret',
+          category: 'plugins',
+          description: "Monarx API Secret",
+          value: "",
+          encrypted: true
+        )
+      end
+      s.value.blank? ? nil : Secret.decrypt!(s.value)
+    end
+
+    def monarx_agent_key
+      s = Setting.find_by name: 'monarx_agent_key', category: 'plugins'
+      if s.nil?
+        s = Setting.create!(
+          name: 'monarx_agent_key',
+          category: 'plugins',
+          description: "Monarx Agent Key",
+          value: "",
+          encrypted: true
+        )
+      end
+      s.value.blank? ? nil : Secret.decrypt!(s.value)
+    end
+
+    def monarx_agent_secret
+      s = Setting.find_by name: 'monarx_agent_secret', category: 'plugins'
+      if s.nil?
+        s = Setting.create!(
+          name: 'monarx_agent_secret',
+          category: 'plugins',
+          description: "Monarx Agent Secret",
+          value: "",
+          encrypted: true
+        )
+      end
+      s.value.blank? ? nil : Secret.decrypt!(s.value)
+    end
+
+    def monarx_enterprise_id
+      s = Setting.find_by name: 'monarx_enterprise_id', category: 'plugins'
+      if s.nil?
+        s = Setting.create!(
+          name: 'monarx_enterprise_id',
+          category: 'plugins',
+          description: "Monarx Enterprise ID",
+          value: "",
+          encrypted: false
+        )
+      end
+      s.value.blank? ? nil : s.value
+    end
+
     ##
     # SMTP
     def smtp_init!
@@ -571,6 +672,7 @@ class Setting < ApplicationRecord
         le_dns_sleep
         le_server
         le_single_domain?
+        monarx_init!
         registry_base_url
         registry_node
         registry_selinux
@@ -602,6 +704,19 @@ class Setting < ApplicationRecord
 
   def check_billing_module
     Setting.billing_module if self.name == 'billing_module'
+  end
+
+  def plugin_changes
+    return unless category == 'plugins'
+
+    # Monarx: Update visibility based on Settings.
+    if name =~ /monarx/ && ContainerImagePlugin.monarx.exists?
+      monarx_plugin = ContainerImagePlugin.monarx.first
+      unless monarx_plugin.active == monarx_plugin.monarx_available?
+        monarx_plugin.update active: monarx_plugin.monarx_available?
+      end
+    end
+
   end
 
 end
