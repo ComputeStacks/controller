@@ -7,7 +7,7 @@ class Admin::ContainerImages::BaseController < Admin::ApplicationController
   def find_image
     @container = ContainerImage.find_by(id: params[:container_image_id])
     if @container.nil?
-      redirect_to "/admin/container_images", alert: I18n.t('crud.unknown', resource: I18n.t('obj.container'))
+      redirect_to "/admin/container_images", alert: I18n.t('crud.unknown', resource: I18n.t('obj.image'))
       return false
     end
     @container.current_user = current_user

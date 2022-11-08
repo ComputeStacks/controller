@@ -53,7 +53,7 @@ module Containers
     def docker_client_with_event(event, ignore_missing = false)
       the_client = docker_client
       if the_client.nil? && !ignore_missing
-        update_attribute :status, 'error'
+        update status: 'error'
         event.event_details.create!(
           data: 'Container does not exist on node',
           event_code: '41237d8136741d74'

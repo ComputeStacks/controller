@@ -55,11 +55,15 @@ Rails.application.routes.draw do
 
     resources :container_images do
       scope module: 'container_images' do
+        resources :image_variants do
+          scope module: 'image_variants' do
+            resources :pull
+          end
+        end
         resources :collaborators,
                   :env_params,
                   :image_plugins,
                   :image_relationships,
-                  :image_variants,
                   :ingress_params,
                   :setting_params,
                   :volume_params,

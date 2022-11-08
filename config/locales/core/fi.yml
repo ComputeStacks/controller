@@ -76,6 +76,8 @@ fi:
     services: Säiliön palvelut
     image: Säiliön kuva
     images: Säiliön kuvat
+    image_variant: Image Variant
+    image_variants: Image Variants
     user: Käyttäjä
     users: Käyttäjät
     registry: Oma arkisto

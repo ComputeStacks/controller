@@ -76,6 +76,8 @@ de:
     services: Container Dienste
     image: Container Image
     images: Container Images
+    image_variant: Image Variant
+    image_variants: Image Variants
     user: Benutzer
     users: Benutzer
     registry: Container Registry
