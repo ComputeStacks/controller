@@ -30,7 +30,7 @@ module ContainerImages
                     when :pending
                       'fa-refresh fa-spin'
                     when :invalid
-                      'danger'
+                      'fa-exclamation-triangle'
                     else
                       nil
                     end

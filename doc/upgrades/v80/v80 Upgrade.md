@@ -84,3 +84,19 @@ LimitNOFILE=infinity
 ```bash
 systemctl daemon-reload && systemctl restart consul
 ```
+
+
+## Consider adjusting kernel parameters
+
+Example:
+
+```
+sysctl fs.file-max=16777216
+sysctl fs.inotify.max_queued_events=8388608
+sysctl fs.inotify.max_user_instances=8388608
+sysctl fs.inotify.max_user_watches=16777216
+sysctl kernel.pid_max=4194304
+sysctl fs.aio-max-nr=2097152
+```
+
+Be sure to persist the changes in: `/etc/sysctld.d/99-sysctl.conf`
