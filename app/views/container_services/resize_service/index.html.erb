@@ -29,7 +29,7 @@
 
       <div class="row">
         <div class="col-md-12 container-package-selector-wrap" style="margin-left:-15px;">
-          <input id="p0" class='container-package-input' data-index="0" type="hidden" name="package[0]" value="<%= @service.package.product_id %>">
+          <input id="p<%= @service.image_variant.id %>" class='container-package-input' data-index="<%= @service.image_variant.id %>" type="hidden" name="package[<%= @service.image_variant.id %>]" value="<%= @service.package.product_id %>">
           <% order_packages_for_service(@service).each do |group,packages| %>
             <% unless group.blank? %>
               <div style="color:#333; text-align: left;padding-left:15px;border-radius: 0px;">
@@ -38,7 +38,7 @@
             <% end %>
             <div class="panel-body">
               <% packages.each do |p| %>
-                <%= render partial: 'orders/containers/package', locals: { project_owner: @project_owner, package: p, region: @service.region, container: { container_id: 0 } } %>
+                <%= render partial: 'orders/containers/package', locals: { project_owner: @project_owner, package: p, region: @service.region, container: { image_variant_id: @service.image_variant.id } } %>
               <% end %>
             </div>
           <% end %>

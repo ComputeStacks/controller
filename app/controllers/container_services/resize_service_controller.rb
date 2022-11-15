@@ -12,7 +12,11 @@ class ContainerServices::ResizeServiceController < ContainerServices::BaseContro
   end
 
   def create
-    product = Product.find_by(id: container_service_params[:package]['0'])
+    product = Product.find_by(id: container_service_params[:package]["#{@service.image_variant.id}"])
+    if product.nil?
+      redirect_to "/container_services/#{@service.id}", alert: I18n.t('crud.unknown', resource: 'Product')
+      return false
+    end
     package = product.package
     if package.nil?
       redirect_to "/container_services/#{@service.id}", alert: I18n.t('crud.unknown', resource: 'Package')

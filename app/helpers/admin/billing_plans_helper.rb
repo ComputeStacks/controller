@@ -11,7 +11,6 @@ module Admin::BillingPlansHelper
     price = phase.prices.where(currency: ENV['CURRENCY']).order(Arel.sql("max_qty asc nulls last")).first
     price = phase.prices.order(Arel.sql("max_qty asc nulls last")).first if price.nil? && phase.prices.exists? # Fallback to not including default currency.
     return 0.0 if price.nil?
-    return 0.0 if price.price.zero?
 
     if phase.product.is_aggregated # Aggregated units are displayed to 5 digits.
       '%.5f' % price.price
