@@ -52,7 +52,7 @@ module VolumeServices
       event.event_details.create!(data: connection_error.message, event_code: "04bed58fa43fab49") if event
       false
     rescue Docker::Error::ServerError => server_error
-      ExceptionAlertService.new(e, '7644f82e2a97cd0e').perform
+      ExceptionAlertService.new(server_error, '7644f82e2a97cd0e').perform
       SystemEvent.create!(
         message: "Error creating volume.",
         log_level: "warn",
@@ -65,7 +65,7 @@ module VolumeServices
       event.event_details.create!(data: server_error.message, event_code: "7644f82e2a97cd0e") if event
       false
     rescue Timeout::Error
-      if defined?(clone_name)
+      if defined?(clone_event) && clone_event
         clone_event.update data: "[#{Time.now.strftime("%Y%m%d%H%M")}] Timeout reached while cloning source volume. \n#{clone_event.data}"
       end
       false

@@ -73,6 +73,7 @@ class OrderSession
   #       source: ""
   #      }
   def add_image(image_variant, opts = {})
+    return if image_variant.nil?
     return if image_variant_selected?(image_variant.id)
     images.each do |i|
       if i[:image_id] == image_variant.container_image.id

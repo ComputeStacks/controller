@@ -26,7 +26,7 @@ module ContainerWorkers
       ContainerWorkers::ReleaseIpWorker.perform_in(30.seconds, container_id, event_id)
     rescue => e
       user = nil
-      if defined?(container) && defined?(event)
+      if defined?(container) && container && defined?(event) && event
         if e.message =~ /is not connected to network/
           # Allow to proceed if it's already disconnected.
           ContainerWorkers::StartWorker.perform_async container_id, event_id

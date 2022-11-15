@@ -33,12 +33,12 @@ module VolumeWorkers
       event.volumes << volume
 
       if halt_attempt
-        if defined?(event)
+        if defined?(event) && event
           event.event_details.create!(
             data: "Too many failed attempts to remove this volume. Please check previous events for errors and try again.",
             event_code: "56a8af7da2e3b652"
-          ) if event
-          event.cancel!("Too many failed attempts") if event
+          )
+          event.cancel!("Too many failed attempts")
         end
         volume.update to_trash: false, trash_after: nil, trashed_by: nil
         return false
@@ -47,21 +47,23 @@ module VolumeWorkers
       VolumeServices::TrashVolumeService.new(volume, event).perform
     rescue Docker::Error::ConflictError
       # volume is in use
-      if defined?(event)
+      if defined?(event) && event
         event.event_details.create!(
           data: "Volume is currently in use. Please stop and remove any associated container before attempting to delete it",
           event_code: 'de7123e54ba18968'
         )
         event.fail! 'Volume in use'
-        if defined?(volume) && volume.event_logs.where(event_code: '26045910b65d1d4f', status: 'failed').count > 2
-          volume.update to_trash: false
+        if defined?(volume)
+          if volume && volume.event_logs.where(event_code: '26045910b65d1d4f', status: 'failed').count > 2
+            volume.update to_trash: false
+          end
         end
-      elsif defined?(volume)
+      elsif defined?(volume) && volume
         volume.update_column(:trash_after, 1.day.from_now)
       end
     rescue => e
       ExceptionAlertService.new(e, 'e4dcc06b2c60061f').perform
-      if defined?(event)
+      if defined?(event) && event
         event.event_details.create!(
           data: e.message,
           event_code: 'e4dcc06b2c60061f'

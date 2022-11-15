@@ -36,7 +36,7 @@ module ContainerServices
       true
     rescue => e
       ExceptionAlertService.new(e, '3932bc1fa2eebfcf').perform
-      if defined?(event)
+      if defined?(event) && event
         event.event_details.create!(
           data: "Fatal error: #{e.message}",
           event_code: "3932bc1fa2eebfcf"

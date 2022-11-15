@@ -27,7 +27,7 @@ module NodeWorkers
       end
 
       ##
-      # Clean stale iamges
+      # Clean stale images
       c = node.client(5)
       return if c.nil?
       result = JSON.parse(c.post("/images/prune?dangling=true", {}))
@@ -55,8 +55,8 @@ module NodeWorkers
         log_level: 'warn',
         data: {
           'node' => {
-            'id' => node.id,
-            'name' => node.label
+            'id' => node&.id,
+            'name' => node&.label
           },
           'error' => e.message
         },

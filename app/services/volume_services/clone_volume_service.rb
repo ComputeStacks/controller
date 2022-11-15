@@ -148,7 +148,7 @@ module VolumeServices
       return false if ActiveRecord::Base.uncached { event.event_details.where(event_code: failed_restore_event_code).exists? }
       true
     rescue Timeout::Error
-      if defined?(clone_name)
+      if defined?(clone_event) && clone_event
         clone_event.update data: "[#{Time.now.strftime("%F %T")}] Timeout reached while cloning source volume.\n#{clone_event.data}"
       end
       false

@@ -1,5 +1,5 @@
 object false
-if defined?(@images)
+if defined?(@images) && @images
 
   node :container_services do
     @services.map do |i|
