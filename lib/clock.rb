@@ -91,7 +91,7 @@ module Clockwork
     if SENTRY_CONFIGURED
       Sentry.with_scope do |scope|
         scope.set_tags event_code: "c698b5e4da4c518c"
-        Sentry.capture_exception e
+        Sentry.capture_exception error
       end
     else
       Rails.logger.warn "error=#{error.message}"

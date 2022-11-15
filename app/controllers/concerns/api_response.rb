@@ -21,7 +21,7 @@ module ApiResponse
     else
       respond_to do |format|
         format.json { render json: { errors: msg }, status: :not_found }
-        format.json { render xml: { errors: msg }, status: :not_found }
+        format.xml { render xml: { errors: msg }, status: :not_found }
       end
     end
 
