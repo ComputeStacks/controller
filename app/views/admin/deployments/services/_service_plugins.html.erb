@@ -1,0 +1,30 @@
+<table class="table">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Active</th>
+    <th>User Selectable</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% if plugins.empty? %>
+    <tr>
+      <td colspan="4" class="text-center">No Plugins</td>
+    </tr>
+  <% end %>
+  <% plugins.each do |i| %>
+  <tr>
+    <td style="vertical-align: middle;"><%= i.label %></td>
+    <td style="vertical-align: middle;"><%= i.active ? 'Yes' : 'No' %></td>
+    <td style="vertical-align: middle;"><%= i.is_optional ? 'Yes' : 'No' %></td>
+    <td class="text-right">
+      <div class="btn-group">
+        <%= link_to icon('fa-regular', 'wrench').html_safe, "#{admin_container_service_path(service)}/service_plugins/#{i.id}/edit", class: 'btn btn-sm btn-default' %>
+        <%= link_to icon('fa-regular', 'trash').html_safe, "#{admin_container_service_path(service)}/service_plugins/#{i.id}", method: :delete, data: { confirm: "Are you sure? This service will no longer follow the parent image." }, class: 'btn btn-sm btn-danger' %>
+      </div>
+    </td>
+  </tr>
+  <% end %>
+  </tbody>
+</table>

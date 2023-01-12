@@ -24,6 +24,8 @@ module NetworkWorkers
         #   NetworkWorkers::ServicePolicyWorker.perform_async i.id
         # end
       end
+    rescue ActiveRecord::RecordNotFound
+      return
     rescue DockerSSH::ConnectionFailed => e # Don't alert to our bug system!
       project.event_logs.create!(
         status: 'alert',

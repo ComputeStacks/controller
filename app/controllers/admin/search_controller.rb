@@ -95,7 +95,7 @@ class Admin::SearchController < Admin::ApplicationController
     sparams[:users].each do |i|
       @search_params << {
         label: "<span class='label label-primary'>User</span>",
-        link: "/admin/users/#{i.id}-#{i.full_name}",
+        link: "/admin/users/#{i.id}-#{i.full_name.parameterize}",
         title: "#{i.full_name} (#{i.email})",
         created_at: i.created_at
       }

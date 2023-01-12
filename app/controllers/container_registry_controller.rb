@@ -51,7 +51,7 @@ class ContainerRegistryController < AuthController
     @registry.user = current_user
     @registry.current_user = current_user
     if @registry.valid? && @registry.save
-      @registry.delay(retry: false).deploy!
+      RegistryWorkers::ProvisionRegistryWorker.perform_async @registry.id
       redirect_to "/container_registry", notice: t('container_registry.created')
       return false
     end
@@ -66,19 +66,6 @@ class ContainerRegistryController < AuthController
       flash[:alert] = "Error!: #{@registry.errors.full_messages.join(", ")}"
     end
     redirect_to "/container_registry"
-
-        # # not implemented
-    # @registry = current_user.container_registries.where(id: params[:id]).first
-    # if @registry.nil?
-    #   redirect_to "/container_registry", alert: t('container_registry.not_found')
-    # end
-    # if @registry.deployed_containers.empty?
-    #   @registry.update_attribute :status, 'working'
-    #   @registry.delay(retry: false).destroy_repo!
-    # else
-    #   flash[:alert] = "Error! There are deployed containers using this registry."
-    # end
-    # redirect_to "/container_registry"
   end
 
   private

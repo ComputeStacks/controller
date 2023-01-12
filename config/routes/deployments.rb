@@ -59,7 +59,18 @@ Rails.application.routes.draw do
         delete 'protect' => 'protect#destroy'
         resources :protect, :sso, :users
       end
-      resources :alerts, :connect, :containers, :events, :environmental, :host_entries, :monarx, :resize_service, :service_logs, :scale_service, :settings
+      resources :alerts,
+                :connect,
+                :containers,
+                :events,
+                :environmental,
+                :host_entries,
+                :monarx,
+                :resize_service,
+                :service_logs,
+                :service_plugins,
+                :scale_service,
+                :settings
     end
   end
 

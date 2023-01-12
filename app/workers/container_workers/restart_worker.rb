@@ -8,8 +8,15 @@ module ContainerWorkers
     # @param [String] event_id Global
     def perform(container_id, event_id)
       return if event_id.nil?
-      container = GlobalID::Locator.locate container_id
       event = GlobalID::Locator.locate event_id
+
+      begin
+        container = GlobalID::Locator.locate container_id
+      rescue ActiveRecord::RecordNotFound
+        event.fail! "Unknown container"
+        return
+      end
+
 
       return unless event.start!
 

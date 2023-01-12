@@ -13,15 +13,17 @@
 </div>
 
 <div class="row">
-  <div class="col-md-8 col-md-offset-2">
+  <div class="<%= @image.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
     <div class="panel panel-default">
-      <%= form_tag "#{container_image_path(@image)}/image_plugins", method: :post %>
+      <%= form_tag "#{container_image_path(@image)}/image_plugins", method: :post do %>
         <div class="panel-body">
           <div class="form-group">
             <label for="add_plugin_id">Plugin</label>
             <select id="add_plugin_id" name="add_plugin_id" class="form-control">
+              <option value=""></option>
               <% @plugins.each do |i| %>
                 <option value="<%= i.id %>"><%= i.name %></option>
+              <% end %>
             </select>
           </div>
         </div>
@@ -32,4 +34,5 @@
       <% end %>
     </div>
   </div>
+  <%= render partial: 'application/model_errors', locals: { errors: @image.errors, obj: 'image' } unless @image.errors.count.zero? %>
 </div>

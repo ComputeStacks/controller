@@ -22,7 +22,8 @@ module ImageWorkers
         obj.validated_tag_updated = Time.now
         obj.save
       end
-
+    rescue ActiveRecord::RecordNotFound
+      return
     end
 
   end

@@ -94,7 +94,6 @@ class Deployment::ContainerService < ApplicationRecord
 
   include Auditable
   include Authorization::ContainerService
-  include ContainerServicePlugins::Monarx
   include ContainerServices::CalicoServicePolicy
   include ContainerServices::CleanupNetPolicy
   include ContainerServices::NodeSelector
@@ -102,6 +101,7 @@ class Deployment::ContainerService < ApplicationRecord
   include ContainerServices::ServiceIngress
   include ContainerServices::ServiceLogs
   include ContainerServices::ServiceMetrics
+  include ContainerServices::ServicePlugins
   include ContainerServices::ServiceUsage
   include ContainerServices::ServiceVariant
   include ContainerServices::StateManager

@@ -123,9 +123,9 @@ class ContainerImage < ApplicationRecord
   include UrlPathFinder
 
   scope :is_public, -> { where(user: nil) }
-  scope :non_lbs, -> { where( Arel.sql("container_images.is_load_balancer = false") ) }
+  scope :non_lbs, -> { where 'container_images.is_load_balancer = false' }
   scope :available, -> { where active: true }
-  scope :sorted, -> { order( Arel.sql('lower(container_images.label)') ) }
+  scope :sorted, -> { order 'lower(container_images.label)' }
 
   has_many :image_variants, class_name: 'ContainerImage::ImageVariant', dependent: :destroy
 
@@ -234,7 +234,7 @@ class ContainerImage < ApplicationRecord
   end
 
   def service_container?
-    %w(cmptstks/phpmyadmin).include?(registry_image_path)
+    %w(cmptstks/phpmyadmin ghcr.io/computestacks/cs-docker-pma).include?(registry_image_path)
   end
 
   def content_variables

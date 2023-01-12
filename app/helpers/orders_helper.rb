@@ -177,6 +177,32 @@ module OrdersHelper
                       end
                     )
                   end
+                  unless i['addons'].nil? || i['addons'].empty?
+                    concat(
+                      tag.tr do
+                        concat(
+                          tag.td("Addons", class: 'order-child-table-item', style: 'font-weight:bold;')
+                        )
+                        concat( tag.td("") )
+                      end
+                    )
+                    i['addons'].each do |addon_id|
+                      addon = ContainerImagePlugin.find_by id: addon_id
+                      next if addon.nil?
+                      concat(
+                        tag.tr do
+                          concat(
+                            tag.td("-> #{addon.label}", class: 'order-child-table-item', style: 'text-indent: 10px;')
+                          )
+                          concat(
+                            tag.td(class: 'text-right') do
+                              addon.product.nil? ? I18n.t('common.free') : formatted_product_price(region, addon.product)
+                            end
+                          )
+                        end
+                      )
+                    end
+                  end
                   if container_image && i['params']
                     i['params'].each do |k,v|
                       next if v['type'] == 'password'

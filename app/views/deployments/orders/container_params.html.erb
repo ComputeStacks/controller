@@ -32,10 +32,21 @@
         <%= render partial: "deployments/orders/container_params", locals: { container: container } if order_container_has_user_params?(container) %>
 
         <%= render partial: "deployments/orders/container_volumes", locals: { container: container } unless container[:volumes].empty? %>
+
+        <%=
+          render partial: "orders/containers/addon",
+                 locals: {
+                   container: container,
+                   region: @region,
+                   project_owner: @project_owner,
+                   order_session: @order_session
+                 } unless order_addons_for_image(container[:image_id]).empty?
+        %>
+
         <% unless container[:free] == 'yes' %>
           <div class="panel-body">
             <div class="row">
-              <div class="col-xs-12"><strong>BILLING</strong></div>
+              <div class="col-xs-12"><strong>PACKAGES</strong></div>
             </div>
             <div class="row">
               <% if order_packages_for_resources(container[:min_cpu], container[:min_mem]).empty? %>

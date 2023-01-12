@@ -82,7 +82,7 @@ Rails.application.routes.draw do
 
         resources :services do
           scope module: 'services' do
-            resources :containers, :events
+            resources :containers, :events, :service_plugins
           end
         end
 
@@ -173,6 +173,7 @@ Rails.application.routes.draw do
     resources :alert_notifications,
               :app_events,
               :audit,
+              :container_image_plugins,
               :container_domains,
               :dashboard,
               :event_logs,

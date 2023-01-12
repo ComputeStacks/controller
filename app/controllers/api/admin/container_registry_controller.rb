@@ -77,7 +77,7 @@ class Api::Admin::ContainerRegistryController < Api::Admin::ApplicationControlle
     @registry.current_user = current_user
     respond_to do |format|
       if @registry.valid? && @registry.save
-        @registry.delay(retry: false).deploy!
+        RegistryWorkers::ProvisionRegistryWorker.perform_async @registry.id
         format.any(:json, :xml) { render template: "api/admin/container_registry/show", status: :created }
       else
         format.json { render json: {errors: @registry.errors}, status: :bad_request }
@@ -95,10 +95,13 @@ class Api::Admin::ContainerRegistryController < Api::Admin::ApplicationControlle
   def destroy
     respond_to do |format|
       if @registry.deployed_containers.empty?
-        @registry.update_attribute :status, 'working'
-        @registry.delay(retry: false).destroy_repo!
-        format.json { render json: {}, status: :accepted }
-        format.xml { render xml: {}, status: :accepted }
+        if @registry.destroy
+          format.json { render json: {}, status: :accepted }
+          format.xml { render xml: {}, status: :accepted }
+        else
+          format.json { render json: { errors: @registry.errors.full_messages }, status: :bad_request }
+          format.xml { render xml: { errors: @registry.errors.full_messages }, status: :bad_request }
+        end
       else
         format.json { render json: {errors: ["Error! There are deployed containers using this registry."]}, status: :bad_request }
         format.xml { render xml: {errors: ["Error! There are deployed containers using this registry."]}, status: :bad_request }

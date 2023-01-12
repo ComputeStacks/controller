@@ -1,4 +1,3 @@
-# Sidekiq::Extensions.enable_delay!
 Sidekiq.strict_args!
 
 sidekiq_redis_conf = {

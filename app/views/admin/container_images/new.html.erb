@@ -20,5 +20,5 @@
       </div>
     <% end %>
   </div>
-  <%= render partial: 'container_images/errors' unless @container.errors.count.zero? %>
+  <%= render(partial: 'application/model_errors', locals: { errors: @container.errors, obj: t('obj.image') }) unless @container.errors.count.zero? %>
 </div>

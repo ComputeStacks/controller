@@ -124,6 +124,7 @@ module ProvisionServices
       return rollback! unless valid?
       return rollback! unless init_subscription?
       return rollback! unless init_service!
+      return rollback! unless init_service_plugins!
       return rollback! unless select_node!
       return rollback! unless init_private_lbs!
       return rollback! unless setup_service_config!
@@ -246,6 +247,7 @@ module ProvisionServices
       true
     end
 
+    # @return [Boolean]
     def build_volumes!
       volume_driver = if container_service.container_image.force_local_volume
                         'local'
@@ -404,6 +406,7 @@ module ProvisionServices
       false
     end
 
+    # @return [Boolean]
     def rollback!
       result[:containers].each do |c|
         c.subscription.destroy if c.subscription
@@ -424,6 +427,7 @@ module ProvisionServices
       false
     end
 
+    # @return [Boolean]
     def valid?
       errors << "Invalid qty" if qty < 1
       errors << "Missing project" if project.nil?
@@ -487,6 +491,17 @@ module ProvisionServices
 
       service_products << image_product if image_product
 
+      # Init any addon products (e.g. non-optional image plugins)
+      # 1. If an addon has an associated product, and it's optional + present in the addons array,
+      #    then we'll create a subscription for it. (User will be charged).
+      # 2. If an addon is not optional, and has a product assigned to it, then the user will
+      #    be charged for it, regardless of it's presence in the array.
+      image.container_image_plugins.active.each do |i|
+        next if i.product.nil?
+        next unless data[:addons].include?(i.id.to_s) || !i.is_optional
+        service_products << i.product
+      end
+
       bw = Product.lookup(project_user.billing_plan, 'bandwidth')
       if bw.nil?
         errors << "Missing bandwidth product in billing plan."
@@ -540,6 +555,7 @@ module ProvisionServices
           errors << "Failed to create subscription product for: #{p.id}"
         end
       end
+
       unless errors.empty?
         subscription.destroy
         self.subscription = nil
@@ -548,6 +564,7 @@ module ProvisionServices
       true
     end
 
+    # @return [Boolean]
     def init_service!
       service_name = NamesGenerator.name(project.id)
       self.container_service = project.services.new(
@@ -569,6 +586,34 @@ module ProvisionServices
       true
     end
 
+    ##
+    # Create image plugin
+    #
+    # Regardless of active/available state, we still create the plugin
+    # so that we can activate it later.
+    #
+    # @return [Boolean]
+    def init_service_plugins!
+      image.container_image_plugins.each do |i|
+        plugin_active = if data[:addons].include?(i.id)
+                          true
+                        else
+                          i.is_optional ? false : true
+                        end
+        p = container_service.service_plugins.new(
+          container_image_plugin: i,
+          active: plugin_active,
+          is_optional: i.is_optional
+        )
+        unless p.save
+          errors << "Error saving plugin #{i.name} | #{p.errors.full_messages.join(", ")}"
+          return false
+        end
+      end
+      true
+    end
+
+    # @return [Boolean]
     def init_private_lbs!
       lb_job = ProvisionServices::IngressControllerProvisioner.new(container_service, event)
       unless lb_job.perform

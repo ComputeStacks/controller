@@ -49,7 +49,8 @@ class ProcessAppEventWorker
         i.fire_app_alert_with_data!(subject, description, labels)
       end
     end
-
+  rescue ActiveRecord::RecordNotFound
+    return
   rescue => e
     ExceptionAlertService.new(e, '02165035182a4b82').perform
   end

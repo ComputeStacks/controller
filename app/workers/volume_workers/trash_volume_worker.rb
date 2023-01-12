@@ -45,6 +45,8 @@ module VolumeWorkers
       end
 
       VolumeServices::TrashVolumeService.new(volume, event).perform
+    rescue ActiveRecord::RecordNotFound
+      return
     rescue Docker::Error::ConflictError
       # volume is in use
       if defined?(event) && event

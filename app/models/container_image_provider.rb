@@ -27,6 +27,7 @@ class ContainerImageProvider < ApplicationRecord
   scope :sorted, -> { order( Arel.sql("lower(name)") )}
 
   has_many :container_images, dependent: :restrict_with_error
+  has_many :image_variants, through: :container_images
   belongs_to :container_registry, optional: true
   has_one :user, through: :container_registry
 

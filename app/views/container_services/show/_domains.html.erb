@@ -24,7 +24,7 @@
     <% service.domains.each do |i| %>
       <tr>
         <td>
-          <%= i.system_domain ? link_to(i.domain, "#{i.force_ssl? ? 'https' : 'http'}://#{i.domain}", target: '_blank') : link_to(i.domain, "/container_domains/#{i.id}/edit") %>
+          <%= link_to i.domain, "#{i.force_ssl? ? 'https' : 'http'}://#{i.domain}", target: '_blank' %>
           <%= domain_le_badge i %>
         </td>
         <td>

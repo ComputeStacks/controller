@@ -29,12 +29,16 @@
 #
 # @!attribute val_default
 #   @return [Decimal]
-##
+#
 # @!attribute prorate
 #   For non-hourly resources, you can optionally choose to enable prorata billing
 #   when a user upgrades/downgrades, or cancels a resource.
 #   NOTE: New subscriptions are _always_ prorated to the first of the month.
 #   @return [Boolean]
+#
+# @!attribute bill_per
+#   Options are `service` and `container`.
+#   @return [String]
 #
 class BillingResource < ApplicationRecord
 
@@ -58,9 +62,18 @@ class BillingResource < ApplicationRecord
   has_one :package, through: :product
 
   validates :product_id, presence: true
+  validates :bill_per, presence: true, inclusion: { in: %w(service container) }
 
   attr_accessor :skip_default_phase
   after_create :create_default_phase, unless: :skip_default_phase
+
+  def bill_per_service?
+    bill_per == 'service'
+  end
+
+  def bill_per_container?
+    bill_per == 'container'
+  end
 
   # @return [Boolean]
   def billed_hourly?

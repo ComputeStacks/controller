@@ -31,7 +31,7 @@
     <div class="col-sm-12">
       <div class="form-group">
         <label>Product</label>
-        <%= collection_select(:subscription_product, :product_id, @products, :id, :label, {}, { class: 'form-control chosen-select-standard' }) %>
+        <%= collection_select(:subscription_product, :product_id, @products, :id, :label_with_kind, {}, { class: 'form-control chosen-select-standard' }) %>
       </div>
     </div>
   </div>

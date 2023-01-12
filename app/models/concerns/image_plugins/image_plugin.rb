@@ -23,7 +23,7 @@ module ImagePlugins
         errors.add(:base, "Unknown plugin")
         return
       end
-      unless p.available?
+      unless p.active
         errors.add(:base, "Invalid Plugin")
         return
       end
@@ -43,7 +43,7 @@ module ImagePlugins
         errors.add(:base, "unknown plugin #{add_plugin_id}")
         return
       end
-      unless plugin.available?
+      unless plugin.active
         errors.add(:base, "plugin unavailable")
         return
       end
@@ -52,6 +52,7 @@ module ImagePlugins
         return
       end
       return if container_image_plugins.exists?(plugin.id)
+
       container_image_plugins << plugin
     end
 

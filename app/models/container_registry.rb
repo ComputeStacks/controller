@@ -107,9 +107,8 @@ class ContainerRegistry < ApplicationRecord
   #   }
   # ]
   def repositories
-    return mock_repositories unless Rails.env.production?
+    return mock_repositories if Rails.env.test?
     images = []
-    base_url = "#{Setting.registry_base_url}:#{self.port}"
     return [] if registry_client.nil? # Means the client could not connect or authenticate with the registry
     begin
       client_images = registry_client.images
@@ -135,7 +134,8 @@ class ContainerRegistry < ApplicationRecord
       image = {image: i.image_name, tags: []}
       i.tags['tags'].each do |tag|
         container = nil
-        container_check = container_image_provider.container_images.find_by(registry_image_path: i.image_name, registry_image_tag: tag)
+        container_check = container_image_provider.container_images.where("container_images.registry_image_path = ? AND container_image_image_variants.registry_image_tag = ?", i.image_name, tag).joins(:image_variants)
+        container_check = container_check.first
         unless container_check.nil?
           container = {
             id: container_check.id,
@@ -155,15 +155,15 @@ class ContainerRegistry < ApplicationRecord
   ## Building and deploying docker registry on physical host #####################################################################
 
   def deploy!
-    return mock_deploy! unless Rails.env.production?
-    self.update_column :status, 'deploying'
+    return mock_deploy! if Rails.env.test?
+    update status: 'deploying'
     container = docker_client
     if container.created?
-      self.update_column :status, 'deployed'
+      update status: 'deployed'
       return true
     end
-    if self.name.blank? # Extra safety around blank paths..
-      self.update_column(:status, 'error')
+    if name.blank? # Extra safety around blank paths..
+      update status: 'error'
       return false
     end
     container.client.exec!("mkdir -p /computestacks-mnt/#{self.name}/{auth,data}")
@@ -184,7 +184,7 @@ class ContainerRegistry < ApplicationRecord
       },
       event_code: '38db2d60875dcdf7'
     )
-    self.update_column :status, 'error'
+    update_column :status, 'error'
   end
 
   # TODO: Look at adding 'REGISTRY_HTTP_SECRET'
@@ -263,6 +263,7 @@ class ContainerRegistry < ApplicationRecord
       username: 'admin',
       password: registry_password
     })
+    c.insecure_ssl = true unless Rails.env.production?
     DockerRegistry::Repo.new(c)
   rescue => e
     ExceptionAlertService.new(e, 'eb77377c9ad9bcca').perform
@@ -283,15 +284,11 @@ class ContainerRegistry < ApplicationRecord
 
   def set_port!
     ports_in_use = ContainerRegistry.all.pluck(:port)
-    if Rails.env.production?
-      p = 25000 # Temporary. Should eventually move back to 10,000.
-    else
-      p = 40000
-    end
-    while (ports_in_use.include?(p) && p < 50000) do
+    p = Rails.env.production? ? 25000 : 45000
+    while ports_in_use.include?(p) && p < 50000 do
       p += 1
     end
-    p > 49999 ? false : self.update_attribute(:port, p)
+    p > 49999 ? false : update(port: p)
   end
 
   def content_variables

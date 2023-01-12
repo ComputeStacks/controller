@@ -37,7 +37,7 @@ class ContainerServices::ResizeServiceController < ContainerServices::BaseContro
           local_disk: @service.package.local_disk
         },
         to: {
-          product: package.product&.label,
+          product: product.label,
           cpu: package.cpu.to_f,
           memory: package.memory,
           storage: package.storage,
@@ -46,7 +46,7 @@ class ContainerServices::ResizeServiceController < ContainerServices::BaseContro
         }
     }.to_yaml
     container_count = @service.containers.count
-    event = @service.event_logs.create(
+    event = @service.event_logs.create!(
         locale: (container_count.abs == 1 ? 'service.resizing_1' : 'service.resizing'),
         locale_keys: {
             'label' => @service.label,
@@ -56,7 +56,7 @@ class ContainerServices::ResizeServiceController < ContainerServices::BaseContro
         audit: audit,
         event_code: 'c2cf0eb058aeff2a'
     )
-    event.deployments << @service.deployment if @service.deployment
+    event.deployments << @service.deployment
     event.event_details.create!(data: raw_msg, event_code: 'c2cf0eb058aeff2a')
     ContainerServiceWorkers::ResizeServiceWorker.perform_async @service.to_global_id.to_s, event.to_global_id.to_s, package.to_global_id.to_s
     redirect_to container_service_path(@service), notice: I18n.t('container_services.controller.resize.queued')

@@ -1,9 +1,11 @@
 - content_for :title, @billing_plan.name
 - content_for :breadcrumb do
   .row.has-breadcrumb
-    ol.breadcrumb
+    ol.breadcrumb.pull-left style="padding-top:10px;"
       li= link_to 'Billing Plans', "/admin/billing_plans"
       li.active= @billing_plan.name
+    ol.breadcrumb.breadcrumb-action.text-right
+      li=link_to "#{icon('fa-solid', 'copy')} Clone".html_safe, "/admin/billing_plans/new?clone=#{@billing_plan.id}", title: 'Clone Billing Plan', class: 'btn btn-sm btn-default'
 
 .row
   .col-lg-8.col-xs-6: p.lead= @billing_plan.name
@@ -25,11 +27,30 @@
     br
     = link_to raw("<i class='fa fa-shopping-basket'></i> Add Product"), "/admin/billing_plans/#{@billing_plan.id}/billing_resources/new", class: 'btn btn-default'
 
+- unless @packages.empty?
+  .row: .col-xs-12: p: strong PACKAGES
+  .row
+    - @packages.each do |resource|
+      = render partial: "admin/billing_plans/billing_resources/item", locals: { resource: resource, base_url: @base_url }
+  hr
 
-.row
-  - @packages.each do |resource|
-    = render partial: "admin/billing_plans/billing_resources/item", locals: { resource: resource, base_url: @base_url }
-hr
-.row
-  - @products.each do |resource|
-    = render partial: "admin/billing_plans/billing_resources/item", locals: { resource: resource, base_url: @base_url }
+- unless @images.empty?
+  .row: .col-xs-12: p: strong IMAGES PRODUCTS
+  .row
+    - @images.each do |resource|
+      = render partial: "admin/billing_plans/billing_resources/item", locals: { resource: resource, base_url: @base_url }
+  hr
+
+- unless @addons.empty?
+  .row: .col-xs-12: p: strong ADDON PRODUCTS
+  .row
+    - @addons.each do |resource|
+      = render partial: "admin/billing_plans/billing_resources/item", locals: { resource: resource, base_url: @base_url }
+  hr
+
+- unless @resources.empty?
+  .row: .col-xs-12: p: strong RESOURCES
+  .row
+    - @resources.each do |resource|
+      = render partial: "admin/billing_plans/billing_resources/item", locals: { resource: resource, base_url: @base_url }
+  hr

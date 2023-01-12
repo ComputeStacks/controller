@@ -1,0 +1,60 @@
+<% content_for :title, "Plugin #{@plugin.name}" %>
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb pull-left" style="padding-top:10px;">
+      <li><%= link_to 'Image Plugins', admin_container_image_plugins_path %></li>
+      <li class="active"><%= @plugin.name %></li>
+    </ol>
+    <ol class="breadcrumb breadcrumb-action text-right">
+      <li><%= link_to icon('fa-regular', 'wrench'), edit_admin_container_image_plugin_path(@plugin), class: "btn btn-sm btn-default" %></li>
+      <li><%= link_to icon('fa-regular', 'trash'), admin_container_image_plugin_path(@plugin), method: :delete, data: { confirm: t('confirm_prompt') }, class: "btn btn-sm btn-danger" %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12">
+
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <p><strong><%= @plugin.name.titleize.upcase %></strong></p>
+        <div class="row">
+          <div class="col-sm-6">
+            <ul class="list-unstyled">
+              <li>
+                ACTIVE<br>
+                <strong><%= @plugin.available? %></strong>
+              </li>
+              <li>
+                PRODUCT<br>
+                <%= @plugin.product.nil? ? '...' : link_to(@plugin.product.label, admin_product_path(@plugin.product)) %>
+              </li>
+            </ul>
+          </div>
+          <div class="col-sm-6">
+            <ul class="list-unstyled">
+              <li>
+                OPTIONAL<br>
+                <strong><%= @plugin.is_optional ? t('common.yes') : t('common.no') %></strong>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <p><strong>Images using this plugin</strong></p>
+
+        <div class="row">
+          <% @plugin.container_images.each do |image| %>
+            <div class="col-md-2 col-sm-4 col-xs-6"><%= link_to image.label, admin_container_image_path(image) %></div>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

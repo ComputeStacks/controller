@@ -1,0 +1,57 @@
+<div class="panel-body">
+
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= label_tag :external_id, "External ID" %>
+        <%= f.text_field :external_id, class: "form-control" %>
+        <span class="help-block">Reference for external billing system.</span>
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= label_tag :prorate, "Prorate on cancellation?" %>
+        <%= f.check_box :prorate, class: "form-control" %>
+        <span class="help-block">
+          When cancelling, or during an upgrade/downgrade, should we credit unused usage?
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= label_tag :product_id, "Product" %>
+        <% if available_products(@billing_plan, @billing_resource.product).empty? %>
+          <p><em>Error! No products available.</em></p>
+        <% else %>
+          <%= collection_select(:billing_resource, :product_id, available_products(@billing_plan, @billing_resource.product), :id, :label, {}, { class: 'form-control chosen-select-standard' }) %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="col-sm-3">
+      <div class="form-group">
+        <%= f.radio_button :bill_per, 'service' %><label><strong>Bill Per Service</strong></label><br />
+        <p>A single unit will be evenly divided across all container subscriptions within a service.</p>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <%= f.radio_button :bill_per, 'container' %><label><strong>Bill Per Container</strong></label><br />
+        <p>Each container within a service will incur the cost of a single unit.</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="panel-footer">
+  <%= link_to t('actions.cancel'), @plan_base_url, class: 'btn btn-default', style: 'margin-right:10px;' %>
+  <%= submit_tag t('actions.save'), class: 'btn btn-success' %>
+  <%= link_to "Delete", "#{@plan_base_url}/billing_resources/#{@billing_resource.id}", method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-danger pull-right' if controller.action_name == 'edit' %>
+</div>

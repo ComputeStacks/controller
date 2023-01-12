@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_11_08_184000) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_20_201157) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -147,6 +147,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_08_184000) do
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.boolean "prorate", default: false, null: false
+    t.string "bill_per", default: "service", null: false
     t.index ["billing_plan_id"], name: "index_billing_resources_on_billing_plan_id"
     t.index ["product_id"], name: "index_billing_resources_on_product_id"
   end
@@ -286,8 +287,11 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_08_184000) do
     t.boolean "active", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "product_id"
+    t.boolean "is_optional", default: false, null: false
     t.index ["active"], name: "index_container_image_plugins_on_active"
     t.index ["name"], name: "index_container_image_plugins_on_name", unique: true
+    t.index ["product_id"], name: "index_container_image_plugins_on_product_id"
   end
 
   create_table "container_image_plugins_images", id: false, force: :cascade do |t|
@@ -504,6 +508,17 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_08_184000) do
     t.datetime "updated_at", precision: nil, null: false
     t.bigint "service_id"
     t.bigint "service_resource_id"
+  end
+
+  create_table "deployment_container_service_service_plugins", force: :cascade do |t|
+    t.bigint "deployment_container_service_id"
+    t.integer "container_image_plugin_id"
+    t.boolean "active"
+    t.boolean "is_optional"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["container_image_plugin_id"], name: "dcssp_cip_id_index"
+    t.index ["deployment_container_service_id"], name: "dcssp_dcs_id_index"
   end
 
   create_table "deployment_container_services", force: :cascade do |t|

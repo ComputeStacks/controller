@@ -35,7 +35,7 @@
         <div class="row">
           <hr>
           <div class="col-md-12">
-            <%= render partial: 'orders/containers/package_price_table', locals: { region: region, product: package.product, phases: package.product.price_phases(project_owner, region) } %>
+            <%= render partial: 'orders/containers/package_price_table', locals: { phases: package.product.price_phases(project_owner, region) } %>
           </div>
         </div>
       <% end %>

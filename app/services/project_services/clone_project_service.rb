@@ -51,6 +51,8 @@ module ProjectServices
       end
       self.order_session = OrderSession.new user, nil
       order_session.skip_dep = true
+      order_session.region = project.region
+      order_session.location = project.region.location
 
       project.services.each do |i|
         vols = []

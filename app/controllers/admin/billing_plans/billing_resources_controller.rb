@@ -42,7 +42,10 @@ class Admin::BillingPlans::BillingResourcesController < Admin::BillingPlans::App
   private
 
   def resource_params
-    params.require(:billing_resource).permit(:product_id, :prorate, :external_id, :val_min, :val_max, :val_default, :val_step, {template_ids: []})
+    params.require(:billing_resource).permit(
+      :product_id, :prorate, :external_id, :bill_per,
+      :val_min, :val_max, :val_default, :val_step, {template_ids: []}
+    )
   end
 
   def load_resource

@@ -30,6 +30,8 @@ module ProjectWorkers
         event.fail! 'Error Selecting Containers'
       end
       event.done! if event.running?
+    rescue ActiveRecord::RecordNotFound
+      return
     rescue => e
       user = nil
       if defined?(event) && event

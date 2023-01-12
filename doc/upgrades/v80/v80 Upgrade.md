@@ -29,19 +29,27 @@ sed -i 's/$CS_REG ash/$CS_REG bash/g' /usr/local/bin/cstacks
 Ensure you have the latest version of our backup agents:
 
 ```bash
-docker pull cmptstks/ssh:v2
-docker pull cmptstks/borg:stable
-docker pull cmptstks/mariadb-backup:10.1
-docker pull cmptstks/mariadb-backup:10.2
-docker pull cmptstks/mariadb-backup:10.3
-docker pull cmptstks/mariadb-backup:10.4
-docker pull cmptstks/mariadb-backup:10.5
-docker pull cmptstks/mariadb-backup:10.6
-docker pull cmptstks/mariadb-backup:10.7
-docker pull cmptstks/mariadb-backup:10.8
-docker pull cmptstks/mariadb-backup:10.9
-docker pull cmptstks/xtrabackup:2.4
-docker pull cmptstks/xtrabackup:8.0
+docker pull ghcr.io/computestacks/cs-docker-bastion:v2
+docker pull ghcr.io/computestacks/cs-docker-borg:latest
+docker pull ghcr.io/computestacks/cs-docker-xtrabackup:2.4
+docker pull ghcr.io/computestacks/cs-docker-xtrabackup:8.0
+```
+
+### Remove unused backup images
+
+```bash
+docker rmi cmptstks/borg:stable
+docker rmi cmptstks/xtrabackup:8.0
+docker rmi cmptstks/xtrabackup:2.4
+docker rmi cmptstks/mariadb-backup:10.1
+docker rmi cmptstks/mariadb-backup:10.2
+docker rmi cmptstks/mariadb-backup:10.3
+docker rmi cmptstks/mariadb-backup:10.4
+docker rmi cmptstks/mariadb-backup:10.5
+docker rmi cmptstks/mariadb-backup:10.6
+docker rmi cmptstks/mariadb-backup:10.7
+docker rmi cmptstks/mariadb-backup:10.8
+docker rmi cmptstks/mariadb-backup:10.9
 ```
 
 ### Add the following to the agent config
@@ -62,8 +70,9 @@ LimitNOFILE=infinity
 ### Download and update the agent binary
 
 ```bash
-systemctl stop cs-agent
 cd /tmp && wget https://f.cscdn.cc/file/cstackscdn/packages/cs-agent/cs-agent.tar.gz
+systemctl stop cs-agent
+chmod +w /etc/computestacks/agent.yml && sed -i 's/cmptstks\/borg:stable/ghcr.io\/computestacks\/cs-docker-borg:latest/g' /etc/computestacks/agent.yml
 tar -xzvf cs-agent.tar.gz
 rm -f /usr/local/bin/cs-agent
 mv cs-agent /usr/local/bin/
@@ -100,3 +109,5 @@ sysctl fs.aio-max-nr=2097152
 ```
 
 Be sure to persist the changes in: `/etc/sysctld.d/99-sysctl.conf`
+
+Check current kernel status with: `slabtop`

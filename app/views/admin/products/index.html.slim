@@ -61,21 +61,41 @@
               = link_to raw('<i class="fa fa-trash"></i>'), "/admin/products/#{i.id}", method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm'
 
 
-hr
-.row: .col-md-12: div: h4 Other Products
-
-.row: .col-md-12: table#products-table.table
-  thead
-    tr
-      th Name
-      th Resource
-      th
-  tbody
-    - @products.each do |i|
+- unless @addons.empty?
+  hr
+  .row: .col-md-12: div: h4 Addons
+  .row: .col-md-12: table#addons-table.table
+    thead
       tr
-        td= i.label
-        td= i.resource_kind.nil? ? '' : i.resource_kind.capitalize
-        td.text-right
-          .btn-group
-            = link_to raw('<i class="fa fa-wrench"></i>'), "/admin/products/#{i.id}", class: 'btn btn-default btn-sm'
-            = link_to raw('<i class="fa fa-trash"></i>'), "/admin/products/#{i.id}", method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm'
+        th Name
+        th Associated Plugins
+        th
+    tbody
+      - @addons.each do |i|
+        tr
+          td= i.label.titleize
+          td= product_addon_plugin_links i
+          td.text-right
+            .btn-group
+              = link_to raw('<i class="fa fa-wrench"></i>'), "/admin/products/#{i.id}", class: 'btn btn-default btn-sm'
+              = link_to raw('<i class="fa fa-trash"></i>'), "/admin/products/#{i.id}", method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm'
+
+- unless @resources.empty?
+  hr
+  .row: .col-md-12: div: h4 Resources
+
+  .row: .col-md-12: table#resources-table.table
+    thead
+      tr
+        th Name
+        th Resource
+        th
+    tbody
+      - @resources.each do |i|
+        tr
+          td= i.label
+          td= i.resource_kind.nil? ? '' : i.resource_kind.titleize
+          td.text-right
+            .btn-group
+              = link_to raw('<i class="fa fa-wrench"></i>'), "/admin/products/#{i.id}", class: 'btn btn-default btn-sm'
+              = link_to raw('<i class="fa fa-trash"></i>'), "/admin/products/#{i.id}", method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm'

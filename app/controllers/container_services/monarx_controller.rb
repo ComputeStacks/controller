@@ -16,7 +16,7 @@ class ContainerServices::MonarxController < ContainerServices::BaseController
   private
 
   def ensure_monarx_available
-    unless @service.monarx_available?
+    unless @service.plugin_available?(:monarx)
       redirect_to "/container_services/#{@service.id}", alert: "Monarx not available."
       return false
     end

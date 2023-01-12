@@ -1,0 +1,29 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Products", "/admin/products" %></li>
+      <li class="active">Edit <%= @product.label %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @product.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <p class="lead">Edit <%= @product.label %></p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="<%= @product.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @product, url: admin_product_path(@product) do |f| %>
+      <%= render partial: "admin/products/form", locals: { f: f } %>
+      <div class="panel panel-default">
+        <div class="panel-footer">
+          <%= link_to t('actions.cancel'), admin_products_path, class: 'btn btn-default', style: 'margin-right:10px;' %>
+          <%= submit_tag t('actions.update'), class: 'btn btn-success pull-right' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <%= render partial: 'application/model_errors', locals: { errors: @product.errors, obj: 'product' } unless @product.errors.count.zero? %>
+</div>

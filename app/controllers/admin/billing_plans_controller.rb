@@ -19,7 +19,9 @@ class Admin::BillingPlansController < Admin::ApplicationController
 
   def show
     @packages = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%Q(products.kind = 'package'))).order( Arel.sql(%Q(lower(products.label))) )
-    @products = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%Q(products.kind != 'package'))).order( Arel.sql(%Q(lower(products.label))) )
+    @images = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%Q(products.kind = 'image'))).order( Arel.sql(%Q(lower(products.label))) )
+    @addons = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%Q(products.kind = 'addon'))).order( Arel.sql(%Q(lower(products.label))) )
+    @resources = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%Q(products.kind = 'resource'))).order( Arel.sql(%Q(lower(products.label))) )
   end
 
   def edit

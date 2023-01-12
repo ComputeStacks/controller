@@ -19,11 +19,28 @@ module NodeWorkers
       ##
       # Pull latest images
       ContainerImage.is_public.each do |image|
-        begin
-          NodeServices::PullImageService.new(node, image).perform
-        rescue
-         next
+        image.image_variants.each do |variant|
+          begin
+            NodeServices::PullImageService.new(node, variant).perform
+          rescue
+            next
+          end
         end
+      end
+
+      ##
+      # Update System Images
+      images = %W(
+        #{Deployment::Sftp.new.image}
+        ghcr.io/computestacks/cs-docker-xtrabackup:2.4
+        ghcr.io/computestacks/cs-docker-xtrabackup:8.0
+        ghcr.io/computestacks/cs-docker-borg:latest
+      )
+
+      images.each do |image|
+        i = NodeServices::PullImageService.new node
+        i.raw_image = image
+        i.perform
       end
 
       ##
@@ -46,6 +63,7 @@ module NodeWorkers
           event_code: '75eaa84677838cf7'
         )
       end
+
     rescue Docker::Error::TimeoutError
       NodeWorkers::UpdateImageWorker.perform_in(10.minutes, node.id)
     rescue => e

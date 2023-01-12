@@ -1,0 +1,58 @@
+<% content_for :title, "Image Plugins" %>
+<%= render partial: 'admin/layouts/shared/images_nav' %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <p class="lead">
+      Image Plugins
+    </p>
+  </div>
+</div>
+
+<% if @plugins.empty? %>
+  <div class="row">
+    <div class="col-xs-12 text-center">
+      <p class="lead">No Plugins Found</p>
+    </div>
+  </div>
+<% end %>
+<div class="row">
+  <div class="col-xs-12">
+    <div class="panel panel-default">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Product</th>
+          <th>Optional</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <% if @plugins.empty? %>
+          <tr>
+            <td colspan="4" class="text-center">No Plugins Found</td>
+          </tr>
+        <% end %>
+        <% @plugins.each do |i| %>
+          <tr>
+            <td>
+              <%= link_to i.name.titleize, admin_container_image_plugin_path(i) %>
+              <%= tag.label("Inactive", class: "label label-warning") unless i.active %>
+            </td>
+            <td><%= image_plugin_product_link i %></td>
+            <td><%= i.is_optional ? t('common.yes') : t('common.no') %></td>
+            <td class="text-right">
+              <div class="btn-group">
+                <%= link_to icon('fa-regular', 'cog'), admin_container_image_plugin_path(i), class: 'btn btn-sm btn-default' %>
+                <%= link_to icon('fa-regular', 'wrench'), edit_admin_container_image_plugin_path(i), class: 'btn btn-sm btn-default' %>
+                <%= link_to icon('fa-regular', 'trash'), admin_container_image_plugin_path(i), class: 'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm_prompt') } %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

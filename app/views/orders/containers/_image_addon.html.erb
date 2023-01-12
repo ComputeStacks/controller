@@ -1,0 +1,55 @@
+<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+  <div class="panel panel-primary">
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-xs-12 text-center">
+          <h6>
+            <%= addon.name %>
+          </h6>
+        </div>
+      </div>
+      <div class="row">
+        <hr>
+        <div class="col-xs-12 text-center">
+          <p>Some description</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 text-center">
+          <div class="checkbox-inline">
+            <label>
+              <input type="checkbox" name="addons[<%= container[:image_variant_id] %>][]" value="<%= addon.id %>" />
+              Choose
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+#
+<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="border-right:1px solid #e4e6e6;">
+  <div class="panel panel-primary">
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-xs-12 text-center">
+          <h5>
+            <%= addon.name %>
+          </h5>
+          <span style="color:black;">$0.00</span>
+        </div>
+      </div>
+      <% if !order_image_product(container).price_phases(project_owner, region)[:trial].empty? || !order_image_product(container).price_phases(project_owner, region)[:discount].empty? %>
+        <div class="row">
+          <hr>
+          <div class="col-md-12">
+            <%= render partial: 'orders/containers/package_price_table', locals: { container: container, region: region, product: order_image_product(container), phases: order_image_product(container).price_phases(project_owner, @region) } %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="panel-footer">
+      <%= button_tag 'CHOOSE', type: 'button', class: 'btn btn-default btn-block container-package-selection', data: {package_id: package.product_id, i: container[:image_variant_id], choose: I18n.t('actions.choose'), selected: I18n.t('actions.selected')}, id: "cpackage-btn-#{container[:image_variant_id]}-#{package.product_id}" %>
+    </div>
+  </div>
+</div>

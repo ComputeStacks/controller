@@ -19,7 +19,7 @@ namespace :containers do
         category:               "web",
         can_scale:                true,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/wordpress",
+        registry_image_path:      "ghcr.io/computestacks/cs-docker-wordpress",
         min_cpu:                  1,
         min_memory:               512,
         labels:                   {

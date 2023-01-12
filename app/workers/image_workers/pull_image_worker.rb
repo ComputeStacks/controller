@@ -15,6 +15,8 @@ module ImageWorkers
       elsif obj.is_a?(ContainerImage::ImageVariant)
         perform_pull node_id, obj
       end
+    rescue ActiveRecord::RecordNotFound
+      return
     end
 
     private

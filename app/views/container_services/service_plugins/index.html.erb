@@ -1,0 +1,110 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to 'Projects', "/deployments" %></li>
+      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+      <li><%= link_to @service.label, container_service_path(@service) %></li>
+      <li class="active">Modify Service Addons</li>
+    </ol>
+  </div>
+<% end %>
+
+<% unless @service.errors.empty? %>
+  <div class="row">
+    <div class="col-xs-12">
+      <strong><%= "#{pluralize(@service.errors.count, "error")} prevented this update from being saved:" %></strong>
+      <ul class="list-unstyled">
+        <% @service.errors.full_messages.each do |msg| %>
+          <li style="color: red;"><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+    <hr>
+  </div>
+<% end %>
+
+<%= form_tag "#{container_service_path(@service)}/service_plugins", method: :post do %>
+  <div class="row">
+    <div class="col-xs-12">
+      <%= link_to t('actions.cancel'), container_service_path(@service), class: 'btn btn-sm btn-default pull-right' %>
+      <small>MODIFY SERVICE ADDONS</small>
+      <h4 style="margin-top:0px;"><%= @service.label %></h4>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <hr/>
+    </div>
+  </div>
+
+  <div class="row">
+    <% if @available_plugins.empty? %>
+      <div class="col-xs-12"><div class="text-center"><p class="lead">No available plugins</p></div></div>
+    <% end %>
+    <% @available_plugins.each do |i| %>
+      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+        <div class="panel panel-default">
+          <div class="panel-body">
+
+            <div class="row">
+
+              <div class="col-xs-12 text-center">
+                <h5><%= i.label %></h5>
+
+                <span style="color:black;">
+                  <%= display_current_price @service.region, i.product %>
+                </span>
+
+              </div>
+            </div>
+
+            <% if i.product && (!i.product.price_phases(@service.user, @service.region)[:trial].empty? || !i.product.price_phases(@service.user, @service.region)[:discount].empty?) %>
+              <div class="row">
+                <hr>
+                <div class="col-md-12">
+                  <%= render partial: 'orders/containers/package_price_table', locals: { phases: i.product.price_phases(@service.user, @service.region) } %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <div class="panel-footer">
+            <%=
+              button_tag 'SELECT',
+                         type: 'button',
+                         class: 'btn btn-default btn-block container-addon-selection',
+                         data: {
+                           addon: i.id,
+                           i: 0,
+                           choose: 'SELECT',
+                           selected: I18n.t('actions.selected')
+                         },
+                         id: "cs-addon-btn-0-#{i.id}"
+            %>
+            <input
+              style="display:none;"
+              type="checkbox"
+              class="container-addon-checkbox"
+              id="addon-checkbox-0-<%= i.id %>"
+              data-index="0"
+              name="new_plugin_list[]"
+              value="<%= i.id %>"
+              <% if @service.service_plugins.active.pluck(:id).include?(i.id) %>checked="checked"<% end %>
+            />
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <hr/>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <%= submit_tag t('actions.save'), class: 'btn btn-success btn-block' %>
+    </div>
+  </div>
+<% end %>

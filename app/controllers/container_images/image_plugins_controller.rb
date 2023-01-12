@@ -3,6 +3,7 @@ class ContainerImages::ImagePluginsController < ContainerImages::BaseController
 
   before_action :find_available_plugins, only: %i[new create]
   before_action :ensure_available_plugins, only: :new
+  before_action :authorize_action, only: %i[new create destroy]
 
   def index
     @plugins = ContainerImagePlugin.active
@@ -25,6 +26,13 @@ class ContainerImages::ImagePluginsController < ContainerImages::BaseController
   end
 
   private
+
+  def authorize_action
+    unless current_user.is_admin
+      redirect_to "/admin/container_images", alert: "permission denied"
+      return false
+    end
+  end
 
   def find_available_plugins
     @plugins = ContainerImagePlugin.active.select do |i|

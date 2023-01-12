@@ -8,6 +8,8 @@ module LoadBalancerWorkers
       load_balancers.each do |lb|
         LoadBalancerServices::UpdateBalancerService.new(lb).perform
       end
+    rescue ActiveRecord::RecordNotFound
+      return
     rescue DockerSSH::ConnectionFailed => e
       SystemEvent.create!(
         message: "LoadBalancer Config Failure",

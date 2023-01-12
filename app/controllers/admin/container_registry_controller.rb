@@ -27,7 +27,7 @@ class Admin::ContainerRegistryController < Admin::ApplicationController
     @registry = ContainerRegistry.new(registry_params)
     @registry.current_user = current_user
     if @registry.save
-      @registry.delay(retry: false).deploy!
+      RegistryWorkers::ProvisionRegistryWorker.perform_async @registry.id
       redirect_to "/admin/container_registry/#{@registry.id}", success: t('container_registry.created')
     else
       render action: :new

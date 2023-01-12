@@ -45,6 +45,7 @@ class OrderSession
     #    min_cpu: Float,
     #    min_mem: Integer,
     #    qty: Integer,
+    #    addons: []Integer,  # List of Addon IDs (ContainerImageProduct)
     #    params: {
     #      String: {
     #        type: String,
@@ -143,6 +144,7 @@ class OrderSession
         free: i.container_image.is_free ? 'yes' : 'no',
         min_cpu: i.container_image.min_cpu,
         min_mem: i.container_image.min_memory,
+        addons: [],  # List of Addon IDs (ContainerImageProduct)
         qty: 1,
         collection_id: collection_id
       }
@@ -210,6 +212,10 @@ class OrderSession
     images.detect { |i| i[:image_id] == image_id.to_i }
   end
 
+  def image_addon_selected?(image_id, addon_id)
+    images.detect { |i| i[:image_id] == image_id.to_i && i[:addons].include?(addon_id) }
+  end
+
   # For displaying selected image on order form
   def order_image_selected?(image_id)
     return false unless image_selected?(image_id)
@@ -252,6 +258,7 @@ class OrderSession
       project_name: project&.name,
       skip_ssh: skip_ssh,
       location_id: location&.id,
+      region_id: region&.id,
       containers: []
     }
 
@@ -265,7 +272,8 @@ class OrderSession
         source: image[:source], # Deployment::ContainerService.csrn
         params: [],
         volumes: image[:volumes],
-        resources: {}
+        resources: {},
+        addons: image[:addons]
       }
       c[:qty] = image[:qty].to_i.zero? ? 1 : image[:qty].to_i
       c[:resources][:product_id] = image[:package_id] if image[:package_id]

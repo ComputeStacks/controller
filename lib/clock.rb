@@ -67,7 +67,6 @@ module Clockwork
 
   every(1.day, 'nodes.daily_maintenance', at: '01:10') do
     NodeWorkers::UpdateImageWorker.perform_async
-    ImageWorkers::UpdateSshImageWorker.perform_async
   end
 
   every(1.day, 'system.cleanup', at: '03:10') do

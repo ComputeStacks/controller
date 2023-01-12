@@ -4,7 +4,7 @@
   </div>
 <% else %>
 
-  <% if @service.monarx_available? %>
+  <% if @service.plugin_available?(:monarx) %>
     <div class="btn-group" style="margin-right:15px;">
       <%= render partial: "container_services/monarx/button", locals: { service: @service } %>
     </div>
@@ -47,6 +47,9 @@
       </li>
       <li>
         <%= link_to %Q(<i class="fa fa-bars"></i> Host Entries).html_safe, "#{@service.id}/host_entries" %>
+      </li>
+      <li>
+        <%= link_to "#{icon('fa-solid', 'cart-flatbed')} Manage Plugins".html_safe, "#{container_service_path(@service)}/service_plugins" %>
       </li>
       <li><%= link_to "<i class='fa fa-wrench'></i> #{t('actions.edit')}".html_safe, "#{container_service_path(@service)}/edit" %></li>
       <li><%= link_to "<i class='fa fa-trash'></i> #{t('actions.destroy')}".html_safe, container_service_path(@service), method: :delete , data: { confirm: t('confirm_prompt') } %></li>

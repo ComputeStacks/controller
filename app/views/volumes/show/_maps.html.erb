@@ -7,7 +7,7 @@
     <% volume.volume_maps.only_services.each do |i| %>
       <tr>
         <td>
-          <%= link_to i.container_service.label, (request.path =~ /admin/ ? admin_container_service_path(i.container_service) : "/container_services/#{i.id}") %>
+          <%= link_to i.container_service.label, (request.path =~ /admin/ ? admin_container_service_path(i.container_service) : container_service_path(i.container_service)) %>
           <% if i.is_owner %>
             <span class="label label-primary">OWNER</span>
           <% end %>

@@ -25,14 +25,19 @@
     </tr>
   </thead>
   <tbody>
+    <% if @containers.empty? %>
+      <tr>
+        <td colspan="7" class="text-center">No containers</td>
+      </tr>
+    <% end %>
     <% @containers.each do |i| %>
       <tr>
-        <td><%= link_to i.name, admin_container_path(i) %></td>
-        <td><%= link_to i.node.label, admin_regions_url(i.node.region) if i.node %></td>
-        <td><%= i.local_ip %></td>
-        <td><%= i.current_state&.capitalize %></td>
-        <td><%= container_stats(i) %></td>
-        <td><%= container_current_disk_usage i %></td>
+        <td style="vertical-align: middle;"><%= link_to i.name, admin_container_path(i) %></td>
+        <td style="vertical-align: middle;"><%= link_to i.node.label, admin_regions_url(i.node.region) if i.node %></td>
+        <td style="vertical-align: middle;"><%= i.local_ip %></td>
+        <td style="vertical-align: middle;"><%= i.current_state&.capitalize %></td>
+        <td style="vertical-align: middle;"><%= container_stats(i) %></td>
+        <td style="vertical-align: middle;"><%= container_current_disk_usage i %></td>
         <td class="text-right"><%= render partial: "admin/containers/shared/power_controls", locals: { container: i } %></td>
       </tr>
     <% end %>

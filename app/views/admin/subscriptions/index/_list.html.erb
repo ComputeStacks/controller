@@ -10,13 +10,18 @@
     </tr>
   </thead>
   <tbody>
+    <% if subscriptions.empty? %>
+      <tr>
+        <td colspan="6" class="text-center">No Subscriptions</td>
+      </tr>
+    <% end %>
     <% subscriptions.each do |i| %>
       <tr>
-        <td><%= link_to i.id, admin_subscription_path(i) %></td>
-        <td><%= i.user.nil? ? '...' : link_to(i.user.full_name, admin_user_path(i.user)) %></td>
-        <td><%= i.linked_obj.nil? ? '...' : link_to(i.linked_obj.name, admin_containers_path(i.linked_obj)) %></td>
-        <td><%= i.active ? 'Active' : 'Inactive' %></td>
-        <td><%= l i.created_at, format: :short %></td>
+        <td style="vertical-align: middle;"><%= link_to i.id, admin_subscription_path(i) %></td>
+        <td style="vertical-align: middle;"><%= i.user.nil? ? '...' : link_to(i.user.full_name, admin_user_path(i.user)) %></td>
+        <td style="vertical-align: middle;"><%= i.linked_obj.nil? ? '...' : link_to(i.linked_obj.name, admin_containers_path(i.linked_obj)) %></td>
+        <td style="vertical-align: middle;"><%= i.active ? 'Active' : 'Inactive' %></td>
+        <td style="vertical-align: middle;"><%= l i.created_at, format: :short %></td>
         <td class="text-right">
           <div class="btn-group">
             <%= link_to icon('fa-solid', 'gear').html_safe, admin_subscription_path(i), class: 'btn btn-sm btn-default' %>

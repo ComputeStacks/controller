@@ -1,0 +1,36 @@
+<div class="row">
+  <div class="col-xs-12">
+    <div class="form-group">
+      <%= f.label :name, 'Name' %>
+      <%= f.text_field :name, class: 'form-control' %>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-6">
+    <div class="form-group">
+      <%= f.label :active, 'Enabled?' %>
+      <%= f.check_box :active, class: 'form-control' %>
+      <% if @plugin.active && !@plugin.available? %>
+        <span class="help-block">Plugin is currently not configured and will not be available.</span>
+      <% end %>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="form-group">
+      <%= f.label :is_optional, 'Optional?' %>
+      <%= f.check_box :is_optional, class: 'form-control' %>
+      <span class="help-block">If true, a user will be able to selectively add this during the order process.</span>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <div class="form-group">
+      <%= f.label :product_id, 'Associate with Product' %>
+      <%= f.select :product_id, @products.collect { |i| [ i.label, i.id ]}, { selected: @plugin.product_id, include_blank: true }, class: 'form-control' %>
+    </div>
+  </div>
+</div>

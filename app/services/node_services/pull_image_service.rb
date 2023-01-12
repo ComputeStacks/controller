@@ -7,6 +7,8 @@ module NodeServices
                   :errors,
                   :raw_image # Useful for pulling system images
 
+    # @param [Node] node
+    # @param [ContainerImage::ImageVariant] image_variant
     def initialize(node, image_variant = nil)
       self.node = node
       self.image_variant = image_variant

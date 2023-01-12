@@ -1,6 +1,0 @@
-.col-sm-4: .panel.panel-body
-  strong= "#{pluralize(@product.errors.count, "error")} prevented this Product from being saved:"
-
-  ul.list-unstyled
-    - @product.errors.full_messages.each do |msg|
-      li style="color: red;"= msg

@@ -86,6 +86,7 @@ en:
       project:
         clone: "[%{project}] Clone Project"
       service:
+        addons: "[%{label}] Updating service addons."
         autoscale: "[%{label}] AutoScaling Service"
         building_1: "[%{label}] Provisioning 1 Container."
         building: "[%{label}] Provisioning %{count} Containers."

@@ -59,4 +59,11 @@ module Deployments::OrderHelper
     image.product
   end
 
+  # Return array of user-selectable plugins
+  def order_addons_for_image(image_id)
+    image = ContainerImage.find_by id: image_id
+    return [] if image.nil?
+    image.container_image_plugins.active.optional
+  end
+
 end

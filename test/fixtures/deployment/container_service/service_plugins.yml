@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  deployment_container_service_id: 
+  container_image_plugin_id: 1
+  active: false
+  is_optional: false
+
+two:
+  deployment_container_service_id: 
+  container_image_plugin_id: 1
+  active: false
+  is_optional: false

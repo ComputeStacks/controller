@@ -6,6 +6,7 @@ module BillingHelper
   # @param [Product] product
   # @type [User] current_user
   def display_current_price(region, product, user = current_user)
+    return I18n.t('common.free') if product.nil?
     current_price = product.price_lookup(user, region)
     final_price = product.price_phases(user, region)[:final].first
     return formatted_product_price(region, product) if current_price == final_price

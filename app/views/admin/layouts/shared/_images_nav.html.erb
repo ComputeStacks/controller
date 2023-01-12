@@ -8,6 +8,9 @@
       <li class="<%= controller.controller_name == 'container_image_collections' ? 'active' : '' %>">
         <%= link_to "Image Collections", admin_container_image_collections_path %>
       </li>
+      <li class="<%= controller.controller_name == 'container_image_plugins' ? 'active' : '' %>">
+        <%= link_to "Image Plugins", admin_container_image_plugins_path %>
+      </li>
       <li class="<%= controller.controller_name == 'container_registry' ? 'active' : '' %>">
         <%= link_to "Container Registries", admin_registries_path %>
       </li>

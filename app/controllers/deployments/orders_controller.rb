@@ -145,6 +145,15 @@ class Deployments::OrdersController < AuthController
       end
       p_el = order_params[:package][:"#{i[:image_variant_id]}"].to_i
       i[:package_id] = p_el unless p_el.zero?
+      if order_params[:addons]
+        i[:addons] = if order_params[:addons][:"#{i[:image_variant_id]}"]
+                       order_params[:addons][:"#{i[:image_variant_id]}"].map { |addon_id| addon_id.to_i }
+                     else
+                       []
+                     end
+      else
+        i[:addons] = []
+      end
     end
 
     @order_session.save
@@ -195,7 +204,10 @@ class Deployments::OrdersController < AuthController
   private
 
   def order_params
-    params.permit(:location_id, :deployment_type, :deployment, containers: [], package: {}, service: {}, image_map: {}, image_variant: {}, collections: [])
+    params.permit(
+      :location_id, :deployment_type, :deployment, containers: [],
+      package: {}, addons: {}, service: {}, image_map: {}, image_variant: {}, collections: []
+    )
   end
 
   def validate_billing_plan

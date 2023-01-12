@@ -45,6 +45,14 @@ class BillingResourcePrice < ApplicationRecord
     %W( #{ENV['CURRENCY']} )
   end
 
+  def bill_per_service?
+    billing_resource.bill_per_service?
+  end
+
+  def bill_per_container?
+    billing_resource.bill_per_container?
+  end
+
   # @return [Float]
   def price_in_hourly
     price / rate_term.to_f

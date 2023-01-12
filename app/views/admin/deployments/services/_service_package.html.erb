@@ -1,0 +1,26 @@
+<table class="table">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>CPU</th>
+    <th>Memory</th>
+    <th>Volume Storage</th>
+    <th>Temporary Storage</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <% if package.nil? %>
+      <td colspan="6" class="text-center">This service has no associated package.</td>
+    <% else %>
+      <td style="vertical-align: middle;"><%= package.product.label %></td>
+      <td style="vertical-align: middle;"><%= pluralize package.cpu, 'core', 'cores' %></td>
+      <td style="vertical-align: middle;"><%= package.memory %> MB</td>
+      <td style="vertical-align: middle;"><%= package.storage %> GB</td>
+      <td style="vertical-align: middle;"><%= package.local_disk %> GB</td>
+      <td class="text-right"><%= service_resize_btn service %></td>
+    <% end %>
+  </tr>
+  </tbody>
+</table>

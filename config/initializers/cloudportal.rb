@@ -2,7 +2,7 @@ require 'names_generator'
 require 'json_web_token'
 
 Monetize.assume_from_symbol = true
-DEFAULT_CURRENCY = Money::Currency.new(ENV['CURRENCY']).symbol
+DEFAULT_CURRENCY = Money::Currency.new(ENV['CURRENCY'].nil? ? 'USD' : ENV['CURRENCY']).symbol
 begin
   COMPUTESTACKS_VERSION = File.read("#{Rails.root.to_s}/VERSION").strip
 rescue
@@ -42,9 +42,9 @@ end
 BYTE_TO_GB = Numeric::GIGABYTE.to_f # old: 1.074e+9 # 1024, not 1000
 KILOBYTE_TO_GB = Numeric::GIGABYTE / 1024.0 # old: 1.049e+6 # 1024, not 1000
 
-I18n.default_locale = ENV['LOCALE']
+I18n.default_locale = ENV['LOCALE'].nil? ? 'en' : ENV['LOCALE']
 
-DockerVolumeLocal.configure ssh_key: ENV['CS_SSH_KEY']
+DockerVolumeLocal.configure ssh_key: ENV['CS_SSH_KEY'].nil? ? "~/.ssh/id_rsa" : ENV['CS_SSH_KEY']
 
 SYSTEM_CONTAINER_NAMES = %w(
   alertmanager

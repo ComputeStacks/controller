@@ -17,7 +17,7 @@ class Admin::ContainerImages::ImagePluginsController < Admin::ContainerImages::B
     if @image.update add_plugin_id: params[:add_plugin_id]
       redirect_to "/admin/container_images/#{@image.id}"
     else
-      render :new
+      render template: "container_images/image_plugins/new"
     end
   end
 
@@ -31,7 +31,7 @@ class Admin::ContainerImages::ImagePluginsController < Admin::ContainerImages::B
 
   def find_available_plugins
     @plugins = ContainerImagePlugin.active.select do |i|
-      i.available? && i.can_enable?(current_user) && !@image.container_image_plugins.include?(i)
+      i.active && i.can_enable?(current_user) && !@image.container_image_plugins.include?(i)
     end
   end
 

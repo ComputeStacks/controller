@@ -84,6 +84,7 @@ fi:
       order:
         provision: Provisioning new order
       service:
+        addons: "[%{label}] Updating service addons."
         autoscale: "[%{label}] AutoScaling Service"
         building_1: "[%{label}] Luodaan 1 kontti."
         building: "[%{label}] Luodaan %{count} konttia."

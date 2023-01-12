@@ -1,0 +1,72 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="form-group">
+          <%= f.label :label, "Name" %>
+          <%= f.text_field :label, required: true, class: 'form-control' %>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="form-group">
+          <%= f.label :group, "Group" %>
+          <%= f.text_field :group, class: 'form-control' %>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="form-group">
+          <%= f.label :external_id, "External ID" %>
+          <%= f.text_field :external_id, class: 'form-control' %>
+          <span class="help-block">Reference for external billing system</span>
+        </div>
+      </div>
+    </div>
+    <% if @product&.id.nil? %>
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="form-group">
+            <%= f.label :kind, "What kind of product is this?" %>
+            <%= f.select :kind, options_for_select(product_options_for_select, @product.kind), {}, class: "form-control" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+<% if @product&.id.nil? || @product&.is_resource? %>
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-md-12">
+          <p><strong>For Metered Resources Only</strong></p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="form-group">
+            <%= f.label :resource_kind, "Type of Resource" %>
+            <%= select(:product, :resource_kind, Product.resource_kinds, { include_blank: true }, { class: 'form-control' }) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <%= f.label :unit, "Unit" %>
+            <%= f.number_field :unit, class: 'form-control' %>
+            <span class="help-block">For most situations, this should always be 1.</span>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <%= f.label :unit_type, "Unit Type" %>
+            <%= f.number_field :unit_type, class: 'form-control' %>
+            <span class="help-block">Examples: GB, MB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

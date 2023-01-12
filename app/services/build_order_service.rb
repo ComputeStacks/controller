@@ -62,6 +62,7 @@ class BuildOrderService
         qty: c[:qty],
         domains: c[:domains] ? c[:domains] : [],
         resources: c[:resources],
+        addons: c[:addons], # List of Addon IDs (ContainerImageProduct)
         params: {},
         # c[:volumes] = [
         #   {
@@ -181,12 +182,15 @@ class BuildOrderService
     errors << "Unknown Region" if location.nil?
     self.region = if project && !project.locations.empty?
                     project.regions.first
+                  elsif !params[:region_id].blank?
+                    Region.find_by id: params[:region_id]
                   elsif location
                     location.next_region requested_packages, project_user, 1
                   else
                     nil
                   end
     errors << "There are no availability zones available" if region.nil?
+    errors << "Now allowed to deploy to this region" unless region.allow_user?(project_user)
     errors.empty?
   end
 

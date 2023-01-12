@@ -33,17 +33,6 @@ class OrdersController < AuthController
         event: 'updated'
       )
       ProcessOrderWorker.perform_async @order.to_global_id.to_s, audit.to_global_id.to_s
-      # event = EventLog.create!(
-      #   locale: 'order.provision',
-      #   audit: audit,
-      #   status: 'pending',
-      #   event_code: 'bf979cac35507208'
-      # )
-      # @order.pending!
-      # @order.current_event = event
-      # unless ProcessOrderService.new(@order).perform
-      #   flash[:alert] = 'Error processing order request'
-      # end
     end
     redirect_to @redirect_path
   end

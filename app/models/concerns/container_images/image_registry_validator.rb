@@ -6,7 +6,7 @@ module ContainerImages
 
     included do
       attr_accessor :skip_tag_validation
-      after_save :update_tag_validation!, unless: proc { skip_tag_validation }
+      after_commit :update_tag_validation!, unless: proc { skip_tag_validation }
     end
 
     def registry_image_available?

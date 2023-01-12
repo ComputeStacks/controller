@@ -14,7 +14,7 @@ namespace :containers do
         is_free:                  true,
         can_scale:                false,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/phpmyadmin",
+        registry_image_path:      "ghcr.io/computestacks/cs-docker-pma",
         skip_variant_setup: true
       )
       pma.image_variants.create!(

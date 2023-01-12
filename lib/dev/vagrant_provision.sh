@@ -169,6 +169,25 @@ cp /home/vagrant/.tmux.conf /root/
 
 chown -R vagrant:vagrant /home/vagrant/
 
+echo "Setting up container registry ssl..."
+mkdir -p /opt/container_registry/ssl
+cat << 'EOF' > /opt/container_registry/ssl/cert.conf
+[req]
+distinguished_name = req_distinguished_name
+prompt = no
+
+[req_distinguished_name]
+C = US
+ST = OR
+L = Portland
+O = CS Customer
+OU = Deployment
+CN = registry.cstacks.local
+EOF
+openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -sha256 -keyout /opt/container_registry/ssl/privkey.pem -out /opt/container_registry/ssl/fullchain.pem -config /opt/container_registry/ssl/cert.conf
+
+echo "Setting up haproxy defaults..."
+
 mkdir -p /etc/haproxy/certs
 
 cat << 'EOF' > /etc/haproxy/default.http
@@ -494,7 +513,7 @@ backups:
   key: "changme!"
   borg:
     compress: "zstd,3"
-    image: "cmptstks/borg:stable"
+    image: "ghcr.io/computestacks/cs-docker-borg:latest"
     nfs: false
 docker:
   version: "1.41"
@@ -694,7 +713,7 @@ ExecStart=/usr/bin/env docker run --rm --name prometheus \
       --network=host \
       -v prometheus-data:/prometheus \
       -v /etc/prometheus:/etc/prometheus:z \
-      prom/prometheus:latest
+      prom/prometheus:latest --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=10d --storage.tsdb.wal-compression --web.console.templates=/usr/share/prometheus/consoles --web.console.libraries=/usr/share/prometheus/console_libraries --storage.tsdb.max-block-duration=1d12h
 
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker kill prometheus 2>/dev/null'
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker rm prometheus 2>/dev/null'
@@ -1064,17 +1083,7 @@ mv /tmp/cs_pdns_up /usr/local/bin/ \
   && bash /usr/local/bin/cs_pdns_up >/dev/null
 
 echo "Pulling docker images..."
-docker pull cmptstks/ssh:v2
-docker pull cmptstks/ssh:beta
-docker pull cmptstks/borg:stable
-docker pull cmptstks/mariadb-backup:10.1
-docker pull cmptstks/mariadb-backup:10.2
-docker pull cmptstks/mariadb-backup:10.3
-docker pull cmptstks/mariadb-backup:10.4
-docker pull cmptstks/mariadb-backup:10.5
-docker pull cmptstks/mariadb-backup:10.6
-docker pull cmptstks/mariadb-backup:10.7
-docker pull cmptstks/mariadb-backup:10.8
-docker pull cmptstks/mariadb-backup:10.9
-docker pull cmptstks/xtrabackup:2.4
-docker pull cmptstks/xtrabackup:8.0
+docker pull ghcr.io/computestacks/cs-docker-bastion:latest
+docker pull ghcr.io/computestacks/cs-docker-borg:latest
+docker pull ghcr.io/computestacks/cs-docker-xtrabackup:2.4
+docker pull ghcr.io/computestacks/cs-docker-xtrabackup:8.0

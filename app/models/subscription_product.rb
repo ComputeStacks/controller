@@ -4,6 +4,9 @@
 # @!attribute [r] id
 #   @return [Integer]
 #
+# @!attribute active
+#   @return [Boolean]
+#
 # @!attribute external_id
 #   Used by third party billing systems and integrations.
 #   @return [String]
@@ -102,7 +105,7 @@ class SubscriptionProduct < ApplicationRecord
   # Used to determine how we setup usage calculation.
   def product_is_resource?
     return true if product.nil?
-    !(product.is_package? || product.is_image?)
+    product.is_resource?
   end
 
   ##
@@ -165,6 +168,7 @@ class SubscriptionProduct < ApplicationRecord
 
   def current_qty
     return 0 if linked_obj.nil?
+    return 1 if product.is_image? || product.is_addon?
     case product.resource_kind
     when 'cpu'
       linked_obj.cpu
@@ -185,7 +189,23 @@ class SubscriptionProduct < ApplicationRecord
 
   # Qty, less qty included in their package
   def billable_qty(raw_units)
-    return 1.0 if package
+    return 1.0 if product.is_package?
+
+    # images and addons are not included in packages, therefore we will not proceed.
+    if product.is_image? || product.is_addon?
+      # per_container == 1.0
+      return 1.0 if billing_resource.bill_per_container?
+
+      # sanity check
+      return 1.0 if linked_obj.nil? || !linked_obj.is_a?(Deployment::Container)
+
+      # If we only have 1 container
+      return 1.0 if linked_obj.service.containers.count == 1
+
+      # Provide a fraction for just this container.
+      return (1.0 / linked_obj.service.containers.count.to_f).round(4)
+    end
+
     included_units = case product.resource_kind
                      when 'backup'
                        subscription.package.backup
@@ -264,7 +284,7 @@ class SubscriptionProduct < ApplicationRecord
   def prorate_usage!
     return if billing_resource.nil?
     return if product_is_resource? # only images/packages can get here.
-    # Only if proration is allowed.
+    # Only if prorata is allowed.
     return unless billing_resource.prorate
     # Only if we have an active usage item.
     return unless billing_usages.where("period_end > ?", Time.now.utc).exists?

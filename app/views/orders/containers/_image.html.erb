@@ -7,15 +7,15 @@
             <%= order_image_product(container).label %>
           </h5>
           <span style="color:black;">
-                            <%= display_current_price(region, order_image_product(container)) %>
-                          </span>
+            <%= display_current_price(region, order_image_product(container)) %>
+          </span>
         </div>
       </div>
       <% if !order_image_product(container).price_phases(project_owner, region)[:trial].empty? || !order_image_product(container).price_phases(project_owner, region)[:discount].empty? %>
         <div class="row">
           <hr>
           <div class="col-md-12">
-            <%= render partial: 'orders/containers/package_price_table', locals: { container: container, region: region, product: order_image_product(container), phases: order_image_product(container).price_phases(project_owner, @region) } %>
+            <%= render partial: 'orders/containers/package_price_table', locals: { phases: order_image_product(container).price_phases(project_owner, @region) } %>
           </div>
         </div>
       <% end %>

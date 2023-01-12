@@ -31,8 +31,7 @@
           <td><%= i.users.count %></td>
           <td><%= i.available_currencies.join(', ') %></td>
           <td class="text-right">
-            <%= link_to icon('fa-solid', 'copy'), "/admin/billing_plans/new?clone=#{i.id}", title: 'Clone Billing Plan', class: 'btn btn-sm btn-default' %>
-            <%= link_to icon('fa-solid', 'gear'), "/admin/billing_plans/#{i.id}", title: 'Manage Billing Plan', class: 'btn btn-sm btn-primary' %>
+            <%= link_to "#{icon('fa-solid', 'gear')} Manage".html_safe, "/admin/billing_plans/#{i.id}", title: 'Manage Billing Plan', class: 'btn btn-sm btn-primary' %>
           </td>
         </tr>
       <% end %>

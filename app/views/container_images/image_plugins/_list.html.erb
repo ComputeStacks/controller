@@ -15,12 +15,21 @@
   <% plugins.each do |i| %>
 
     <tr>
-      <td><%= i.name %></td>
-      <td class="text-right">
-        <div class="btn-group">
-          <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_plugin_path(image, i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
-        </div>
+      <td>
+        <%= current_user.is_admin? ? link_to(i.name.titleize, admin_container_image_plugin_path(i)) : i.name.titleize %>
+        <% unless i.available? %>
+          <span class="label label-danger">Not Configured</span>
+        <% end %>
       </td>
+      <% if i.can_enable?(current_user) %>
+        <td class="text-right">
+          <div class="btn-group">
+            <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_plugin_path(image, i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+          </div>
+        </td>
+      <% else %>
+        <td></td>
+      <% end %>
     </tr>
 
   <% end %>

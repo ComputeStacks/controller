@@ -1,0 +1,49 @@
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ol class="breadcrumb">
+      <li><%= link_to "Projects", "/admin/deployments" %></li>
+      <li><%= link_to @service.deployment.name, admin_deployments_path(@service.deployment) %></li>
+      <li><%= link_to @service.name, admin_container_service_path(@service) %></li>
+      <li class="active">Edit Addon <%= @plugin.label %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="<%= @plugin.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+    <%= form_for @plugin, url: "#{admin_container_service_path(@service)}/service_plugins/#{@plugin.id}" do |f| %>
+      <div class="panel panel-default">
+
+        <div class="panel-body">
+          <strong><%= @plugin.label.upcase %></strong>
+          <p>
+            Any changes you make here <em>may not</em> be applied until you rebuild all associated containers.
+          </p>
+        </div>
+
+        <div class="panel-body">
+          <div class="row">
+
+            <div class="col-xs-6">
+              <label>Active</label>
+              <%= f.check_box :active, class: 'form-control' %>
+            </div>
+            <div class="col-xs-6">
+              <label>User Selectable?</label>
+              <%= f.check_box :is_optional, class: 'form-control' %>
+              <span class="help-block">If disable, users will not be able to active or deactivate this addon.</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <%= link_to t('actions.cancel'), admin_container_service_path(@service), class: 'btn btn-default', style: 'margin-right: 10px;' %>
+          <%= submit_tag t('actions.save'), class: 'btn btn-success pull-right' %>
+        </div>
+
+      </div>
+    <% end %>
+  </div>
+  <%= render(partial: 'application/model_errors', locals: { obj: 'addon', errors: @plugin.errors }) unless @plugin.errors.count.zero? %>
+</div>

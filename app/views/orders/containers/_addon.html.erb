@@ -1,0 +1,63 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-xs-12"><strong>ADDONS</strong></div>
+  </div>
+</div>
+<div class="panel-body">
+  <div class="row">
+    <% order_addons_for_image(container[:image_id]).each do |i| %>
+      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+        <div class="panel panel-default">
+          <div class="panel-body">
+
+            <div class="row">
+
+              <div class="col-xs-12 text-center">
+                <h5><%= i.label %></h5>
+
+                <span style="color:black;">
+                  <%= display_current_price region, i.product %>
+                </span>
+
+              </div>
+            </div>
+
+            <% if i.product && (!i.product.price_phases(project_owner, region)[:trial].empty? || !i.product.price_phases(project_owner, region)[:discount].empty?) %>
+              <div class="row">
+                <hr>
+                <div class="col-md-12">
+                  <%= render partial: 'orders/containers/package_price_table', locals: { phases: i.product.price_phases(project_owner, region) } %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <div class="panel-footer">
+            <%=
+              button_tag 'SELECT',
+                         type: 'button',
+                         class: 'btn btn-default btn-block container-addon-selection',
+                         data: {
+                           addon: i.id,
+                           i: container[:image_variant_id],
+                           choose: 'SELECT',
+                           selected: I18n.t('actions.selected')
+                         },
+                         id: "cs-addon-btn-#{container[:image_variant_id]}-#{i.id}"
+            %>
+            <input
+              style="display:none;"
+              type="checkbox"
+              class="container-addon-checkbox"
+              id="addon-checkbox-<%= container[:image_variant_id] %>-<%= i.id %>"
+              data-index="<%= container[:image_variant_id] %>"
+              name="addons[<%= container[:image_variant_id] %>][]"
+              value="<%= i.id %>"
+              <% if order_session.image_addon_selected?(container[:image_id], i.id) %>checked="checked"<% end %>
+            />
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+<hr>

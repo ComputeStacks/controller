@@ -84,6 +84,7 @@ de:
       order:
         provision: Bereitstellung neuer Auftrag
       service:
+        addons: "[%{label}] Updating service addons."
         autoscale: "[%{label}] AutoScaling Dienst."
         building_1: "[%{label}] Bereitstellung 1 Container."
         building: "[%{label}] Bereitstellung %{count} Container."

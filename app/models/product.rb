@@ -11,6 +11,7 @@
 #   Must be one of:
 #     * package
 #     * image
+#     * addon
 #     * resource
 #   @return [String]
 #
@@ -59,9 +60,11 @@ class Product < ApplicationRecord
 
   include Auditable
 
-  scope :sorted, -> { order( Arel.sql("lower(label)") ) }
+  scope :sorted, -> { order "lower(label)" }
   scope :packages, -> { where(kind: 'package' ) }
+  scope :addons, -> { where(kind: 'addon' ) }
   scope :images, -> { where(kind: 'image' ) }
+  scope :resources, -> { where(kind: 'resource' ) }
 
   has_many :billing_resources, dependent: :destroy
   has_many :prices, through: :billing_resources
@@ -75,17 +78,23 @@ class Product < ApplicationRecord
   has_many :containers, class_name: 'Deployment::Container', through: :subscriptions
   has_one :package, class_name: 'BillingPackage', dependent: :destroy
 
+  has_many :image_plugins, class_name: "ContainerImagePlugin", dependent: :nullify
+
   before_validation :set_defaults
 
   before_save :update_product_name
   before_save :set_aggregation
 
   validates :label, presence: true
-  validates :kind, inclusion: { in: %w(resource package image), message: 'Must be one of: resource, package, image' }
+  validates :kind, inclusion: { in: %w(resource package image addon), message: 'Must be one of: resource, package, image, addon' }
   validates :unit, numericality: { greater_than: 0 }, if: Proc.new { |product| product.kind == 'resource' }
   validates :unit_type, presence: true, if: Proc.new { |product| product.kind == 'resource' }
 
   accepts_nested_attributes_for :package
+
+  def label_with_kind
+    "#{label} (#{kind.titleize})"
+  end
 
   def is_package?
     kind == 'package'
@@ -93,6 +102,14 @@ class Product < ApplicationRecord
 
   def is_image?
     kind == 'image'
+  end
+
+  def is_addon?
+    kind == 'addon'
+  end
+
+  def is_resource?
+    kind == 'resource'
   end
 
   # Find a particular price for a given user & region

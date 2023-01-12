@@ -68,12 +68,18 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
 
     end
 
-    # PHP
-    unless ContainerImage.where(name: 'php').exists?
-      php = ContainerImage.find_by(name: 'php-7-4')
+    # phpMyAdmin
+    pma = ContainerImage.find_by registry_image_path: "cmptstks/phpmyadmin"
+    if pma
+      pma.update registry_image_path: "ghcr.io/computestacks/cs-docker-pma"
+    end
 
+    # PHP
+    php = ContainerImage.find_by name: "php" # newer-style
+    if php.nil?
+      php = ContainerImage.find_by(name: 'php-7-4')
       if php
-        php.update name: 'php', label: 'PHP'
+        php.update name: 'php', label: 'PHP', registry_image_path: "ghcr.io/computestacks/cs-docker-php"
         php.image_variants.each do |i|
           i.update_column :is_default, false
         end
@@ -132,7 +138,8 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
           )
         end
       end
-
+    else
+      php.update registry_image_path: "ghcr.io/computestacks/cs-docker-php"
     end
 
     # Postgres
@@ -183,8 +190,9 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
     end
 
     # Wordpress
-    wp = ContainerImage.find_by name: 'wordpress', registry_image_path: "cmptstks/wordpress"
-    if wp
+    wp = ContainerImage.find_by name: 'wordpress' # in case provider has custom wordpress image...
+    if wp && %w(ghcr.io/computestacks/cs-docker-wordpress cmptstks/wordpress).include?(wp.registry_image_path)
+      wp.update registry_image_path: "ghcr.io/computestacks/cs-docker-wordpress"
       wp.image_variants.each do |i|
         i.update_column :is_default, false
       end
@@ -233,6 +241,10 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
       end
 
     end
+
+    # WHMCS
+    whmcs = ContainerImage.find_by registry_image_path: "cmptstks/whmcs"
+    whmcs.update(registry_image_path: "ghcr.io/computestacks/cs-docker-whmcs") if whmcs
 
   end
 end

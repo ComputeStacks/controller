@@ -113,7 +113,7 @@ class Deployment::Sftp < ApplicationRecord
   end
 
   def image
-    Rails.env.production? ? "cmptstks/ssh:v2" : "cmptstks/ssh:beta"
+    "ghcr.io/computestacks/cs-docker-bastion:#{Rails.env.production? ? 'v2' : 'latest'}"
   end
 
   def reset_password!

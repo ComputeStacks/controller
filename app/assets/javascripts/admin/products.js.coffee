@@ -5,6 +5,9 @@ jQuery ->
   $('#product-images-table').DataTable
     "order": [[ 0, "desc" ]]
     "pageLength": 50
-  $('#products-table').DataTable
+  $('#addons-table').DataTable
+    "order": [[ 0, "desc" ]]
+    "pageLength": 50
+  $('#resources-table').DataTable
     "order": [[ 0, "desc" ]]
     "pageLength": 50
