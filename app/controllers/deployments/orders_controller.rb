@@ -7,7 +7,7 @@ class Deployments::OrdersController < AuthController
 
     @all_images = ContainerImage.by_category ContainerImage.is_public.non_lbs.available
     @own_images = ContainerImage.by_category ContainerImage.find_all_for(current_user).non_lbs.available
-    @collections = ContainerImageCollection.with_valid_dep ContainerImageCollection.available
+    @collections = ContainerImageCollection.with_valid_collections ContainerImageCollection.available
 
     if @all_images.empty? && @own_images.empty?
       return fail_and_redirect!(I18n.t('common.feature_disabled', resource: I18n.t('obj.deployment')))

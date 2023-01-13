@@ -1,8 +1,11 @@
 <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-  <div class="panel panel-default">
+  <div class="panel <%= image.default_variant.nil? ? 'panel-danger' : 'panel-default' %>">
     <div class="panel-heading" style="padding:2px;"></div>
     <div class="panel-body">
-      <p class="lead"><%= image.label %></p>
+      <div style="margin-bottom:23px;">
+        <span style="font-size:19.5px;line-height:1.4;font-weight:300;"><%= image.label %></span>
+        <% if image.default_variant.nil? %><span class="label label-danger">Missing default variant</span><% end %>
+      </div>
       <%= link_to "Remove", admin_container_image_collection_container_image_path(collection, image), method: :delete, class: 'btn btn-block btn-danger' %>
     </div>
   </div>

@@ -23,6 +23,9 @@
 <% unless @collection.dependencies_met? %>
   <div class="alert alert-danger">This image collection includes images that have dependencies which are not yet added to this collection. Please add all image dependencies.</div>
 <% end %>
+<% unless @collection.has_default_variant? %>
+  <div class="alert alert-danger">Some associated images do not have a default variant. This collection will not be visible until those are corrected.</div>
+<% end %>
 <div class="row">
   <% @collection.container_images.each do |i| %>
     <%= render partial: "admin/container_image_collections/collection_card", locals: { image: i, collection: @collection } %>

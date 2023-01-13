@@ -24,7 +24,20 @@ class ContainerImageCollection < ApplicationRecord
     container_images.where(is_load_balancer: false).order(:name).uniq
   end
 
+  def all_images_valid?
+    has_default_variant? && dependencies_met?
+  end
+
+  # @return [Boolean]
+  def has_default_variant?
+    container_images.each do |i|
+      return false if i.default_variant.nil?
+    end
+    true
+  end
+
   # Require all dependent images
+  # @return [Boolean]
   def dependencies_met?
     container_images.each do |i|
       i.dependencies.each do |ii|
@@ -36,10 +49,10 @@ class ContainerImageCollection < ApplicationRecord
     true
   end
 
-  def self.with_valid_dep(query)
+  def self.with_valid_collections(query)
     query.each do |q|
-      unless q.dependencies_met?
-        query.pop q
+      unless q.all_images_valid?
+        query = query.excluding q
       end
     end
     query

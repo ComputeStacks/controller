@@ -26,9 +26,7 @@
             <div class="col-xs-6">
               <div class="lead">
                 <%= link_to i.label, admin_container_image_collection_path(i) %>
-                <% unless i.dependencies_met? %>
-                  <%= icon 'fa-solid', 'triangle-exclamation' %>
-                <% end %>
+                <%= icon('fa-solid', 'triangle-exclamation', nil, { class: 'text-danger' }) unless i.all_images_valid? %>
               </div>
             </div>
             <div class="col-xs-6 text-right">
