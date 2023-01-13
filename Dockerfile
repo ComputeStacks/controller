@@ -1,4 +1,4 @@
-FROM ruby:3.1
+FROM ruby:3.2
 
 LABEL maintainer="https://github.com/ComputeStacks"
 LABEL org.opencontainers.image.authors="https://github.com/ComputeStacks"

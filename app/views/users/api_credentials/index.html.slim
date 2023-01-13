@@ -26,5 +26,5 @@
                   td= l i.created_at.in_time_zone(Time.zone), format: :long
                   td.text-right
                     .btn-group
-                      = link_to '<i class="fa fa-wrench"></i>'.html_safe, "/users/api_credentials/#{i.id}/edit", class: 'btn btn-sm btn-default'
-                      = link_to '<i class="fa fa-trash"></i>'.html_safe, "/users/api_credentials/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger'
+                      = link_to icon('fa-solid', 'wrench'), "/users/api_credentials/#{i.id}/edit", class: 'btn btn-sm btn-default'
+                      = link_to icon('fa-solid', 'trash'), "/users/api_credentials/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger'

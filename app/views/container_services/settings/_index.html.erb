@@ -34,8 +34,8 @@
       </td>
       <td class="text-right">
         <div class="btn-group">
-          <%= link_to tag.i(nil, class: 'fa fa-wrench'), "#{service_param_path(s)}/edit", class: 'btn btn-default btn-sm' %>
-          <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{service_param_path(s)}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
+          <%= link_to icon('fa-solid', 'wrench'), "#{service_param_path(s)}/edit", class: 'btn btn-default btn-sm' %>
+          <%= link_to icon('fa-solid', 'trash'), "#{service_param_path(s)}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
         </div>
       </td>
     </tr>

@@ -36,8 +36,8 @@
         <td class="text-right">
           <div class="btn-group">
             <%= link_to icon('fa-solid', 'gear').html_safe, admin_user_path(i), class: 'btn btn-default btn-xs' %>
-            <%= link_to raw('<i class="fa fa-wrench fa-fw"></i>'), "#{admin_user_path(i)}/edit", class: 'btn btn-default btn-xs' %>
-            <%= link_to raw('<i class="fa fa-trash fa-fw"></i>'), admin_user_path(i), method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-danger btn-xs' %>
+            <%= link_to icon('fa-solid', 'wrench'), "#{admin_user_path(i)}/edit", class: 'btn btn-default btn-xs' %>
+            <%= link_to icon('fa-solid', 'trash'), admin_user_path(i), method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-danger btn-xs' %>
           </div>
         </td>
       </tr>

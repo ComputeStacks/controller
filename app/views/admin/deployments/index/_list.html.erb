@@ -26,7 +26,7 @@
           <div class="row" style="padding-top:10px;">
             <div class="col-xs-6">
               <small>
-                <% if d.user.nil? %><i class="fa fa-user-circle-o"></i><% else %><%= image_tag d.user.avatar_url(18), class: 'img-circle' %><% end %> <%= d.user.nil? ? 'none' : link_to(d.user.full_name, admin_user_path(d.user)) %>
+                <% if d.user.nil? %><i class="fa-regular fa-circle-user"></i><% else %><%= image_tag d.user.avatar_url(18), class: 'img-circle' %><% end %> <%= d.user.nil? ? 'none' : link_to(d.user.full_name, admin_user_path(d.user)) %>
                 | Created: <%= l d.created_at.in_time_zone(Time.zone), format: :short %>
                 | Containers: <%= d.deployed_containers.count %>
               </small>

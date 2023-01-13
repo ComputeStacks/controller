@@ -34,8 +34,8 @@
         <td class="text-right">
           <% if @container.can_edit?(current_user) %>
             <div class="btn-group">
-              <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_image_volume_path(i), class: 'btn btn-xs btn-default' %>
-              <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_volume_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' if current_user.is_admin? || i.container_image.user == current_user %>
+              <%= link_to icon('fa-solid', 'wrench'), edit_container_image_volume_path(i), class: 'btn btn-xs btn-default' %>
+              <%= link_to icon('fa-solid', 'trash'), container_image_volume_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' if current_user.is_admin? || i.container_image.user == current_user %>
             </div>
           <% end %>
         </td>
@@ -49,8 +49,8 @@
         <td class="text-right">
           <% if @container.can_edit?(current_user) %>
             <div class="btn-group">
-              <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_image_volume_path(i), class: 'btn btn-xs btn-default' %>
-              <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_volume_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' if current_user.is_admin? || i.container_image.user == current_user %>
+              <%= link_to icon('fa-solid', 'wrench'), edit_container_image_volume_path(i), class: 'btn btn-xs btn-default' %>
+              <%= link_to icon('fa-solid', 'trash'), container_image_volume_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' if current_user.is_admin? || i.container_image.user == current_user %>
             </div>
           <% end %>
         </td>

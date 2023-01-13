@@ -24,16 +24,16 @@
 <div class="row">
   <div class="col-lg-8 col-lg-offset-2 col-md-12">
     <a href="/volumes/<%= @volume.id %>/edit" class="btn btn-sm btn-default" style="margin-right:5px;">
-      <i class="fa fa-wrench"></i>
+      <%= icon('fa-solid', 'wrench') %>
     </a>
-    <%= link_to tag.i(nil, class: 'fa fa-trash'), "/volumes/#{@volume.id}", method: :delete, data: { confirm: 'Are you sure? This will result in data loss.' }, class: 'btn btn-sm btn-danger', style: "margin-right:5px;" %>
+    <%= link_to icon('fa-solid', 'trash'), "/volumes/#{@volume.id}", method: :delete, data: { confirm: 'Are you sure? This will result in data loss.' }, class: 'btn btn-sm btn-danger', style: "margin-right:5px;" %>
 
     <a href="/volumes/<%= @volume.id %>/subscribers" class="btn btn-sm btn-default" style="margin-right:5px;">
-      <i class="fa fa-link"></i>
+      <i class="fa-solid fa-link"></i>
       <%= t 'obj.containers' %>
     </a>
     <a href="/volumes/<%= @volume.id %>/logs" class="btn btn-sm btn-default" style="margin-right:5px;">
-      <i class="fa fa-list"></i>
+      <i class="fa-regular fa-rectangle-list"></i>
       <%= t 'events.plural' %>
     </a>
     <% if Feature.check('backups', current_user) %>

@@ -2,8 +2,8 @@
 <div class="panel panel-default">
   <div class="panel-body" style="margin-bottom:-25px;">
     <div class="pull-right btn-group text-right">
-      <%= link_to tag.i(nil, class: 'fa fa-wrench'), "/admin/subscriptions/#{@subscription.id}/subscription_products/#{sp.id}/edit", class: 'btn btn-sm btn-default' %>
-      <%= link_to tag.i(nil, class: 'fa fa-trash'), "/admin/subscriptions/#{@subscription.id}/subscription_products/#{sp.id}", method: :delete, data: { confirm: "Are you sure?" }, class: 'btn btn-sm btn-danger' %>
+      <%= link_to icon('fa-solid', 'wrench'), "/admin/subscriptions/#{@subscription.id}/subscription_products/#{sp.id}/edit", class: 'btn btn-sm btn-default' %>
+      <%= link_to icon('fa-solid', 'trash'), "/admin/subscriptions/#{@subscription.id}/subscription_products/#{sp.id}", method: :delete, data: { confirm: "Are you sure?" }, class: 'btn btn-sm btn-danger' %>
     </div>
     <h5>
       <%= sp.product&.label %>

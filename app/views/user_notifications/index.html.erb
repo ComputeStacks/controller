@@ -45,8 +45,8 @@
                         <td><%= i.notifier_formatted_value %></td>
                         <td><%= notifier_rule_table_list i, base_path %></td>
                         <td class="text-right">
-                          <%= link_to tag.i(nil, class: 'fa fa-wrench'), "#{base_path}/#{i.id}/edit", class: 'btn btn-sm btn-default' %>
-                          <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{base_path}/#{i.id}", method: :delete, class: 'btn btn-sm btn-danger', data: { confirm: t('confirm_prompt') } %>
+                          <%= link_to icon('fa-solid', 'wrench'), "#{base_path}/#{i.id}/edit", class: 'btn btn-sm btn-default' %>
+                          <%= link_to icon('fa-solid', 'trash'), "#{base_path}/#{i.id}", method: :delete, class: 'btn btn-sm btn-danger', data: { confirm: t('confirm_prompt') } %>
                         </td>
                       </tr>
                     <% end %>

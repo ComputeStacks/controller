@@ -26,16 +26,16 @@ module ContainerImages
                     when :valid
                       'fa-check'
                     when :partial
-                      'fa-exclamation-triangle'
+                      'fa-triangle-exclamation'
                     when :pending
-                      'fa-refresh fa-spin'
+                      'fa-rotate fa-spin'
                     when :invalid
-                      'fa-exclamation-triangle'
+                      'fa-triangle-exclamation'
                     else
                       nil
                     end
       return nil if status_class.nil?
-      %Q(<span class="label label-#{status_class}"><i class="fa #{status_icon} fa-fw"></i></span>).html_safe
+      %Q(<span class="label label-#{status_class}"><i class="fa-solid #{status_icon}"></i></span>).html_safe
     end
 
     def image_valid_tag_message(image)
@@ -72,13 +72,13 @@ module ContainerImages
     def table_image_icon(image)
       case image.variant_pull_status
       when :valid
-        tag.i nil, class: 'fa fa-check-circle', style: 'color: green;'
+        icon('fa-solid', 'circle-check', nil, { style: 'color: green;' })
       when :partial
-        tag.i nil, class: 'fa-exclamation-triangle'
+        icon('fa-solid', 'triangle-exclamation')
       when :pending
-        tag.i nil, class: 'fa-refresh fa-spin'
+        icon('fa-solid fa-spin', 'rotate')
       when :invalid
-        tag.i nil, class: 'fa fa-ban'
+        icon('fa-solid', 'ban')
       else
         nil
       end

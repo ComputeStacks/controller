@@ -79,7 +79,7 @@
               <td><%= auth.domain %></td>
               <td><%= auth.challenge_type %></td>
               <td><%= auth.expires_at.blank? ? 'n/a' : l(auth.expires_at, format: :short) %></td>
-              <td class="text-right"><%= link_to tag.i(nil, class: 'fa fa-trash'), admin_lets_encrypt_auth_path(auth), method: :delete, data: {confirm: 'Are you sure? Be sure to also disable LetsEncrypt for this domain.'}, class: 'btn btn-sm btn-danger' %></td>
+              <td class="text-right"><%= link_to icon('fa-solid', 'trash'), admin_lets_encrypt_auth_path(auth), method: :delete, data: {confirm: 'Are you sure? Be sure to also disable LetsEncrypt for this domain.'}, class: 'btn btn-sm btn-danger' %></td>
             </tr>
           <% end %>
         </tbody>

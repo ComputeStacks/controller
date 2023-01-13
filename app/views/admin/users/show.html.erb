@@ -9,7 +9,7 @@
         <%= render partial: 'admin/users/show/overview' %>
       </div>
       <div role="tabpanel" class="tab-pane remote-resource" data-url="<%= admin_user_path(@user) %>/subscriptions" id="subscriptions">
-        <p class="text-center"><i class="fa fa-refresh fa-spin"></i></p>
+        <p class="text-center"><%= icon('fa-solid fa-spin', 'rotate') %></p>
       </div>
       <div role="tabpanel" class="tab-pane" id="deployments">
         <%= render partial: 'admin/users/show/deployments', locals: { deployments: @deployments } %>

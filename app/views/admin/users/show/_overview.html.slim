@@ -5,7 +5,7 @@
         .pull-right= link_to "See More", "#{admin_user_path(@user)}/event_logs"
         strong RECENT EVENTS
       .panel-body.remote-resource.refresh data-url="#{admin_user_path(@user)}/event_logs"
-        p.text-center: i.fa.fa-refresh.fa-spin
+        p.text-center: i.fa-solid.fa-rotate.fa-spin
   .col-md-4.col-sm-6
     .panel.panel-default
       table.table-list
@@ -44,7 +44,7 @@
           td= @user.phase_started.nil? ? '' : l(@user.phase_started.to_date, format: :short)
 
     .panel.panel-default.remote-resource data-url="/admin/users/#{@user.id}?js=true&req=services"
-      p.text-center: i.fa.fa-refresh.fa-spin
+      p.text-center: i.fa-solid.fa-rotate.fa-spin
 
     .panel.panel-default
       table.table-list

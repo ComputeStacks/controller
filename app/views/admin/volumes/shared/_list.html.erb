@@ -35,9 +35,9 @@
                 <td class="text-right">
                   <div class="btn-group">
                     <% if from %>
-                      <%= link_to tag.i(nil, class: 'fa fa-wrench fa-fw'), "/admin/volumes/#{i.id}/edit?from=#{from}", class: 'btn btn-default btn-sm' %>
+                      <%= link_to icon('fa-solid', 'wrench'), "/admin/volumes/#{i.id}/edit?from=#{from}", class: 'btn btn-default btn-sm' %>
                     <% else %>
-                      <%= link_to tag.i(nil, class: 'fa fa-wrench fa-fw'), "/admin/volumes/#{i.id}/edit", class: 'btn btn-default btn-sm' %>
+                      <%= link_to icon('fa-solid', 'wrench'), "/admin/volumes/#{i.id}/edit", class: 'btn btn-default btn-sm' %>
                     <% end %>
                   </div>
                 </td>

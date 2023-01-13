@@ -16,4 +16,4 @@ table.table
           br
           small= l i.created_at.in_time_zone(Time.zone), format: :long
         td.text-right valign="middle" style="vertical-align:middle;"
-          = link_to content_tag(:i, '', class: 'fa fa-trash'), "/users/security_key/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-xs', style: 'margin-top:-4px;'
+          = link_to icon('fa-solid', 'trash'), "/users/security_key/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-xs', style: 'margin-top:-4px;'

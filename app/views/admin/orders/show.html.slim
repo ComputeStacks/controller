@@ -7,8 +7,8 @@
 .row
   .col-xs-6: p.lead Order Detail for: #{@order.id}
   .col-xs-6.text-right
-    = link_to raw('<i class="fa fa-rocket"></i> Process Order'), "/admin/orders/#{@order.id}/process", method: :put, data: {confirm: 'Are you sure? Manual provisioning will bypass any billing integration.'}, class: "btn btn-success btn-sm", style: 'margin-right:10px;' if @order.can_process?
-    = link_to raw('<i class="fa fa-trash"></i>'), "/admin/orders/#{@order.id}", method: :delete, data: {confirm: "Are you sure?"}, class: "btn btn-danger btn-sm"
+    = link_to raw('<i class="fa-solid fa-rocket"></i> Process Order'), "/admin/orders/#{@order.id}/process", method: :put, data: {confirm: 'Are you sure? Manual provisioning will bypass any billing integration.'}, class: "btn btn-success btn-sm", style: 'margin-right:10px;' if @order.can_process?
+    = link_to icon('fa-solid', 'trash'), "/admin/orders/#{@order.id}", method: :delete, data: {confirm: "Are you sure?"}, class: "btn btn-danger btn-sm"
 
 .row.remote-resource.refresh data-url="/admin/orders/#{@order.id}?js=true"
   noscript Error! Javascript required to load content.

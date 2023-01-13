@@ -62,7 +62,7 @@
           <div class="panel-heading"><div class="panel-title">Attached Volumes</div></div>
           <div class="remote-resource" data-url="<%= admin_sftp_path(@container) %>/remote_volumes">
             <div style="padding:25px 0;" class="text-center">
-              <i class="fa fa-refresh fa-spin"></i>
+              <%= icon('fa-solid fa-spin', 'rotate') %>
               <%= t 'common.loading_obj', obj: t('obj.volumes') %>
             </div>
           </div>
@@ -75,7 +75,7 @@
         <div class="panel panel-default">
           <div class="remote-resource refresh" data-url="<%= admin_sftp_path(@container) %>/events">
             <div class="text-center" style="padding: 25px 0;">
-              <i class="fa fa-refresh fa-spin"></i>
+              <%= icon('fa-solid fa-spin', 'rotate') %>
               <%= t 'common.loading_obj', obj: t('events.plural') %>
             </div>
           </div>

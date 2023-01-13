@@ -5,7 +5,7 @@
       <%= tag.li link_to(t('header.nav.apps'), "/deployments/orders") %>
       <%= tag.li t('orders.projects.container_params.app_settings'), class: 'active' %>
       <li class="pull-right no-spacer">
-        <%= link_to "<i class='fa fa-ban'></i>  #{t('orders.projects.cancel')}".html_safe, "/deployments/orders/cancel", class: "btn btn-sm btn-warning", style: "margin-top:-3px;" %>
+        <%= link_to "<i class='fa-solid fa-xmark'></i>  #{t('orders.projects.cancel')}".html_safe, "/deployments/orders/cancel", class: "btn btn-sm btn-warning", style: "margin-top:-3px;" %>
       </li>
     </ol>
   </div>

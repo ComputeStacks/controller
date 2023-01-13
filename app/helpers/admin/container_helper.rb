@@ -36,19 +36,19 @@ module Admin::ContainerHelper
   # Provide feedback when a field is empty due to provisioning
 
   def container_name_indicator(container)
-    container.name.blank? ? tag(:i, class: 'fa fa-refresh fa-spin') : container.name
+    container.name.blank? ? icon('fa-solid fa-spin', 'rotate') : container.name
   end
 
   def container_status_indicator(container)
-    container.current_state.blank? ? tag(:i, class: 'fa fa-refresh fa-spin') : container.current_state.capitalize
+    container.current_state.blank? ? icon('fa-solid fa-spin', 'rotate') : container.current_state.capitalize
   end
 
   def container_node_indicator(container)
-    container.node.nil? ? tag(:i, class: 'fa fa-refresh fa-spin') : container.node.label
+    container.node.nil? ? icon('fa-solid fa-spin', 'rotate') : container.node.label
   end
 
   def container_ip_indicator(container)
-    container.local_ip.nil? ? tag(:i, class: 'fa fa-refresh fa-spin') : container.local_ip
+    container.local_ip.nil? ? icon('fa-solid fa-spin', 'rotate') : container.local_ip
   end
 
 end

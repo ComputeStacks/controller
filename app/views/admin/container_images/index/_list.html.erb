@@ -31,7 +31,7 @@
         <div class="btn-group">
           <%= link_to icon('fa-solid', 'copy').html_safe, "/admin/container_images/new?container_image[parent_image_id]=#{i.id}", class: 'btn btn-sm btn-default' %>
           <%= link_to icon('fa-solid', 'gear'), admin_container_image_path(i), class: 'btn btn-sm btn-default' %>
-          <%= link_to raw("<i class='fa fa-trash'></i>"), admin_container_image_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
+          <%= link_to icon('fa-solid', 'trash'), admin_container_image_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
         </div>
       </td>
     </tr>

@@ -60,7 +60,7 @@
 									<td>
 										<%= admin_audit_description i %>
 										<br>
-										<span style="font-size:0.9em;"><i class="fa fa-dot-circle-o text-success"></i> Performed
+										<span style="font-size:0.9em;"><i class="fa-regular fa-circle-dot text-success"></i> Performed
 											by: <%= i.user.nil? ? 'System' : link_to(i.user.full_name, admin_user_path(i.user)) %></span>
 									</td>
 									<td class="text-right"><%= l i.created_at.in_time_zone(Time.zone), format: :long %></td>

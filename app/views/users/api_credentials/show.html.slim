@@ -16,9 +16,9 @@
         td.text-center.code-font style='font-size:1.5em;'= @api_credential.generated_password.blank? ? '*** HIDDEN ***' : @api_credential.generated_password
     .panel-footer
       - if @api_credential.created_at < 1.minute.ago
-        = link_to raw("<i class='fa fa-trash'></i> #{t('actions.delete')}"), "/users/api_credentials/#{@api_credential.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger'
+        = link_to raw("<i class='fa-solid fa-trash'></i> #{t('actions.delete')}"), "/users/api_credentials/#{@api_credential.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger'
       - else
-        = link_to raw("<i class='fa fa-ban'></i> #{t('actions.cancel')}"), "/users/api_credentials/#{@api_credential.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger'
+        = link_to raw("<i class='fa-solid fa-ban'></i> #{t('actions.cancel')}"), "/users/api_credentials/#{@api_credential.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger'
       = link_to t('actions.continue'), "/users/api_credentials", class: 'btn btn-success pull-right btn-sm'
 .row: .block-center.col-md-8.col-md-offset-2
   p.text-center

@@ -11,9 +11,9 @@ module ContainerServices
 
     def service_auto_scale_btn(service)
       if service.auto_scale
-        link_to "#{tag.i(nil, class: 'fa fa-line-chart')} #{t('container_services.auto_scale.enabled')}".html_safe, container_service_auto_scale_path(service), class: 'btn btn-sm btn-success'
+        link_to "#{tag.i(nil, class: 'fa-solid fa-chart-line')} #{t('container_services.auto_scale.enabled')}".html_safe, container_service_auto_scale_path(service), class: 'btn btn-sm btn-success'
       else
-        link_to "#{tag.i(nil, class: 'fa fa-line-chart')} #{t('container_services.auto_scale.disabled')}".html_safe, container_service_auto_scale_path(service), class: 'btn btn-sm btn-default'
+        link_to "#{tag.i(nil, class: 'fa-solid fa-chart-line')} #{t('container_services.auto_scale.disabled')}".html_safe, container_service_auto_scale_path(service), class: 'btn btn-sm btn-default'
       end
     end
 

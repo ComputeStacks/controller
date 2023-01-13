@@ -22,16 +22,16 @@ module ContainerImages
     end
 
     def image_variant_valid_tag_label(variant)
-      %Q(<span class="label label-success"><i class="fa #{image_variant_valid_tag_icon(variant)} fa-fw"></i></span>).html_safe
+      %Q(<span class="label label-success">#{image_variant_valid_tag_icon(variant)}</span>).html_safe
     end
 
     def image_variant_valid_tag_icon(variant)
       if variant.validated_tag && variant.validated_tag_updated
-        'fa-check'
+        icon('fa-solid', 'check')
       elsif variant.validated_tag_updated
-        'fa-ban'
+        icon('fa-solid', 'ban')
       else
-        'fa-refresh fa-spin'
+        icon('fa-solid fa-spin', 'rotate')
       end
     end
 

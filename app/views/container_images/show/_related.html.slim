@@ -2,7 +2,7 @@
   .panel-body
     - if @container.can_edit?(current_user)
       a.btn.btn-xs.btn-default.pull-right href="#{new_container_image_relationship_path(@container)}" style="margin-top:-3px;margin-right:-7px;"
-        i.fa.fa-plus
+        i.fa-solid.fa-plus
     p: strong= t 'container_images.params.related.table.title'
     - if @container.dependency_parents.empty?
       p.text-center= t 'container_images.params.related.table.none'

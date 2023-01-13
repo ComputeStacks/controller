@@ -142,7 +142,7 @@ class Admin::SearchController < Admin::ApplicationController
     end
     sparams[:images].each do |i|
       t = if i.user
-            %Q(#{i.label} (<i class="fa fa-user"></i> #{i.user.full_name}))
+            %Q(#{i.label} (<i class="fa-solid fa-user"></i> #{i.user.full_name}))
           else
             i.label
           end
@@ -155,7 +155,7 @@ class Admin::SearchController < Admin::ApplicationController
     end
     sparams[:subscriptions].each do |i|
       t = if i.user
-            %Q(#{i.label} (<i class="fa fa-user"></i> #{i.user.full_name}))
+            %Q(#{i.label} (<i class="fa-solid fa-user"></i> #{i.user.full_name}))
           else
             i.label
           end

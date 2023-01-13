@@ -11,7 +11,7 @@
     <% @users.each do |user| %>
       <tr>
         <td><%= user['display_name'] %></td>
-        <td><%= link_to "Login <i class='fa fa-external-link'></i>".html_safe, "/container_services/#{@service.id}/wordpress/sso?user=#{user['user_login']}", method: :post, target: "_blank" %></td>
+        <td><%= link_to "Login <i class='fa-solid fa-up-right-from-square'></i>".html_safe, "/container_services/#{@service.id}/wordpress/sso?user=#{user['user_login']}", method: :post, target: "_blank" %></td>
       </tr>
     <% end %>
   </table>

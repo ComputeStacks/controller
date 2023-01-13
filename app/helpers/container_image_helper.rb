@@ -104,9 +104,9 @@ module ContainerImageHelper
       link_to(icon('fa-solid', 'gear'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{image.id}", class: 'btn btn-sm btn-default')
     ]
     if image.can_administer?(current_user)
-      btns << link_to(tag.i(nil, class: 'fa fa-trash'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{image.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger')
+      btns << link_to(icon('fa-solid', 'trash'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{image.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger')
     else
-      btns << link_to(tag.i(nil, class: 'fa fa-trash'), "/container_images/#{image.id}", disabled: 'disabled', title: 'only owners can delete', class: 'btn btn-sm btn-danger')
+      btns << link_to(icon('fa-solid', 'trash'), "/container_images/#{image.id}", disabled: 'disabled', title: 'only owners can delete', class: 'btn btn-sm btn-danger')
     end
     %Q(
       <div class="text-right" style="vertical-align: middle;">

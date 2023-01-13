@@ -49,8 +49,8 @@
             </td>
             <td class="text-right">
               <div class="btn-group">
-                <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, "host_entries/#{i.id}/edit", class: 'btn btn-xs btn-default' %>
-                <%= link_to '<i class="fa fa-trash"></i>'.html_safe, "host_entries/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+                <%= link_to icon('fa-solid', 'wrench'), "host_entries/#{i.id}/edit", class: 'btn btn-xs btn-default' %>
+                <%= link_to icon('fa-solid', 'trash'), "host_entries/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
               </div>
             </td>
           </tr>

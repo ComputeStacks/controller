@@ -20,8 +20,8 @@
       em Owner: #{@zone.user.nil? ? 'System' : @zone.user.full_name}
   .col-lg-2.col-md-3.col-sm-4.col-xs-12.text-right
     = link_to "Collaborators", "/admin/dns/#{@zone.id}/collaborators", class: 'btn btn-sm btn-primary', style: 'margin-right: 10px;'
-    = link_to content_tag(:i, nil, class: 'fa fa-fw fa-wrench'), edit_admin_dn_url(@zone), class: 'btn btn-sm btn-default'
-    = link_to content_tag(:i, nil, class: 'fa fa-fw fa-trash'), admin_dn_url(@zone), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger', style: 'margin-left:10px;'
+    = link_to icon('fa-solid', 'wrench'), edit_admin_dn_url(@zone), class: 'btn btn-sm btn-default'
+    = link_to icon('fa-solid', 'trash'), admin_dn_url(@zone), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger', style: 'margin-left:10px;'
 
 - if @zone.can_view?(current_user)
   .row
@@ -46,18 +46,18 @@
                 td.text-right
                   - if i.name == @zone.name || i.name == "#{@zone.name}."
                     .btn-group
-                      = link_to raw("<i class='fa fa-wrench'></i>"), '#', disabled: 'disabled', class: 'btn btn-sm btn-default', title: 'Unable to Edit'
-                      = link_to raw("<i class='fa fa-trash'></i>"), '#', disabled: 'disabled', class: 'btn btn-sm btn-danger', title: 'Unable to Destroy'
+                      = link_to icon('fa-solid', 'wrench'), '#', disabled: 'disabled', class: 'btn btn-sm btn-default', title: 'Unable to Edit'
+                      = link_to icon('fa-solid', 'trash'), '#', disabled: 'disabled', class: 'btn btn-sm btn-danger', title: 'Unable to Destroy'
                   - else
                     .btn-group
-                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
-                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+                      = link_to icon('fa-solid', 'wrench'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to icon('fa-solid', 'trash'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
   .row
     .col-md-12
       .panel.panel-default
         .panel-heading
           h4.panel-title
-          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=a", :class => "btn btn-xs btn-default pull-right"
+          = link_to icon('fa-solid', 'plus'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=a", :class => "btn btn-xs btn-default pull-right"
           | A/AAAA
         table.table style="table-layout:fixed;width:100%;"
           - if @zone_client.records['A'].empty? && @zone_client.records['AAAA'].empty?
@@ -79,8 +79,8 @@
                   td= i.ttl
                   td.text-right
                     .btn-group
-                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
-                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+                      = link_to icon('fa-solid', 'wrench'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to icon('fa-solid', 'trash'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
               - @zone_client.records['AAAA'].each do |i,k|
                 - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
                 tr
@@ -89,14 +89,14 @@
                   td= i.ttl
                   td.text-right
                     .btn-group
-                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
-                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+                      = link_to icon('fa-solid', 'wrench'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to icon('fa-solid', 'trash'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
   .row
     .col-md-12
       .panel.panel-default
         .panel-heading
           h4.panel-title
-          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=mx", :class => "btn btn-xs btn-default pull-right"
+          = link_to icon('fa-solid', 'plus'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=mx", :class => "btn btn-xs btn-default pull-right"
           | MX
         table.table style="table-layout:fixed;width:100%;"
           - if @zone_client.records['MX'].empty?
@@ -120,14 +120,14 @@
                   td= i.ttl
                   td.text-right
                     .btn-group
-                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
-                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+                      = link_to icon('fa-solid', 'wrench'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to icon('fa-solid', 'trash'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
   .row
     .col-md-12
       .panel.panel-default
         .panel-heading
           h4.panel-title
-          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=cname", :class => "btn btn-xs btn-default pull-right"
+          = link_to icon('fa-solid', 'plus'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=cname", :class => "btn btn-xs btn-default pull-right"
           | CNAME
         table.table style="table-layout:fixed;width:100%;"
           - if @zone_client.records['CNAME'].empty?
@@ -149,15 +149,15 @@
                   td= i.ttl
                   td.text-right
                     .btn-group
-                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
-                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+                      = link_to icon('fa-solid', 'wrench'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to icon('fa-solid', 'trash'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
 
   .row
     .col-md-12
       .panel.panel-default
         .panel-heading
           h4.panel-title
-          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=txt", :class => "btn btn-xs btn-default pull-right"
+          = link_to icon('fa-solid', 'plus'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=txt", :class => "btn btn-xs btn-default pull-right"
           | TXT
         table.table style="table-layout:fixed;width:100%;"
           - if @zone_client.records['TXT'].empty?
@@ -179,15 +179,15 @@
                   td= i.ttl
                   td.text-right
                     .btn-group
-                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
-                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+                      = link_to icon('fa-solid', 'wrench'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to icon('fa-solid', 'trash'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
 
   .row
     .col-md-12
       .panel.panel-default
         .panel-heading
           h4.panel-title
-          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=srv", :class => "btn btn-xs btn-default pull-right"
+          = link_to icon('fa-solid', 'plus'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=srv", :class => "btn btn-xs btn-default pull-right"
           | SRV
         table.table style="table-layout:fixed;width:100%;"
           - if @zone_client.records['SRV'].empty?
@@ -209,15 +209,15 @@
                   td= i.ttl
                   td.text-right
                     .btn-group
-                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
-                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+                      = link_to icon('fa-solid', 'wrench'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to icon('fa-solid', 'trash'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
 
   .row
     .col-md-12
       .panel.panel-default
         .panel-heading
           h4.panel-title
-          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=caa", :class => "btn btn-xs btn-default pull-right"
+          = link_to icon('fa-solid', 'plus'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=caa", :class => "btn btn-xs btn-default pull-right"
           | CAA
         table.table style="table-layout:fixed;width:100%;"
           - if @zone_client.records['CAA'].empty?
@@ -239,15 +239,15 @@
                   td= i.ttl
                   td.text-right
                     .btn-group
-                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
-                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+                      = link_to icon('fa-solid', 'wrench'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to icon('fa-solid', 'trash'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
 
   .row
     .col-md-12
       .panel.panel-default
         .panel-heading
           h4.panel-title
-          = link_to raw('<i class="fa fa-plus"></i>'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=ptr", :class => "btn btn-xs btn-default pull-right"
+          = link_to icon('fa-solid', 'plus'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/new?t=ptr", :class => "btn btn-xs btn-default pull-right"
           | PTR
         table.table style="table-layout:fixed;width:100%;"
           - if @zone_client.records['PTR'].empty?
@@ -269,8 +269,8 @@
                   td= i.ttl
                   td.text-right
                     .btn-group
-                      = link_to raw("<i class='fa fa-wrench'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
-                      = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
+                      = link_to icon('fa-solid', 'wrench'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
+                      = link_to icon('fa-solid', 'trash'), "/admin/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
 
   - if @dns_driver.support_dnssec?
     .row: .col-md-12: .panel.panel-default

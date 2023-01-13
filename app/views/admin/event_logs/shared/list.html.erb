@@ -4,7 +4,7 @@
       <tr class="log <%= log.table_class %>">
         <td>
           <%= link_to time_ago_in_words(log.created_at), defined?(@deployment) ? "#{admin_deployments_path(@deployment)}/events/#{log.id}" : "/admin/event_logs/#{log.id}" %>
-          <%= content_tag(:i, nil, class: 'fa fa-file-text-o', style: 'margin-left:5px;') if log.event_details.exists? %>
+          <%= icon('fa-regular', 'file-lines', nil, { style: "margin-left:5px;" }) if log.event_details.exists? %>
         </td>
         <td><%= admin_deployment_event(log).html_safe %></td>
         <td class="text-right"><%= format_event_log(log.status) %></td>

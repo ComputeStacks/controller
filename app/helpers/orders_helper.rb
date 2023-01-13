@@ -51,11 +51,11 @@ module OrdersHelper
                         case vol['action']
                         when 'clone', 'mount'
                           concat(
-                            tag.td("-> #{vol['action'].capitalize} Volume #{vol['source']} at #{vol['mount_path']} #{vol['mount_ro'] ? '(RO)' : '' }", class: 'order-child-table-item', colspan: '2', style: 'text-indent: 10px;')
+                            tag.td("#{icon('fa-solid', 'arrow-right-long')}  #{vol['action'].capitalize} Volume #{vol['source']} at #{vol['mount_path']} #{vol['mount_ro'] ? '(RO)' : '' }".html_safe, class: 'order-child-table-item', colspan: '2', style: 'text-indent: 10px;')
                           )
                         when 'create'
                           concat(
-                            tag.td("-> Create Volume #{vol['label']} at #{vol['mount_path']}", class: 'order-child-table-item', colspan: '2', style: 'text-indent: 10px;')
+                            tag.td("#{icon('fa-solid', 'arrow-right-long')}  Create Volume #{vol['label']} at #{vol['mount_path']}".html_safe, class: 'order-child-table-item', colspan: '2', style: 'text-indent: 10px;')
                           )
                         else
                           next
@@ -79,7 +79,7 @@ module OrdersHelper
                     concat(
                         tag.tr do
                           concat(
-                              tag.td('-> CPU', class: 'order-child-table-item', style: 'text-indent: 10px;')
+                              tag.td("#{icon('fa-solid', 'arrow-right-long')} CPU".html_safe, class: 'order-child-table-item', style: 'text-indent: 10px;')
                           )
                           concat(
                               tag.td("#{product.package.cpu} #{product.package.cpu.to_f > 1 ? 'CORES' : 'CORE'}", class: 'text-right')
@@ -89,7 +89,7 @@ module OrdersHelper
                     concat(
                         tag.tr do
                           concat(
-                              tag.td("-> #{I18n.t('attributes.mem')}", class: 'order-child-table-item', style: 'text-indent: 10px;')
+                              tag.td("#{icon('fa-solid', 'arrow-right-long')} #{I18n.t('attributes.mem')}".html_safe, class: 'order-child-table-item', style: 'text-indent: 10px;')
                           )
                           concat(
                               tag.td("#{product.package.memory.to_f / 1024.0} GB", class: 'text-right')
@@ -99,7 +99,7 @@ module OrdersHelper
                     concat(
                         tag.tr do
                           concat(
-                              tag.td("-> #{I18n.t('attributes.disk')}", class: 'order-child-table-item', style: 'text-indent: 10px;')
+                              tag.td("#{icon('fa-solid', 'arrow-right-long')}  #{I18n.t('attributes.disk')}".html_safe, class: 'order-child-table-item', style: 'text-indent: 10px;')
                           )
                           concat(
                               tag.td("#{product.package.storage} GB", class: 'text-right')
@@ -109,7 +109,7 @@ module OrdersHelper
                     concat(
                       tag.tr do
                         concat(
-                          tag.td("-> #{I18n.t('attributes.local_disk')}", class: 'order-child-table-item', style: 'text-indent: 10px;')
+                          tag.td("#{icon('fa-solid', 'arrow-right-long')}  #{I18n.t('attributes.local_disk')}".html_safe, class: 'order-child-table-item', style: 'text-indent: 10px;')
                         )
                         concat(
                           tag.td("#{product.package.local_disk} GB", class: 'text-right')
@@ -119,7 +119,7 @@ module OrdersHelper
                     concat(
                         tag.tr do
                           concat(
-                              tag.td("-> #{I18n.t('attributes.transfer')}", class: 'order-child-table-item', style: 'text-indent: 10px;')
+                              tag.td("#{icon('fa-solid', 'arrow-right-long')} #{I18n.t('attributes.transfer')}".html_safe, class: 'order-child-table-item', style: 'text-indent: 10px;')
                           )
                           concat(
                               tag.td("#{product.package.bandwidth} GB", class: 'text-right')
@@ -192,7 +192,7 @@ module OrdersHelper
                       concat(
                         tag.tr do
                           concat(
-                            tag.td("-> #{addon.label}", class: 'order-child-table-item', style: 'text-indent: 10px;')
+                            tag.td("#{icon('fa-solid', 'arrow-right-long')}  #{addon.label}".html_safe, class: 'order-child-table-item', style: 'text-indent: 10px;')
                           )
                           concat(
                             tag.td(class: 'text-right') do

@@ -97,7 +97,7 @@ module Admin::BillingPlansHelper
   end
 
   def currency_table_qty(qty)
-    return "&infin;".html_safe if qty.nil? || qty < 0
+    return icon('fa-solid', 'infinity', nil, { title: 'In perpetuity' }) if qty.nil? || qty < 0
     return qty.to_i if qty % 2 == 0
     qty
   end

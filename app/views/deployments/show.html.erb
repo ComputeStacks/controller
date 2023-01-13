@@ -10,9 +10,9 @@
         <li><%= link_to raw("#{icon('fa-solid', 'copy')} Clone"), "/deployments/#{@deployment.token}/clone_project", method: :create, data: { confirm: t('confirm_prompt') }, class: "btn btn-sm btn-default", style: "margin-right:5px;" %></li>
       <% end %>
       <% if current_user.is_admin %>
-        <%= link_to '<i class="fa fa-external-link"></i> View In Admin'.html_safe, "/admin/deployments/#{@deployment.id}", class: 'btn btn-sm btn-default', style: 'margin-right:5px;' %>
+        <%= link_to '<i class="fa-solid fa-up-right-from-square"></i> View In Admin'.html_safe, "/admin/deployments/#{@deployment.id}", class: 'btn btn-sm btn-default', style: 'margin-right:5px;' %>
       <% end %>
-      <li><%= link_to raw("<i class='fa fa-cube'></i> #{t('.header.new_container')}"), "/deployments/orders?o=#{@deployment.token}&t=container", class: "btn btn-sm btn-default" %></li>
+      <li><%= link_to raw("<i class='fa-solid fa-cube'></i> #{t('.header.new_container')}"), "/deployments/orders?o=#{@deployment.token}&t=container", class: "btn btn-sm btn-default" %></li>
     </ol>
   </div>
 <% end %>
@@ -30,7 +30,7 @@
       <% end %>
       <% unless @deployment.is_resource_owner?(current_user) %>
         <span style="font-size:12px;vertical-align:text-top;">
-          &nbsp;&nbsp;<span class="label label-primary"><i class="fa fa-users fa-fw"></i> <%= @deployment.user.full_name %></span>
+          &nbsp;&nbsp;<span class="label label-primary"><i class="fa-solid fa-users"></i> <%= @deployment.user.full_name %></span>
         </span>
       <% end %>
     </h4>
@@ -75,7 +75,7 @@
       <div id="overview" class="tab-pane remote-resource refresh active" data-url="/deployments/<%= @deployment.token %>/services">
         <div class="row">
           <div class="col-md-12 text-center" style="padding:25px 0;">
-            <i class="fa fa-refresh fa-spin"></i>
+            <%= icon('fa-solid fa-spin', 'rotate') %>
             <%= t 'deployments.show.loading.containers' %>
           </div>
         </div>
@@ -84,7 +84,7 @@
       <div id="domains" class="tab-pane remote-resource refresh" data-url="/deployments/<%= @deployment.token %>/domains">
         <div class="row">
           <div class="col-md-12 text-center" style="padding:25px 0;">
-            <i class="fa fa-refresh fa-spin"></i>
+            <%= icon('fa-solid fa-spin', 'rotate') %>
             <%= t 'deployments.show.loading.domains' %>
           </div>
         </div>
@@ -93,7 +93,7 @@
       <div id="ssl" class="tab-pane remote-resource refresh" data-url="/deployments/<%= @deployment.token %>/certificates">
         <div class="row">
           <div class="col-md-12 text-center" style="padding:25px 0;">
-            <i class="fa fa-refresh fa-spin"></i>
+            <%= icon('fa-solid fa-spin', 'rotate') %>
             <%= t 'deployments.show.loading.certs' %>
           </div>
         </div>
@@ -102,7 +102,7 @@
       <div id="volumes" class="tab-pane remote-resource" data-url="/deployments/<%= @deployment.token %>/volumes">
         <div class="row">
           <div class="col-md-12 text-center" style="padding:25px 0;">
-            <i class="fa fa-refresh fa-spin"></i>
+            <%= icon('fa-solid fa-spin', 'rotate') %>
             <%= t 'deployments.show.loading.volumes' %>
           </div>
         </div>
@@ -112,7 +112,7 @@
         <div id="load_balancers" class="tab-pane remote-resource" data-url="/deployments/<%= @deployment.token %>/services?load_balancers=true">
           <div class="row">
             <div class="col-md-12 text-center" style="padding:25px 0;">
-              <i class="fa fa-refresh fa-spin"></i>
+              <%= icon('fa-solid fa-spin', 'rotate') %>
               <%= t 'deployments.show.loading.containers' %>
             </div>
           </div>
@@ -122,7 +122,7 @@
       <div id="collaborators" class="tab-pane remote-resource" data-url="/deployments/<%= @deployment.token %>/collaborators">
         <div class="row">
           <div class="col-md-12 text-center" style="padding:25px 0;">
-            <i class="fa fa-refresh fa-spin"></i>
+            <%= icon('fa-solid fa-spin', 'rotate') %>
             Loading Collaborators
           </div>
         </div>

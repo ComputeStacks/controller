@@ -34,7 +34,7 @@
               <td><%= i.fill_to %></td>
               <td><%= i.active ? 'Yes' : 'No' %></td>
               <td><%= l i.created_at, format: :short %></td>
-              <td class="text-right"><%= link_to "<i class='fa fa-wrench'></i>".html_safe, "/admin/regions/#{i.id}/edit", class: 'btn btn-xs btn-default' %></td>
+              <td class="text-right"><%= link_to icon('fa-solid', 'wrench'), "/admin/regions/#{i.id}/edit", class: 'btn btn-xs btn-default' %></td>
             </tr>
           <% end %>
         </tbody>

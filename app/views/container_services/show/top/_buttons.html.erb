@@ -1,6 +1,6 @@
 <% if show_error_page?(@service) %>
   <div class="btn-group">
-    <%= link_to "<i class='fa fa-trash'></i> #{t('actions.destroy')}".html_safe, container_service_path(@service), method: :delete , data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger' %>
+    <%= link_to "<i class='fa-solid fa-trash'></i> #{t('actions.destroy')}".html_safe, container_service_path(@service), method: :delete , data: { confirm: t('confirm_prompt') }, class: 'btn btn-sm btn-danger' %>
   </div>
 <% else %>
 
@@ -26,33 +26,33 @@
 
   <div class="btn-group" style="margin-left:15px;">
     <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      <i class="fa fa-cog"></i>
+      <i class="fa-solid fa-gear"></i>
       <span class="caret"></span>
       <span class="sr-only"><%= t 'actions.manage' %></span>
     </button>
     <ul class="dropdown-menu dropdown-menu-right">
       <% unless @service.containers.sorted.first.nil? %>
-        <li><%= link_to "<i class='fa fa-area-chart'></i> Charts".html_safe, "#{container_service_path(@service)}/charts" %></li>
-        <li><%= link_to "<i class='fa fa-table'></i> #{t('container_services.containers.logs.breadcrumb')}".html_safe, "#{container_service_path(@service)}/service_logs" %></li>
+        <li><%= link_to "<i class='fa-solid fa-chart-area'></i> Charts".html_safe, "#{container_service_path(@service)}/charts" %></li>
+        <li><%= link_to "<i class='fa-solid fa-table-cells'></i> #{t('container_services.containers.logs.breadcrumb')}".html_safe, "#{container_service_path(@service)}/service_logs" %></li>
       <% end %>
-      <li><%= link_to "<i class='fa fa-list'></i> #{t('events.link_to')}".html_safe, "#{container_service_path(@service)}/events" %></li>
+      <li><%= link_to "<i class='fa-regular fa-rectangle-list'></i> #{t('events.link_to')}".html_safe, "#{container_service_path(@service)}/events" %></li>
       <li role="separator" class="divider"></li>
       <% unless @service.container_image.service_container? %>
       <li>
-        <%= link_to "<i class='fa fa-line-chart'></i> #{t('container_services.auto_scale.menu_action')}".html_safe, "#{container_service_path(@service)}/auto_scale" %>
+        <%= link_to "<i class='fa-solid fa-chart-line'></i> #{t('container_services.auto_scale.menu_action')}".html_safe, "#{container_service_path(@service)}/auto_scale" %>
       </li>
       <% end %>
       <li>
-        <%= link_to %Q(<i class="fa fa-database"></i> #{t('container_services.header.env')}).html_safe, "#{container_service_path(@service)}/environmental" %>
+        <%= link_to %Q(<i class="fa-solid fa-database"></i> #{t('container_services.header.env')}).html_safe, "#{container_service_path(@service)}/environmental" %>
       </li>
       <li>
-        <%= link_to %Q(<i class="fa fa-bars"></i> Host Entries).html_safe, "#{@service.id}/host_entries" %>
+        <%= link_to %Q(<i class="fa-solid fa-bars"></i> Host Entries).html_safe, "#{@service.id}/host_entries" %>
       </li>
       <li>
         <%= link_to "#{icon('fa-solid', 'cart-flatbed')} Manage Plugins".html_safe, "#{container_service_path(@service)}/service_plugins" %>
       </li>
-      <li><%= link_to "<i class='fa fa-wrench'></i> #{t('actions.edit')}".html_safe, "#{container_service_path(@service)}/edit" %></li>
-      <li><%= link_to "<i class='fa fa-trash'></i> #{t('actions.destroy')}".html_safe, container_service_path(@service), method: :delete , data: { confirm: t('confirm_prompt') } %></li>
+      <li><%= link_to "<i class='fa-solid fa-wrench'></i> #{t('actions.edit')}".html_safe, "#{container_service_path(@service)}/edit" %></li>
+      <li><%= link_to "<i class='fa-solid fa-trash'></i> #{t('actions.destroy')}".html_safe, container_service_path(@service), method: :delete , data: { confirm: t('confirm_prompt') } %></li>
     </ul>
   </div>
 <% end %>

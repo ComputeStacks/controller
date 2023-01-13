@@ -5,8 +5,8 @@
         <div class="col-xs-12">
           <div class="pull-right text-right">
             <div class="btn-group">
-               <%= link_to tag.i(nil, class: 'fa fa-wrench'), "/admin/billing_plans/#{resource.billing_plan_id}/billing_resources/#{resource.id}/edit", class: 'btn btn-default btn-sm' %>
-              <%= link_to tag.i(nil, class: 'fa fa-trash'), "/admin/billing_plans/#{resource.billing_plan_id}/billing_resources/#{resource.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
+               <%= link_to icon('fa-solid', 'wrench'), "/admin/billing_plans/#{resource.billing_plan_id}/billing_resources/#{resource.id}/edit", class: 'btn btn-default btn-sm' %>
+              <%= link_to icon('fa-solid', 'trash'), "/admin/billing_plans/#{resource.billing_plan_id}/billing_resources/#{resource.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
             </div>
           </div>
           <span style="font-size:2rem;"><%= resource.product.label %></span>
@@ -58,7 +58,7 @@
         <th class="text-uppercase text-muted">Pricing Tiers</th>
         <th class="text-uppercase text-muted">Currencies</th>
         <th class="text-right">
-          <%= link_to raw("<i class='fa fa-plus'></i> Phase"), "#{@base_url}/billing_phases/new?billing_resource_id=#{resource.id}", class: 'btn btn-xs btn-primary' if resource.available_phases.count < 3 %>
+          <%= link_to raw("<i class='fa-solid fa-plus'></i> Phase"), "#{@base_url}/billing_phases/new?billing_resource_id=#{resource.id}", class: 'btn btn-xs btn-primary' if resource.available_phases.count < 3 %>
         </th>
       </tr>
       </thead>
@@ -66,7 +66,7 @@
       <% resource.available_phases.each do |phase| %>
         <tr onclick="window.location='<%= "#{base_url}/billing_phases/#{phase.id}" %>'" style="cursor: pointer;">
           <td><%= link_to phase.phase_type.capitalize, "#{base_url}/billing_phases/#{phase.id}", style: "text-decoration:underline;color:#333;" %></td>
-          <td><%= phase.phase_type == 'final' ? "&infin;".html_safe : "#{phase.duration_qty} #{phase.duration_unit}" %></td>
+          <td style="text-indent: 10px;"><%= phase.phase_type == 'final' ? icon('fa-solid', 'infinity', nil, { title: 'In perpetuity' }) : "#{phase.duration_qty} #{phase.duration_unit}" %></td>
           <td><%= phase_default_price(phase) %></td>
           <td><%= phase.regions.count %></td>
           <td><%= phase.prices.count %></td>

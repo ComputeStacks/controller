@@ -3,7 +3,7 @@ fr:
     backups:
       new: Create a Backup
       restore:
-        title_html: '<i class="fa fa-refresh"></i> Restore'
+        title_html: '<i class="fa-solid fa-rotate"></i> Restore'
         confirm: Are you sure? This will wipe out the current data set and restart the associated containers.
       name: Backup Name
       title: Backups

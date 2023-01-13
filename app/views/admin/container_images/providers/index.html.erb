@@ -28,8 +28,8 @@
         </td>
         <td class="text-right">
           <div class="btn-group">
-            <%= link_to raw("<i class='fa fa-wrench fa-fw'></i>"), edit_admin_container_images_provider_path(i), class: 'btn btn-sm btn-default' %>
-            <%= link_to raw("<i class='fa fa-trash fa-fw'></i>"), admin_container_images_provider_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' unless i.is_dockerhub? %>
+            <%= link_to icon('fa-solid', 'wrench'), edit_admin_container_images_provider_path(i), class: 'btn btn-sm btn-default' %>
+            <%= link_to icon('fa-solid', 'trash'), admin_container_images_provider_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' unless i.is_dockerhub? %>
           </div>
         </td>
       </tr>

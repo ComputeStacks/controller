@@ -21,11 +21,11 @@
       </div>
       <div class="col-md-6 text-right">
         <% if @container.can_migrate? %>
-          <%= link_to "<i class='fa fa-truck'></i> Migrate".html_safe, "/admin/containers/#{@container.id}/migrate_container", class: 'btn btn-sm btn-danger' %>
+          <%= link_to "<i class='fa-solid fa-truck'></i> Migrate".html_safe, "/admin/containers/#{@container.id}/migrate_container", class: 'btn btn-sm btn-danger' %>
         <% else %>
-          <%= link_to "<i class='fa fa-truck'></i> Migrate".html_safe, '#', disabled: 'disabled', class: 'btn btn-sm btn-danger', title: t('containers.high_availability.migration.error') %>
+          <%= link_to "<i class='fa-solid fa-truck'></i> Migrate".html_safe, '#', disabled: 'disabled', class: 'btn btn-sm btn-danger', title: t('containers.high_availability.migration.error') %>
         <% end %>
-        <%= link_to '<i class="fa fa-external-link"></i> Container Details'.html_safe, container_path(@container), class: 'btn btn-primary btn-sm' %>
+        <%= link_to '<i class="fa-solid fa-up-right-from-square"></i> Container Details'.html_safe, container_path(@container), class: 'btn btn-primary btn-sm' %>
         <%= render partial: "admin/containers/shared/power_controls", locals: { container: @container } %>
       </div>
     </div>
@@ -71,7 +71,7 @@
           <div class="panel-heading"><div class="panel-title">Attached Volumes</div></div>
           <div class="remote-resource" data-url="<%= admin_containers_path(@container) %>/remote_volumes">
             <div style="padding:25px 0;" class="text-center">
-              <i class="fa fa-refresh fa-spin"></i>
+              <%= icon('fa-solid fa-spin', 'rotate') %>
               <%= t 'common.loading_obj', obj: t('obj.volumes') %>
             </div>
           </div>
@@ -83,7 +83,7 @@
       <div class="col-md-12">
         <div class="panel panel-default">
           <div class="remote-resource refresh" data-url="<%= admin_containers_path(@container) %>/events">
-            <div class="text-center" style="padding: 25px 0;"><i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading_obj', obj: t('events.plural') %></div>
+            <div class="text-center" style="padding: 25px 0;"><%= icon('fa-solid fa-spin', 'rotate') %> <%= t 'common.loading_obj', obj: t('events.plural') %></div>
           </div>
         </div>
       </div>

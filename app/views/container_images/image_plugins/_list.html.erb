@@ -24,7 +24,7 @@
       <% if i.can_enable?(current_user) %>
         <td class="text-right">
           <div class="btn-group">
-            <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_plugin_path(image, i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+            <%= link_to icon('fa-solid', 'trash'), container_image_plugin_path(image, i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
           </div>
         </td>
       <% else %>

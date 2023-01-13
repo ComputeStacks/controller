@@ -18,5 +18,5 @@ table.table
         td= l i.created_at.in_time_zone(Time.zone), format: :long
         td= l i.updated_at, format: :long
         td.text-right
-          = link_to tag.i(class: 'fa fa-gear'), "/admin/orders/#{i.id}", class: 'btn btn-default btn-sm', style: 'margin-right:5px;'
-          = link_to tag.i(class: 'fa fa-trash'), "/admin/orders/#{i.id}", method: :delete, data: {confirm: "Are you sure?"}, class: 'btn btn-danger btn-sm'
+          = link_to icon('fa-solid', 'gear'), "/admin/orders/#{i.id}", class: 'btn btn-default btn-sm', style: 'margin-right:5px;'
+          = link_to tag.i(class: 'fa-solid fa-trash'), "/admin/orders/#{i.id}", method: :delete, data: {confirm: "Are you sure?"}, class: 'btn btn-danger btn-sm'

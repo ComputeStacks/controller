@@ -27,8 +27,8 @@
       <td style="vertical-align: middle;"><%= i.value %></td>
       <td class="text-right">
         <div class="btn-group">
-          <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_service_environmental_path(i), class: 'btn btn-xs btn-default' %>
-          <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_service_environmental_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+          <%= link_to icon('fa-solid', 'wrench'), edit_container_service_environmental_path(i), class: 'btn btn-xs btn-default' %>
+          <%= link_to icon('fa-solid', 'trash'), container_service_environmental_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
         </div>
       </td>
     </tr>

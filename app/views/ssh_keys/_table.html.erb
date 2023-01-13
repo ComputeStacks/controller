@@ -36,7 +36,7 @@
       <% if editable %>
         <td><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
         <td class="text-right">
-          <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{base_path}/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
+          <%= link_to icon('fa-solid', 'trash'), "#{base_path}/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
         </td>
       <% else %>
         <td class="text-right"><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>

@@ -4,7 +4,7 @@
     <tr>
       <th style="padding-left:3px;">
         <%= button_tag type: 'submit', class: 'btn btn-danger btn-sm', data: {confirm: 'Are you sure?'} do %>
-          <i class="fa fa-trash"></i>
+          <%= icon('fa-solid', 'trash') %>
         <% end %>
       </th>
       <th>ID</th>
@@ -39,7 +39,7 @@
         </td>
         <td class="text-right">
           <div class="btn-group">
-            <%= link_to tag.i(nil, class: 'fa fa-wrench fa-fw'), "/admin/volumes/#{i.id}/edit", class: 'btn btn-default btn-sm' %>
+            <%= link_to icon('fa-solid', 'wrench'), "/admin/volumes/#{i.id}/edit", class: 'btn btn-default btn-sm' %>
           </div>
         </td>
       </tr>

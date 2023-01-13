@@ -10,7 +10,7 @@
       <li class="active"><%= t 'header.nav.apps' %></li>
       <li class="pull-right no-spacer" style="margin-top:-3px;">
         <%= link_to t('orders.projects.containers.custom_app'), "/container_images/new", class: 'btn btn-sm btn-primary' %>
-        <%= link_to "#{icon('fa-solid', 'ban')} #{t('orders.projects.cancel')}".html_safe, "/deployments/orders/cancel", class: "btn btn-sm btn-warning" %>
+        <%= link_to "#{icon('fa-solid', 'xmark')} #{t('orders.projects.cancel')}".html_safe, "/deployments/orders/cancel", class: "btn btn-sm btn-warning" %>
       </li>
     </ol>
   </div>

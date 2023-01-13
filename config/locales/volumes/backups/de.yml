@@ -3,7 +3,7 @@ de:
     backups:
       new: Backup erstellen
       restore:
-        title_html: '<i class="fa fa-refresh"></i> Wiederherstellen'
+        title_html: '<i class="fa-solid fa-rotate"></i> Wiederherstellen'
         confirm: Sind Sie sicher? Dadurch wird der aktuelle Datensatz gelöscht und die zugehörigen Container werden neu gestartet.
       name: Backup Name
       title: Backups

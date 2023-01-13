@@ -36,13 +36,13 @@
         <td class="text-right">
           <% if i.system_domain %>
             <div class="btn-group">
-              <%= link_to raw("<i class='fa fa-wrench'></i>"), '', disabled: 'disabled', class: 'btn btn-xs btn-default' %>
-              <%= link_to "<i class='fa fa-trash'></i>".html_safe, '', disabled: 'disabled', class: 'btn btn-xs btn-danger' %>
+              <%= link_to icon('fa-solid', 'wrench'), '', disabled: 'disabled', class: 'btn btn-xs btn-default' %>
+              <%= link_to icon('fa-solid', 'trash'), '', disabled: 'disabled', class: 'btn btn-xs btn-danger' %>
             </div>
           <% else %>
             <div class="btn-group">
-              <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_container_domain_path(i), class: 'btn btn-xs btn-default' %>
-              <%= link_to "<i class='fa fa-trash'></i>".html_safe, container_domain_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-xs btn-danger' %>
+              <%= link_to icon('fa-solid', 'wrench'), edit_container_domain_path(i), class: 'btn btn-xs btn-default' %>
+              <%= link_to icon('fa-solid', 'trash'), container_domain_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-xs btn-danger' %>
             </div>
           <% end %>
         </td>

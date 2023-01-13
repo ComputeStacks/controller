@@ -8,7 +8,7 @@
       <li class="active">Image Variants</li>
     </ol>
     <ol class="breadcrumb breadcrumb-action text-right">
-      <li><%= link_to raw("<i class='fa fa-cubes'></i>&nbsp;&nbsp;&nbsp;Add Variant"), "/container_images/#{@image.id}/image_variants/new", class: 'btn btn-sm btn-default' %></li>
+      <li><%= link_to raw("<i class='fa-solid fa-cubes'></i>&nbsp;&nbsp;&nbsp;Add Variant"), "/container_images/#{@image.id}/image_variants/new", class: 'btn btn-sm btn-default' %></li>
     </ol>
   </div>
 <% end %>
@@ -17,7 +17,7 @@
 <div class="row">
   <div class="col-lg-8 col-lg-offset-2 col-md-12">
     <% if @image.can_edit?(current_user) %>
-      <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_variant_path(@image), class: "pull-right btn btn-xs btn-default" %>
+      <%= link_to icon('fa-solid', 'plus'), new_container_image_variant_path(@image), class: "pull-right btn btn-xs btn-default" %>
       <div id="updateImageVariantPosBtn" class="btn-group pull-right" style="margin-right:10px;display:none;">
         <%= submit_tag t('actions.update'), class: 'btn btn-xs btn-success'%>
         <%= link_to t('actions.cancel'), "/container_images/#{@image.id}/image_variants", class: 'btn btn-xs btn-default' %>

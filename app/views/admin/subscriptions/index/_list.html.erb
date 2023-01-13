@@ -25,8 +25,8 @@
         <td class="text-right">
           <div class="btn-group">
             <%= link_to icon('fa-solid', 'gear').html_safe, admin_subscription_path(i), class: 'btn btn-sm btn-default' %>
-            <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_admin_subscription_path(i), class: 'btn btn-sm btn-default' %>
-            <%= link_to raw("<i class='fa fa-trash fa-danger'></i>"), admin_subscription_path(i), method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-sm btn-danger' %>
+            <%= link_to icon('fa-solid', 'wrench'), edit_admin_subscription_path(i), class: 'btn btn-sm btn-default' %>
+            <%= link_to raw("<i class='fa-solid fa-trash fa-danger'></i>"), admin_subscription_path(i), method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-sm btn-danger' %>
           </div>
         </td>
       </tr>

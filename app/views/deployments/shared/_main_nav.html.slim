@@ -9,7 +9,7 @@
 
       - case controller.controller_name
       - when 'deployments'
-        li= link_to raw("<i class='fa-regular fa-folder-open'></i>&nbsp;&nbsp;&nbsp;#{t('.new_deployment')}"), "/deployments/orders", class: 'btn btn-sm btn-default'
+        li= link_to raw("<i class='fa-solid fa-plus'></i>&nbsp;&nbsp;&nbsp;#{t('.new_deployment')}"), "/deployments/orders", class: 'btn btn-sm btn-default'
       - when 'container_domains'
         li= link_to t('deployments.shared.main_nav.new_domain'), "/container_domains/new", class: 'btn btn-sm btn-default'
       - when 'alert_notifications'

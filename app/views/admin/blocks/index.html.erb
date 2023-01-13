@@ -24,13 +24,13 @@
             <td><%= i.content_key.blank? ? '...' : i.content_key %></td>
             <td><%= i.block_contents.distinct.pluck(:locale).join(', ') %></td>
             <td class="text-right">
-              <%= link_to tag.i(nil, class: 'fa fa-book'), "/admin/blocks/#{i.id}/block_contents", class: 'btn btn-primary btn-sm', style: 'margin-right: 10px;' %>
+              <%= link_to icon('fa-solid', 'book'), "/admin/blocks/#{i.id}/block_contents", class: 'btn btn-primary btn-sm', style: 'margin-right: 10px;' %>
               <div class="btn-group">
-                <%= link_to "<i class='fa fa-wrench'></i>".html_safe, "/admin/blocks/#{i.id}/edit", class: 'btn btn-default btn-sm' %>
+                <%= link_to icon('fa-solid', 'wrench'), "/admin/blocks/#{i.id}/edit", class: 'btn btn-default btn-sm' %>
                 <% if i.content_key.blank? %>
-                  <%= link_to "<i class='fa fa-trash'></i>".html_safe, "/admin/blocks/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
+                  <%= link_to icon('fa-solid', 'trash'), "/admin/blocks/#{i.id}", method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-danger btn-sm' %>
                 <% else %>
-                  <%= link_to "<i class='fa fa-trash'></i>".html_safe, "/", disabled: 'disabled', title: 'Unable to delete system content block', class: 'btn btn-danger btn-sm' %>
+                  <%= link_to icon('fa-solid', 'trash'), "/", disabled: 'disabled', title: 'Unable to delete system content block', class: 'btn btn-danger btn-sm' %>
                 <% end %>
               </div>
             </td>

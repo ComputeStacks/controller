@@ -1,8 +1,8 @@
-<%= link_to "<i class='fa fa-table'></i> #{t('container_services.containers.logs.breadcrumb')}".html_safe, "/deployments/#{@deployment.token}/project_logs", class: 'btn btn-sm btn-default', style: 'margin-right:10px;' %>
+<%= link_to "<i class='fa-solid fa-table-cells'></i> #{t('container_services.containers.logs.breadcrumb')}".html_safe, "/deployments/#{@deployment.token}/project_logs", class: 'btn btn-sm btn-default', style: 'margin-right:10px;' %>
 
 <div class="btn-group">
   <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    <i class="fa fa-cog"></i>
+    <i class="fa-solid fa-gear"></i>
     <span class="caret"></span>
     <span class="sr-only"><%= t 'actions.manage' %></span>
   </button>

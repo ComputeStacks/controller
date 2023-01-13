@@ -33,9 +33,9 @@
               <td><%= link_to lb.domain, admin_load_balancer_url(lb) %></td>
               <td class="remote-resource refresh" data-url="<%= "/admin/load_balancers/#{lb.id}?js=true" %>"><%= l lb.job_performed %></td>
               <td class="text-right">
-                <%= link_to content_tag(:i, nil, class: 'fa fa-refresh fa-fw'), "/admin/load_balancers/#{lb.id}/deploy_load_balancer", method: :post, class: 'btn btn-success btn-sm', title: 'Deploy LoadBalancer Config', data: { confirm: 'Are you sure?' } %>
-                <%= link_to content_tag(:i, nil, class: 'fa fa-wrench fa-fw'), edit_admin_load_balancer_url(lb), class: 'btn btn-default btn-sm' %>
-                <%= link_to content_tag(:i, nil, class: 'fa fa-fw fa-trash'), admin_load_balancer_url(lb), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %>
+                <%= link_to icon('fa-solid', 'rotate'), "/admin/load_balancers/#{lb.id}/deploy_load_balancer", method: :post, class: 'btn btn-success btn-sm', title: 'Deploy LoadBalancer Config', data: { confirm: 'Are you sure?' } %>
+                <%= link_to icon('fa-solid', 'wrench'), edit_admin_load_balancer_url(lb), class: 'btn btn-default btn-sm' %>
+                <%= link_to icon('fa-solid', 'trash'), admin_load_balancer_url(lb), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %>
               </td>
             </tr>
           <% end %>

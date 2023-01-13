@@ -22,8 +22,8 @@
         <td><%= l i.updated_at.in_time_zone(Time.zone), format: :long %></td>
         <td class="text-right">
           <div class="btn-group">
-            <%= link_to tag.i(class: 'fa fa-gear'), "/admin/orders/#{i.id}", class: 'btn btn-default btn-sm' %>
-            <%= link_to tag.i(class: 'fa fa-trash'), "/admin/orders/#{i.id}", method: :delete, data: {confirm: "Are you sure?"}, class: 'btn btn-danger btn-sm' %>
+            <%= link_to icon('fa-solid', 'gear'), "/admin/orders/#{i.id}", class: 'btn btn-default btn-sm' %>
+            <%= link_to tag.i(class: 'fa-solid fa-trash'), "/admin/orders/#{i.id}", method: :delete, data: {confirm: "Are you sure?"}, class: 'btn btn-danger btn-sm' %>
           </div>
         </td>
       </tr>

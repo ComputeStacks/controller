@@ -14,7 +14,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="pull-right">
-          <%= link_to '<i class="fa fa-external-link"></i> Service Details'.html_safe, container_service_path(@service), class: 'btn btn-primary btn-sm' %>
+          <%= link_to '<i class="fa-solid fa-up-right-from-square"></i> Service Details'.html_safe, container_service_path(@service), class: 'btn btn-primary btn-sm' %>
         </div>
         <p class="lead"><%= @service.label %></p>
       </div>
@@ -53,7 +53,7 @@
           <div class="panel-body"><strong>CONTAINERS</strong></div>
           <div class="remote-resource" data-url="<%= admin_container_service_path(@service) %>/containers">
             <div style="padding:25px 0;" class="text-center">
-              <i class="fa fa-refresh fa-spin"></i>
+              <%= icon('fa-solid fa-spin', 'rotate') %>
               <%= t 'common.loading_obj', obj: t('obj.containers') %>
             </div>
           </div>
@@ -93,7 +93,7 @@
         <div class="panel panel-default">
           <div class="remote-resource refresh" data-url="<%=  admin_container_service_path(@service) %>/events">
             <div class="text-center" style="padding: 25px 0;">
-              <i class="fa fa-refresh fa-spin"></i> <%= t 'common.loading_obj', obj: t('events.plural') %>
+              <%= icon('fa-solid fa-spin', 'rotate') %> <%= t 'common.loading_obj', obj: t('events.plural') %>
             </div>
           </div>
         </div>

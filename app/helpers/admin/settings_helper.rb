@@ -35,9 +35,9 @@ module Admin::SettingsHelper
   end
 
   def admin_setting_value(setting)
-    return tag.i(nil, class: 'fa fa-ellipsis-h') if setting.value.blank?
+    return tag.i(nil, class: 'fa-solid fa-ellipsis') if setting.value.blank?
     if setting.encrypted?
-      return setting.decrypted_value.blank? ? tag.i(nil, class: 'fa fa-ellipsis-h') : '[ENCRYPTED]'
+      return setting.decrypted_value.blank? ? tag.i(nil, class: 'fa-solid fa-ellipsis') : '[ENCRYPTED]'
     end
     return setting.value == 't' ? 'Yes' : 'No' if %w(t f).include?(setting.value)
     truncate setting.value, length: 35

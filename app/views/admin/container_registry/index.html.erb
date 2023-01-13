@@ -32,10 +32,10 @@
               admin / <%= i.registry_password %>
             </td>
             <td class="text-right">
-              <%= link_to tag.i(nil, class: 'fa fa-user-plus fa-fw'), admin_registry_collaborators_path(i), class: 'btn btn-sm btn-default' %>
+              <%= link_to tag.i(nil, class: 'fa-solid fa-user-plus'), admin_registry_collaborators_path(i), class: 'btn btn-sm btn-default' %>
               <div class="btn-group">
-                <%= link_to tag.i(nil, class: 'fa fa-wrench fa-fw'), edit_admin_registry_path(i), class: 'btn btn-sm btn-default' %>
-                <%= link_to tag.i(nil, class: 'fa fa-trash fa-fw'), admin_registry_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
+                <%= link_to icon('fa-solid', 'wrench'), edit_admin_registry_path(i), class: 'btn btn-sm btn-default' %>
+                <%= link_to icon('fa-solid', 'trash'), admin_registry_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
               </div>
             </td>
           </tr>

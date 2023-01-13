@@ -9,9 +9,9 @@
       <td>Status</td>
       <td>
         <% if alert.active? %>
-          <i class="fa fa-refresh fa-spin"></i> Active for <%= time_ago_in_words alert.last_event %>
+          <%= icon('fa-solid fa-spin', 'rotate') %> Active for <%= time_ago_in_words alert.last_event %>
         <% else %>
-          <i class="fa fa-check-circle" style="color:green;"></i> Resolved on <%= l alert.updated_at, format: :short %>
+          <%= icon 'fa-solid', 'circle-check', nil, { style: 'color: green;' } %> Resolved on <%= l alert.updated_at, format: :short %>
         <% end %>
       </td>
     </tr>

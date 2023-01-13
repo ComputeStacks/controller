@@ -1,0 +1,29 @@
+<div class="row">
+  <div class="col-md-12"><h4>Activity Log</h4></div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+
+    <table class="table">
+      <% if @events.empty? %>
+        <tr>
+          <td colspan="2" class="text-align:center;">No Events</td>
+        </tr>
+      <% end %>
+      <% @events.each do |i| %>
+      <tr>
+        <td>
+          <span class="label <%= i.label_class %>"><%= i.category %></span>
+          <%= link_to billing_event_title(i), "/admin/app_events/#{i.id}" %>
+        </td>
+        <td class="text-right">
+          <small><%= l i.created_at.in_time_zone(Time.zone), format: :long %></small>
+        </td>
+      </tr>
+      <% end %>
+    </table>
+
+    <%= will_paginate @events %>
+  </div>
+</div>

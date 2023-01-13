@@ -26,11 +26,11 @@
       <% end %>
       <td class="text-right">
         <% if return_to == 'service' %>
-          <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, "#{edit_ingress_rule_path(i)}?return_to=service", class: 'btn btn-sm btn-default' %>
+          <%= link_to icon('fa-solid', 'wrench'), "#{edit_ingress_rule_path(i)}?return_to=service", class: 'btn btn-sm btn-default' %>
         <% else %>
-          <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, "#{edit_ingress_rule_path(i)}", class: 'btn btn-sm btn-default' %>
+          <%= link_to icon('fa-solid', 'wrench'), "#{edit_ingress_rule_path(i)}", class: 'btn btn-sm btn-default' %>
         <% end %>
-        <%= link_to tag.i(nil, class: 'fa fa-trash'), ingress_rule_path(i), method: :delete, class: 'btn btn-sm btn-danger', data: { confirm: "Are you sure? This will also delete any associated domains." } %>
+        <%= link_to icon('fa-solid', 'trash'), ingress_rule_path(i), method: :delete, class: 'btn btn-sm btn-danger', data: { confirm: "Are you sure? This will also delete any associated domains." } %>
       </td>
     </tr>
   <% end %>

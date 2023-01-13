@@ -9,7 +9,7 @@
       <tr class="log <%= log.table_class %>">
         <td>
           <%= link_to time_ago_in_words(log.created_at), "#{root_path}/#{log.id}" %>
-          <%= content_tag(:i, nil, class: 'fa-regular fa-file-lines', style: 'margin-left:5px;') if log.event_details.exists? %>
+          <%= icon('fa-regular', 'fa-file-lines', nil, { style: 'margin-left:5px;'} ) if log.event_details.exists? %>
         </td>
         <% unless defined?(@deployment) %>
           <td>
@@ -30,7 +30,7 @@
           <td style="border:0; line-height:11px;"></td>
           <% unless defined?(@deployment) %><td style="border:0; line-height:11px;">&nbsp;</td><% end %>
           <td style="border:0; line-height:11px;">
-            <i class="fa fa-dot-circle-o text-success"></i>
+            <i class="fa-regular fa-circle-dot text-success"></i>
             <%= t 'audit.performed_by_html', user: performer(log.audit) %>
           </td>
           <td style="border:0; line-height:11px;" class="text-right"><%= l log.audit.created_at, format: :short %></td>

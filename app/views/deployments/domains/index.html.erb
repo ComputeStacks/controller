@@ -32,8 +32,8 @@
             <td class="text-right">
               <%= link_to t('container_services.certificates.verify_domain'), "/container_domains/#{i.id}/dns_check", method: :post, class: 'btn btn-xs btn-default' if i.le_require_verify? %>
               <div class="btn-group">
-                <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_container_domain_path(i), class: 'btn btn-xs btn-default' %>
-                <%= link_to "<i class='fa fa-trash'></i>".html_safe, container_domain_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+                <%= link_to icon('fa-solid', 'wrench'), edit_container_domain_path(i), class: 'btn btn-xs btn-default' %>
+                <%= link_to icon('fa-solid', 'trash'), container_domain_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
               </div>
             </td>
           </tr>

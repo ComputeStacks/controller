@@ -23,11 +23,11 @@
               <%= %Q(&nbsp; #{volume_ha_warning(i)}).html_safe if i.region.has_clustered_storage? && !i.uses_clustered_storage? %>
             </td>
             <td><%= i.usage %> GB</td>
-            <td><%= i.borg_enabled ? i.list_archives.count : tag.i(nil, class: 'fa fa-ban') %></td>
+            <td><%= i.borg_enabled ? i.list_archives.count : tag.i(nil, class: 'fa-solid fa-ban') %></td>
             <td><%= volume_attached_services i %></td>
             <td class="text-right">
               <div class="btn-group">
-                <%= link_to tag.i(nil, class: 'fa fa-wrench fa-fw'), edit_volume_url(i), class: 'btn btn-warning btn-xs' %>
+                <%= link_to icon('fa-solid', 'wrench'), edit_volume_url(i), class: 'btn btn-warning btn-xs' %>
               </div>
             </td>
           </tr>

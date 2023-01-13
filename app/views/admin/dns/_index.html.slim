@@ -23,9 +23,9 @@
               td.text-right
                 .btn-group
                   = link_to icon('fa-solid', 'gear').html_safe, "/admin/dns/#{i.id}-#{i.name.parameterize}", class: 'btn btn-sm btn-default'
-                  = link_to raw("<i class='fa fa-trash'></i>"), "/admin/dns/#{i.id}-#{i.name.parameterize}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger'
+                  = link_to icon('fa-solid', 'trash'), "/admin/dns/#{i.id}-#{i.name.parameterize}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger'
         - else
           - @zones.each do |i|
             tr
               td= i.id
-              td.text-right= link_to raw("<i class='fa fa-chain'></i> Link"), "/admin/dns?dns_zone[name]=#{i.id}&dns_zone[provider_ref]=#{i.id}&dns_zone[provision_driver_id]=#{@dns_driver.id}", method: :post, class: 'btn btn-xs btn-success'
+              td.text-right= link_to raw("<i class='fa-solid fa-link'></i> Link"), "/admin/dns?dns_zone[name]=#{i.id}&dns_zone[provider_ref]=#{i.id}&dns_zone[provision_driver_id]=#{@dns_driver.id}", method: :post, class: 'btn btn-xs btn-success'

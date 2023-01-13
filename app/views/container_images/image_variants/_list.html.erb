@@ -15,9 +15,9 @@
     <% if image.can_edit? current_user %>
       <td class="text-right">
         <div class="btn-group">
-          <%= link_to(raw("<i class='fa fa-download'></i> pull"), "/admin/container_images/#{image.id}/image_variants/#{i.id}/pull", method: :post, class: 'btn btn-xs btn-default', title: 'Force update of image variant on all nodes', style: "margin-right:5px;") if current_user.is_admin %>
-          <%= link_to '<i class="fa fa-wrench"></i>'.html_safe, edit_container_image_variant_path(i), class: 'btn btn-xs btn-default' %>
-          <%= link_to '<i class="fa fa-trash"></i>'.html_safe, container_image_variant_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
+          <%= link_to(raw("<i class='fa-solid fa-download'></i> pull"), "/admin/container_images/#{image.id}/image_variants/#{i.id}/pull", method: :post, class: 'btn btn-xs btn-default', title: 'Force update of image variant on all nodes', style: "margin-right:5px;") if current_user.is_admin %>
+          <%= link_to icon('fa-solid', 'wrench'), edit_container_image_variant_path(i), class: 'btn btn-xs btn-default' %>
+          <%= link_to icon('fa-solid', 'trash'), container_image_variant_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' %>
         </div>
       </td>
     <% end %>

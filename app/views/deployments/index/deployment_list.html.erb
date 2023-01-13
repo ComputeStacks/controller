@@ -1,0 +1,107 @@
+<% if @deployments.empty? && @pending_orders.empty? %>
+  <div class="col-md-6.col-md-offset-3">
+    <div class="text-center" style="margin-top:50px;opacity: 0.2;">
+      <%= icon 'fa-solid', 'cubes-stacked', nil, { style: 'font-size:10em;' } %>
+      <div style="color:#333;font-size:3em;"><%= t '.none' %></div>
+    </div>
+  </div>
+<% else %>
+  <% if @deployments.count > 6 %>
+    <div class="col-md-12"><%= render partial: "deployments/index/dense" %></div>
+  <% else %>
+
+    <% @pending_orders.each do |i| %>
+      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+        <div class="panel panel-default">
+
+          <div class="panel-heading">
+            <div class="panel-title" style="font-size:14px;line-height:13px;">
+              <%= i.order_data['project']['name'] %>
+              <div class="pull-right"><%= icon 'fa-regular', 'clock' %></div>
+            </div>
+          </div>
+
+          <div class="panel-body">
+            <ul class="list-unstyled">
+              <li>
+                <%= icon 'fa-solid', 'bolt' %>
+                <%= t '.deployments.status' %>
+                <b class="pull-right"><%= t 'deployments.index.deployment_list.deployments.pending_order' %></b>
+              </li>
+
+              <li>
+                <%= icon 'fa-regular', 'clock' %>
+                <%= t '.deployments.last_event' %>
+                <b class="pull-right"><%= distance_of_time_in_words_to_now(i.updated_at, include_seconds: true) %></b>
+              </li>
+
+              <li>
+                <%= icon 'fa-solid', 'cube' %>
+                <%= t 'obj.containers' %>
+                <b class="pull-right"><%= i.order_data['raw_order'].count %></b>
+              </li>
+
+              <li>
+                <%= icon 'fa-solid', 'globe' %>
+                <%= t 'obj.region' %>
+                <b class="pull-right">...</b>
+              </li>
+
+            </ul>
+
+            <div>
+              <%= link_to "View Order", "/orders/#{i.id}", class: "btn btn-default btn-block" %>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    <% end %>
+
+    <% @deployments.each do |i| %>
+      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+        <div class="panel <%= deployment_panel_header i %>">
+
+          <div class="panel-heading">
+            <div class="panel-title" style="font-size:14px;line-height:13px;">
+              <%= truncate i.name, length: 35 %>
+              <div class="pull-right"><%= deployment_list_header_icon(i).join(' ').html_safe %></div>
+            </div>
+          </div>
+
+          <div class="panel-body text-center" style="margin-bottom:-20px;">
+            <% deployment_icons(i).each do |c| %>
+              <%= container_image_img_icon_tag c, 'medium' %>
+            <% end %>
+          </div>
+
+          <div class="panel-body">
+            <ul class="list-unstyled">
+              <li>
+                <%= icon 'fa-solid', 'cube' %>
+                <%= t('obj.services') %>
+                <b class="pull-right"><%= i.services.where(is_load_balancer: false).count %></b>
+              </li>
+              <li>
+                <%= icon 'fa-regular', 'clock' %>
+                <%= t '.deployments.last_event' %>
+                <b class="pull-right"><%= deployment_last_event i %></b>
+              </li>
+              <li>
+                <%= icon 'fa-solid', 'globe' %>
+                <%= i.locations.count == 1 ? t('obj.region') : t('obj.regions') %>
+                <b class="pull-right"><%= i.locations.empty? ? '...' : i.locations.pluck(:name).join(', ') %></b>
+              </li>
+            </ul>
+            <div style="font-size:12px;">
+              <%= link_to raw("#{icon('fa-solid', 'gear')} #{t('actions.manage')}"), "/deployments/#{i.token}", :class => "btn btn-default btn-sm btn-block" %>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    <% end %>
+
+  <% end %>
+<% end %>

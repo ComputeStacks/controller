@@ -18,8 +18,8 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <div class="pull-right text-right">
-            <%= link_to content_tag(:i, nil, class: 'fa fa-wrench'), edit_admin_location_url(location), class: 'btn btn-default btn-sm' %>
-            <%= link_to content_tag(:i, nil, class: 'fa fa-trash'), admin_location_url(location), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-danger btn-sm' %>
+            <%= link_to icon('fa-solid', 'wrench'), edit_admin_location_url(location), class: 'btn btn-default btn-sm' %>
+            <%= link_to icon('fa-solid', 'trash'), admin_location_url(location), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-danger btn-sm' %>
           </div>
           <p class="panel-title"><%= location.name %></p>
         </div>

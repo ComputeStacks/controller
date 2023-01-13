@@ -20,8 +20,8 @@
         <td><%= i.formatted_issuer %></td>
         <td class="text-right">
           <div class="btn-group">
-            <%= link_to "<i class='fa fa-wrench'></i>".html_safe, edit_certificate_path(i), class: 'btn btn-default btn-sm' %>
-            <%= link_to raw("<i class='fa fa-trash'></i>"), certificate_path(i), method: :delete, class: 'btn btn-sm btn-danger', data: {confirm: t('confirm_prompt')} %>
+            <%= link_to icon('fa-solid', 'wrench'), edit_certificate_path(i), class: 'btn btn-default btn-sm' %>
+            <%= link_to icon('fa-solid', 'trash'), certificate_path(i), method: :delete, class: 'btn btn-sm btn-danger', data: {confirm: t('confirm_prompt')} %>
           </div>
 
         </td>

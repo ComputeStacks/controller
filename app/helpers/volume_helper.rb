@@ -61,7 +61,7 @@ module VolumeHelper
   # @param [Deployment::ContainerService] service
   def volume_map_label(volume, service)
     return nil if volume.owner == service
-    "<span class='label label-info'><i class='fa fa-link'></i> #{volume.owner.label}</span>"
+    "<span class='label label-info'><i class='fa-solid fa-link'></i> #{volume.owner.label}</span>"
   end
 
   def volume_attached_services(volume)

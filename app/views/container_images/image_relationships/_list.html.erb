@@ -1,6 +1,6 @@
 <div class="panel panel-default">
   <div class="panel-body">
-    <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_relationship_path(image), class: "pull-right btn btn-xs btn-default" %>
+    <%= link_to icon('fa-solid', 'plus'), new_container_image_relationship_path(image), class: "pull-right btn btn-xs btn-default" %>
     <strong><%= t 'container_images.params.related.table.title' %></strong>
   </div>
   <table class="table">
@@ -21,7 +21,7 @@
         <tr>
           <td><%= link_to image_relationship_label(i), container_image_path(i.dependency) %></td>
           <td class="text-right">
-            <%= link_to raw('<i class="fa fa-trash"></i>'), "#{container_image_relationship_path(i)}", method: :delete, data: {confirm: t('confirm_prompt')}, class: "btn btn-xs btn-danger" if current_user.is_admin? || image.user == current_user %>
+            <%= link_to icon('fa-solid', 'trash'), "#{container_image_relationship_path(i)}", method: :delete, data: {confirm: t('confirm_prompt')}, class: "btn btn-xs btn-danger" if current_user.is_admin? || image.user == current_user %>
           </td>
         </tr>
       <% end %>

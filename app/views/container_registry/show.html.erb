@@ -6,7 +6,7 @@
       <li class="active"><%= @registry.label %> <%= "(#{@registry.user.full_name})" unless @registry.is_resource_owner?(current_user) %></li>
       <% if @registry.can_administer?(current_user) %>
         <li class="pull-right no-spacer">
-          <%= link_to(raw("<i class='fa fa-user-plus'></i> #{t('collaborators.collaborate')}"), "#{container_registry_path(@registry)}/collaborators", class: 'btn btn-sm btn-default', title: 'Manage collaborations') %>
+          <%= link_to(raw("<i class='fa-solid fa-user-plus'></i> #{t('collaborators.collaborate')}"), "#{container_registry_path(@registry)}/collaborators", class: 'btn btn-sm btn-default', title: 'Manage collaborations') %>
         </li>
       <% end %>
     </ol>
@@ -19,9 +19,9 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <div class="btn-group pull-right">
-          <%= link_to raw("<i class='fa fa-wrench'></i>"), edit_container_registry_path(@registry), class: 'btn btn-sm btn-default' %>
+          <%= link_to icon('fa-solid', 'wrench'), edit_container_registry_path(@registry), class: 'btn btn-sm btn-default' %>
           <% if @registry.can_administer?(current_user) %>
-            <%= link_to raw('<i class="fa fa-trash fa-inverse"></i>'), container_registry_path(@registry), method: :delete, data: { confirm: t('.delete_confirm') }, class: 'btn btn-sm btn-danger' %>
+            <%= link_to raw('<i class="fa-solid fa-trash fa-inverse"></i>'), container_registry_path(@registry), method: :delete, data: { confirm: t('.delete_confirm') }, class: 'btn btn-sm btn-danger' %>
           <% end %>
         </div>
         <span class="panel-title">
@@ -68,11 +68,11 @@
                 <% image[:tags].each do |tag| %>
                   <% if tag[:container].nil? %>
                     <a class="btn btn-sm btn-default" style="margin-left:5px;" href="<%= link_reg_to_image_path @registry, image[:image], tag[:tag] %>">
-                      <i class="fa fa-chain-broken"></i> <%= tag[:tag] %>
+                      <i class="fa-solid fa-link-slash"></i> <%= tag[:tag] %>
                     </a>
                   <% else %>
                     <a class="btn btn-sm btn-success" style="margin-left:5px;" href="<%= container_registry_image_path tag[:container][:id], tag[:container][:name] %>">
-                      <i class="fa fa-link"></i> <%= tag[:tag] %>
+                      <i class="fa-solid fa-link"></i> <%= tag[:tag] %>
                     </a>
                   <% end %>
                 <% end %>

@@ -23,7 +23,7 @@
     <% end %>
     <% if @container.can_edit? current_user %>
       <div class="remote-resource refresh refresh-always" data-url="<%= container_image_path @container %>">
-        <%= t 'common.loading' %> <i class="fa fa-refresh fa-fw fa-spin"></i>
+        <%= t 'common.loading' %> <%= icon 'fa-solid fa-spin', 'rotate' %>
       </div>
     <% end %>
   </div>
@@ -32,13 +32,13 @@
     <div class="col-sm-6">
       <div class="pull-right">
         <% if @container.can_administer?(current_user) %>
-          <%= link_to raw("<i class='fa fa-user-plus'></i> #{t('collaborators.collaborate').capitalize}"), container_image_collaborators_path(@container), class: 'btn btn-sm btn-default', title: 'Manage collaborations', style: "margin-right:5px;" %>
+          <%= link_to raw("<i class='fa-solid fa-user-plus'></i> #{t('collaborators.collaborate').capitalize}"), container_image_collaborators_path(@container), class: 'btn btn-sm btn-default', title: 'Manage collaborations', style: "margin-right:5px;" %>
         <% end %>
-        <%= link_to(raw("<i class='fa fa-download'></i> Pull Image"), "/admin/container_images/#{@container.id}/pull", method: :post, class: 'btn btn-sm btn-default', title: 'Force update of image on all nodes', style: "margin-right:5px;") if current_user.is_admin %>
+        <%= link_to(raw("<i class='fa-solid fa-download'></i> Pull Image"), "/admin/container_images/#{@container.id}/pull", method: :post, class: 'btn btn-sm btn-default', title: 'Force update of image on all nodes', style: "margin-right:5px;") if current_user.is_admin %>
         <%= link_to raw("#{icon('fa-solid', 'copy')} #{t('container_images.clone')}"), "#{new_container_image_path}?container_image[parent_image_id]=#{@container.id}", class: 'btn btn-sm btn-primary', style: "margin-right:5px;" %>
-        <%= link_to raw('<i class="fa fa-wrench"></i>'), edit_container_image_path(@container), class: 'btn btn-sm btn-default', style: "margin-right:5px;" %>
+        <%= link_to icon('fa-solid', 'wrench'), edit_container_image_path(@container), class: 'btn btn-sm btn-default', style: "margin-right:5px;" %>
         <% if @container.can_administer?(current_user) %>
-          <%= link_to raw('<i class="fa fa-trash"></i>'), container_image_path(@container), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
+          <%= link_to icon('fa-solid', 'trash'), container_image_path(@container), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger' %>
         <% end %>
       </div>
     </div>
@@ -52,7 +52,7 @@
     <div class="panel <%= @container.ingress_params.empty? ? 'panel-warning' : 'panel-default' %>">
       <%= @container.ingress_params.empty? ? tag.div(class: 'panel-heading', style: 'padding:2px;') : '' %>
       <div class="panel-body">
-        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_ingress_param_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
+        <%= link_to icon('fa-solid', 'plus'), new_container_image_ingress_param_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
         <strong><%= t 'container_images.ingress_rules.obj_plural' %></strong>
       </div>
       <%= render partial: 'container_images/ingress_params/list', locals: {data: @container.ingress_params.sorted, image: @container} %>
@@ -64,7 +64,7 @@
 
     <div class="panel panel-default">
       <div class="panel-body">
-        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_host_entry_path(@container), class: "pull-right btn btn-xs btn-default" %>
+        <%= link_to icon('fa-solid', 'plus'), new_container_image_host_entry_path(@container), class: "pull-right btn btn-xs btn-default" %>
         <strong>Custom Host Entries</strong>
       </div>
       <%= render partial: "container_images/custom_host_entries/list", locals: { entries: @container.host_entries, image: @container } %>
@@ -72,7 +72,7 @@
 
     <div class="panel panel-default">
       <div class="panel-body">
-        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_plugin_path(@container), class: "pull-right btn btn-xs btn-default" %>
+        <%= link_to icon('fa-solid', 'plus'), new_container_image_plugin_path(@container), class: "pull-right btn btn-xs btn-default" %>
         <strong>Image Plugins</strong>
       </div>
       <%= render partial: "container_images/image_plugins/list", locals: { plugins: @container.container_image_plugins, image: @container } %>
@@ -84,7 +84,7 @@
 
     <div class="panel panel-default">
       <div class="panel-body">
-        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_setting_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
+        <%= link_to icon('fa-solid', 'plus'), new_container_image_setting_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
         <strong><%= t 'container_images.params.settings.table.title' %></strong>
       </div>
       <%= render partial: 'container_images/setting_params/list', locals: {data: @container.setting_params.sorted, image: @container} %>
@@ -93,7 +93,7 @@
     <div class="panel <%= @container.volumes.empty? ? 'panel-warning' : 'panel-default' %>">
       <%= @container.volumes.empty? ? tag.div(class: 'panel-heading', style: 'padding:2px;') : '' %>
       <div class="panel-body">
-        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_volume_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
+        <%= link_to icon('fa-solid', 'plus'), new_container_image_volume_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
         <strong><%= t 'volumes.table.title' %></strong>
       </div>
       <%= render partial: 'container_images/volume_params/list', locals: {data: @container.volumes, image: @container} %>
@@ -101,7 +101,7 @@
 
     <div class="panel panel-default">
       <div class="panel-body">
-        <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_env_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
+        <%= link_to icon('fa-solid', 'plus'), new_container_image_env_path(@container), class: "pull-right btn btn-xs btn-default" if @container.can_edit?(current_user) %>
         <strong><%= t 'container_images.params.env.table.title' %></strong>
       </div>
       <%= render partial: 'container_images/env_params/list', locals: {data: @container.env_params.sorted, image: @container} %>
@@ -111,7 +111,7 @@
       <%= form_for @container, url: container_image_path(@container) do |f| %>
         <div class="panel-body">
           <% if @container.can_edit?(current_user) %>
-            <%= link_to '<i class="fa fa-plus"></i>'.html_safe, new_container_image_variant_path(@container), class: "pull-right btn btn-xs btn-default" %>
+            <%= link_to icon('fa-solid', 'plus'), new_container_image_variant_path(@container), class: "pull-right btn btn-xs btn-default" %>
             <div id="updateImageVariantPosBtn" class="btn-group pull-right" style="margin-right:10px;display:none;">
               <%= submit_tag t('actions.update'), class: 'btn btn-xs btn-success'%>
               <%= link_to t('actions.cancel'), "/container_images/#{@container.id}", class: 'btn btn-xs btn-default' %>

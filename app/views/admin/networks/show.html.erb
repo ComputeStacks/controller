@@ -12,8 +12,8 @@
     <p><span class="lead"><%= @network.name %></span><br /><%= @network.label %></p>
   </div>
   <div class="col-md-4 col-xs-6 text-right">
-    <%= link_to content_tag(:i, nil, class: 'fa fa-wrench'), edit_admin_network_url(@network), class: 'btn btn-sm btn-default' %>
-    <%= link_to content_tag(:i, nil, class: 'fa fa-trash'), admin_network_url(@network), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger' %>
+    <%= link_to icon('fa-solid', 'wrench'), edit_admin_network_url(@network), class: 'btn btn-sm btn-default' %>
+    <%= link_to icon('fa-solid', 'trash'), admin_network_url(@network), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger' %>
   </div>
 </div>
 

@@ -1,7 +1,7 @@
 - if @registries.empty?
   .col-md-6.col-md-offset-3
     .text-center style="margin-top:50px;opacity:0.2;"
-      i.fa.fa-database style="font-size:15em;"
+      i.fa-solid.fa-box-archive style="font-size:15em;"
       div style='color:#333;font-size:3em;'= t '.empty'
 - else
   - @registries.each do |i|
@@ -11,13 +11,13 @@
           = i.label
           .pull-right
             - if i.is_resource_owner?(current_user)
-              i.fa.fa-user-plus.fa-fw style="margin-right:5px;" title=(pluralize(i.container_registry_collaborators.active.count, 'Collaborator'))
+              i.fa-solid.fa-user-plus style="margin-right:5px;" title=(pluralize(i.container_registry_collaborators.active.count, 'Collaborator'))
             - else
-              i.fa.fa-user.fa-fw style="margin-right:5px;" title=(i.user.full_name)
+              i.fa-solid.fa-user style="margin-right:5px;" title=(i.user.full_name)
             - if i.status == t('.deploying') || i.status == t('.working')
-              i.fa.fa-refresh.fa-spin.fa-fw
+              i.fa-solid.fa-rotate.fa-spin
             - else
-              i.fa.fa-database.fa-fw
+              i.fa-solid.fa-database
       .panel-body
         ul.list-unstyled
           li

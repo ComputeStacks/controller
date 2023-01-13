@@ -15,7 +15,7 @@ echo "syntax on" >> /etc/vim/vimrc
 apt-get update && apt-get -y upgrade
 update-alternatives --set iptables /usr/sbin/iptables-legacy
 update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent etcd prometheus-node-exporter redis-server postgresql-13 postgresql-13-ip4r rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen
+apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent etcd prometheus-node-exporter redis-server postgresql-13 postgresql-13-ip4r rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen libyaml-dev
 curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
@@ -67,8 +67,8 @@ EOF
 systemctl enable consul && systemctl start consul
 
 echo "Setting up NVM & nodejs..."
-su - vagrant -c "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | PROFILE=/Users/vagrant/profile bash"
-su - vagrant -c "nvm install v16.17.0"
+su - vagrant -c "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | PROFILE=/Users/vagrant/profile bash"
+su - vagrant -c "nvm install v16.15.1"
 su - vagrant -c "corepack enable"
 
 # TODO: Add this to /home/vagrant/.profile
@@ -1027,9 +1027,9 @@ sudo -u vagrant git clone https://github.com/rbenv/ruby-build.git /home/vagrant/
 echo "export PATH=/home/vagrant/.rbenv/shims:$PATH" >> /home/vagrant/.profile
 echo "export OVERMIND_SOCKET=/home/vagrant/.overmind.sock" >> /home/vagrant/.profile
 
-echo "Installing ruby 3.1 (This may take a few minutes)..."
-su - vagrant -c "rbenv install 3.1.2"
-su - vagrant -c "rbenv global 3.1.2"
+echo "Installing ruby 3.2 (This may take a few minutes)..."
+su - vagrant -c "rbenv install 3.2.0"
+su - vagrant -c "rbenv global 3.2.0"
 
 echo "Performing GitHub authentication..."
 cat << 'OUTER' > /home/vagrant/gh_auth.sh

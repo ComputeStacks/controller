@@ -20,17 +20,17 @@
         </a>
       <% end %>
       <a href="/admin/volumes/<%= @volume.id %>/logs" class="btn btn-sm btn-default" style="margin-right:5px;">
-        <i class="fa fa-list"></i>
+        <i class="fa-regular fa-rectangle-list"></i>
         Events
       </a>
       <a href="/admin/volumes/<%= @volume.id %>/subscribers" class="btn btn-sm btn-default" style="margin-right:5px;">
-        <i class="fa fa-link"></i>
+        <i class="fa-solid fa-link"></i>
         Containers
       </a>
       <a href="/admin/volumes/<%= @volume.id %>/edit" class="btn btn-sm btn-default" style="margin-right:5px;">
-        <i class="fa fa-wrench"></i>
+        <%= icon('fa-solid', 'wrench') %>
       </a>
-      <%= link_to tag.i(nil, class: 'fa fa-trash'), "/admin/volumes/#{@volume.id}", method: :delete, data: { confirm: 'Are you sure? This will result in data loss.' }, class: 'btn btn-sm btn-danger' %>
+      <%= link_to icon('fa-solid', 'trash'), "/admin/volumes/#{@volume.id}", method: :delete, data: { confirm: 'Are you sure? This will result in data loss.' }, class: 'btn btn-sm btn-danger' %>
     </div>
   </div>
 </div>

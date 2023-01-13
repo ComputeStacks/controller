@@ -34,12 +34,12 @@
                 <td><%= l i.created_at.in_time_zone(Time.zone), format: :short %></td>
                 <td class="text-right">
                   <div class="btn-group">
-                    <%= link_to "#{tag.i(nil, class: 'fa fa-refresh fa-fw')} #{t('container_services.certificates.verify_domain')}".html_safe, "#{admin_deployments_path(@deployment)}/domains/#{i.id}/verify_dns", method: :post, class: 'btn btn-xs btn-default' if i.le_require_verify? %>
-                    <%= link_to tag.i(nil, class: 'fa fa-wrench fa-fw'), admin_edit_container_domains_path(i), class: 'btn btn-default btn-sm' %>
+                    <%= link_to "#{icon('fa-solid', 'refresh')} #{t('container_services.certificates.verify_domain')}".html_safe, "#{admin_deployments_path(@deployment)}/domains/#{i.id}/verify_dns", method: :post, class: 'btn btn-xs btn-default' if i.le_require_verify? %>
+                    <%= link_to icon('fa-solid', 'wrench'), admin_edit_container_domains_path(i), class: 'btn btn-default btn-sm' %>
                     <% if i.system_domain? %>
-                      <%= link_to tag.i(nil, class: 'fa fa-trash fa-fw'), "#", disabled: 'disabled', class: 'btn btn-danger btn-sm' %>
+                      <%= link_to icon('fa-solid', 'trash'), "#", disabled: 'disabled', class: 'btn btn-danger btn-sm' %>
                     <% else %>
-                      <%= link_to tag.i(nil, class: 'fa fa-trash fa-fw'), admin_container_domains_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-danger btn-sm' %>
+                      <%= link_to icon('fa-solid', 'trash'), admin_container_domains_path(i), method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-danger btn-sm' %>
                     <% end %>
                   </div>
                 </td>

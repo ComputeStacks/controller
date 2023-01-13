@@ -31,13 +31,13 @@ module ContainerServicesHelper
           when 'offline_containers'
             "<span style='color:rgb(217,175,95);'>Offline Containers</span>"
           when 'active_alert'
-            %Q(<span style='color:rgb(217,175,95);'><i class="fa fa-exclamation-triangle fa-fw"></i> Active Alert</span>)
+            %Q(<span style='color:rgb(217,175,95);'><i class="fa-solid fa-triangle-exclamation"></i> Active Alert</span>)
           else
             nil
           end
 
-    msg = '<i class="fa fa-refresh fa-spin fa-fw"></i>' if status == 'working' && msg.nil?
-    msg = '<i class="fa fa-exclamation-triangle fa-fw"></i>' if status == 'alert' && msg.nil?
+    msg = icon('fa-solid fa-spin', 'rotate') if status == 'working' && msg.nil?
+    msg = icon('fa-solid', 'triangle-exclamation') if status == 'alert' && msg.nil?
     msg.nil? ? '' : "#{msg}&nbsp;&nbsp;|&nbsp;&nbsp;".html_safe
   end
 
@@ -99,9 +99,9 @@ module ContainerServicesHelper
       return 'Online' if service.container_image.service_container?
       link_to service_auto_scale_status(service), container_service_auto_scale_path(service)
     when 'inactive', 'offline_containers'
-      %Q( #{tag.i(nil, class: 'text-warning fa fa-exclamation-triangle')} Offline Containers ).html_safe
+      %Q( #{tag.i(nil, class: 'text-warning a-solid fa-triangle-exclamation')} Offline Containers ).html_safe
     when 'alert', 'active_alert', 'resource_usage'
-      %Q( #{tag.i(nil, class: 'text-danger fa fa-exclamation-triangle')} Alert ).html_safe
+      %Q( #{tag.i(nil, class: 'text-danger a-solid fa-triangle-exclamation')} Alert ).html_safe
     when 'working'
       'Operation In Progress'
     else

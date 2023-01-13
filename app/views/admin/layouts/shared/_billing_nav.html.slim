@@ -8,12 +8,12 @@
     - if controller.controller_name == 'billing_plans'
 
       ol.breadcrumb.breadcrumb-action.text-right
-        li= link_to raw("<i class='fa fa-columns'></i>&nbsp;&nbsp;&nbsp;New Billing Plan"), "/admin/billing_plans/new", class: 'btn btn-sm btn-default'
+        li= link_to raw("<i class='fa-solid fa-table-columns'></i>&nbsp;&nbsp;&nbsp;New Billing Plan"), "/admin/billing_plans/new", class: 'btn btn-sm btn-default'
 
     - elsif controller.controller_name == 'products'
 
       ol.breadcrumb.breadcrumb-action.text-right
-        li= link_to raw("<i class='fa fa-shopping-basket'></i>&nbsp;&nbsp;&nbsp;New Product"), "/admin/products/new", class: 'btn btn-sm btn-default'
+        li= link_to raw("<i class='fa-solid fa-basket-shopping'></i>&nbsp;&nbsp;&nbsp;New Product"), "/admin/products/new", class: 'btn btn-sm btn-default'
 
     - else
 

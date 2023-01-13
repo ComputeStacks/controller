@@ -2,7 +2,7 @@
   $ ->
     elem = "#" + id
     the_url = $(elem + ' a').attr('href')
-    $(elem).html '<i class="fa fa-refresh fa-spin"></i>'
+    $(elem).html '<i class="fa-solid fa-rotate fa-spin"></i>'
     $(elem).load the_url
 
 jQuery ->

@@ -1,0 +1,58 @@
+<% content_for :title, "Activity Log" %>
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb">
+    <ul class="breadcrumb">
+      <li><%= link_to "Activity Log", "/admin/app_events" %></li>
+      <li class="active"><%= "Activity Log ID:#{@event.id}" %></li>
+    </ul>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-xs-12">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @event.user %>
+          <tr>
+            <th>User</th>
+            <td></td>
+          </tr>
+        <% end %>
+        <tr>
+          <th>Action</th>
+          <td><%= @event.action %></td>
+        </tr>
+        <% if @event.ip_address %>
+          <tr>
+            <th>IP Address</th>
+            <td><%= link_to @event.ip_address, "/admin/users/#{@event.user.id}-#{@event.user.full_name.parameterize}/whois/#{@event.ip_address.to_s.gsub(".", "-")}" %></td>
+          </tr>
+        <% end %>
+        <tr>
+          <th>Timestamp</th>
+          <td><%= l @event.created_at.in_time_zone(Time.zone), format: :long %></td>
+        </tr>
+        <% if @event.linked %>
+          <tr>
+            <th>Object</th>
+            <td><%= link_to @event.description, @event.url %></td>
+          </tr>
+        <% end %>
+        <% unless @event.details.nil? || @event.details.empty? %>
+          <% @event.details.each_key do |k| %>
+            <tr>
+              <th><%= k %></th>
+              <td><%= @event.details[k] %></td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

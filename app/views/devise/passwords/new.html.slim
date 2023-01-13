@@ -6,7 +6,7 @@
       .panel-body
         .form-group: .input-group
           span.input-group-addon
-            i.fa.fa-envelope
+            i.fa-regular.fa-envelope
           = text_field resource_name, :email, class: 'form-control', placeholder: 'user@domain.com'
       .panel-footer
         = link_to t('actions.cancel'), '/', class: 'btn btn-default btn-sm'
@@ -22,7 +22,7 @@
           .form-group
             .input-group
               span.input-group-addon
-                i.fa.fa-envelope
+                i.fa-regular.fa-envelope
               = text_field resource_name, :email, class: 'form-control', placeholder: 'user@domain.com'
         .modal-footer
           = link_to t('actions.cancel'), "/", class: "btn btn-default pull-left"

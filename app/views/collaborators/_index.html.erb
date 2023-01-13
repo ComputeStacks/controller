@@ -26,9 +26,9 @@
             </td>
             <td class="text-right">
               <% if collab.can_administer? current_user %>
-                <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{base_path}/#{collab.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-danger btn-sm', title: t('collaborators.actions.delete') %>
+                <%= link_to icon('fa-solid', 'trash'), "#{base_path}/#{collab.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-danger btn-sm', title: t('collaborators.actions.delete') %>
               <% else %>
-                <%= link_to tag.i(nil, class: 'fa fa-trash'), "#{base_path}/#{collab.id}", disabled: 'disabled', title: t('collaborators.actions.delete_denied'), class: 'btn btn-danger btn-sm' %>
+                <%= link_to icon('fa-solid', 'trash'), "#{base_path}/#{collab.id}", disabled: 'disabled', title: t('collaborators.actions.delete_denied'), class: 'btn btn-danger btn-sm' %>
               <% end %>
             </td>
           </tr>

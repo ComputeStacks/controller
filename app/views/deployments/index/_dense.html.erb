@@ -12,7 +12,7 @@
             <%= t 'deployments.index.deployment_list.deployments.pending_order' %>
           </span>
           <div class="pull-right hidden-xs">
-            <i class="fa fa-clock-o"></i>
+            <i class="fa-regular fa-clock"></i>
           </div>
         </div>
       </div>
@@ -36,14 +36,14 @@
               <%= pluralize i.services.where(is_load_balancer: false).count, t('obj.service'), t('obj.services') %>
               &nbsp;&nbsp;|&nbsp;&nbsp;<%= deployment_last_event(i) %>
               <% if !i.is_resource_owner?(current_user) %>
-                &nbsp;&nbsp;|&nbsp;&nbsp;<i class="fa fa-users fa-fw"></i> <%= i.user.full_name %>
+                &nbsp;&nbsp;|&nbsp;&nbsp;<i class="fa-solid fa-users"></i> <%= i.user.full_name %>
               <% elsif i.deployment_collaborators.active.exists? %>
-                &nbsp;&nbsp;|&nbsp;&nbsp;<i class="fa fa-user-plus fa-fw"></i> <%= pluralize i.deployment_collaborators.active.count, 'Collaborator' %>
+                &nbsp;&nbsp;|&nbsp;&nbsp;<i class="fa-solid fa-user-plus"></i> <%= pluralize i.deployment_collaborators.active.count, 'Collaborator' %>
               <% end %>
             </span>
             <div class="pull-right hidden-xs">
               <% if %w(working deleting).include?(i.current_state) %>
-                <i class="fa fa-refresh fa-spin"></i> &nbsp;&nbsp; | &nbsp;&nbsp;
+                <%= icon('fa-solid fa-spin', 'rotate') %> &nbsp;&nbsp; | &nbsp;&nbsp;
               <% elsif i.current_state != 'ok' %>
                 <%= deployment_status i %> &nbsp;&nbsp; | &nbsp;&nbsp;
               <% end %>
