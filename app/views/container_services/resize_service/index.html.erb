@@ -38,7 +38,18 @@
             <% end %>
             <div class="panel-body">
               <% packages.each do |p| %>
-                <%= render partial: 'orders/containers/package', locals: { project_owner: @project_owner, package: p, region: @service.region, container: { image_variant_id: @service.image_variant.id } } %>
+                <%=
+                  render partial: 'orders/containers/package',
+                         locals: {
+                           large_layout: true,
+                           project_owner: @project_owner,
+                           package: p,
+                           region: @service.region,
+                           container: {
+                             image_variant_id: @service.image_variant.id
+                           }
+                         }
+                %>
               <% end %>
             </div>
           <% end %>

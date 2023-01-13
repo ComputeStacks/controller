@@ -15,6 +15,25 @@ setContainerPackage = ->
     $(selected_btn).attr 'disabled', 'disabled'
     $(selected_btn).html selected_text
 
+setImageVariant = ->
+
+  $('button.image-variant-selector').each ->
+    choose_text = $(this).attr('data-choose')
+    $(this).removeClass 'btn-info'
+    $(this).addClass 'btn-default'
+    $(this).removeAttr 'disabled'
+    $(this).html choose_text
+
+  $('input.image-variant-input').each (i,v) ->
+    selected_btn = 'button#image-variant-btn-' + $(v).attr('data-image') + '-' + $(v).attr('value')
+    selected_text = $(selected_btn).attr('data-selected')
+    version_label_field = "span#image-variant-label-" + $(v).attr('data-image')
+    $(version_label_field).html $(selected_btn).attr('data-label')
+    $(selected_btn).addClass 'btn-info'
+    $(selected_btn).removeClass 'btn-default'
+    $(selected_btn).attr 'disabled', 'disabled'
+    $(selected_btn).html selected_text
+
 selectContainerAddons = ->
 
   $('button.container-addon-selection').each ->
@@ -32,6 +51,14 @@ selectContainerAddons = ->
       $(selected_btn).html selected_text
 
 jQuery ->
+
+  if $('.image-variant-selector').length
+    setImageVariant()
+
+    $('.image-variant-selector').click ->
+      input_element = "input#image-" + $(this).attr('data-image') + "-variant"
+      $(input_element).val $(this).attr('data-variant')
+      setImageVariant()
 
   if $('.container-addon-selection').length
     selectContainerAddons()

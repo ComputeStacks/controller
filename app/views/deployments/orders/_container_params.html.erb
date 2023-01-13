@@ -9,7 +9,7 @@
           <label><%= container[:params][p][:label] %></label>
           <input type="text"
                  class="form-control"
-                 name="service[container-<%= container[:container_id] %>-param-<%= p %>]"
+                 name="service[container-<%= container[:image_variant_id] %>-param-<%= p %>]"
                  value="<%= container[:params][p][:value].nil? ? container[:params][p][:default_value] : container[:params][p][:value] %>"
             />
         </div>

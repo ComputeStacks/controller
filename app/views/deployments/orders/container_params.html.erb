@@ -19,72 +19,65 @@
     <% unless container[:free] == 'yes' %>
     <input id="p<%= container[:image_variant_id] %>" class='container-package-input' data-index="<%= container[:image_variant_id] %>" type="hidden" name="package[<%= container[:image_variant_id] %>]" value="<%= container['free'] == 'yes' ? 0 : container[:package_id] %>">
     <% end %>
-    <div class="row"><div class="col-sm-12">
-      <div class="panel panel-primary">
-        <div class="panel-body" >
-          <div class="pull-right hidden-xs hidden-sm">
-            <%= image_tag order_image_icon_path(container[:image_id]), style: "width:60px;position:absolute;margin-left:-65px;" %>
+    <input id="image-<%= container[:image_id] %>-variant" class="image-variant-input" data-image="<%= container[:image_id] %>" type="hidden" name="image_variant_selector[<%= container[:image_id] %>]" value="<%= container[:image_variant_id] %>">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="panel panel-primary">
+          <div class="panel-body" >
+            <div class="pull-right hidden-xs hidden-sm">
+              <%= image_tag order_image_icon_path(container[:image_id]), style: "width:60px;position:absolute;margin-left:-65px;" %>
+            </div>
+            <div style="text-transform: uppercase;font-size:18px;font-weight:300;text-indent: 5px;letter-spacing: 1.5px">
+              <%= container[:container_name] %>
+            </div>
           </div>
-          <div style="text-transform: uppercase;font-size:18px;font-weight:300;text-indent: 5px;letter-spacing: 1.5px">
-            <%= container[:container_name] %>
-          </div>
-        </div>
-        <%= render partial: "deployments/orders/container_params", locals: { container: container } if order_container_has_user_params?(container) %>
 
-        <%= render partial: "deployments/orders/container_volumes", locals: { container: container } unless container[:volumes].empty? %>
-
-        <%=
-          render partial: "orders/containers/addon",
-                 locals: {
-                   container: container,
-                   region: @region,
-                   project_owner: @project_owner,
-                   order_session: @order_session
-                 } unless order_addons_for_image(container[:image_id]).empty?
-        %>
-
-        <% unless container[:free] == 'yes' %>
-          <div class="panel-body">
+          <% if order_image_variant_list(container[:image_id]).count > 1 || order_container_has_user_params?(container) %>
             <div class="row">
-              <div class="col-xs-12"><strong>PACKAGES</strong></div>
-            </div>
-            <div class="row">
-              <% if order_packages_for_resources(container[:min_cpu], container[:min_mem]).empty? %>
-              <div class="col-md-12 text-center">
-                <p>
-                  <%= t('orders.projects.container_params.no_packages.resources_html', cpu: container['cpu'], memory: container['mem']) %>
-                </p>
+              <div class="<%= order_params_use_large_layout? ? 'col-xs-12' : 'col-sm-6 col-xs-12' %>">
+                <%= render partial: "deployments/orders/image_variant_grid", locals: { container: container, variant_list: order_image_variant_list(container[:image_id]) } %>
+                <%= render partial: "deployments/orders/container_params", locals: { container: container } if order_container_has_user_params?(container) %>
+                <%= render partial: "deployments/orders/container_volumes", locals: { container: container } unless container[:volumes].empty? %>
+                <%=
+                  render partial: "orders/containers/addon",
+                         locals: {
+                           container: container,
+                           region: @region,
+                           project_owner: @project_owner,
+                           order_session: @order_session
+                         } unless order_addons_for_image(container[:image_id]).empty?
+                %>
               </div>
-              <% end %>
-            </div>
-          </div>
-          <% order_packages_for_resources(container[:min_cpu], container[:min_mem]).each do |group,packages| %>
-            <% unless group.blank? %>
-              <div style="color:#333; text-align: left;padding-left:15px;border-radius: 0px;">
-                <div class="panel-body"><%= group %></div>
+              <div class="<%= order_params_use_large_layout? ? 'col-xs-12' : 'col-sm-6 col-xs-12' %>">
+                <%=
+                  render partial: "deployments/orders/image_packages",
+                         locals: {
+                           container: container,
+                           project_owner: @project_owner,
+                           region: @region,
+                           large_layout: order_params_use_large_layout?
+                         } unless container[:free] == 'yes'
+                %>
               </div>
-            <% end %>
-            <div class="panel-body">
-              <% unless order_image_product(container).nil? %>
-                <% if order_image_product(container).allow_user?(current_user) %>
-                  <%=
-                    render partial: "orders/containers/image",
-                           locals: {
-                             region: @region,
-                             container: container,
-                             project_owner: @project_owner
-                           }
-                  %>
-                <% end %>
-              <% end %>
-              <% packages.each do |p| %>
-                <%= render partial: 'orders/containers/package', locals: { project_owner: @project_owner, package: p, region: @region, container: container } %>
-              <% end %>
             </div>
+          <% else %>
+            <%= render partial: "deployments/orders/container_volumes", locals: { container: container } unless container[:volumes].empty? %>
+            <%=
+              render partial: "deployments/orders/image_packages",
+                     locals: {
+                       container: container,
+                       project_owner: @project_owner,
+                       region: @region,
+                       large_layout: true
+                     } unless container[:free] == 'yes'
+            %>
           <% end %>
-        <% end %>
+
+
+
+        </div>
       </div>
-    </div></div>
+    </div>
   <% end %>
   <div class="row"><div class="col-sm-12">
     <%= submit_tag t('actions.continue'), class: "btn btn-success btn-block" %>

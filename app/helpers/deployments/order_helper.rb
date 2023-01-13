@@ -66,4 +66,14 @@ module Deployments::OrderHelper
     image.container_image_plugins.active.optional
   end
 
+  def order_image_variant_list(image_id)
+    image = ContainerImage.find_by id: image_id
+    return [] if image.nil?
+    image.image_variants
+  end
+
+  def order_params_use_large_layout?
+    BillingPackage.find_by_plan(current_user.billing_plan).count > 4
+  end
+
 end

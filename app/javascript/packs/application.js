@@ -16,4 +16,5 @@
 // const imagePath = (name) => images(name, true)
 import "../src/container_images/image_variants"
 import "../src/credentials"
-import "../src/order_volumes"
+import "../src/orders/variants"
+import "../src/orders/volumes"

@@ -14,8 +14,10 @@ module OrdersHelper
     result = []
     region = Region.find_by(id: order.order_data['region_id'])
     data.each_with_index do |i, k|
-      container_image = ContainerImage::ImageVariant.find_by(id: i['image_variant_id'])&.container_image
-      image_name = container_image.nil? ? 'Unknown' : container_image.label
+      image_variant = ContainerImage::ImageVariant.find_by(id: i['image_variant_id'])
+      next if image_variant.nil?
+      container_image = image_variant.container_image
+      image_name = container_image.nil? ? 'Unknown' : image_variant.friendly_name
       image_product = container_image.product
       product = Product.find_by(id: i.dig('resources', 'product_id'))
       result << tag.div(class: 'order_wrapper') do
@@ -39,7 +41,7 @@ module OrdersHelper
                         if image_product
                           concat(
                               tag.td(class: 'text-right', style: 'font-weight:bold;') do
-                                image_product.nil? ? I18n.t('common.free') : formatted_product_price(region, image_product)
+                                formatted_product_price(region, image_product)
                               end
                           )
                         end

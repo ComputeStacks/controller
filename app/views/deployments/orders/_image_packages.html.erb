@@ -1,0 +1,47 @@
+<div class="panel-body">
+  <div class="row">
+    <div class="col-xs-12"><strong>PACKAGES</strong></div>
+  </div>
+  <div class="row">
+    <% if order_packages_for_resources(container[:min_cpu], container[:min_mem]).empty? %>
+      <div class="col-md-12 text-center">
+        <p>
+          <%= t('orders.projects.container_params.no_packages.resources_html', cpu: container['cpu'], memory: container['mem']) %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+</div>
+<% order_packages_for_resources(container[:min_cpu], container[:min_mem]).each do |group,packages| %>
+  <% unless group.blank? %>
+    <div style="color:#333; text-align: left;padding-left:15px;border-radius: 0px;">
+      <div class="panel-body"><%= group %></div>
+    </div>
+  <% end %>
+  <div class="panel-body">
+    <% unless order_image_product(container).nil? %>
+      <% if order_image_product(container).allow_user?(current_user) %>
+        <%=
+          render partial: "orders/containers/image",
+                 locals: {
+                   region: @region,
+                   container: container,
+                   project_owner: @project_owner
+                 }
+        %>
+      <% end %>
+    <% end %>
+    <% packages.each do |p| %>
+      <%=
+        render partial: 'orders/containers/package',
+               locals: {
+                 large_layout: large_layout,
+                 project_owner: @project_owner,
+                 package: p,
+                 region: @region,
+                 container: container
+               }
+      %>
+    <% end %>
+  </div>
+<% end %>

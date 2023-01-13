@@ -1,0 +1,46 @@
+<% if variant_list.count > 1 %>
+<div class="panel-body">
+  <div class="row">
+    <div class="col-xs-12">
+      <strong>
+        SELECTED VERSION: <span id="image-variant-label-<%= container[:image_id] %>"><%= container[:variant_label] %></span>
+        <a style="cursor:pointer;" class="order-image-variant-list-toggle" data-list-id="order-image-variant-list-<%= container[:image_id] %>">[MODIFY]</a>
+      </strong>
+    </div>
+  </div>
+</div>
+
+<div class="order-image-variant-list panel-body" id="order-image-variant-list-<%= container[:image_id] %>" style="display:none;">
+  <div class="row">
+    <% variant_list.each do |i| %>
+      <div class="<%= order_params_use_large_layout? ? 'col-lg-3 col-md-4 col-sm-6 col-xs-12' : 'col-lg-4 col-md-6 col-sm-12' %>">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-xs-12 text-center">
+                <strong><%= i.label %></strong>
+              </div>
+            </div>
+          </div>
+          <div class="panel-footer">
+            <%=
+              button_tag 'SELECT',
+                         type: 'button',
+                         class: 'btn btn-default btn-block image-variant-selector',
+                         data: {
+                           variant: i.id,
+                           image: container[:image_id],
+                           label: i.label,
+                           choose: 'SELECT',
+                           selected: I18n.t('actions.selected')
+                         },
+                         id: "image-variant-btn-#{container[:image_id]}-#{i.id}"
+            %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+<hr>
+<% end %>

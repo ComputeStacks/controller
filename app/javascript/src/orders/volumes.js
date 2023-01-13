@@ -1,6 +1,6 @@
 window.addEventListener('load', () => {
 
-  const toggleVolumeParamButtons = document.querySelectorAll('.volume-param-toggle');
+  const toggleVolumeParamButtons = document.querySelectorAll('.order-volume-param-toggle');
 
   toggleVolumeParamButtons.forEach(function (toggleBtn) {
     toggleBtn.addEventListener('click', function() {

@@ -138,7 +138,8 @@ class OrderSession
         image_id: i.container_image.id,
         image_variant_id: i.id,
         source: source ? source_csrn : nil,
-        container_name: i.friendly_name,
+        container_name: i.container_image.label,
+        variant_label: i.label,
         params: settings,
         volumes: vols,
         free: i.container_image.is_free ? 'yes' : 'no',
@@ -150,6 +151,19 @@ class OrderSession
       }
     end
     add_dependencies!(opts) unless skip_dep
+  end
+
+  def update_image_variant!(image_id, new_variant_id)
+    image = images.find { |i| i[:image_id] == image_id }
+    return false if image.nil?
+    return true if image[:image_variant_id].to_i == new_variant_id.to_i
+    image_object = ContainerImage.find_by id: image_id
+    return false unless image_object.can_view?(user)
+    new_variant = image_object.image_variants.find_by id: new_variant_id
+    return false if new_variant.nil?
+    image[:image_variant_id] = new_variant.id
+    image[:variant_label] = new_variant.label
+    true
   end
 
   def add_collection(collection_id)
