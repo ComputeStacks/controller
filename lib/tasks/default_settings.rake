@@ -158,15 +158,6 @@ task default_settings: :environment do
     )
   end
 
-  unless ContainerImageProvider.where(name: "Elastic").exists?
-    puts "Creating Elastic Image Provider..."
-    ContainerImageProvider.create!(
-      name: "Elastic",
-      is_default: false,
-      hostname: "docker.elastic.co"
-    )
-  end
-
   unless ContainerImageProvider.where(name: "Github").exists?
     puts "Creating Github Image Provider..."
     ContainerImageProvider.create!(

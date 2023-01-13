@@ -39,13 +39,14 @@ module ContainerImages
     end
 
     def image_valid_tag_message(image)
+      retry_link = link_to(icon('fa-solid', 'rotate', 'Retry'), "#{container_image_path(image)}/image_validation", method: :post)
       case image.variant_pull_status
       when :partial
-        %q(<small class='text-danger'>Some image variants are not available.</small>).html_safe
+        %Q(<small class='text-danger'>Some image variants are not available. #{retry_link}</small>).html_safe
       when :pending
         %q(<small class='text-muted'>Pending registry validation...</small>).html_safe
       when :invalid
-        %q(<small class='text-muted'>Error connecting to registry, ensure settings are correct.</small>).html_safe
+        %Q(<small class='text-danger'>Error connecting to registry, ensure settings are correct. #{retry_link}</small>).html_safe
       else
         nil
       end

@@ -2,7 +2,7 @@ namespace :containers do
   desc "Install php container"
   task php: :environment do
     if ContainerImage.find_by(name: 'php').nil?
-      dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
+      dhprovider = ContainerImageProvider.find_by(name: "Github")
       php        = ContainerImage.create!(
         name:                     'php',
         label:                    'PHP',
@@ -12,7 +12,7 @@ namespace :containers do
         can_scale:                true,
         is_free:                  false,
         container_image_provider: dhprovider,
-        registry_image_path:      "ghcr.io/computestacks/cs-docker-php",
+        registry_image_path:      "computestacks/cs-docker-php",
         skip_variant_setup: true
       )
 

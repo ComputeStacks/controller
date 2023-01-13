@@ -4,7 +4,7 @@ namespace :containers do
   task wordpress: :environment do
 
     if ContainerImage.find_by(name: 'wordpress').nil?
-      dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
+      provider = ContainerImageProvider.find_by(name: "Github")
 
       unless ContainerImage.where(name: 'mariadb').exists?
         Rake::Task['containers:mariadb'].execute
@@ -18,8 +18,8 @@ namespace :containers do
         role:                     "wordpress",
         category:               "web",
         can_scale:                true,
-        container_image_provider: dhprovider,
-        registry_image_path:      "ghcr.io/computestacks/cs-docker-wordpress",
+        container_image_provider: provider,
+        registry_image_path:      "computestacks/cs-docker-wordpress",
         min_cpu:                  1,
         min_memory:               512,
         labels:                   {

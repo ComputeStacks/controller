@@ -1,6 +1,15 @@
 class UpgradeSystemImages < ActiveRecord::Migration[7.0]
   def change
 
+    gh_image_provider = ContainerImageProvider.find_by(name: "Github")
+    if gh_image_provider.nil? # shouldn't happen
+      gh_image_provider = ContainerImageProvider.create!(
+        name: "Github",
+        is_default: false,
+        hostname: "ghcr.io"
+      )
+    end
+
     # MariaDB
     unless ContainerImage.where(name: 'mariadb').exists?
       mysql = ContainerImage.find_by(name: 'mariadb-105')
@@ -71,7 +80,7 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
     # phpMyAdmin
     pma = ContainerImage.find_by registry_image_path: "cmptstks/phpmyadmin"
     if pma
-      pma.update registry_image_path: "ghcr.io/computestacks/cs-docker-pma"
+      pma.update container_image_provider: gh_image_provider, registry_image_path: "computestacks/cs-docker-pma"
     end
 
     # PHP
@@ -79,7 +88,7 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
     if php.nil?
       php = ContainerImage.find_by(name: 'php-7-4')
       if php
-        php.update name: 'php', label: 'PHP', registry_image_path: "ghcr.io/computestacks/cs-docker-php"
+        php.update container_image_provider: gh_image_provider, name: 'php', label: 'PHP', registry_image_path: "computestacks/cs-docker-php"
         php.image_variants.each do |i|
           i.update_column :is_default, false
         end
@@ -139,7 +148,7 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
         end
       end
     else
-      php.update registry_image_path: "ghcr.io/computestacks/cs-docker-php"
+      php.update container_image_provider: gh_image_provider, registry_image_path: "computestacks/cs-docker-php"
     end
 
     # Postgres
@@ -191,8 +200,8 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
 
     # Wordpress
     wp = ContainerImage.find_by name: 'wordpress' # in case provider has custom wordpress image...
-    if wp && %w(ghcr.io/computestacks/cs-docker-wordpress cmptstks/wordpress).include?(wp.registry_image_path)
-      wp.update registry_image_path: "ghcr.io/computestacks/cs-docker-wordpress"
+    if wp && %w(computestacks/cs-docker-wordpress cmptstks/wordpress).include?(wp.registry_image_path)
+      wp.update container_image_provider: gh_image_provider, registry_image_path: "computestacks/cs-docker-wordpress"
       wp.image_variants.each do |i|
         i.update_column :is_default, false
       end
@@ -244,7 +253,9 @@ class UpgradeSystemImages < ActiveRecord::Migration[7.0]
 
     # WHMCS
     whmcs = ContainerImage.find_by registry_image_path: "cmptstks/whmcs"
-    whmcs.update(registry_image_path: "ghcr.io/computestacks/cs-docker-whmcs") if whmcs
+    if whmcs
+      whmcs.update container_image_provider: gh_image_provider, registry_image_path: "computestacks/cs-docker-whmcs"
+    end
 
   end
 end

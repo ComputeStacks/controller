@@ -4,7 +4,7 @@ namespace :containers do
   task pma: :environment do
 
     if ContainerImage.find_by(name: 'pma').nil?
-      dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
+      dhprovider = ContainerImageProvider.find_by(name: "Github")
       pma        = ContainerImage.create!(
         name:                     "pma",
         label:                    "phpMyAdmin",
@@ -14,7 +14,7 @@ namespace :containers do
         is_free:                  true,
         can_scale:                false,
         container_image_provider: dhprovider,
-        registry_image_path:      "ghcr.io/computestacks/cs-docker-pma",
+        registry_image_path:      "computestacks/cs-docker-pma",
         skip_variant_setup: true
       )
       pma.image_variants.create!(

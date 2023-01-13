@@ -64,6 +64,7 @@ Rails.application.routes.draw do
                   :env_params,
                   :image_plugins,
                   :image_relationships,
+                  :image_validation,
                   :ingress_params,
                   :setting_params,
                   :volume_params,

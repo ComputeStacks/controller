@@ -9,7 +9,7 @@ namespace :containers do
       end
       mysql = ContainerImage.find_by(name: 'mariadb')
 
-      dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
+      dhprovider = ContainerImageProvider.find_by(name: "Github")
       whmcs      = ContainerImage.create!(
         name:                     'whmcs',
         label:                    'WHMCS',
@@ -19,7 +19,7 @@ namespace :containers do
         can_scale:                true,
         is_free:                  false,
         container_image_provider: dhprovider,
-        registry_image_path:      "ghcr.io/computestacks/cs-docker-whmcs",
+        registry_image_path:      "computestacks/cs-docker-whmcs",
         skip_variant_setup: true
       )
 
