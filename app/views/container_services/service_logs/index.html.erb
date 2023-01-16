@@ -1,20 +1,60 @@
 <% content_for :title, "#{@service.label} Logs" %>
 
-<% content_for :breadcrumb do %>
+<% if request.xhr? %>
 
-  <div class="row has-breadcrumb">
-    <ol class="breadcrumb">
-      <li><%= link_to t('obj.deployments'), "/deployments" %></li>
-      <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
-      <li><%=link_to @service.label, container_service_path(@service)  %></li>
-      <li class="active">Logs</li>
-    </ol>
+  <div class="row">
+    <div class="col-xs-12 text-right">
+      <%= l Time.now.in_time_zone(current_user.tz), format: :month_time_with_year %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <table class="table terminal-view">
+        <tbody>
+        <% if @logs.empty? %>
+        <tr>
+          <td class="text-center">No logs received yet.</td>
+        </tr>
+        <% end %>
+        <% @logs.each do |i| %>
+        <tr>
+          <td class="hidden-xs hidden-sm">
+            <%= l Time.at(i[0]).in_time_zone(current_user.tz), format: :month_time_without_year %>
+          </td>
+          <td class="hidden-xs hidden-sm text-primary">
+            <%= i[1].gsub('/','') %>
+          </td>
+          <td><%= i[2] %></td>
+        </tr>
+        <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<% else %>
+
+  <% content_for :breadcrumb do %>
+    <div class="row has-breadcrumb">
+      <ol class="breadcrumb">
+        <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+        <li><%= link_to @deployment.name, deployments_path(@deployment) %></li>
+        <li><%=link_to @service.label, container_service_path(@service)  %></li>
+        <li class="active">Logs</li>
+      </ol>
+    </div>
+  <% end %>
+
+  <div class="remote-resource refresh" data-url="/container_services/<%= @service.id %>/service_logs">
+    <div class="row">
+      <div class="col-xs-12">
+        <noscript><%= t 'noscript' %></noscript>
+        <div class="text-center" style="padding: 25px 0;">
+          <%= icon 'fa-solid fa-rotate', 'spin', t('common.loading') %>
+        </div>
+      </div>
+    </div>
   </div>
 
 <% end %>
-
-<div class="row">
-  <div class="col-xs-12">
-    <div class="xterm-container"></div>
-  </div>
-</div>
