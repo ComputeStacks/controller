@@ -8,7 +8,7 @@ class Api::Admin::ContainerImages::PullController < Api::Admin::ContainerImages:
   # `POST /api/admin/container_images/{id}/pull`
   #
   def create
-    ImageWorkers::PullImageWorker.perform_async nil, @image.to_global_id.to_s
+    ImageWorkers::PullImageWorker.perform_async nil, @image.global_id
     respond_to do |f|
       f.json { render json: {}, status: :accepted }
       f.xml { render xml: {}, status: :accepted }

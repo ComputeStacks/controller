@@ -4,6 +4,27 @@ module OrdersHelper
     image.dependencies.filter_map { |i| i.id }.join(', ')
   end
 
+  def order_view_status(order)
+    pending_msg = "Your order is being provisioned, please wait..."
+    error_msg = "There appears to be a problem, please contact support."
+
+    is_ready = "Your project is ready"
+    is_ready_cloned = "Your project is ready, however the cloning process may still need a few more minutes to finish. Please watch for the volume snapshot and restore process in your event log to ensure the clone was successful."
+
+    event = order.provision_event
+
+    return pending_msg if event.nil?
+
+    return pending_msg if order.deployment.nil? && event.active?
+    return error_msg if order.deployment.nil? && event.done?
+    if order.is_clone?
+      return is_ready_cloned if order.deployment && event.success?
+    else
+      return is_ready if order.deployment && event.success?
+    end
+    "Your project is being provisioned."
+  end
+
   # Generate order confirmation table
   #
   # @param [Order] order
@@ -27,7 +48,7 @@ module OrdersHelper
               concat tag.small(t('obj.deployment').upcase)
               concat tag.div(order.deployment.name, class: 'order-item-description')
             end
-          ) if order.deployment
+          ) if order.deployment && order.pending?
           concat tag.small(i['product_type'].upcase.gsub("_", " "), style: 'font-weight:bold;')
           concat tag.div(i.dig('product', 'label'), class: 'order-item-description')
           concat(

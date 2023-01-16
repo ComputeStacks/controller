@@ -19,7 +19,7 @@ module LoadBalancerServices
 
     def perform
       return true unless existing_jobs.empty?
-      LoadBalancerWorkers::DeployConfigWorker.perform_async(lb.nil? ? nil : lb.to_global_id.to_s)
+      LoadBalancerWorkers::DeployConfigWorker.perform_async(lb.nil? ? nil : lb.global_id)
     end
 
     private
@@ -32,7 +32,7 @@ module LoadBalancerServices
           q2 = i.args.empty?
         else
           q1 = i.item['class'] == 'LoadBalancerWorkers::DeployConfigWorker'
-          q2 = i.args.include? lb.to_global_id.to_s.to_s
+          q2 = i.args.include? lb.global_id.to_s
         end
         q1 && q2
       end

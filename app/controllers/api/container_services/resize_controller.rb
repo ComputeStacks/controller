@@ -47,9 +47,9 @@ class Api::ContainerServices::ResizeController < Api::ContainerServices::BaseCon
         event.event_details.create!(data: raw_msg, event_code: 'fdfcc55ffebd0424')
         event.deployments << @service.deployment if @service.deployment
         ContainerServiceWorkers::ResizeServiceWorker.perform_async(
-          @service.to_global_id.to_s,
-          event.to_global_id.to_s,
-          product.package.to_global_id.to_s
+          @service.global_id,
+          event.global_id,
+          product.package.global_id
         )
         result << "Successfully queued resize to package #{product.label}"
       end

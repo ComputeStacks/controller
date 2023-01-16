@@ -11,7 +11,15 @@ class OrdersController < AuthController
     redirect_to "/deployments/orders"
   end
 
-  def show; end
+  def show
+    if request.xhr?
+      render template: "orders/order_state", layout: false
+    else
+      if @order.success? && @order.provision_event&.success? && @order.deployment
+        redirect_to "/deployments/#{@order.deployment.token}"
+      end
+    end
+  end
 
   # Process an order
   def update
@@ -32,7 +40,7 @@ class OrdersController < AuthController
         ip_addr: request.remote_ip,
         event: 'updated'
       )
-      ProcessOrderWorker.perform_async @order.to_global_id.to_s, audit.to_global_id.to_s
+      ProcessOrderWorker.perform_async @order.global_id, audit.global_id
     end
     redirect_to @redirect_path
   end
@@ -51,14 +59,9 @@ class OrdersController < AuthController
 
   def find_order
     @order = current_user.orders.find_by(id: params[:id])
-
     return(redirect_to("/deployments")) if @order.nil?
-    @redirect_path = if @order.deployment
-      "/deployments/#{@order.deployment.token}"
-    else
-      '/deployments'
-    end
     @order.current_user = current_user
+    @redirect_path = @order.deployment ? "/deployments/#{@order.deployment.token}" : "/orders/#{@order.id}"
   end
 
   def load_order_session

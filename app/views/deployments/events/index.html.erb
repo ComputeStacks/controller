@@ -10,18 +10,10 @@
   </div>
 <% end %>
 
-
-<div class="row">
-  <div class="col-md-12">
-    <div class="row">
-      <div class="col-md-12">
-        <%= render partial: "event_logs/list", locals: { logs: @logs, root_path: "/deployments/#{@deployment.token}/events" } %>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <%= will_paginate @logs %>
-      </div>
+<div class="remote-resource <% if params[:page].blank? %>refresh<% end %>" data-url="<%= deployments_path @deployment %>/events">
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <%= icon('fa-solid fa-spin', 'rotate') %>
     </div>
   </div>
 </div>

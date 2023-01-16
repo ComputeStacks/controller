@@ -23,7 +23,7 @@ class StoreAlertService
         else
           existing_alert.update_attribute :status, data[:status]
           if existing_alert.name == 'NodeUp' && existing_alert.node
-            NodeWorkers::HeartbeatWorker.perform_async existing_alert.node.to_global_id.to_s
+            NodeWorkers::HeartbeatWorker.perform_async existing_alert.node.global_id
           end
         end
         next

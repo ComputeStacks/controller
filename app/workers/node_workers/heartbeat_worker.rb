@@ -8,7 +8,7 @@ module NodeWorkers
 
       if node_id.nil?
         Node.all.each do |n|
-          NodeWorkers::HeartbeatWorker.perform_async n.to_global_id.to_s
+          NodeWorkers::HeartbeatWorker.perform_async n.global_id
         end
         return
       end

@@ -1,37 +1,20 @@
 <%= content_for :title, "Order: #{@order.id}" %>
 
-<div class="row">
-  <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 block-center">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h4 class="panel-title"><%= @order.can_process? ? t('orders.show.title.confirmation') : t('orders.show.title.details') %></h4>
-      </div>
-      <div class="panel-body" style="min-height:250px;">
-        <div class="order-os-image"><%= image_tag ContainerImage.default_avatar_path %></div>
-        <%= order_confirmation(@order) %>
-        <div class="clearfix">&nbsp;</div>
-      </div>
-      <% if @order.can_process? %>
-        <div class="panel-footer">
-          <% if defined?(@order_session) && @order_session.new_project? %>
-            <%= link_to t('actions.edit'), "/deployments/orders/containers", class: 'btn btn-default' %>
-            <%= link_to t('actions.submit'), "/orders/#{@order.id}", method: :put, class: 'btn btn-success pull-right' %>
-            <%= link_to t('actions.cancel'), "/orders/#{@order.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-warning pull-right', style: "margin-right: 5px;" %>
-          <% else %>
-            <%= link_to t('actions.cancel'), "/orders/#{@order.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-warning' %>
-            <%= link_to t('actions.submit'), "/orders/#{@order.id}", method: :put, class: 'btn btn-success pull-right' %>
-          <% end %>
-        </div>
-      <% end %>
+<% content_for :breadcrumb do %>
+  <div class="row has-breadcrumb hidden-xs">
+    <ol class="breadcrumb">
+      <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+      <li class="active"><%= @order.id %></li>
+    </ol>
+  </div>
+<% end %>
+
+<div class="remote-resource refresh" data-url="/orders/<%= @order.id %>">
+  <div class="row">
+    <div class="col-xs-12 text-center" style="padding:25px 0;">
+      <%= icon('fa-solid fa-spin', 'rotate') %>
     </div>
-    <div class="order-footer-message text-center"><em><%= t '.estimate_warning' %></em></div>
   </div>
 </div>
 
-<% if current_user.is_support_admin? || Rails.env.development? %>
-  <div class="row" style="margin-top:10px;">
-    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 block-center" style="color:#ccc;font-size:12px;">
-      <%= render partial: 'deployments/orders/admin_header' %>
-    </div>
-  </div>
-<% end %>
+`

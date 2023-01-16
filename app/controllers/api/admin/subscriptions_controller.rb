@@ -186,9 +186,9 @@ class Api::Admin::SubscriptionsController < Api::Admin::ApplicationController
             container_count = @service.containers.count
             event = @service.event_logs.where("locale = ? AND (status = ? OR status = ?)", (container_count.abs == 1 ? 'service.resizing_1' : 'service.resizing'), 'pending', 'running').first
             ContainerServiceWorkers::ResizeServiceWorker.perform_async(
-              @service.to_global_id.to_s,
-              event.to_global_id.to_s,
-              product.package.to_global_id.to_s
+              @service.global_id,
+              event.global_id,
+              product.package.global_id
             )
             is_ok = true
           else
@@ -212,7 +212,7 @@ class Api::Admin::SubscriptionsController < Api::Admin::ApplicationController
         event.deployments << @service.deployment if @service.deployment
         region_check = @service.region
         if region_check && !region_check.nodes.empty?
-          ContainerServiceWorkers::ScaleServiceWorker.perform_async @service.to_global_id.to_s, event.to_global_id.to_s
+          ContainerServiceWorkers::ScaleServiceWorker.perform_async @service.global_id, event.global_id
         else
           event.update(
                    status: 'failed',

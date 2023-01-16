@@ -34,7 +34,7 @@ class DeploymentsController < AuthController
     )
     @deployment.mark_trashed!
     event.deployments << @deployment
-    ProjectWorkers::TrashProjectWorker.perform_async @deployment.to_global_id.to_s, event.to_global_id.to_s
+    ProjectWorkers::TrashProjectWorker.perform_async @deployment.global_id, event.global_id
     redirect_to '/deployments', notice: 'Project queued for deletion'
   end
 

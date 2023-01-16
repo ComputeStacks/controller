@@ -48,7 +48,7 @@ module Containers
     private
 
     def trigger_create_notifier
-      ProcessAppEventWorker.perform_async 'ContainerCreated', user.to_global_id.to_s, to_global_id.to_s
+      ProcessAppEventWorker.perform_async 'ContainerCreated', user.global_id, global_id
     end
 
     def trigger_destroy_notifier
@@ -57,7 +57,7 @@ module Containers
         'description' => app_event_description('ContainerDestroyed'),
         'labels' => []
       }
-      ProcessAppEventWorker.perform_async('ContainerDestroyed', user.to_global_id.to_s, nil, data) if user
+      ProcessAppEventWorker.perform_async('ContainerDestroyed', user.global_id, nil, data) if user
     end
 
   end

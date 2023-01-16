@@ -1,7 +1,11 @@
 class ContainerServices::EventsController < ContainerServices::BaseController
 
   def index
-    @logs = @service.event_logs.sorted.paginate page: params[:page], per_page: 25
+    if request.xhr?
+      @logs = @service.event_logs.sorted.paginate page: params[:page], per_page: 25
+      @root_path = "#{helpers.container_service_path(@service)}/events"
+      render template: 'event_logs/list', layout: false
+    end
   end
 
   def show

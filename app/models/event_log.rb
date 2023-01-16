@@ -29,7 +29,7 @@ class EventLog < ApplicationRecord
 
   # @!scope class
   # @return [Array<EventLog>]
-  scope :recent, -> { where Arel.sql %Q( event_logs.updated_at > '#{1.day.ago.iso8601}' ) }
+  scope :recent, -> { where %Q( event_logs.updated_at > '#{1.day.ago.iso8601}' ) }
 
   # @return [Array<AlertNotification>]
   has_and_belongs_to_many :alert_notifications

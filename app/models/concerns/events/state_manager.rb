@@ -3,9 +3,9 @@ module Events
     extend ActiveSupport::Concern
 
     included do
-      scope :active, -> { where( Arel.sql("status = 'pending' OR status = 'running'") ) }
+      scope :active, -> { where "status = 'pending' OR status = 'running'" }
       scope :running, -> { where status: 'running' }
-      scope :failed, -> { where(status: 'failed') }
+      scope :failed, -> { where status: 'failed' }
     end
 
     # @return [Boolean]

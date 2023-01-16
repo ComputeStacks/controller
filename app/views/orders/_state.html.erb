@@ -1,0 +1,97 @@
+<div class="row">
+
+  <div class="col-sm-6 col-xs-12">
+    <small><%= t('obj.deployment').upcase %></small>
+    <div class="order-item-description">
+      <%= @order.deployment ? @order.deployment.name : icon('fa-solid fa-spin', 'sync', 'Project will be created shortly...') %>
+    </div>
+    <% if @order.deployment && !@order.provision_event&.active? %>
+      <%= link_to icon('fa-solid', 'rocket', "Take me to my project"), "/deployments/#{@order.deployment.token}", class: 'btn btn-primary' %>
+    <% end %>
+  </div>
+
+  <div class="col-sm-6 col-xs-12" style="padding-top:10px;">
+    <div class="text-center">
+      <p class="lead"><%= order_view_status @order %></p>
+    </div>
+  </div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+  <div class="col-lg-5 col-md-6 col-sm-12">
+
+    <div class="panel panel-default">
+      <div class="panel-body" style="min-height:250px;">
+        <%= order_confirmation(@order) %>
+        <div class="clearfix">&nbsp;</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="col-lg-7 col-md-6 col-sm-12">
+
+    <% @order.events.sorted.each do |event| %>
+      <div class="panel <%= event_status_panel_header_color event %>">
+        <% if deployment_event(event).strip.blank? %>
+          <div class="panel-heading" style="padding:2px;"></div>
+        <% else %>
+          <div class="panel-heading">
+            <%= strip_tags deployment_event(event).gsub(/\[(.*?)\]/, '') %>
+            <% if event.running? %>
+              <div class="pull-right" style="vertical-align: middle;">
+                <%= icon 'fa-solid fa-spin', 'sync' %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if event.success? %>
+          <div class="panel-body">
+
+            <%= l event.created_at.in_time_zone(Time.zone), format: :long %> <%= icon 'fa-solid', 'arrow-right' %> <%= l event.updated_at, format: :long %>
+            <div class="pull-right"><%= icon 'fa-solid', 'check', t("events.#{event.status}"), { class: 'text-success' } %></div>
+
+          </div>
+        <% else %>
+          <table class="table-list">
+            <tr>
+              <td><%= t('deployments.logs.log.status') %></td>
+              <td><%= t "events.#{event.status}" %></td>
+            </tr>
+            <tr>
+              <td><%= t('deployments.logs.log.started') %></td>
+              <td><%= l event.created_at.in_time_zone(Time.zone), format: :long %></td>
+            </tr>
+            <tr>
+              <td><%= event.status == 'pending' || event.status == 'running' ? t('deployments.logs.log.last_updated') : t('deployments.logs.log.finished') %></td>
+              <td><%= l event.updated_at, format: :long %></td>
+            </tr>
+            <tr>
+              <td><%= t 'events.code' %></td>
+              <td class="code-font-minimal">
+                <small><%= event.event_code %></small>
+              </td>
+            </tr>
+          </table>
+
+          <% event.event_details.each do |detail| %>
+            <% next if detail.formatted_data =~ /msgid/ %>
+            <div class="panel-body" style="padding-bottom: 0;">
+              <pre><%= detail.formatted_data %></pre>
+            </div>
+          <% end %>
+
+        <% end %>
+
+      </div>
+    <% end %>
+
+  </div>
+
+</div>

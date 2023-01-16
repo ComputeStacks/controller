@@ -66,7 +66,7 @@ module Containerized
         data: 'Unable to provision, container is already built; attempting start.',
         event_code: '7ebfd45eba7e7dc8'
       )
-      ContainerWorkers::StartWorker.perform_async to_global_id.to_s, event.to_global_id.to_s
+      ContainerWorkers::StartWorker.perform_async global_id, event.global_id
       return false
     end
     if node.nil?

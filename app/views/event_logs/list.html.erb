@@ -1,0 +1,10 @@
+<div class="row">
+  <div class="col-md-12">
+    <%= render partial: "event_logs/list", locals: { logs: @logs, root_path: @root_path } %>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <%= will_paginate @logs %>
+  </div>
+</div>

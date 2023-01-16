@@ -9,7 +9,7 @@ module VolumeWorkers
         Volume.trashable.each do |i|
           # If any nodes are offline, then wait to trash this one later.
           next if i.nodes.offline.exists?
-          VolumeWorkers::TrashVolumeWorker.perform_async i.to_global_id.to_s
+          VolumeWorkers::TrashVolumeWorker.perform_async i.global_id
         end
         return
       end

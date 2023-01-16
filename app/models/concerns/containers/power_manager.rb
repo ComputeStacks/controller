@@ -88,7 +88,7 @@ module Containers
               data: "Attempting to recover from:\n#{rsp.info['State']['Error']}",
               event_code: 'cc40061553c02457'
             )
-            ContainerWorkers::ReleaseIpWorker.perform_async to_global_id.to_s, event.to_global_id.to_s
+            ContainerWorkers::ReleaseIpWorker.perform_async global_id, event.global_id
             return nil
           end
         elsif rsp.info['State']['Error'] && rsp.info['State']['Error'].to_s.length < 50

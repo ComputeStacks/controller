@@ -54,6 +54,10 @@ class Order < ApplicationRecord
     self.order_data = params
   end
 
+  def provision_event
+    events.find_by event_code: "0a3af01a3384fa10"
+  end
+
   def requires_project?
     data[:raw_order].each do |i|
       return true if i[:product_type] == 'container'

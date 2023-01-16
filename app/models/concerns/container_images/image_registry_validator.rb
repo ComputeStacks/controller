@@ -19,7 +19,7 @@ module ContainerImages
     private
 
     def update_tag_validation!
-      ImageWorkers::ValidateTagWorker.perform_async to_global_id.to_s
+      ImageWorkers::ValidateTagWorker.perform_async global_id
     end
 
   end

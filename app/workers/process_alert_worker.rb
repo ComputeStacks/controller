@@ -61,16 +61,16 @@ class ProcessAlertWorker
 
     # Node is offline
     if alert.name == 'NodeUp' && alert.node
-      NodeWorkers::HeartbeatWorker.perform_async alert.node.to_global_id.to_s
+      NodeWorkers::HeartbeatWorker.perform_async alert.node.global_id
     end
 
     # Container has gone away
     if alert.name == 'ContainerKilled' && alert.active?
       if alert.container
-        ContainerWorkers::RecoverContainerWorker.perform_async alert.container.to_global_id.to_s, alert.to_global_id.to_s
+        ContainerWorkers::RecoverContainerWorker.perform_async alert.container.global_id, alert.global_id
       end
       if alert.sftp_container
-        ContainerWorkers::RecoverContainerWorker.perform_async alert.sftp_container.to_global_id.to_s, alert.to_global_id.to_s
+        ContainerWorkers::RecoverContainerWorker.perform_async alert.sftp_container.global_id, alert.global_id
       end
     end
 
@@ -88,7 +88,7 @@ class ProcessAlertWorker
         # Determine if we've had an alert like this in the past 5 minutes.
         unless alert_triggered
           resource_kind = alert.name == 'ContainerCpuUsage' ? 'cpu' : 'memory'
-          ContainerServiceWorkers::AutoScaleServiceWorker.perform_async container_service.to_global_id.to_s, resource_kind
+          ContainerServiceWorkers::AutoScaleServiceWorker.perform_async container_service.global_id, resource_kind
         end
       end
 

@@ -11,4 +11,17 @@ module EventLogHelper
     end
   end
 
+  def event_status_panel_header_color(event)
+    case event.status
+    when 'running'
+      'panel-primary'
+    when 'completed'
+      'panel-success'
+    when 'failed'
+      'panel-danger'
+    else # 'pending', 'cancelled'
+      'panel-default'
+    end
+  end
+
 end

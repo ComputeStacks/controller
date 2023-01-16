@@ -237,7 +237,7 @@ class ProcessOrderService
       data: "ProcessOrderService error output:\n\n#{errors.join("\n")}",
       event_code: "a0e582f298a0ca01"
     ) unless errors.empty?
-    ProcessAppEventWorker.perform_async 'NewOrder', order.user&.to_global_id.to_s, order.to_global_id.to_s
+    ProcessAppEventWorker.perform_async 'NewOrder', order.user&.global_id, order.global_id
     event.done!
     order.done!
   end

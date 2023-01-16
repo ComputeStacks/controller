@@ -36,7 +36,7 @@ class Api::ContainerServices::ScaleController < Api::ContainerServices::BaseCont
     redirect_url = nil
     region_check = @service.region
     if region_check && !region_check.nodes.empty?
-      ContainerServiceWorkers::ScaleServiceWorker.perform_async @service.to_global_id.to_s, event.to_global_id.to_s
+      ContainerServiceWorkers::ScaleServiceWorker.perform_async @service.global_id, event.global_id
     else
       errors << 'Invalid Region. Unable to scale containers.'
     end

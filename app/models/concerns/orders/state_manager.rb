@@ -32,6 +32,14 @@ module Orders
     end
 
     ##
+    # Is this a...?
+
+    # Are we cloning from another project?
+    def is_clone?
+      order_data['raw_order'].detect { |i| !i['source'].blank? }
+    end
+
+    ##
     # State Questions
 
     def pending?

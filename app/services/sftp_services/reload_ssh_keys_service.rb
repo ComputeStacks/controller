@@ -20,8 +20,8 @@ module SftpServices
       build_event!
       event.start!
       ContainerWorkers::ContainerExecWorker.perform_async(
-        container.to_global_id.to_s,
-        event.to_global_id.to_s,
+        container.global_id,
+        event.global_id,
         %w(/usr/bin/ruby /usr/local/bin/load_ssh_keys.rb)
       )
     end

@@ -22,7 +22,7 @@ module ProvisionServices
             )
             event.fail! 'Failed to pull image'
             # Also revalidate the image...
-            ImageWorkers::ValidateTagWorker.perform_async(container.image_variant.to_global_id.to_s)
+            ImageWorkers::ValidateTagWorker.perform_async(container.image_variant.global_id)
             return false
           end
         end

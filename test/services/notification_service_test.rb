@@ -19,7 +19,7 @@ class NotificationServiceTest < ActionMailer::TestCase
 
     Sidekiq::Testing.inline! do
       assert_emails 1 do
-        ProcessAppEventWorker.perform_async 'UserActivated', nil, u.to_global_id.to_s
+        ProcessAppEventWorker.perform_async 'UserActivated', nil, u.global_id
       end
     end
 

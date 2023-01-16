@@ -44,7 +44,7 @@ region.nodes.each do |node|
       event.containers << container
       event.deployments << container.deployment
       event.container_services << container.service
-      ContainerWorkers::MigrateContainerWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s
+      ContainerWorkers::MigrateContainerWorker.perform_async container.global_id, event.global_id
     end
   end
 end; 0

@@ -167,7 +167,7 @@ class Api::ContainerServicesController < Api::ApplicationController
       status: 'pending'
     )
     event.container_services << @service
-    ContainerServiceWorkers::TrashServiceWorker.perform_async @service.to_global_id.to_s, event.to_global_id.to_s
+    ContainerServiceWorkers::TrashServiceWorker.perform_async @service.global_id, event.global_id
     respond_to do |format|
       format.json { render json: {}, status: :accepted }
       format.xml { render xml: {}, status: :accepted }

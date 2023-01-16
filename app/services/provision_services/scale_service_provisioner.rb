@@ -49,7 +49,7 @@ module ProvisionServices
             data: "Created container: #{new_container.container.name}",
             event_code: 'b2059e7d695115be'
           )
-          ContainerWorkers::ProvisionWorker.perform_async new_container.container.to_global_id.to_s, event.to_global_id.to_s
+          ContainerWorkers::ProvisionWorker.perform_async new_container.container.global_id, event.global_id
         end
       else # Remove Containers
         container_service.containers.limit(current_count - qty).order(:created_at).each do |container|

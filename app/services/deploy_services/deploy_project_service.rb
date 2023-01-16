@@ -23,7 +23,7 @@ module DeployServices
     def perform
 
       # Apply Project Service Policy
-      NetworkWorkers::ProjectPolicyWorker.perform_async project.to_global_id.to_s
+      NetworkWorkers::ProjectPolicyWorker.perform_async project.global_id
 
       # Collect all the services that we need to deploy
       services = []

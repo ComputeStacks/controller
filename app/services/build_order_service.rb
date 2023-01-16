@@ -126,7 +126,7 @@ class BuildOrderService
       if process_order
         order.pending!
         # Process right away
-        ProcessOrderWorker.perform_async order.to_global_id.to_s, audit.to_global_id.to_s
+        ProcessOrderWorker.perform_async order.global_id, audit.global_id
       end
     else
       order.errors.full_messages.each do |er|

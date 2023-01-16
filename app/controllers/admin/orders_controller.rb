@@ -43,7 +43,7 @@ class Admin::OrdersController < Admin::ApplicationController
         ip_addr: request.remote_ip,
         event: 'created'
       )
-      ProcessOrderWorker.perform_async @order.to_global_id.to_s, audit.to_global_id.to_s
+      ProcessOrderWorker.perform_async @order.global_id, audit.global_id
       flash[:notice] = "Order will be provisioned shortly."
     else
       flash[:alert] = "Only open orders can be processed."

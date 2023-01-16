@@ -39,11 +39,11 @@ module ImageWorkers
         delay = 30.seconds
         Node.online.each do |n|
           if count > 10
-            ImageWorkers::PullImageWorker.perform_in delay, n.id, variant.to_global_id.to_s
+            ImageWorkers::PullImageWorker.perform_in delay, n.id, variant.global_id
             # every 10, increase delay by 15 seconds to evenly distribute
             delay += 15.seconds if count % 10 == 0
           else
-            ImageWorkers::PullImageWorker.perform_async n.id, variant.to_global_id.to_s
+            ImageWorkers::PullImageWorker.perform_async n.id, variant.global_id
           end
           count += 1
         end

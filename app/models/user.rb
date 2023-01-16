@@ -208,9 +208,10 @@ class User < ApplicationRecord
   include Users::OtpStorable
 
 
-  scope :sorted, -> { order( Arel.sql("lower(users.lname), lower(users.fname)") ) }
-  scope :by_last_name, -> { order( Arel.sql("lower(lname)") ) }
-  scope :with_active_subscriptions, -> { select( Arel.sql("lower(users.lname), lower(users.fname), users.*") ).where(subscriptions: { active: true }).joins(:subscriptions).distinct }
+  scope :sorted, -> { order "lower(users.lname), lower(users.fname)" }
+  scope :by_last_name, -> { order "lower(lname)" }
+
+  scope :with_active_subscriptions, -> { select( "lower(users.lname), lower(users.fname), users.*" ).where(subscriptions: { active: true }).joins(:subscriptions).distinct }
   scope :cpanel, -> { where("labels::jsonb ? 'cpanel'") }
   scope :admins, -> { where is_admin: true }
 

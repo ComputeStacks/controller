@@ -56,7 +56,7 @@ module ContainerServices::WordpressServices
         else
           service.secrets.create!(key_name: "protected_mode_pw", data: password)
         end
-        ContainerWorkers::ContainerExecWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s, ["/bin/sh", "-c", "/usr/local/lsws/bin/lswsctrl reload"]
+        ContainerWorkers::ContainerExecWorker.perform_async container.global_id, event.global_id, ["/bin/sh", "-c", "/usr/local/lsws/bin/lswsctrl reload"]
         return true
       end
       errors << result
@@ -79,7 +79,7 @@ module ContainerServices::WordpressServices
       result = container.container_exec!(c, nil, 10)
       d = result[:response].strip
       if d.blank?
-        ContainerWorkers::ContainerExecWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s, ["/bin/sh", "-c", "/usr/local/lsws/bin/lswsctrl reload"]
+        ContainerWorkers::ContainerExecWorker.perform_async container.global_id, event.global_id, ["/bin/sh", "-c", "/usr/local/lsws/bin/lswsctrl reload"]
         return true
       end
       errors << result
