@@ -5,7 +5,7 @@ module ContainerServices
       extend ActiveSupport::Concern
 
       included do
-        scope :demo, -> { where("container_image_plugins.name == 'demo'").join(:container_image_plugin) }
+        scope :demo, -> { where("container_image_plugins.name = 'demo'").joins(:container_image_plugin) }
       end
 
       def demo_available?

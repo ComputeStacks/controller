@@ -39,6 +39,8 @@ class SubscriptionProduct < ApplicationRecord
 
   include Auditable
 
+  scope :active, -> { where active: true }
+
   belongs_to :subscription, optional: true
 
   has_one :user, through: :subscription

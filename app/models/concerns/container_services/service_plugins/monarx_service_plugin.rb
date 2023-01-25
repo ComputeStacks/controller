@@ -5,9 +5,7 @@ module ContainerServices
       extend ActiveSupport::Concern
 
       included do
-
         scope :monarx, -> { where("container_image_plugins.name = 'monarx'").joins(:container_image_plugin) }
-
       end
 
       # @return [Boolean]
@@ -52,7 +50,7 @@ module ContainerServices
 
       def monarx_agent_id
         Rails.cache.fetch("monarx_agentid_#{name}", expires_in: 1.week, skip_nil: true) do
-
+          return nil unless container_image_plugin.monarx_available?
           result = HTTP.timeout(30)
                        .headers(container_image_plugin.monarx_api_headers)
                        .get "#{container_image_plugin.monarx_enterprise_url}/agent", params: { filter: "agent.tags==#{name}" }

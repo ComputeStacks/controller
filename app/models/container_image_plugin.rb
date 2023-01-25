@@ -14,6 +14,9 @@
 class ContainerImagePlugin < ApplicationRecord
 
   include Auditable
+  include ImagePlugins::Marketplace
+  include ImagePlugins::Marketplace::Demo
+  include ImagePlugins::Marketplace::Monarx
   include ImagePlugins::MonarxPlugin
 
   default_scope { order name: :desc }

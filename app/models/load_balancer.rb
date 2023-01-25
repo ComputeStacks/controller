@@ -123,7 +123,7 @@ class LoadBalancer < ApplicationRecord
 
   before_create :set_defaults
 
-  attr_accessor :internal_ips, :external_ips
+  attr_accessor :internal_ips, :external_ips, :skip_validation
 
   after_save :trigger_domain_validation
   after_save :trigger_le_generation
@@ -322,12 +322,14 @@ class LoadBalancer < ApplicationRecord
   end
 
   def trigger_domain_validation
+    return if skip_validation
     if saved_change_to_attribute?("domain")
       LoadBalancerWorkers::ValidateDomainWorker.perform_async id, current_audit&.id
     end
   end
 
   def trigger_le_generation
+    return if skip_validation
     if saved_change_to_attribute?("le")
       LoadBalancerServices::LetsEncryptService.new(self, current_audit).perform
     end

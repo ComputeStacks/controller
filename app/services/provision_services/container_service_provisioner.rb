@@ -544,6 +544,7 @@ module ProvisionServices
         external_id: data[:external_id],
         active: false
       )
+      subscription.current_audit = event.audit if event&.audit
       if subscription.save
         result[:subscriptions] << subscription
       else
@@ -551,7 +552,8 @@ module ProvisionServices
         return false
       end
       service_products.each do |p|
-        unless subscription.subscription_products.create!(product: p, allow_nil_phase: true)
+        sp = subscription.add_product! p
+        unless sp.errors.empty?
           errors << "Failed to create subscription product for: #{p.id}"
         end
       end

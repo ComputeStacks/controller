@@ -583,7 +583,8 @@ LoadBalancer.create! label: 'dev',
                      internal_ip: [ '127.0.0.1', vagrant_vm_ip.gsub("\n","") ],
                      public_ip: '127.0.0.1',
                      direct_connect: true,
-                     cert_encrypted: Secret.encrypt!(File.read(lb_cert_path))
+                     cert_encrypted: Secret.encrypt!(File.read(lb_cert_path)),
+                     skip_validation: true
 
 puts "Creating default admin user..."
 group = UserGroup.create! name: 'default',

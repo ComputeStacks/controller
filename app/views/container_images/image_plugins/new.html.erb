@@ -27,6 +27,16 @@
             </select>
           </div>
         </div>
+        <hr>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>
+              <input id="cascade_plugin" name="cascade_plugin" type="checkbox">
+              Add plugin to existing containers?
+            </label>
+            <span class="help-block">Note: If this plugin is required, has an associated product, and is configured in the user's billing plan with a price, then they will be billed immediately for it.</span>
+          </div>
+        </div>
         <div class="panel-footer">
           <%= link_to t('actions.cancel'), "#{container_image_path(@image)}", class: 'btn btn-default', style: 'margin-right: 10px;' %>
           <%= submit_tag t('actions.submit'), class: 'btn btn-success pull-right' %>

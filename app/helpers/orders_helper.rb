@@ -7,6 +7,7 @@ module OrdersHelper
   def order_view_status(order)
     pending_msg = "Your order is being provisioned, please wait..."
     error_msg = "There appears to be a problem, please contact support."
+    failed_provisioning = "There was a problem provisioning your order."
 
     is_ready = "Your project is ready"
     is_ready_cloned = "Your project is ready, however the cloning process may still need a few more minutes to finish. Please watch for the volume snapshot and restore process in your event log to ensure the clone was successful."
@@ -22,6 +23,7 @@ module OrdersHelper
     else
       return is_ready if order.deployment && event.success?
     end
+    return failed_provisioning if order.deployment&.provisioning_failed?
     "Your project is being provisioned."
   end
 

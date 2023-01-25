@@ -1,7 +1,7 @@
 class ContainerServices::ServicePluginsController < ContainerServices::BaseController
 
   def index
-    @available_plugins = @service.service_plugins.optional
+    @available_plugins = @service.available_plugins
   end
 
   def create

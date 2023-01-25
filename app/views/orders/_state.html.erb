@@ -5,14 +5,21 @@
     <div class="order-item-description">
       <%= @order.deployment ? @order.deployment.name : icon('fa-solid fa-spin', 'sync', 'Project will be created shortly...') %>
     </div>
-    <% if @order.deployment && !@order.provision_event&.active? %>
+    <% if @order.deployment && !@order.provision_event&.active? && !@order.deployment&.provisioning_failed? %>
       <%= link_to icon('fa-solid', 'rocket', "Take me to my project"), "/deployments/#{@order.deployment.token}", class: 'btn btn-primary' %>
+    <% elsif @order.deployment && !@order.provision_event&.active? && @order.deployment&.provisioning_failed? %>
+      <%= link_to icon('fa-solid', 'triangle-exclamation', "View Project"), "/deployments/#{@order.deployment.token}", class: 'btn btn-warning' %>
     <% end %>
   </div>
 
   <div class="col-sm-6 col-xs-12" style="padding-top:10px;">
     <div class="text-center">
       <p class="lead"><%= order_view_status @order %></p>
+      <% if @order.deployment && !@order.provision_event&.active? && @order.deployment&.provisioning_failed?  %>
+        <p>
+          Try deleting your project and placing the order again. If the problem persists, please contact support.
+        </p>
+      <% end %>
     </div>
   </div>
 
@@ -83,7 +90,7 @@
           <% event.event_details.each do |detail| %>
             <% next if detail.formatted_data =~ /msgid/ %>
             <div class="panel-body" style="padding-bottom: 0;">
-              <pre><%= detail.formatted_data %></pre>
+              <pre style="white-space: pre-wrap;"><%= detail.formatted_data %></pre>
             </div>
           <% end %>
 

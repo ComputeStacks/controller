@@ -16,9 +16,9 @@ apt-get update && apt-get -y upgrade
 update-alternatives --set iptables /usr/sbin/iptables-legacy
 update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent etcd prometheus-node-exporter redis-server postgresql-13 postgresql-13-ip4r rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen libyaml-dev
-curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
+curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
   $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
@@ -39,8 +39,7 @@ else
   echo "Falling back to debian repository for powerdns due to arm architecture."
 fi
 
-curl https://haproxy.debian.net/bernat.debian.org.gpg \
-      | gpg --dearmor > /usr/share/keyrings/haproxy.debian.net.gpg
+curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor -o /usr/share/keyrings/haproxy.debian.net.gpg
 
 echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" \
       http://haproxy.debian.net bullseye-backports-2.4 main \

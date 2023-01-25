@@ -11,7 +11,8 @@
 * [FEATURE] Image categories. When editing an image, you can define a category; images will be grouped by category on the order page.
 * [FEATURE] Specify default variant when linking images. Note: Currently only accessible via API and console.
 * [FEATURE] Support for monthly (post-paid) billing plans. New subscriptions will be prorated to the first of the month.
-* [FEATURE] Support for purchased addons (plugins).
+* [FEATURE] Support for paid addons, with the ability to allow users to selectively activate or deactivate them.
+* [FEATURE] Support for marketplace addons via plugins.
 * [FEATURE] New order provisioning screen after an order is placed.
 * [CHANGE] Both `tcp` and `udp` will share the same external NAT port.
 * [CHANGE] Previously, even if over-commit memory/cpu was enabled, ComputeStacks would still prevent placing containers on a node that did not have enough cpu or memory available. This would cause orders to fail; this will now follow the over-commit setting as well.

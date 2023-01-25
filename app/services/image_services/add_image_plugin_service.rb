@@ -17,6 +17,7 @@ module ImageServices
     attr_accessor :image,
                   :plugin,
                   :cascade,
+                  :current_user,
                   :errors
 
     # @param [ContainerImage] image
@@ -25,12 +26,15 @@ module ImageServices
       self.image = image
       self.plugin = plugin
       self.cascade = false
+      self.current_user = nil
       self.errors = []
     end
 
     # @return [Boolean]
     def perform
-      if image << plugin
+      return false unless valid?
+      image.current_user = current_user
+      if image.update add_plugin_id: plugin.id
         cascade_plugin! if cascade
       else
         self.errors << image.errors.full_messages.join(", ")
@@ -39,6 +43,21 @@ module ImageServices
     end
 
     private
+
+    def valid?
+      if current_user.is_a?(User)
+        errors << "Unauthorized" unless current_user.is_admin
+      else
+        errors << "Missing performed by user"
+      end
+      unless plugin.is_a?(ContainerImagePlugin)
+        errors << "Unknown plugin"
+      end
+      unless image.is_a?(ContainerImage)
+        errors << "Unknown image"
+      end
+      errors.empty?
+    end
 
     # @return [Boolean]
     def cascade_plugin!
@@ -53,9 +72,11 @@ module ImageServices
           end
         end
 
+        # Plugin is active & optional? Initially set to inactive
+        # Plugin is active & not optional? Initially set to active
         p = s.service_plugins.new(
           container_image_plugin: plugin,
-          active: plugin.active,
+          active: plugin.active && !plugin.is_optional,
           is_optional: plugin.is_optional
         )
         unless p.save
@@ -68,12 +89,11 @@ module ImageServices
     # @param [Deployment::ContainerService] service
     # @return [Boolean]
     def init_subscription!(service)
-      s = service.subscription.subscription_products.new(
-        product: plugin.product,
-        allow_nil_phase: true
-      )
-      return true if s.save
-      self.errors << "Error saving subscription product for service : #{service.id} | #{s.errors.full_messages.join(", ")}"
+      subscription = service.subscription
+      subscription.current_user = current_user
+      sp = subscription.add_product! plugin.product
+      return true if sp.errors.empty?
+      self.errors << "Error saving subscription product for service : #{service.id} | #{sp.errors.full_messages.join(", ")}"
       false
     end
 

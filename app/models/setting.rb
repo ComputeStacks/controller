@@ -26,8 +26,7 @@ class Setting < ApplicationRecord
   after_update_commit :plugin_changes
 
   def decrypted_value
-    return self.value unless self.encrypted
-    self.value.nil? ? nil : Secret.decrypt!(self.value)
+    (value.blank? || !encrypted) ? value : Secret.decrypt!(value)
   end
 
   def is_boolean?
@@ -638,6 +637,34 @@ class Setting < ApplicationRecord
       smtp_from != "noreply@example.com"
     end
 
+    def marketplace_username
+      s = Setting.find_by name: 'marketplace_username', category: 'plugins'
+      if s.nil?
+        s = Setting.create!(
+          name: 'marketplace_username',
+          category: 'plugins',
+          description: "Username for Marketplace Plugins",
+          value: "",
+          encrypted: false
+        )
+      end
+      s.value.blank? ? nil : s.value
+    end
+
+    def marketplace_password
+      s = Setting.find_by name: 'marketplace_password', category: 'plugins'
+      if s.nil?
+        s = Setting.create!(
+          name: 'marketplace_password',
+          category: 'plugins',
+          description: "Password for Marketplace Plugins",
+          value: "",
+          encrypted: true
+        )
+      end
+      s.value.blank? ? nil : s.decrypted_value
+    end
+
     # Load all other defaults (not including above.)
     def setup!
       # DISABLED
@@ -672,6 +699,8 @@ class Setting < ApplicationRecord
         le_dns_sleep
         le_server
         le_single_domain?
+        marketplace_username
+        marketplace_password
         monarx_init!
         registry_base_url
         registry_node
@@ -693,7 +722,7 @@ class Setting < ApplicationRecord
   private
 
   def set_value
-    if self.encrypted && !self.value.nil?
+    if self.encrypted && !self.value.blank?
       self.value = Secret.encrypt!(self.value)
     elsif self.name == 'billing_module'
       self.value = value.blank? ? 'none' : value.capitalize.strip

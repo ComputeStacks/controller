@@ -81,7 +81,6 @@ gem 'redcarpet', '= 3.5.1', platform: :ruby
 gem "sentry-ruby"
 gem "sentry-rails"
 gem "sentry-sidekiq"
-# gem 'sentry-raven', '= 3.1.2'
 
 gem 'sass-rails', '= 6.0.0'
 gem 'bootstrap-sass', '= 3.4.1'

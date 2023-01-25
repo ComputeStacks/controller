@@ -15,36 +15,19 @@ module ContainerServices
       after_update :update_plugin_list, if: Proc.new { new_plugin_list }
     end
 
-    # Helper method to determine the plugin state
-    #
-    # @param [Symbol] plugin_name
-    # @return [Boolean]
-    def plugin_available?(plugin_name)
-      case plugin_name
-      when :monarx
-        return false if service_plugins.active.monarx.empty?
-        service_plugins.active.monarx.first.monarx_available?
-      when :demo
-        service_plugins.active.demo.first.demo_available?
-      else
-        false
+    # Return a pristine list of plugins a user can enable
+    # @return [Array]
+    def available_plugins
+      service_plugins.optional.to_a.delete_if do |i|
+        !i.user_selectable?
       end
     end
 
-    # Helper method to find a given plugin
-    #
-    # @param [Symbol]
-    # @return [Deployment::ContainerService::ServicePlugin, nil]
-    def plugin_instance(plugin_name)
-      return nil unless plugin_available?(plugin_name)
-      case plugin_name
-      when :monarx
-        service_plugins.active.monarx.first
-      when :demo
-        service_plugins.active.demo.first
-      else
-        nil
-      end
+    # Helper method to determine If we show the monarx button
+    # This should be replaced with something that works for all plugins
+    def monarx_available?
+      return false if service_plugins.active.monarx.empty?
+      service_plugins.active.monarx.first.monarx_available?
     end
 
     private

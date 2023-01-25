@@ -14,17 +14,14 @@ class Admin::ContainerImages::ImagePluginsController < Admin::ContainerImages::B
   end
 
   def create
-    if @image.update add_plugin_id: params[:add_plugin_id]
-      redirect_to "/admin/container_images/#{@image.id}"
-    else
-      render template: "container_images/image_plugins/new"
-    end
+    cascade = params[:cascade_plugin].blank? ? false : true
+    ImageWorkers::AddImagePluginWorker.perform_async current_user.id, @image.id, params[:add_plugin_id], cascade
+    redirect_to "/admin/container_images/#{@image.id}", notice: "Plugin will be added shortly. Check System Alerts for any errors."
   end
 
   def destroy
-    plugin = @image.container_image_plugins.find_by id: params[:id]
-    @image.container_image_plugins.delete plugin
-    redirect_to "/admin/container_images/#{@image.id}"
+    ImageWorkers::RemoveImagePluginWorker.perform_async current_user.id, @image.id, params[:id]
+    redirect_to "/admin/container_images/#{@image.id}", notice: "Plugin will be removed shortly. Check System Alerts for any errors."
   end
 
   private

@@ -109,7 +109,7 @@ class Subscription < ApplicationRecord
   end
 
   def package
-    products.find_by(kind: 'package')&.package
+    products.packages.first&.package
   end
 
   def package_subscription
@@ -217,6 +217,31 @@ class Subscription < ApplicationRecord
     end # END unless linked_obj
     true
   end # END new_resource_qty!()
+
+  ##
+  # Used to add addon and image products
+  #
+  # @return [SubscriptionProduct]
+  def add_product!(product)
+    # 1. does an active product already exist? If so, return it
+    sp = subscription_products.where(product: product).first
+    if sp
+      sp.current_user = current_user if current_user
+      sp.current_audit = current_audit if current_audit
+      # 2. does an inactive product exist? If so, activate it and return
+      sp.unpause! unless sp.active
+      return sp
+    end
+    # 3. not exist? create a new one
+    sp = subscription_products.new(
+      product: product,
+      allow_nil_phase: true
+    )
+    sp.current_user = current_user if current_user
+    sp.current_audit = current_audit if current_audit
+    sp.save
+    sp
+  end
 
   private
 

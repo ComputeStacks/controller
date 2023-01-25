@@ -39,6 +39,18 @@ class Deployment::ContainerService::ServicePlugin < ApplicationRecord
     end
   end
 
+  # Can a user selectively enable or disable this plugin?
+  # @return [Boolean]
+  def user_selectable?
+    return false unless is_optional
+    case container_image_plugin.name
+    when "monarx"
+      container_image_plugin.monarx_available?
+    else
+      true
+    end
+  end
+
   private
 
   def update_subscription

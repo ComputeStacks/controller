@@ -15,9 +15,16 @@
 
     <% if @services.empty? %>
       <div class="col-md-6 col-md-offset-3">
-        <div class="text-center" style="margin-top:50px;opacity: 0.2;">
+        <div class="text-center <% if @deployment.provisioning_failed? %>text-danger<% end %>" style="margin-top:50px;<% unless @deployment.provisioning_failed? %>opacity: 0.2;<% end %>">
           <i class="fa-solid fa-cubes" style="font-size:6em;"></i>
-          <div style="color:#333;font-size:2em;">No Applications Found</div>
+          <div class="<% if @deployment.provisioning_failed? %>text-danger<% end %>" style="<% unless @deployment.provisioning_failed? %>color:#333;<% end %>font-size:2em;">
+            <% if @deployment.provisioning_failed? %>
+              There was a fatal error provisioning your project. Please try deleting the project and placing a new order.<br>
+              If the problem persists, please contact support.
+            <% else %>
+              No Applications Found
+            <% end %>
+          </div>
         </div>
       </div>
     <% end %>

@@ -1,4 +1,6 @@
 module ImagePlugins
+  ##
+  # Used by ContainerImage
   module ImagePlugin
     extend ActiveSupport::Concern
 
@@ -52,7 +54,6 @@ module ImagePlugins
         return
       end
       return if container_image_plugins.exists?(plugin.id)
-
       container_image_plugins << plugin
     end
 

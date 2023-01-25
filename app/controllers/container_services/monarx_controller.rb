@@ -1,24 +1,13 @@
 class ContainerServices::MonarxController < ContainerServices::BaseController
 
-  before_action :ensure_monarx_available
-
   def index
-
-    @frame_link = @service.monarx_plugin_url
+    @frame_link = if @service.service_plugins.active.monarx.empty?
+                    nil
+                  else
+                    @service.service_plugins.active.monarx.first.monarx_plugin_url
+                  end
     if @frame_link.nil?
       redirect_to "/container_services/#{@service.id}", alert: "Monarx not available."
-      return false
-    end
-
-  end
-
-
-  private
-
-  def ensure_monarx_available
-    unless @service.plugin_available?(:monarx)
-      redirect_to "/container_services/#{@service.id}", alert: "Monarx not available."
-      return false
     end
   end
 
