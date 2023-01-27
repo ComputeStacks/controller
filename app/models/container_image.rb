@@ -293,8 +293,8 @@ class ContainerImage < ApplicationRecord
   # Create initial default tag on commit
   def setup_default_tag
     image_variants.create!(
-      registry_image_tag: registry_image_tag,
-      label: registry_image_tag,
+      registry_image_tag: registry_image_tag.strip,
+      label: registry_image_tag.strip,
       version: 0,
       is_default: true
     ) unless skip_variant_setup

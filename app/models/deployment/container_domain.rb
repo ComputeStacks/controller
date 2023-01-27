@@ -25,6 +25,7 @@ class Deployment::ContainerDomain < ApplicationRecord
 
   scope :sorted, -> { order(:domain) }
   scope :active, -> { where(enabled: true) }
+  scope :orphaned, -> { where ingress_rule: nil }
 
   # @return [Array<Audit>]
   has_many :audits, -> { where(rel_model: 'Deployment::ContainerDomain') }, foreign_key: :rel_id, class_name: 'Audit', dependent: :nullify
@@ -55,6 +56,7 @@ class Deployment::ContainerDomain < ApplicationRecord
   validates :domain, presence: true
   validates :domain, uniqueness: { case_sensitive: false }
   validate :validate_domain_name, on: :create, unless: Proc.new { is_sys }
+  validate :ensure_ingress_present, unless: Proc.new { is_sys }
 
   after_save :reload_load_balancer!, unless: Proc.new { sys_no_reload }
   before_destroy :reload_load_balancer!, unless: Proc.new { sys_no_reload }
@@ -155,6 +157,12 @@ class Deployment::ContainerDomain < ApplicationRecord
       if lets_encrypt && lets_encrypt_user && (lets_encrypt_user != self.user)
         LetsEncryptWorkers::ChangeDomainOwnerWorker.perform_in(5.minutes, id)
       end
+    end
+  end
+
+  def ensure_ingress_present
+    if ingress_rule.nil?
+      errors.add(:ingress_rule_id, "is missing")
     end
   end
 

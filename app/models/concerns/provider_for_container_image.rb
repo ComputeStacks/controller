@@ -84,7 +84,7 @@ module ProviderForContainerImage
 
   def cleanup_registry_custom
     unless registry_custom.blank?
-      self.registry_custom = registry_custom.gsub("http://",'').gsub("https://",'').split('/').first
+      self.registry_custom = registry_custom.gsub("http://",'').gsub("https://",'').split('/').first.strip
     end
   end
 
