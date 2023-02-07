@@ -11,6 +11,7 @@ module ProjectServices
     end
 
     def perform
+      return false if deployment&.region.nil?
       return false if deployment.region.consul_config.nil?
       Diplomat::Kv.put("#{@consul_base}/metadata", overview.to_json, deployment.region.consul_config)
     end
