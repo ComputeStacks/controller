@@ -13,9 +13,9 @@ echo "alias dconsole='docker exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput
 echo "Defaults:vagrant env_keep += \"EDITOR\"" >> /etc/sudoers.d/vagrant
 echo "syntax on" >> /etc/vim/vimrc
 apt-get update && apt-get -y upgrade
+apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent etcd prometheus-node-exporter redis-server postgresql-13 postgresql-13-ip4r rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen libyaml-dev
 update-alternatives --set iptables /usr/sbin/iptables-legacy
 update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent etcd prometheus-node-exporter redis-server postgresql-13 postgresql-13-ip4r rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen libyaml-dev
 curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
@@ -67,13 +67,13 @@ systemctl enable consul && systemctl start consul
 
 echo "Setting up NVM & nodejs..."
 su - vagrant -c "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | PROFILE=/Users/vagrant/profile bash"
-su - vagrant -c "nvm install v16.15.1"
-su - vagrant -c "corepack enable"
+su - vagrant -c "\. /home/vagrant/.nvm/nvm.sh && nvm install --lts && nvm use --lts && corepack enable"
 
-# TODO: Add this to /home/vagrant/.profile
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+cat << 'EOF' >> /home/vagrant/.profile
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+EOF
 
 systemctl stop pdns
 
@@ -186,7 +186,6 @@ EOF
 openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -sha256 -keyout /opt/container_registry/ssl/privkey.pem -out /opt/container_registry/ssl/fullchain.pem -config /opt/container_registry/ssl/cert.conf
 
 echo "Setting up haproxy defaults..."
-
 mkdir -p /etc/haproxy/certs
 
 cat << 'EOF' > /etc/haproxy/default.http
@@ -380,11 +379,7 @@ EOF
 
 systemctl restart redis-server
 
-if [ $(dpkg --print-architecture) == 'amd64' ]; then
-  wget -O /tmp/cs-agent.tar.gz https://cdn.computestacks.net/packages/cs-agent/cs-agent.tar.gz
-else
-  wget -O /tmp/cs-agent.tar.gz https://cdn.computestacks.net/packages/cs-agent/cs-agent-arm64.tar.gz
-fi
+wget -O /tmp/cs-agent.tar.gz https://f.cscdn.cc/file/cstackscdn/packages/cs-agent/cs-agent-$(dpkg --print-architecture).tar.gz
 tar -xzvf /tmp/cs-agent.tar.gz -C /tmp
 mv /tmp/cs-agent /usr/local/bin/ && chmod +x /usr/local/bin/cs-agent
 
@@ -411,35 +406,37 @@ WantedBy=multi-user.target
 EOF
 
 mkdir /etc/systemd/system/docker.service.d
-cat << 'EOF' > /etc/systemd/system/docker.service.d/startup.conf
+
+if [ $(dpkg --print-architecture) == 'amd64' ]; then
+  cat << 'EOF' > /etc/systemd/system/docker.service.d/startup.conf
 [Service]
 ExecStart=
 ExecStart=/usr/bin/dockerd -H unix:// -H tcp://0.0.0.0:2376 --ipv6=false --icc=false --userland-proxy=false --cluster-store=etcd://127.0.0.1:2379
 TasksMax=infinity
 EOF
 
-systemctl daemon-reload && systemctl enable docker && systemctl restart docker
+  systemctl daemon-reload && systemctl enable docker && systemctl restart docker
 
-echo "Allow vagrant user to access docker..."
-usermod -aG docker vagrant
+  echo "Allow vagrant user to access docker..."
+  usermod -aG docker vagrant
 
-mkdir /etc/calico
-mkdir /var/log/calico
-mkdir /var/run/calico
+  mkdir /etc/calico
+  mkdir /var/log/calico
+  mkdir /var/run/calico
 
-wget -O /usr/local/bin/calicoctl https://cdn.computestacks.net/packages/calico/calicoctl-v1.6.5
-wget -O /usr/local/bin/calico-libnetwork https://cdn.computestacks.net/packages/calico/libnetwork-plugin-v1.1.3
-chmod +x /usr/local/bin/calicoctl
-chmod +x /usr/local/bin/calico-libnetwork
+  wget -O /usr/local/bin/calicoctl https://f.cscdn.cc/file/cstackscdn/packages/calico/calicoctl-v1.6.5
+  wget -O /usr/local/bin/calico-libnetwork https://f.cscdn.cc/file/cstackscdn/packages/calico/libnetwork-plugin-v1.1.3
+  chmod +x /usr/local/bin/calicoctl
+  chmod +x /usr/local/bin/calico-libnetwork
 
-cat << 'EOF' > /etc/calico/calico-ipam.env
+  cat << 'EOF' > /etc/calico/calico-ipam.env
 ETCD_ENDPOINTS=http://127.0.0.1:2379
 NODENAME=csdev
 CALICO_NETWORKING_BACKEND=bird
 CALICO_LIBNETWORK_LABEL_ENDPOINTS=true
 EOF
 
-cat << 'EOF' > /etc/calico/calicoctl.cfg
+  cat << 'EOF' > /etc/calico/calicoctl.cfg
 apiVersion: v1
 kind: calicoApiConfig
 metadata:
@@ -448,7 +445,7 @@ spec:
   etcdEndpoints: http://127.0.0.1:2379
 EOF
 
-cat << 'EOF' > /etc/systemd/system/calico-ipam.service
+  cat << 'EOF' > /etc/systemd/system/calico-ipam.service
 [Unit]
 Description=calico-ipam
 Before=docker.service
@@ -463,7 +460,7 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-cat << 'EOF' > /usr/local/bin/run_calico
+  cat << 'EOF' > /usr/local/bin/run_calico
 docker run --net=host --privileged --name=calico-node -d --restart=always \
   -e ETCD_ENDPOINTS=http://127.0.0.1:2379 \
   -e CALICO_LIBNETWORK_LABEL_ENDPOINTS=true \
@@ -480,11 +477,22 @@ docker run --net=host --privileged --name=calico-node -d --restart=always \
   -v /var/run/docker.sock:/var/run/docker.sock \
   quay.io/calico/node:release-v2.6
 EOF
-chmod +x /usr/local/bin/run_calico
+  chmod +x /usr/local/bin/run_calico
 
-systemctl daemon-reload && systemctl enable calico-ipam && systemctl start calico-ipam
+  systemctl daemon-reload && systemctl enable calico-ipam && systemctl start calico-ipam
 
-bash /usr/local/bin/run_calico
+  bash /usr/local/bin/run_calico
+
+else
+  echo "$(dpkg --print-architecture) is an unsupported architecture. The network policy manager is not being installed."
+  cat << 'EOF' > /etc/systemd/system/docker.service.d/startup.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd -H unix:// -H tcp://0.0.0.0:2376 --icc=false --userland-proxy=false
+TasksMax=infinity
+EOF
+
+fi
 
 export CONSUL_HTTP_TOKEN=$(curl -X PUT http://127.0.0.1:8500/v1/acl/bootstrap | jq -r '.SecretID')
 echo "export CONSUL_HTTP_TOKEN=$CONSUL_HTTP_TOKEN" >> /home/vagrant/.profile
@@ -857,7 +865,7 @@ ExecStart=/usr/bin/env docker run --rm --name loki-logs \
       --network=host \
       -v loki-data:/loki \
       -v /etc/loki/loki-config.yml:/etc/loki/local-config.yaml:z \
-      grafana/loki:2.4.2
+      grafana/loki:2.7.3
 
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker kill loki-logs 2>/dev/null'
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker rm loki-logs 2>/dev/null'
@@ -1055,7 +1063,8 @@ OUTER
 
 su - vagrant -c "bash /home/vagrant/gh_auth.sh" && rm /home/vagrant/gh_auth.sh
 
-cat << 'EOF' > /root/calico_net.yml
+if [ $(dpkg --print-architecture) == 'amd64' ]; then
+  cat << 'EOF' > /root/calico_net.yml
 apiVersion: v1
 kind: ipPool
 metadata:
@@ -1064,9 +1073,12 @@ spec:
   nat-outgoing: true
 EOF
 
-calicoctl apply -f /root/calico_net.yml
+  calicoctl apply -f /root/calico_net.yml
 
-docker network create --driver calico --ipam-driver calico-ipam --subnet=10.167.186.0/24 dev
+  docker network create --driver calico --ipam-driver calico-ipam --subnet=10.167.186.0/24 dev
+else
+  echo "Skipping docker network setup due to unsupported architecture."
+fi
 
 echo "Provisioning PowerDNS for ComputeStacks..."
 pdnsutil create-zone cstacks.local ns1.cstacks.local

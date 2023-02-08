@@ -58,18 +58,12 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 80, host: 80
   config.vm.network "forwarded_port", guest: 443, host: 443
 
-  config.vm.box = "roboxes/debian11"
+  config.vm.box = "bento/debian-11.5"
 
-  ##
-  # If you're using Parallels, here are some recommended parameters.
-  # vagrant up --provider=parallels
-  config.vm.provider "parallels" do |vm|
+  config.vm.provider "virtualbox" do |vm|
     vm.name = "computestacks"
     vm.memory = 4096
     vm.cpus = 2
-    vm.customize ["set", :id, "--hypervisor-type", "apple"]
-    vm.check_guest_tools = true
-    vm.update_guest_tools = true
   end
 
   config.vm.provision "file", source: "lib/test/powerdns/pdns_up.sh", destination: "/tmp/cs_pdns_up"
