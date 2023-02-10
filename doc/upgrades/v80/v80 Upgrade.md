@@ -111,3 +111,12 @@ sysctl fs.aio-max-nr=2097152
 Be sure to persist the changes in: `/etc/sysctld.d/99-sysctl.conf`
 
 Check current kernel status with: `slabtop`
+
+## Update Docker on Nodes
+
+```bash
+apt-mark unhold docker-ce docker-ce-cli
+apt-get update
+apt-get -y install docker-ce=5:20.10.23~3-0~debian-bullseye docker-ce-cli=5:20.10.23~3-0~debian-bullseye containerd.io
+apt-mark hold docker-ce docker-ce-cli
+```
