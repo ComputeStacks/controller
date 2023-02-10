@@ -45,7 +45,8 @@ echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" \
       http://haproxy.debian.net bullseye-backports-2.4 main \
       > /etc/apt/sources.list.d/haproxy.list
 
-apt-get update && apt-get -y install consul docker-ce docker-ce-cli containerd.io haproxy=2.4.\* pdns-server pdns-backend-pgsql
+apt-get update
+apt-get -y install docker-ce=5:20.10.23~3-0~debian-bullseye docker-ce-cli=5:20.10.23~3-0~debian-bullseye containerd.io consul haproxy=2.4.\* pdns-server pdns-backend-pgsql
 touch /etc/consul.d/consul.env && chown consul:consul /etc/consul.d/consul.env
 cat << 'EOF' > /etc/consul.d/consul.hcl
 datacenter = "dev"
