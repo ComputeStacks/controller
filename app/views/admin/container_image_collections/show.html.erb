@@ -8,8 +8,8 @@
     </ol>
     <ol class="breadcrumb breadcrumb-action text-right">
       <li><%= link_to "Add Image", new_admin_container_image_collection_container_image_path(@collection), class: 'btn btn-sm btn-success' %></li>
-      <li><%= link_to icon('fa-regular', 'wrench'), edit_admin_container_image_collection_path(@collection), class: "btn btn-sm btn-default" %></li>
-      <li><%= link_to icon('fa-regular', 'trash'), admin_container_image_collection_path(@collection), method: :delete, data: { confirm: t('confirm_prompt') }, class: "btn btn-sm btn-danger" %></li>
+      <li><%= link_to icon('fa-solid', 'wrench'), edit_admin_container_image_collection_path(@collection), class: "btn btn-sm btn-default" %></li>
+      <li><%= link_to icon('fa-solid', 'trash'), admin_container_image_collection_path(@collection), method: :delete, data: { confirm: t('confirm_prompt') }, class: "btn btn-sm btn-danger" %></li>
     </ol>
   </div>
 <% end %>

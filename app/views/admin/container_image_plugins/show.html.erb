@@ -6,8 +6,8 @@
       <li class="active"><%= @plugin.name %></li>
     </ol>
     <ol class="breadcrumb breadcrumb-action text-right">
-      <li><%= link_to icon('fa-regular', 'wrench'), edit_admin_container_image_plugin_path(@plugin), class: "btn btn-sm btn-default" %></li>
-      <li><%= link_to icon('fa-regular', 'trash'), admin_container_image_plugin_path(@plugin), method: :delete, data: { confirm: t('confirm_prompt') }, class: "btn btn-sm btn-danger" %></li>
+      <li><%= link_to icon('fa-solid', 'wrench'), edit_admin_container_image_plugin_path(@plugin), class: "btn btn-sm btn-default" %></li>
+      <li><%= link_to icon('fa-solid', 'trash'), admin_container_image_plugin_path(@plugin), method: :delete, data: { confirm: t('confirm_prompt') }, class: "btn btn-sm btn-danger" %></li>
     </ol>
   </div>
 <% end %>

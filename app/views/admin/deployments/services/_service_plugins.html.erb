@@ -20,8 +20,8 @@
     <td style="vertical-align: middle;"><%= i.is_optional ? 'Yes' : 'No' %></td>
     <td class="text-right">
       <div class="btn-group">
-        <%= link_to icon('fa-regular', 'wrench').html_safe, "#{admin_container_service_path(service)}/service_plugins/#{i.id}/edit", class: 'btn btn-sm btn-default' %>
-        <%= link_to icon('fa-regular', 'trash').html_safe, "#{admin_container_service_path(service)}/service_plugins/#{i.id}", method: :delete, data: { confirm: "Are you sure? This service will no longer follow the parent image." }, class: 'btn btn-sm btn-danger' %>
+        <%= link_to icon('fa-solid', 'wrench').html_safe, "#{admin_container_service_path(service)}/service_plugins/#{i.id}/edit", class: 'btn btn-sm btn-default' %>
+        <%= link_to icon('fa-solid', 'trash').html_safe, "#{admin_container_service_path(service)}/service_plugins/#{i.id}", method: :delete, data: { confirm: "Are you sure? This service will no longer follow the parent image." }, class: 'btn btn-sm btn-danger' %>
       </div>
     </td>
   </tr>

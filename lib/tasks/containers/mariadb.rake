@@ -17,11 +17,31 @@ namespace :containers do
       )
 
       mysql.image_variants.create!(
+        label: "10.11",
+        registry_image_tag: "10.11",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        is_default: true,
+        version: 0,
+        skip_tag_validation: true
+      )
+
+      mysql.image_variants.create!(
+        label: "10.10",
+        registry_image_tag: "10.10",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        is_default: false,
+        version: 0,
+        skip_tag_validation: true
+      )
+
+      mysql.image_variants.create!(
         label: "10.9",
         registry_image_tag: "10.9",
         validated_tag: true,
         validated_tag_updated: Time.now,
-        is_default: true,
+        is_default: false,
         version: 0,
         skip_tag_validation: true
       )

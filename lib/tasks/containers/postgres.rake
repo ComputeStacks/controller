@@ -16,12 +16,21 @@ namespace :containers do
         skip_variant_setup: true
       )
       pg.image_variants.create!(
+        label: "15",
+        registry_image_tag: "15",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
+      )
+      pg.image_variants.create!(
         label: "14",
         registry_image_tag: "14",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 0,
-        is_default: true,
+        is_default: false,
         skip_tag_validation: true
       )
       pg.image_variants.create!(
