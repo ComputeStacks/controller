@@ -7,14 +7,16 @@ module ContainerServices
       setting_params.each do |i|
         vars << "build.settings.#{i.name}"
       end
-      dependent_services.each do |i|
+      available_deps = dependent_services
+      service_resources.each do |i|
+        available_deps << i unless available_deps.include?(i)
+      end
+      available_deps.each do |i|
         i.setting_params.each do |ii|
           vars << "dep.#{i.container_image.role}.parameters.settings.#{ii.name}"
         end
         vars << "dep.#{i.container_image.role}.self.ip"
         vars << "dep.#{i.container_image.role}.self.default_domain"
-        # vars << "dep.#{i.container_image.role}.self.ip_with_port"
-        # vars << "dep.#{i.container_image.role}.self.port"
       end
       vars
     end

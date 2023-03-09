@@ -2,14 +2,17 @@ namespace :containers do
 
   desc "Install tomcat container"
   task tomcat: :environment do
-    if ContainerImage.find_by(name: 'tomcat').nil?
+    if ContainerImage.find_by(name: 'tomcat-10').nil?
 
       # Setup block
-      block = Block.create!(title: 'Tomcat Image', content_key: 'tomcat_general')
-      block.block_contents.create!(
-        locale: ENV['LOCALE'],
-        body: "<h4>Tomcat</h4><div><br></div><div>To learn how to use this image, please visit: <a href=\"https://github.com/ComputeStacks/docker/blob/master/tomcat/README.md\">https://github.com/ComputeStacks/docker/blob/master/tomcat/README.md</a></div>"
-      )
+      block = Block.find_by(content_key: 'tomcat_general')
+      if block.nil?
+        block = Block.create!(title: 'Tomcat Image', content_key: 'tomcat_general')
+        block.block_contents.create!(
+          locale: ENV['LOCALE'],
+          body: "<h4>Tomcat</h4><div><br></div><div>To learn how to use this image, please visit: <a href=\"https://github.com/ComputeStacks/docker/blob/master/tomcat/README.md\">https://github.com/ComputeStacks/docker/blob/master/tomcat/README.md</a></div>"
+        )
+      end
 
       dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
       tomcat = ContainerImage.create!(

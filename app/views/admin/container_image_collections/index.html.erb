@@ -27,6 +27,7 @@
               <div class="lead">
                 <%= link_to i.label, admin_container_image_collection_path(i) %>
                 <%= icon('fa-solid', 'triangle-exclamation', nil, { class: 'text-danger' }) unless i.all_images_valid? %>
+                <%= content_tag(:span, 'DISABLED', class: 'label label-default') unless i.active %>
               </div>
             </div>
             <div class="col-xs-6 text-right">

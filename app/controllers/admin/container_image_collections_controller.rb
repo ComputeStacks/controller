@@ -6,7 +6,7 @@ class Admin::ContainerImageCollectionsController < Admin::ApplicationController
   before_action :get_image_list, only: %i[new create edit update]
 
   def index
-    @collections = ContainerImageCollection.available
+    @collections = ContainerImageCollection.all
   end
 
   def show; end

@@ -1,6 +1,21 @@
 # Change Log
 
+## v8.0.1
+
+_Mar 8, 2023_
+
+* [CHANGE] Provide additional feedback if ComputeStacks is unable to locate a node during an order.
+* [CHANGE] Hide node disk IO limit settings due to poor overall system performance when enabled.
+* [FIX] Editing variable environment variables for a service would not show all possible options, including the currently selected one.
+* [FIX] Adding a new image variant and checking the default box would not uncheck the previous default variant.
+* [FIX] non-admins were unable to deploy collections with hidden images.
+* [FIX] Fixed broken icons.
+
+***
+
 ## v8.0.0
+
+_Mar 1, 2023_
 
 * [FEATURE] Clone Project.
 * [FEATURE] Clone volumes.

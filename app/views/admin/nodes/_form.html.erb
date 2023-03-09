@@ -43,12 +43,13 @@
   </div>
 </div>
 <hr>
+
+<% if show_disk_io_settings? @node %>
 <div class="panel-body">
   <div class="row">
     <div class="col-sm-12">
       <h5>Disk IO Limits</h5>
       <p class="lead">A value of <code>0</code>, or a blank block device path, will disable the limit.</p>
-      <em>Only supported by nodes running Debian 11+</em>
       <br><br>
     </div>
   </div>
@@ -96,6 +97,8 @@
   </div>
 </div>
 <hr>
+<% end %>
+
 <div class="panel-body">
   <div class="row">
     <div class="col-sm-12">

@@ -30,6 +30,7 @@ module Authorization
     def can_view?(current_user)
       return true if active && user.nil?
       return false if current_user.nil?
+      return true unless container_image_collections.available.empty?
       return true if current_user.is_admin || user == current_user
       return true if container_image_collaborators.where(user_id: current_user.id, active: true).exists?
 

@@ -13,23 +13,40 @@ module Nodes
     # end
 
     def can_accept_package?(package)
-      ##
+      proceed = true
       # Sanity checking: Make sure the node even has enough cpu / memory
-      return false if metric_cpu_cores[:cpu].to_f < package.cpu
-      return false if metric_memory(:MB)[:memory] < package.memory
-
-      # Check actual usage
-      return false if metric_memory_avail && (metric_memory_avail < package.memory)
+      if metric_cpu_cores[:cpu].to_f < package.cpu
+        add_context! node_system_cpu_cores: { metric_cpu_cores: metric_cpu_cores[:cpu], requested_cpu: package.cpu.to_f }
+        proceed = false
+      end
+      if metric_memory(:MB)[:memory] < package.memory
+        add_context! node_system_memory: { metric_memory: metric_memory(:MB)[:memory], requested_memory: package.memory }
+        proceed = false
+      end
 
       unless location.overcommit_cpu
-        return false if (metric_cpu_cores[:cpu].to_f - allocated_resources[:cpu]) < package.cpu
+        if (metric_cpu_cores[:cpu].to_f - allocated_resources[:cpu]) < package.cpu
+          add_context! no_overcommit_cpu: {
+            total_node_cpu: metric_cpu_cores[:cpu].to_f,
+            cpu_allocated: allocated_resources[:cpu],
+            requested_cpu: package.cpu.to_f
+          }
+          proceed = false
+        end
       end
 
       unless location.overcommit_memory
-        return false if (metric_memory(:MB)[:memory] - allocated_resources[:memory] < package.memory)
+        if metric_memory(:MB)[:memory] - allocated_resources[:memory] < package.memory
+          add_context! no_overcommit_memory: {
+            total_node_memory: metric_memory(:MB)[:memory],
+            memory_allocated: allocated_resources[:memory],
+            requested_memory: package.memory
+          }
+          proceed = false
+        end
       end
 
-      true
+      proceed
     end
 
     def allocated_resources

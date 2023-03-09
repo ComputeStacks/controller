@@ -119,14 +119,22 @@ class ContainerImage::ImageVariant < ApplicationRecord
       errors.add(:base, "Unable to remove the default tag. Please choose a new default instead.")
       throw :abort
     elsif is_default_changed? && is_default # false to true
-      existing_default = container_image.image_variants.default.first
-      existing_default&.update_column :is_default, false
+      container_image.image_variants.default.each do |i|
+        next if i == self
+        i.update_column :is_default, false
+      end
     end
   end
 
   def setup_defaults
     unless container_image.has_default_variant?
       self.is_default = true
+    end
+    if is_default && container_image.has_default_variant?
+      container_image.image_variants.default.each do |i|
+        next if i == self
+        i.update_column :is_default, false
+      end
     end
     self.version = if container_image.image_variants.last
                     container_image.image_variants.last.version + 1

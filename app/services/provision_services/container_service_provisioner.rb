@@ -12,7 +12,7 @@ module ProvisionServices
   # @!attribute project
   #   @return [Deployment]
   # @!attribute event
-  #   return [EventLog]
+  #   @return [EventLog]
   # @!attribute container_service
   #   @return [Deployment::ContainerService]
   # @!attribute image_variant
@@ -240,6 +240,10 @@ module ProvisionServices
         n = container_service.nodes.empty? ? region.find_node(p_region) : container_services.nodes.first
         if n.nil?
           errors << "Expected to have a node, but nil was returned."
+          event.event_details.create!(
+            data: region.context.to_yaml,
+            event_code: "57e27d7a868e5e96"
+          ) unless region.context.empty?
           return false
         end
         self.node = n
@@ -254,9 +258,6 @@ module ProvisionServices
                       else
                         container_service.region.volume_backend
                       end
-
-      # template = Volume.volume_template_id
-      # have_volume_templates = project.volumes.where.not(template: nil).collect { |i| i.template.csrn }
 
       skip_volumes = data[:volume_config].filter_map { |i| i[:csrn] if i[:action] == "skip" }
 
@@ -274,9 +275,6 @@ module ProvisionServices
           end
         end
 
-        # Grab possible volume to clone (via ContainerImage)
-        # existing_volume_id = have_volume_templates.select { |i| i == vol.csrn }.first
-        # existing_volume = existing_volume_id ? Csrn.locate(existing_volume_id) : nil
         source_snapshot = nil
         vol_action = existing_volume ? 'mount' : 'create'
         mount_ro = vol.mount_ro

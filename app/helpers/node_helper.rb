@@ -35,4 +35,12 @@ module NodeHelper
     e.nil? ? t('common.never') : distance_of_time_in_words_to_now(e.created_at.in_time_zone(Time.zone), include_seconds: true)
   end
 
+  def show_disk_io_settings?(node)
+    return true unless node.block_write_bps.zero?
+    return true unless node.block_read_bps.zero?
+    return true unless node.block_write_iops.zero?
+    return true unless node.block_read_iops.zero?
+    false
+  end
+
 end

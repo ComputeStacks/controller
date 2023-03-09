@@ -138,10 +138,19 @@ class Region < ApplicationRecord
     selected_avail_memory = 0
 
     candidates.each do |candidate|
-      next unless candidate.can_accept_package?(package)
-      next if candidate.under_evacuation?
+      unless candidate.can_accept_package?(package)
+        add_context! "#{candidate.label}": { package_unable: candidate.context }
+        next
+      end
+      if candidate.under_evacuation?
+        add_context! "#{candidate.label}": { evacuation: true }
+        next
+      end
       candidate_obj_count = candidate.container_count
-      next if fill_to <= candidate_obj_count
+      if fill_to <= candidate_obj_count
+        add_context! "#{candidate.label}": { filled: { max_fill: fill_to, current_qty: candidate_obj_count } }
+        next
+      end
       current_cpu_avail = candidate.metric_cpu_cores[:cpu] - candidate.allocated_resources[:cpu]
       current_mem_avail = candidate.metric_memory(:MB)[:memory] - candidate.allocated_resources[:memory]
 
@@ -154,7 +163,10 @@ class Region < ApplicationRecord
         next
       end
 
-      next if candidate.failed_health_checks > 1
+      if candidate.failed_health_checks > 1
+        add_context! "#{candidate.label}": { failed_health_checks: candidate.failed_health_checks }
+        next
+      end
 
       case location.fill_strategy
       when 'least'
