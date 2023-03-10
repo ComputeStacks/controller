@@ -62,6 +62,18 @@ namespace :containers do
         registry_image_tag: "php8.1-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
+        is_default: false,
+        version: 0,
+        skip_tag_validation: true,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
+      )
+
+      wp.image_variants.create!(
+        label: "php 8.2",
+        registry_image_tag: "php8.2-litespeed",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
         is_default: true,
         version: 0,
         skip_tag_validation: true,

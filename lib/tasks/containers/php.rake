@@ -17,12 +17,24 @@ namespace :containers do
       )
 
       php.image_variants.create!(
+        label: "8.2",
+        registry_image_tag: "8.2-litespeed",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true,
+        after_migrate: "/usr/local/bin/migrate_php_version",
+        rollback_migrate: "echo \"Please rebuild container and try again\""
+      )
+
+      php.image_variants.create!(
         label: "8.1",
         registry_image_tag: "8.1-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 0,
-        is_default: true,
+        is_default: false,
         skip_tag_validation: true,
         after_migrate: "/usr/local/bin/migrate_php_version",
         rollback_migrate: "echo \"Please rebuild container and try again\""
