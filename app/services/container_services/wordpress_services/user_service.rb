@@ -35,7 +35,9 @@ module ContainerServices::WordpressServices
 
       # wp-cli will add non-json error messages to the output when there is a problem with an installation.
       # This will attempt to recover from that and parse out the original json.
-      rsp = parse_wp_json data[:response]
+      d = data[:response].is_a?(Array) ? data[:response][0] : data[:response]
+      d = d.is_a?(Array) ? d[0] : d
+      rsp = parse_wp_json d
       rsp = parse_wp_json "#{data[:response].split("]")[0]}]" if rsp.nil?
       rsp.nil? ? [] : rsp
     rescue Docker::Error::TimeoutError
