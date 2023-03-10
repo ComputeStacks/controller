@@ -99,9 +99,9 @@ module ContainerServicesHelper
       return 'Online' if service.container_image.service_container?
       link_to service_auto_scale_status(service), container_service_auto_scale_path(service)
     when 'inactive', 'offline_containers'
-      %Q( #{tag.i(nil, class: 'text-warning a-solid fa-triangle-exclamation')} Offline Containers ).html_safe
+      %Q( #{tag.i(nil, class: 'text-warning fa-solid fa-triangle-exclamation')} Offline Containers ).html_safe
     when 'alert', 'active_alert', 'resource_usage'
-      %Q( #{tag.i(nil, class: 'text-danger a-solid fa-triangle-exclamation')} Alert ).html_safe
+      %Q( #{tag.i(nil, class: 'text-danger fa-solid fa-triangle-exclamation')} Alert ).html_safe
     when 'working'
       'Operation In Progress'
     else
