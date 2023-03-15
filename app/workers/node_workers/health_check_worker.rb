@@ -198,7 +198,7 @@ module NodeWorkers
     # @return [Boolean]
     def ignore_container?(container)
       return false if container.info['Labels'].empty?
-      %w(backup system).include? container.info['labels']['com.computestacks.role']
+      %w(backup system).include? container.info['Labels']['com.computestacks.role']
     end
 
   end
