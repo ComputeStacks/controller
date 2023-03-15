@@ -197,8 +197,7 @@ module NodeWorkers
     # @param [Docker::Container] container
     # @return [Boolean]
     def ignore_container?(container)
-      return false if container.info.nil?
-      return false if container.info['labels'].empty?
+      return false if container.info['Labels'].empty?
       %w(backup system).include? container.info['labels']['com.computestacks.role']
     end
 
