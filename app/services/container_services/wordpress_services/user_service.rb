@@ -25,12 +25,18 @@ module ContainerServices::WordpressServices
     #     ]
     #
     def users
-      container = service.containers.active.first
+      # Try to use the sftp container, which is generally less susceptible to issues with the wordpress installation.
+      container = service.sftp_containers.first
+      container = service.containers.active.first if container.nil?
       if container.nil?
         errors << "No active container found"
         return []
       end
-      c = %W(/usr/local/bin/wp user list --role=administrator --json --path=/var/www/html/wordpress --allow-root)
+      c = if container.is_a?(Deployment::Container)
+            %W(sudo -u www-data wp user list --role=administrator --json --path=/var/www/html/wordpress)
+          else
+            %W(sudo -u sftpuser wp user list --role=administrator --json --path=#{service_files_path(service)}/wordpress/html/wordpress)
+          end
       data = container.container_exec!(c, nil, 20)
 
       # wp-cli will add non-json error messages to the output when there is a problem with an installation.

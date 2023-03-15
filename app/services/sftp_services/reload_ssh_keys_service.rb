@@ -33,6 +33,7 @@ module SftpServices
         locale_keys: { container: container.name },
         locale: 'sftp.reload_ssh_keys',
         status: "pending",
+        event_code: "52a00936df3e2289",
         audit: audit
       )
       event.deployments << container.deployment

@@ -34,7 +34,7 @@ module NodeWorkers
         #{Deployment::Sftp.new.image}
         ghcr.io/computestacks/cs-docker-xtrabackup:2.4
         ghcr.io/computestacks/cs-docker-xtrabackup:8.0
-        ghcr.io/computestacks/cs-docker-borg:latest
+        ghcr.io/computestacks/cs-docker-borg:#{Rails.env.production? ? '1.4' : 'latest'}
       )
 
       images.each do |image|

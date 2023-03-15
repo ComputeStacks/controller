@@ -1,5 +1,15 @@
 # Change Log
 
+## v8.0.2
+
+_Mar 14, 2023_
+
+* [CHANGE] Wordpress: Default to `wp-cli` within the sftp container, rather than the app container. This way WP functions will still work even with the container is offline.
+* [CHANGE] Pin the borg backup container to a specific version, rather than the latest tag.
+* [CHANGE] Ignore containers that have a service role label.
+
+***
+
 ## v8.0.1
 
 _Mar 8, 2023_

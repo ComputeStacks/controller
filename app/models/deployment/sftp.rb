@@ -91,6 +91,15 @@ class Deployment::Sftp < ApplicationRecord
     name.strip
   end
 
+  # @param [Deployment::ContainerService] service
+  def service_files_path(service)
+    "/home/sftpuser/apps/#{service.name}"
+  rescue => e
+    ExceptionAlertService.new(e, 'e3b6be943aa98978').perform
+    # Make sure no matter what, we're always returning some kind of directory path!
+    "/tmp"
+  end
+
   def toggle_pw_auth!
     pw_auth ? update(pw_auth: false) : update(pw_auth: true)
   end

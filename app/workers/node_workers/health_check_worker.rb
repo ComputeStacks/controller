@@ -25,9 +25,14 @@ module NodeWorkers
       return if containers_on_node.empty? # Skip if this is empty. Trying to catch odd empty results.
 
       containers_on_node.each do |i|
+        next if ignore_container?(i)
         container_name = i.info['Names'].first.gsub("/", '').strip
+
+        ## deprecated
         next if container_name == 'calico-node' || i.info['Image'] == "calico/node"
         next if SYSTEM_CONTAINER_NAMES.include? container_name
+        ## end
+
         have_containers << container_name
       end
 
@@ -187,6 +192,13 @@ module NodeWorkers
         event_code: '459363d1cbcce0c3'
       )
       ProcessAppEventWorker.perform_async 'ContainerBootFailed', container.user&.global_id, container.global_id
+    end
+
+    # @param [Docker::Container] container
+    # @return [Boolean]
+    def ignore_container?(container)
+      return false if container.info['labels'].empty?
+      %w(backup system).include? container.info['labels']['com.computestacks.role']
     end
 
   end
