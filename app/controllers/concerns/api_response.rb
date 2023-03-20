@@ -24,7 +24,10 @@ module ApiResponse
         format.xml { render xml: { errors: msg }, status: :not_found }
       end
     end
+  end
 
+  def api_obj_no_access
+    api_obj_missing "Your account does not have the required permissions to access this resource."
   end
 
   ##

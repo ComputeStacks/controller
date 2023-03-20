@@ -5,7 +5,7 @@ class Api::ContainerServices::IngressRulesControllerTest < ActionDispatch::Integ
   include ApiTestControllerBase
 
   setup do
-    @service = Deployment::ContainerService.first
+    @service = deployment_container_services :wordpress
   end
 
   test "list ingress rules" do
@@ -15,6 +15,8 @@ class Api::ContainerServices::IngressRulesControllerTest < ActionDispatch::Integ
     assert_response :success
 
     data = JSON.parse(response.body)
+
+    puts data['ingress_rules']
 
     assert_equal @service.ingress_rules.count, data['ingress_rules'].count
 

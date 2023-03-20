@@ -38,4 +38,4 @@ default:
 #  direct_connect: true
 #  le: false
 #  region: regiontwo
-#  cert_encrypted: "<%= Secret.encrypt!(File.read("/home/vagrant/.ssl_wildcard/sharedcert.pem")) %>"
+#  cert_encrypted: "<%# Secret.encrypt!(File.read("/home/vagrant/.ssl_wildcard/sharedcert.pem")) %>"
