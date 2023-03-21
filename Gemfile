@@ -53,7 +53,7 @@ gem 'webauthn', '= 2.5.2'
 gem 'clockwork', '= 3.0.1'
 gem 'http_accept_language', '= 2.1.1'
 
-gem 'nokogiri', '= 1.13.10'
+gem 'nokogiri', '= 1.14.2'
 
 gem 'country_select', '= 8.0.1'
 gem 'responders', '= 3.0.1'
