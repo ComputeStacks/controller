@@ -13,7 +13,7 @@ class String
   # * we allow @ for email addresses
   # * allow '.'
   def allowed_query
-    delete('=').delete('!')
+    delete('=').delete('!').delete('\\')
                .delete('"').delete("'").delete('&')
                .delete('%').delete('~').delete('{')
                .delete('}').delete('(').delete(')')
