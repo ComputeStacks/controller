@@ -1,5 +1,5 @@
 <% if @active_events.zero? %>
   <%= @last_event.nil? ? t('common.never') : link_to(distance_of_time_in_words_to_now(@last_event, include_seconds: true), "/container_services/#{@service.id}/events") %>
 <% else %>
-  <%= link_to "#{icon('fa-regular', 'circle-notch', class: 'fa-spin')} #{pluralize(@active_events, 'active event', 'active events')}".html_safe, "/container_services/#{@service.id}/events" %>
+  <%= link_to "#{icon('fa-solid fa-spin', 'rotate')} #{pluralize(@active_events, 'active event', 'active events')}".html_safe, "/container_services/#{@service.id}/events" %>
 <% end %>
