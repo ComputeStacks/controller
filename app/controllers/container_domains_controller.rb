@@ -28,6 +28,10 @@ class ContainerDomainsController < AuthController
   end
 
   def create
+    if @deployment.nil?
+      redirect_to "/container_domains/new", alert: "Missing project"
+      return false
+    end
     @domain = @deployment.user.container_domains.new(domain_params)
     @domain.user = @deployment.user
     @domain.current_user = current_user

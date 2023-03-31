@@ -1,5 +1,12 @@
 # Change Log
 
+## v8.0.3
+
+* [FIX] If phpMyAdmin was selected during an order, an error would prevent the order from being successful.
+* [FIX] Adding a domain without selecting a project would result in a 500 error.
+
+***
+
 ## v8.0.2
 
 _Mar 14, 2023_

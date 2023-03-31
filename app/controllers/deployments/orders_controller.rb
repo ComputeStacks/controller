@@ -158,7 +158,9 @@ class Deployments::OrdersController < AuthController
 
     # After we've updated params based on the previous variant id, now we can make changes
     @order_session.images.each do |i|
+      # TODO: Next if FREE and has no variants/etc
       next if order_params[:image_variant_selector][i[:image_id].to_s] == i[:image_variant_id].to_s
+      next if order_params[:image_variant_selector][i[:image_id].to_s].to_i.zero?
       unless @order_session.update_image_variant!(i[:image_id], order_params[:image_variant_selector][i[:image_id].to_s].to_i)
         return redirect_to("/deployments/orders/containers", alert: "Failed to change variant for image #{i[:image_id]} to variant #{order_params[:image_variant_selector][i[:image_id].to_s]}")
       end
