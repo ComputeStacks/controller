@@ -46,6 +46,7 @@
             </td>
           </tr>
         </table>
+        <div class="panel-footer text-center" style="font-family:'Space Mono', monospace;">ssh -p <%= i.public_port %> sftpuser@<%= i.ip_addr.strip %></div>
       </div>
     <% end %>
     <% unless service.volumes.sftp_enabled.empty? %>
