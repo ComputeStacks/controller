@@ -7,6 +7,7 @@ frontend https
   option httplog
   option http-server-close
   option forwardfor if-none
+  http-request set-var(txn.host) hdr(Host)
   <% if load_balancer.proxy_ipaddrs.empty? %>
   http-request del-header X-Forwarded-For
   http-request set-header X-Forwarded-Proto https
@@ -27,12 +28,12 @@ frontend https
     <% next if service.containers.empty? %>
     <% service.ingress_rules.where(external_access: true, proto: 'http').each do |ingress| %>
       <% ingress.global_container_domains.each do |domain| %>
-  acl host_rule_<%= index %> hdr(host) -i <%= domain.domain %>
+  acl host_rule_<%= index %> var(txn.host) -m str <%= domain.domain %>
   <% if ingress.restrict_cf %>
-  acl restricted_url hdr(host) -i <%= domain.domain %>
+  acl restricted_url var(txn.host) -m str <%= domain.domain %>
   <% end %>
   <% if domain.enable_hsts_header? %>
-  http-response set-header Strict-Transport-Security "max-age=16000000; includeSubDomains; preload;" if { var(txn.domain) -i <%= domain.domain %> }
+  http-response set-header Strict-Transport-Security "max-age=16000000; preload;" if host_rule_<%= index %>
   <% end %>
   use_backend <%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %> if host_rule_<%= index %>
         <% index += 1 %>

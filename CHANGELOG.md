@@ -1,5 +1,13 @@
 # Change Log
 
+## v8.0.4
+
+* [CHANGE] Update initial images on a fresh install.
+* [FIX] Don't cache dns results when validating lets encrypt domains.
+* [FIX] Custom load balancer images were failing to deploy properly.
+
+***
+
 ## v8.0.3
 
 * [FIX] If phpMyAdmin was selected during an order, an error would prevent the order from being successful.

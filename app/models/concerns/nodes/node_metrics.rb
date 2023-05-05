@@ -28,7 +28,7 @@ module Nodes
         if (metric_cpu_cores[:cpu].to_f - allocated_resources[:cpu]) < package.cpu
           add_context! no_overcommit_cpu: {
             total_node_cpu: metric_cpu_cores[:cpu].to_f,
-            cpu_allocated: allocated_resources[:cpu],
+            cpu_allocated: allocated_resources[:cpu].to_f,
             requested_cpu: package.cpu.to_f
           }
           proceed = false

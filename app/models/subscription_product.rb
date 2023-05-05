@@ -313,7 +313,7 @@ class SubscriptionProduct < ApplicationRecord
       event: 'updated',
       rel_id: item.id,
       rel_model: item.class.to_s,
-      raw_text: "Adjust usage due to SubscriptionProduct (#{id}) change."
+      raw_data: "Adjust usage due to SubscriptionProduct (#{id}) change."
     )
     updated_total = BillingResourcePrice.prorated_total(hourly_rate, 4, item.period_start, Time.now.utc, item.qty)
     if item.update(period_end: Time.now.utc, total: updated_total)

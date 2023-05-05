@@ -23,9 +23,12 @@ module LetsEncryptServices
         self.container_domain = nil
       end
       self.event = event
-      @dns = Dnsruby::Resolver.new( { nameserver: NS_LIST } )
-      @dns.retry_delay = 1
-      @dns.retry_times = 3
+      @dns = Dnsruby::Resolver.new( {
+                                      nameserver: NS_LIST,
+                                      do_caching: false,
+                                      retry_delay: 1,
+                                      retry_times: 3
+                                    } )
     end
 
     # @return [Boolean]

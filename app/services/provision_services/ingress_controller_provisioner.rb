@@ -45,12 +45,17 @@ module ProvisionServices
 
     def provision_load_balancer(image)
       lb_name = NamesGenerator.name project.id
+      variant = image.image_variants.default.first
+      if variant.nil?
+        errors << "Missing image variant for image #{image.id}"
+        return
+      end
       lb_service = project.services.new(
-        container_image: image,
+        image_variant: variant,
         is_load_balancer: true,
         name: lb_name,
         label: lb_name,
-        cpu: 1, # TODO: Manage Ingress Controller resources
+        cpu: 1,
         memory: 1024,
         region: service.region,
         command: image.command,
@@ -77,6 +82,7 @@ module ProvisionServices
           errors << i
         end
       end
+      NetworkWorkers::ServicePolicyWorker.perform_async lb_service.id
     end
 
     def valid?

@@ -10,7 +10,7 @@
 # @!attribute rel_uuid
 #   @return [String] UUID of model (if applicable)
 #
-# @!attribute raw_text
+# @!attribute raw_data
 #   @return [String] Raw details about this audit. Generally not used as we prefer to store data in Events.
 #
 # @!attribute ip_addr

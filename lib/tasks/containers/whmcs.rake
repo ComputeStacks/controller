@@ -1,5 +1,5 @@
 namespace :containers do
-  desc "Install php 7.2 container"
+  desc "Install whmcs container"
   task whmcs: :environment do
 
     if ContainerImage.find_by(name: 'whmcs').nil?
@@ -9,7 +9,7 @@ namespace :containers do
       end
       mysql = ContainerImage.find_by(name: 'mariadb')
 
-      dhprovider = ContainerImageProvider.find_by(name: "Github")
+      provider = ContainerImageProvider.find_by(name: "Github")
       whmcs      = ContainerImage.create!(
         name:                     'whmcs',
         label:                    'WHMCS',
@@ -18,14 +18,14 @@ namespace :containers do
         category:               'web',
         can_scale:                true,
         is_free:                  false,
-        container_image_provider: dhprovider,
+        container_image_provider: provider,
         registry_image_path:      "computestacks/cs-docker-whmcs",
         skip_variant_setup: true
       )
 
       whmcs.image_variants.create!(
-        label: "php 7.4",
-        registry_image_tag: "php7.4-litespeed",
+        label: "php 8.1",
+        registry_image_tag: "php8.1-litespeed",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 0,

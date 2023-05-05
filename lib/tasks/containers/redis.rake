@@ -23,7 +23,7 @@ namespace :containers do
         container_image_provider: dhprovider,
         registry_image_path:      "redis",
         remote_block_id:          block.id,
-        command:                  "/bin/sh -c redis-server --requirepass {{password}} --save "" --appendonly no",
+        command:                  "/bin/sh -c redis-server --save "" --appendonly no",
         labels:                   {
           system_image_name: "redis-public"
         },
@@ -38,17 +38,11 @@ namespace :containers do
         is_default: true,
         skip_tag_validation: true
       )
-      redis.setting_params.create!(
-        name:       'password',
-        label:      'Password',
-        param_type: 'password'
-      )
       redis.ingress_params.create!(
         port:            6379,
-        proto:           'tls',
-        external_access: true
+        proto:           'tcp',
+        external_access: false
       )
-      # Required for HA with NFS.
       redis.volumes.create!(
         label:             'redis',
         mount_path:        '/data',

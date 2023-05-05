@@ -220,7 +220,7 @@ module ContainerServices
           data: "Unable to locate running container, aborting.",
           event_code: '5c2183886cefdf90'
         )
-        event.fail! 'No online containers'
+        event.cancel! 'No online containers'
         rollback!
         return false
       end

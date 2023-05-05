@@ -57,7 +57,7 @@ module NodeWorkers
         obj = LoadBalancer.find_by(name: i) if obj.nil?
 
         if obj.nil?
-          trash_container! i, node
+          trash_container!(i, node) if Rails.env.production?
           next
         else
           next if obj.respond_to?(:status) && %w(building migrating).include?(obj.status)

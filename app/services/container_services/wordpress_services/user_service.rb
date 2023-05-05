@@ -33,9 +33,9 @@ module ContainerServices::WordpressServices
         return []
       end
       c = if container.is_a?(Deployment::Container)
-            %W(sudo -u www-data wp user list --role=administrator --json --path=/var/www/html/wordpress)
+            %W(sudo -u www-data wp user list --skip-plugins --skip-themes --quiet --role=administrator --json --path=/var/www/html/wordpress)
           else
-            %W(sudo -u sftpuser wp user list --role=administrator --json --path=#{container.service_files_path(service)}/wordpress/html/wordpress)
+            %W(sudo -u sftpuser wp user list --skip-plugins --skip-themes --quiet --role=administrator --json --path=#{container.service_files_path(service)}/wordpress/html/wordpress)
           end
       data = container.container_exec!(c, nil, 20)
 
