@@ -1,0 +1,6 @@
+/*
+  By default it's not overlaying text on the page.
+ */
+.easepick-wrapper {
+  z-index: 100;
+}

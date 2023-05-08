@@ -2,16 +2,13 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="shortcut icon" href="/assets/custom/favicon.ico"/>
+  <link rel="shortcut icon" href="<%= Rails.env.production? ? "/assets/" : "/" %>custom/favicon.ico"/>
   <title><%= content_for?(:title) ? "#{yield(:title)} | #{Setting.app_name}" : Setting.app_name %></title>
-  <!-- [if lt IE 9]>
-  <script src="https://html5shim.googlecode.com/svn/trunk/html5.js" type="text/javascript"></script>
-  <![endif]-->
   <meta name="description" content="<%= content_for?(:description) ? yield(:description) : Setting.app_name %>">
-  <link rel="stylesheet" href="/assets/custom/application.css">
+  <link rel="stylesheet" href="<%= Rails.env.production? ? "/assets/" : "/" %>custom/application.css">
   <%= stylesheet_link_tag "application" %>
-  <%= javascript_include_tag "application" %>
-  <%= javascript_pack_tag "application" %>
+  <%# javascript_include_tag "application" %>
+  <%= javascript_importmap_tags %>
   <%= csrf_meta_tags %>
   <%= yield(:head) %>
   <%= render partial: "layouts/plugins/google_analytics" if Setting.google_analytics_enabled? %>
@@ -26,7 +23,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <%= link_to(image_tag("/assets/custom/#{Setting.branding_img_app}"), "/", class: 'navbar-brand') unless Setting.branding_img_app.nil? %>
+        <%= link_to(image_tag("#{Rails.env.production? ? '/assets/' : '/'}custom/#{Setting.branding_img_app}"), "/", class: 'navbar-brand') unless Setting.branding_img_app.nil? %>
       </div>
       <div class="collapse navbar-collapse" id="main-navbar-menu">
         <ul class="nav navbar-nav">

@@ -20,14 +20,14 @@ class Admin::Subscriptions::SubscriptionUsageController < Admin::Subscriptions::
                p.nil? ? usages : usages.where(products: {id: p.id}).joins(:product)
              end
     unless params[:timerange].blank?
-      stime = params[:timerange].split("-").first.strip
-      etime = params[:timerange].split("-").last.strip
-      usages = usages.where("period_start >= ? AND period_end <= ?", Time.parse(stime).utc, Time.parse(etime).utc)
+      stime = params[:timerange].split(" - ").first.strip
+      etime = params[:timerange].split(" - ").last.strip
+      usages = usages.where("period_start >= ? AND period_end <= ?", DateTime.parse(stime).to_date, "#{DateTime.parse(etime).to_date} 23:59:59")
     end
     unless params[:p_timerange].blank?
-      pstime = params[:p_timerange].split("-").first.strip
-      petime = params[:p_timerange].split("-").last.strip
-      usages = usages.where("processed_on >= ? AND processed_on <= ?", Time.parse(pstime).utc, Time.parse(petime).utc)
+      pstime = params[:p_timerange].split(" - ").first.strip
+      petime = params[:p_timerange].split(" - ").last.strip
+      usages = usages.where("processed_on >= ? AND processed_on <= ?", DateTime.parse(pstime).to_date, "#{DateTime.parse(petime).to_date} 23:59:59")
     end
     @billing_usages = usages.paginate page: params[:page], per_page: 30
   rescue

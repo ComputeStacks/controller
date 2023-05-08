@@ -5,7 +5,7 @@ class ContainerRegistryController < AuthController
 
   def index
     @registries = ContainerRegistry.find_all_for current_user
-    if params[:js]
+    if request.xhr?
       render :template => "container_registry/registry_list", :layout => false
       return false
     end

@@ -2,8 +2,7 @@ Sidekiq.strict_args!
 
 sidekiq_redis_conf = {
   url: Rails.env.production? ? ENV["REDIS_URL"] : "redis://localhost:6379/#{Rails.env.test? ? '8' : '6'}",
-  network_timeout: 3,
-  driver: :hiredis
+  network_timeout: 3
 }
 
 # unless Rails.env.production?

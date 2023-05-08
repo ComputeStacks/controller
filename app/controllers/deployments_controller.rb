@@ -43,7 +43,7 @@ class DeploymentsController < AuthController
   def find_deployment
     @deployment = Deployment.find_for current_user, { token: params[:id] }
     if @deployment.nil?
-      if params[:js] || request.xhr?
+      if request.xhr?
         render plain: I18n.t('crud.unknown', resource: I18n.t('obj.deployment')), layout: false
       else
         redirect_to "/deployments", alert: I18n.t('crud.unknown', resource: I18n.t('obj.deployment'))

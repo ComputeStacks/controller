@@ -29,8 +29,8 @@ class Admin::DeploymentsController < Admin::ApplicationController
     end
     unless params[:created_between].blank?
       begin
-        stime = Time.parse(params[:created_between].split("-").first.strip).utc
-        etime = Time.parse(params[:created_between].split("-").last.strip).utc
+        stime = DateTime.parse(params[:created_between].split(" - ").first.strip).to_date
+        etime = "#{DateTime.parse(params[:created_between].split(" - ").last.strip).to_date} 23:59:59"
         deployments = deployments.where( Arel.sql %Q( created_at BETWEEN '#{stime}' AND '#{etime}' ) )
       rescue
         flash[:alert] = "#{params[:created_between]} is an invalid date range"

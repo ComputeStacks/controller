@@ -1039,8 +1039,8 @@ echo "export PATH=/home/vagrant/.rbenv/shims:$PATH" >> /home/vagrant/.profile
 echo "export OVERMIND_SOCKET=/home/vagrant/.overmind.sock" >> /home/vagrant/.profile
 
 echo "Installing ruby 3.2 (This may take a few minutes)..."
-su - vagrant -c "rbenv install 3.2.0"
-su - vagrant -c "rbenv global 3.2.0"
+su - vagrant -c "rbenv install 3.2.2"
+su - vagrant -c "rbenv global 3.2.2"
 
 echo "Performing GitHub authentication..."
 cat << 'OUTER' > /home/vagrant/gh_auth.sh

@@ -20,4 +20,4 @@
         td.code-font admin
       tr
         td= t('common.password').upcase
-        td#registry-password.code-font= link_to t('actions.show'), "/container_registry/#{@registry.id}/registry_connect/password", onclick: "inlineRemoteResource('registry-password');return false;"
+        td#registry-password.code-font= link_to t('actions.show'), "/container_registry/#{@registry.id}/registry_connect/password", class: 'inline-remote-resource'

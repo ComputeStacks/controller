@@ -30,7 +30,7 @@ class Admin::OrdersController < Admin::ApplicationController
     rescue
       @order_details = "Error loading data."
     end
-    if params[:js]
+    if request.xhr?
       render template: 'admin/orders/order', layout: false
       return false
     end
@@ -63,7 +63,7 @@ class Admin::OrdersController < Admin::ApplicationController
   def load_order
     @order = Order.find_by(id: params[:id])
     if @order.nil?
-      if params[:js]
+      if request.xhr?
         render plain: "Order not found.", layout: false
       else
         redirect_to "/admin/orders", alert: 'Unknown Order.'

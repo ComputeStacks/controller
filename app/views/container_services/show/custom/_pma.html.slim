@@ -20,5 +20,5 @@
           - else
             td.text-right
               div id="setting_#{setting.id}"
-                = link_to(t('actions.show'), service_param_path(setting), onclick: "inlineRemoteResource('setting_#{setting.id}');return false;")
+                = link_to(t('actions.show'), service_param_path(setting), class: "inline-remote-resource")
               div: small root

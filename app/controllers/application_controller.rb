@@ -115,7 +115,7 @@ class ApplicationController < ActionController::Base
 
   def check_suspended
     if !current_user.active && request.fullpath != "/logout"
-      if params[:js]
+      if request.xhr?
         render plain: '', layout: false
       else
         render template: "layouts/shared/suspended", layout: "layouts/devise"

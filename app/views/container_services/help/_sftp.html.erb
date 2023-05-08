@@ -39,7 +39,7 @@
             <td><%= t 'common.password' %></td>
             <td id="sftp-password" class="code-font-minimal">
               <% if i.pw_auth %>
-                <%= link_to t('actions.show'), sftp_password_path(i), onclick: "inlineRemoteResource('sftp-password');return false;" %>
+                <%= link_to t('actions.show'), sftp_password_path(i), class: "inline-remote-resource" %>
               <% else %>
                 <%= link_to "Enable Password Auth", sftp_path(i), method: :patch %>
               <% end %>

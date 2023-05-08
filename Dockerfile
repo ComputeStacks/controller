@@ -31,45 +31,44 @@ RUN set -ex; \
             iputils-ping \
             vim \
             git \
-            nodejs \
-            yarnpkg \
             supervisor \
+            nginx-light \
     ; \
-    gem install -N passenger sassc nokogiri \
-      && passenger-config compile-agent --auto --optimize \
-      && passenger-config install-standalone-runtime --auto --skip-cache \
-      && passenger-config build-native-support \
-          && passenger-config compile-agent --auto --optimize \
-          && passenger-config install-standalone-runtime --auto --skip-cache \
-          && passenger-config build-native-support \
+    echo "set_real_ip_from 127.0.0.1;" > /etc/nginx/conf.d/restore_ip.conf \
+    ; \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    ; \
+    apt-get install -y nodejs \
+      && corepack enable \
+    ; \
+    gem install -N puma sassc nokogiri \
     ; \
     mkdir -p /usr/src/app/vendor; \
-    ln -s /usr/bin/yarnpkg /usr/local/bin/yarn; \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*;
+    apt-get clean \
+      && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /usr/src/app
 
 COPY Gemfile /usr/src/app
 COPY Gemfile.lock /usr/src/app
-COPY package.json /usr/src/app
-COPY lib/supervisord.conf /etc/supervisord.conf
 
 RUN bundle config https://rubygems.pkg.github.com/ComputeStacks $github_user:$github_token \
                 && bundle config set without 'test development' \
         ; \
         cd /usr/src/app \
                 && bundle install \
-                && yarn \
         ; \
         bundle config --delete https://rubygems.pkg.github.com/computestacks/
 
+COPY lib/build/nginx.conf /etc/nginx/sites-enabled/default
+COPY lib/build/supervisord.conf /etc/supervisord.conf
 COPY . /usr/src/app
 
 RUN echo "$(cat VERSION)-$(git rev-parse --short --verify HEAD)" > VERSION \
         && bundle exec rails db:schema:load \
         && bundle exec rake generate_changelog \
-        && bundle exec rake assets:precompile
+        && bundle exec rake assets:precompile \
+        && mkdir -p /usr/src/app/tmp/pids
 
 EXPOSE 3000
 

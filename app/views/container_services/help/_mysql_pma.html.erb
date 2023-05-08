@@ -18,7 +18,7 @@
   </div>
   <div class="col-sm-4">
     <small><%= t('common.password').upcase %></small><br>
-    <code id="pma-setting"><%= pw_setting.nil? ? '...' : link_to(t('actions.show'), service_param_path(pw_setting), onclick: "inlineRemoteResource('pma-setting');return false;") %></code>
+    <code id="pma-setting"><%= pw_setting.nil? ? '...' : link_to(t('actions.show'), service_param_path(pw_setting), class: "inline-remote-resource") %></code>
   </div>
 </div>
 <hr>

@@ -16,7 +16,7 @@ class ContainerServices::ContainersController < ContainerServices::BaseControlle
   def load_container
      @container = @service.containers.find_by(id: params[:id])
      if @container.nil?
-      if params[:js]
+      if request.xhr?
         render plain: I18n.t('crud.unknown', resource: I18n.t('obj.container'))
       else
         redirect_to @service_base_url, alert: I18n.t('crud.unknown', resource: I18n.t('obj.container'))

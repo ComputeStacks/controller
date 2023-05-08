@@ -17,7 +17,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:13-alpine
+        image: postgres:15-alpine
         env:
           POSTGRES_USER: cstacks
           POSTGRES_DB: cstacks
@@ -32,7 +32,7 @@ jobs:
           - 5432:5432
       redis:
         # Docker Hub image
-        image: redis
+        image: redis:7
         # Set health checks to wait until redis has started
         options: >-
           --health-cmd "redis-cli ping"

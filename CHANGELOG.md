@@ -1,5 +1,14 @@
 # Change Log
 
+## v8.1.0
+
+_Please see doc/upgrades/v81/ for upgrade notes._
+
+* [CHANGE] Replace webpacker with importmaps.
+* [CHANGE] Replace passenger with puma.
+
+***
+
 ## v8.0.4
 
 * [CHANGE] Update initial images on a fresh install.

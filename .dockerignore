@@ -24,3 +24,4 @@ Dockerfile
 .rubocop.yml
 .yardopts
 .browserslistrc
+tmp/

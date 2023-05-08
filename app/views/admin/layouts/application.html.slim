@@ -2,11 +2,11 @@ doctype html
 html
   head
     title= content_for?(:title) ? "#{yield(:title)} | Administrator" : "#{Setting.app_name} Administrator"
-    link rel="shortcut icon" href="/assets/custom/favicon.ico"
+    link rel="shortcut icon" href="#{Rails.env.production? ? "/assets/" : "/"}custom/favicon.ico"
     = stylesheet_link_tag "application"
-    link rel="stylesheet" href="/assets/custom/application.css"
-    = javascript_include_tag "application"
-    = javascript_pack_tag "application"
+    link rel="stylesheet" href="#{Rails.env.production? ? "/assets/" : "/"}custom/application.css"
+    // javascript_include_tag "application"
+    = javascript_importmap_tags
     = render partial: "layouts/plugins/google_analytics" if Setting.google_analytics_enabled?
     = csrf_meta_tags
     = yield :head
@@ -24,7 +24,7 @@ html
             span.icon-bar
             span.icon-bar
           - unless Setting.branding_img_admin.nil?
-            a.navbar-brand.navbar-brand-admin href='/admin/dashboard'= image_tag "/assets/custom/#{Setting.branding_img_admin}", height: '20'
+            a.navbar-brand.navbar-brand-admin href='/admin/dashboard'= image_tag "#{Rails.env.production? ? '/assets/' : '/'}custom/#{Setting.branding_img_admin}", height: '20'
         #main-navbar-menu.collapse.navbar-collapse
           ul.nav.navbar-nav
             li.divider role='separator'

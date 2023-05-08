@@ -5,7 +5,7 @@ class Admin::Deployments::DomainsController < Admin::Deployments::BaseController
 
 	def index
 		@domains = @deployment.domains.sorted
-		return(render template: "admin/deployments/domains/index", layout: false) if params[:js]
+		return(render template: "admin/deployments/domains/index", layout: false) if request.xhr?
 	end
 
 	def new

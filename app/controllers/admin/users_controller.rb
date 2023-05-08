@@ -67,7 +67,7 @@ class Admin::UsersController < Admin::ApplicationController
     @zones = @user.dns_zones
     @volumes = @user.volumes
     @certs = @user.lets_encrypts
-    if params[:js]
+    if request.xhr?
       case params[:req]
       when 'billing_events'
         render template: 'admin/users/show/app_events', layout: false

@@ -32,12 +32,13 @@
           <div class="form-group">
             <p class="lead">Increase or decrease the number of containers running your application.</p>
             <label for="qty">Containers</label>
+            <span id="range-slider-val"><%= @service.containers.count %></span>
             <br />
             <% cquota = current_user.current_quota.dig(:containers, :available) %>
             <% if @service.containers.count <= cquota %>
-              <input title="container quantity" type="range" class="form-control" name="qty" min="1" max="<%= cquota > 30 ? '30' : cquota %>" step="1" value="<%= @service.containers.count %>">
+              <input title="container quantity" type="range" class="range-slider form-control" name="qty" min="1" max="<%= cquota > 30 ? '30' : cquota %>" step="1" value="<%= @service.containers.count %>">
             <% else %>
-              <input title="container quantity" type="range" class="form-control" name="qty" min="1" max="<%= @service.containers.count %>" step="1" value="<%= @service.containers.count %>">
+              <input title="container quantity" type="range" class="range-slider form-control" name="qty" min="1" max="<%= @service.containers.count %>" step="1" value="<%= @service.containers.count %>">
             <% end %>
           </div>
         </div>

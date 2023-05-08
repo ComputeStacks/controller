@@ -78,3 +78,4 @@ lib/dev/bin/
 lib/dev/keys/
 plugins/
 .yarn/
+workspace/

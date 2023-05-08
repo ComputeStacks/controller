@@ -47,7 +47,7 @@
             <tr>
               <td>Password</td>
               <td id="sftp-password">
-                <%= link_to t('actions.show'), "#{admin_sftp_path(@container)}/password", onclick: "inlineRemoteResource('sftp-password');return false;" %>
+                <%= link_to t('actions.show'), "#{admin_sftp_path(@container)}/password", class: "inline-remote-resource" %>
               </td>
             </tr>
           </table>

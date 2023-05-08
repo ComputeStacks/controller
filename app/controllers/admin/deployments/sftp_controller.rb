@@ -2,7 +2,7 @@ class Admin::Deployments::SftpController < Admin::Deployments::BaseController
 
   def index
     @sftp_containers = @deployment.sftp_containers.sorted
-    return render(template: "admin/deployments/sftp/index", layout: false) if params[:js]
+    return render(template: "admin/deployments/sftp/index", layout: false) if request.xhr?
   end
 
   # Trigger SFTP re-generation for a project

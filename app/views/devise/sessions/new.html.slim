@@ -33,7 +33,7 @@
           - if Setting.branding_img_login.nil?
             h4= Setting.app_name
           - else
-            = image_tag "/assets/custom/#{Setting.branding_img_login}"
+            = image_tag "#{Rails.env.production? ? '/assets/' : '/'}custom/#{Setting.branding_img_login}"
         .modal-body
           div style="max-width:500px;margin:0 auto;text-align:center;padding-top:40px;"
             .form-group

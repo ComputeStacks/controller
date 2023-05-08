@@ -5,3 +5,6 @@
   border-color: #e4e6e6;
   padding: 20px;
 }
+trix-toolbar [data-trix-button-group="file-tools"] {
+  display: none;
+}

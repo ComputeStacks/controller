@@ -7,7 +7,11 @@
 class Admin::Sftp::PasswordController < Admin::Sftp::BaseController
 
   def index
-    render plain: @container.password, layout: false
+    if request.xhr?
+      render plain: @container.password, layout: false
+    else
+      redirect_to "/admin/sftp/#{@container.id}"
+    end
   end
 
 end

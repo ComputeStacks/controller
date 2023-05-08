@@ -7,7 +7,7 @@ class Admin::LoadBalancersController < Admin::ApplicationController
   end
 
   def show
-    if params[:js]
+    if request.xhr?
       render layout: false, plain: I18n.l(@load_balancer.job_performed)
     end
   end
