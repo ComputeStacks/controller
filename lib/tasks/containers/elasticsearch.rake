@@ -1,80 +1,46 @@
+#docker run --rm -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.12.1
+
 namespace :containers do
-  desc "Install elasticsearch container"
+  desc "Install elasticsearch"
   task elasticsearch: :environment do
-    ghprovider = ContainerImageProvider.find_by(name: "Github")
-    es_lb      = ContainerImage.where("labels @> ?", { system_image_name: "es-loadbalancer-v1" }.to_json).first
-    if es_lb.nil?
-      es_lb = ContainerImage.create!(
-        name:                     'es-nginx-lb',
-        label:                    'ElasticSearch LoadBalancer',
-        role:                     'loadbalancer',
-        category: "other",
-        is_load_balancer:         true,
-        can_scale:                true,
-        container_image_provider: ghprovider,
-        registry_image_path:      "computestacks/es-nginx-lb",
-        registry_image_tag:       "v1",
-        is_free:                  true,
-        labels:                   {
-          system_image_name: "es-loadbalancer-v1"
-        },
-        skip_variant_setup: true
-      )
-      es_lb.image_variants.create!(
-        label: "v1",
-        is_default: true,
-        registry_image_tag: "v1",
-        version: 0,
-        skip_tag_validation: true,
-        validated_tag: true,
-        validated_tag_updated: Time.now
-      )
-      es_lb.setting_params.create!(
-        name:       'password',
-        label:      'Password',
-        param_type: 'password'
-      )
-      es_lb.env_params.create!(
-        name:       'HTTPASS',
-        param_type: 'variable',
-        env_value:  'build.settings.password'
-      )
-      es_lb.ingress_params.create!(
-        port:            80,
-        external_access: true,
-        proto:           'http'
-      )
-    end
-
-    lb_rule = es_lb.ingress_params.first
-
-    return false if lb_rule.nil?
-
-    unless ContainerImage.where("labels @> ?", { system_image_name: "elasticsearch-6.4" }.to_json).exists?
+    unless ContainerImage.where(name: "elasticsearch").exists?
+      dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
       elasticsearch = ContainerImage.create!(
-        name:                     'elasticsearch-64',
-        label:                    "ElasticSearch for Wordpress",
-        description:              "<div>ElasticSearch is a powerful search server. Add it to your site to improve speed and accuracy of your search results.</div>",
+        name:                     'elasticsearch',
+        label:                    'ElasticSearch',
+        description:              "ElasticSearch is a powerful search server. Add it to your site to improve speed and accuracy of your search results.",
         role:                     'elasticsearch',
-        category:               'other',
+        category:               'misc',
         can_scale:                false,
-        container_image_provider: ghprovider,
-        registry_image_path:      "computestacks/cs-docker-es-for-wp",
-        registry_image_tag:       "6.4.3",
+        container_image_provider: dhprovider,
+        registry_image_path:      "elasticsearch",
         min_cpu:                  1,
         min_memory:               1024,
-        labels:                   {
-          system_image_name: "elasticsearch-6.4"
-        },
         skip_variant_setup: true
       )
       elasticsearch.image_variants.create!(
-        label: "v6",
-        is_default: true,
-        version: 0,
-        registry_image_tag: "v6",
+        label: "8.7.1",
+        registry_image_tag: "8.7.1",
         validated_tag: true,
         validated_tag_updated: Time.now,
+        version: 0,
+        is_default: true,
+        skip_tag_validation: true
+      )
+      elasticsearch.image_variants.create!(
+        label: "7.17.10",
+        registry_image_tag: "7.17.10",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        version: 1,
+        skip_tag_validation: true
+      )
+      elasticsearch.image_variants.create!(
+        label: "6.8.23",
+        registry_image_tag: "6.8.23",
+        validated_tag: true,
+        validated_tag_updated: Time.now,
+        version: 2,
         skip_tag_validation: true
       )
       elasticsearch.env_params.create!(
@@ -95,18 +61,11 @@ namespace :containers do
         param_type:   "static",
         static_value: "-Xms416m -Xmx416m"
       )
-      elasticsearch.env_params.create!(
-        name:         "xpack.security.enabled",
-        label:        "xpack",
-        param_type:   "static",
-        static_value: "false"
-      )
 
       elasticsearch.ingress_params.create!(
         port:               9200,
-        external_access:    true,
-        proto:              'http',
-        load_balancer_rule: lb_rule
+        external_access:    false,
+        proto:              'http'
       )
       elasticsearch.ingress_params.create!(
         port:            9300,
