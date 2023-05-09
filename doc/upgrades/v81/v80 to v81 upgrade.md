@@ -77,3 +77,18 @@ systemctl reload nginx
 ```
 
 This will ensure the real ip is pushed to the controller for logging.
+
+## Upgrade cs-agent on all nodes
+
+_While not directly tied to v8.1, our agent was updated with important bug fixes._
+
+```bash
+cd /tmp && wget https://f.cscdn.cc/file/cstackscdn/packages/cs-agent/cs-agent.tar.gz
+systemctl stop cs-agent
+tar -xzvf cs-agent.tar.gz
+rm -f /usr/local/bin/cs-agent
+mv cs-agent /usr/local/bin/
+chown root:root /usr/local/bin/cs-agent && chmod +x /usr/local/bin/cs-agent
+rm -rf /tmp/cs-agent*
+systemctl daemon-reload && systemctl start cs-agent
+```
