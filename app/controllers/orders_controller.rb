@@ -17,6 +17,8 @@ class OrdersController < AuthController
     else
       if @order.success? && @order.provision_event&.success? && @order.deployment
         redirect_to "/deployments/#{@order.deployment.token}"
+      elsif @order.cancelled?
+        redirect_to "/deployments"
       end
     end
   end
