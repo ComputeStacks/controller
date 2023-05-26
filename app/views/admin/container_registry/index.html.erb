@@ -26,7 +26,7 @@
               <%= " (#{i.name})" if i.label != i.name %>
             </td>
             <td><%= i.status %></td>
-            <td><%= i.user.nil? ? '...' : link_to(i.user.full_name, admin_users_path(i.user)) %></td>
+            <td><%= i.user.nil? ? '...' : link_to(i.user.full_name, admin_user_path(i.user)) %></td>
             <td class="code-font" style="font-size:12px;"><%= "#{Setting.registry_base_url}:#{i.port}" %></td>
             <td class="code-font" style="font-size:12px;">
               admin / <%= i.registry_password %>
