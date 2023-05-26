@@ -13,7 +13,7 @@
 
 <div class="row">
   <div class="col-md-12">
-    <table id="container-image-table" class="table table-hover" style="width:100%">
+    <table class="table table-hover" style="width:100%">
       <thead>
         <tr>
           <th>Name</th>
@@ -22,6 +22,23 @@
           <th></th>
         </tr>
       </thead>
+      <tbody>
+      <% if @images.empty? %>
+        <tr>
+          <td colspan="4" class="text-center">No Images, <%= link_to "Create One", "/container_images/new" %></td>
+        </tr>
+      <% end %>
+      <% @images.each do |i| %>
+
+        <tr>
+          <td><%= %Q(#{table_image_icon(i)} <a href="/container_images/#{i.id}">#{i.label}</a>).html_safe %></td>
+          <td><%= i.user.nil? ? '...' : i.user.full_name %></td>
+          <td><%= i.container_registry ? %Q(<a href="/container_registry/#{i.container_registry.id}">#{i.container_registry.label}</a>).html_safe : i.registry_image_path %></td>
+          <td><%= image_table_buttons(i).html_safe %></td>
+        </tr>
+
+      <% end %>
+      </tbody>
     </table>
   </div>
 </div>

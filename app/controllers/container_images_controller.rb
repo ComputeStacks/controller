@@ -6,10 +6,10 @@ class ContainerImagesController < AuthController
 
   def index
     @images = ContainerImage.find_all_for(current_user)
-    respond_to do |format|
-      format.json {}
-      format.html {}
-    end
+    # respond_to do |format|
+    #   format.json {}
+    #   format.html {}
+    # end
   end
 
   def edit
