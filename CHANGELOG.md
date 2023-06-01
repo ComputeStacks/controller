@@ -1,5 +1,11 @@
 # Change Log
 
+## v8.1.1
+
+* [FIX] Bug fixes around admin management of volumes.
+
+***
+
 ## v8.1.0
 
 _Please see doc/upgrades/v81/ for upgrade notes._

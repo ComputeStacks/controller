@@ -16,7 +16,7 @@ module Containers
       result = []
       DockerVolumeLocal::Node.new(node).list_all_volumes.each do |i|
         vol = expected_volumes.select { |ii| ii.name == i.id }[0]
-        next if vol.nil?
+        next if vol.nil? || vol.container_service.nil?
         image = vol.container_service.container_image
         next unless image.enable_sftp
         next if Volume.excluded_roles.include?(image.role.downcase) # Hard code block sftp container.

@@ -65,6 +65,7 @@ module VolumeHelper
   end
 
   def volume_attached_services(volume)
+    return '...' if volume.volume_maps.empty? || volume.container_services.empty?
     links = volume.container_services.map do |i|
       link_to(i.label, container_service_path(i))
     end

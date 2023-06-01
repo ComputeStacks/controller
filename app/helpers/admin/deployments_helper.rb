@@ -1,7 +1,7 @@
 module Admin::DeploymentsHelper
 
   def admin_deployments_path(deployment)
-    "/admin/deployments/#{deployment.id}-#{deployment.name.parameterize}"
+    "/admin/deployments/#{deployment.id}-#{deployment.name.parameterize.gsub(".","-")}"
   end
 
   # @param [Deployment::EventLog] event

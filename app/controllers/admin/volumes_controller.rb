@@ -8,9 +8,9 @@ class Admin::VolumesController < Admin::ApplicationController
     volumes = Volume.where(to_trash: params[:state] == 'trashed')
     volumes = case params[:containers]
               when 'linked'
-                volumes.where.not(container_service: nil)
+                volumes.left_outer_joins(:volume_maps).where.not(volume_maps: {id: nil})
               when 'unlinked'
-                volumes.where(container_service: nil)
+                volumes.where.missing(:volume_maps)
               else
                 volumes
               end
@@ -98,7 +98,7 @@ class Admin::VolumesController < Admin::ApplicationController
     @deployment = @volume.deployment
     @back_url = case params[:from]
                 when 'deployment'
-                  @deployment ? "/admin/deployments/#{@deployment.id}-#{@deployment.name.parameterize}" : "/admin/volumes"
+                  @deployment ? "/admin/deployments/#{@deployment.id}" : "/admin/volumes"
                 else
                   "/admin/volumes"
                 end

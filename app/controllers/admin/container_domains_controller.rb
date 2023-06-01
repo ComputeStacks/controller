@@ -60,7 +60,7 @@ class Admin::ContainerDomainsController < Admin::ApplicationController
       else
         if @domain.deployment
           @deployment = @domain.deployment
-          redirect_to "/admin/deployments/#{@deployment.id}-#{@deployment.name.parameterize}#domains", success: "Domain created."
+          redirect_to "/admin/deployments/#{@deployment.id}#domains", success: "Domain created."
         else
           redirect_to "/admin/container_domains", success: "Domain created."
         end
@@ -90,7 +90,7 @@ class Admin::ContainerDomainsController < Admin::ApplicationController
     @domain = Deployment::ContainerDomain.find_by(id: params[:id])
     if @domain&.deployment
       @deployment = @domain.deployment
-      @base_url = "/admin/deployments/#{@deployment.id}-#{@deployment.name.parameterize}#domains"
+      @base_url = "/admin/deployments/#{@deployment.id}#domains"
     else
       @base_url = "/admin/container_domains"
     end

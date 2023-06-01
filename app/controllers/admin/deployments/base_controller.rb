@@ -13,7 +13,7 @@ class Admin::Deployments::BaseController < Admin::ApplicationController
 				return redirect_to("/admin/deployments")
 			end
 		end
-		@base_url = "/admin/deployments/#{@deployment.id}-#{@deployment.name.to_param}"
+		@base_url = "/admin/deployments/#{@deployment.id}"
 	end
 
 end

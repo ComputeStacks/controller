@@ -148,7 +148,7 @@ class Deployment::ContainerService < ApplicationRecord
            foreign_key: 'container_service_id',
            dependent: :destroy
 
-  has_many :volume_maps
+  has_many :volume_maps, dependent: :destroy
   has_many :volumes, through: :volume_maps
 
   has_many :owned_volume_maps, -> { where is_owner: true }, class_name: 'VolumeMap', foreign_key: 'container_service_id'

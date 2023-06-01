@@ -21,7 +21,7 @@ class Admin::Deployments::DomainsController < Admin::Deployments::BaseController
 
 	def find_domain
 		@domain = @deployment.domains.find_by(id: params[:id])
-		@base_url = "/admin/deployments/#{@deployment.id}-#{@deployment.name.parameterize}"
+		@base_url = "/admin/deployments/#{@deployment.id}"
 		return redirect_to(@base_url, alert: "Unknown domain") if @domain.nil?
 		@domain.current_user = current_user
 		@services = @domain.user.container_services.sorted
