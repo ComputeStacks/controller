@@ -7,6 +7,8 @@ Documenting flow of models, workers, and services used when an order event is tr
   - BuildOrderService
     + ProcessOrderWorker
       * ProcessOrderService
+        - NetworkServices::GenerateProjectNetworkService
+          - NetworkServices::CreateBridgeNetworkService
         - OrderServices::ContainerServiceOrderService
           + ProvisionServices::ContainerServiceProvisioner
         - ProvisionServices::SftpProvisioner

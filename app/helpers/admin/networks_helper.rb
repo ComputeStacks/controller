@@ -18,4 +18,13 @@ module Admin::NetworksHelper
     end
   end
 
+  # @param [Network] network
+  def net_in_use_label(network)
+    if network.has_clustered_networking?
+      "#{network.addresses.count} Addresses"
+    else
+      "#{network.child_networks.active.count} Subnets"
+    end
+  end
+
 end

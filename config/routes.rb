@@ -5,6 +5,11 @@ Rails.application.routes.draw do
 
   get '500', to: 'exceptions#internal_server_error'
 
+  # Engines (ComputeStacks Plugins)
+  if File.exist?(Rails.root.join('config/routes/engines.rb'))
+    load Rails.root.join('config/routes/engines.rb')
+  end
+
   load Rails.root.join('config/routes/admin.rb')
   load Rails.root.join('config/routes/api.rb')
   load Rails.root.join('config/routes/auth.rb')

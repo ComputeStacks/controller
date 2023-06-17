@@ -2,15 +2,22 @@ class ProcessOrderService
 
   attr_accessor :order,
                 :event,
+                :region,
                 :project,
                 :container_service, # The created service
+                :region,
                 :result,
                 :errors
 
   def initialize(order)
     self.order = order
     self.event = order.current_event
-    self.project = order.deployment if order.deployment
+    self.project = order.deployment.nil? ? nil : order.deployment
+    self.region = if order.data[:region_id].blank?
+                    nil
+                  else
+                    Region.find_by id: order.data[:region_id]
+                  end
     self.errors = []
 
     ## Track what we've done.
@@ -44,6 +51,14 @@ class ProcessOrderService
     if order.requires_project? && !init_project!
       fail_process! 'Failed to find or create project'
       return false
+    end
+
+    unless region.has_clustered_networking?
+      # Link private net to project
+      unless NetworkServices::GenerateProjectNetworkService.new(event, region, project).perform
+        fail_process! "Failed to build project network"
+        return false
+      end
     end
 
     to_provision = order.data[:raw_order]
@@ -152,6 +167,9 @@ class ProcessOrderService
   #
   # Instead, gracefully fail on those items that didn't make it, and allow the user/admin to inspect the current state and attempt to recover manually.
   def finalize!
+    # Project does not have the private network, so we need to reload from the DB.
+    project.reload
+
     # Setup Metadata Token
     metadata_token = ProjectServices::GenMetadataToken.new(project)
     unless metadata_token.perform
@@ -205,6 +223,10 @@ class ProcessOrderService
       errors << "Missing region"
       return false
     end
+    if region.nil?
+      errors << "Missing Availability Zone"
+      return false
+    end
     true
   end
 
@@ -230,6 +252,12 @@ class ProcessOrderService
     ) unless errors.empty?
     event.fail! msg
     order.fail!
+
+    # Cleanup network
+    if project&.private_network
+      project.private_network.update deployment: nil
+    end
+
   end
 
   def complete_process!

@@ -36,7 +36,6 @@ module Nodes
     def consul_iptable_rules
       data = { rules: [] }
       iptable_rules.each do |i|
-        next if i.public_network?
         if i.sftp_container # should never hit this...
           data[:rules] << {
             proto: i.proto,

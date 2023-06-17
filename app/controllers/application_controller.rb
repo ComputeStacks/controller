@@ -13,7 +13,6 @@ class ApplicationController < ActionController::Base
   rescue_from ActionController::BadRequest, with: :bad_request
   rescue_from ActionController::UnknownFormat, with: :unknown_route
   rescue_from ActionController::RoutingError, with: :unknown_route
-
   rescue_from ActionController::InvalidAuthenticityToken, with: :token_error
 
   before_action :check_suspended, if: :current_user

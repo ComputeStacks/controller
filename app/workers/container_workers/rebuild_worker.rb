@@ -4,19 +4,27 @@ module ContainerWorkers
 
     sidekiq_options retry: 1
 
-    # @param [String] container_id Global ID
-    # @param [String] event_id Global
-    def perform(container_id, event_id)
+    # args[0] = container_id GLOBALID
+    # args[1] = event_id GLOBALID
+    # args[2] = keep_last_power_state (default FALSE). If rebuilding, new state will be ON.
+    def perform(*args)
       timeout_event_code = '2f4eeefceb3fd59e' # Container Stop
-      return if event_id.nil?
-      container = GlobalID::Locator.locate container_id
-      event = GlobalID::Locator.locate event_id
+      container = GlobalID::Locator.locate args[0]
+      event = GlobalID::Locator.locate args[1]
+      keep_prev_state = args[2].nil? ? false : args[2]
+
+      return if container.nil? || event.nil?
 
       return unless event.start!
 
       # Ensure prerequisites are met
       return unless ProvisionServices::ImageReadyService.new(container, event).perform
 
+      container_state = if keep_prev_state
+                          container.req_state == 'stopped' ? 'stopped' : 'running'
+                        else
+                          'running'
+                        end
 
       stop_result = Timeout::timeout(30) do
         container.stop!(event, true)
@@ -45,13 +53,15 @@ module ContainerWorkers
         return
       end
 
-      if container.is_a?(Deployment::Container)
-        NetworkWorkers::ServicePolicyWorker.perform_async container.service&.id
-      elsif container.is_a?(Deployment::Sftp)
-        NetworkWorkers::SftpPolicyWorker.perform_async container.id
+      if container.region.has_clustered_networking?
+        if container.is_a?(Deployment::Container)
+          NetworkWorkers::ServicePolicyWorker.perform_async container.service&.id
+        elsif container.is_a?(Deployment::Sftp)
+          NetworkWorkers::SftpPolicyWorker.perform_async container.id
+        end
       end
 
-      ContainerWorkers::ProvisionWorker.perform_in 5.seconds, container_id, event_id
+      ContainerWorkers::ProvisionWorker.perform_in 5.seconds, container.to_global_id.to_s, event.to_global_id.to_s, container_state
 
     rescue ActiveRecord::RecordNotFound
       return # Silently fail

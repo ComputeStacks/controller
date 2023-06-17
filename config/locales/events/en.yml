@@ -85,6 +85,8 @@ en:
         provision: Provisioning new order
       project:
         clone: "[%{project}] Clone Project"
+      region:
+        network: "[%{region}] Changing Network Driver"
       service:
         addons: "[%{label}] Updating service addons."
         autoscale: "[%{label}] AutoScaling Service"

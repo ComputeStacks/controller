@@ -3,7 +3,7 @@ module ContainerServices
     extend ActiveSupport::Concern
 
     def bill_bw_by_lb?
-      ! (public_network? || has_iptable_rules?)
+      !has_iptable_rules?
     end
 
     # Currently only used for display purposes.

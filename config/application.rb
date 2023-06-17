@@ -19,7 +19,7 @@ module CloudPortal
     config.active_job.queue_adapter = :sidekiq
     config.assets.enabled = true
     config.assets.initialize_on_precompile = false
-    config.active_record.yaml_column_permitted_classes = [ActiveSupport::TimeZone, ActiveSupport::TimeWithZone, Time, DateTime, BigDecimal, Symbol]
+    config.active_record.yaml_column_permitted_classes = [ActiveSupport::TimeZone, ActiveSupport::TimeWithZone, Time, DateTime, BigDecimal, Symbol, IPAddr]
     config.middleware.use Rack::Attack
     config.assets.precompile += ['*.svg']
 

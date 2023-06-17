@@ -7,6 +7,10 @@
 # @!attribute [r] name
 #   @return [String]
 #
+# @!attribute status
+#   pending,running,stopped,error,degraded
+#   @return [String]
+#
 # @!attribute node
 #   @return [Node]
 #
@@ -73,7 +77,7 @@ class Deployment::Sftp < ApplicationRecord
   has_many :ssh_host_keys, class_name: 'Deployment::SftpHostKey', dependent: :destroy, foreign_key: 'sftp_container_id'
 
   before_save :set_pass
-  after_save :update_pw_auth!
+  after_update :update_pw_auth!
 
   after_create :setup_ingress_rule!
   after_create :generate_certificates!

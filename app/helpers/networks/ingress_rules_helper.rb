@@ -23,7 +23,7 @@ module Networks
       if ingress_rule.public_port.zero?
         link_to t('actions.activate'), "#{ingress_rule_path(ingress_rule)}/toggle_nat", method: :post, data: {confirm: 'Are you sure? This will publicly expose this endpoint.'}
       elsif ingress_rule.public_port > 0
-        link_to ingress_rule.public_network? ? "Deactivate" : ingress_rule.public_port, "#{ingress_rule_path(ingress_rule)}/toggle_nat", method: :post, data: {confirm: 'Are you sure? This will disable public access and reset this NAT port.'}
+        link_to ingress_rule.public_port, "#{ingress_rule_path(ingress_rule)}/toggle_nat", method: :post, data: {confirm: 'Are you sure? This will disable public access and reset this NAT port.'}
       end
     end
 

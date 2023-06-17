@@ -58,11 +58,11 @@ class BuildOrderService
         product_type: 'container',
         source: c[:source], # Source service CSRN
         label: c[:name],
-        image_variant_id: c[:image_variant].to_i,
+        image_variant_id: c[:image_variant_id].to_i,
         qty: c[:qty],
         domains: c[:domains] ? c[:domains] : [],
         resources: c[:resources],
-        addons: c[:addons], # List of Addon IDs (ContainerImageProduct)
+        addons: c[:addons].nil? ? [] : c[:addons], # List of Addon IDs (ContainerImageProduct)
         params: {},
         # c[:volumes] = [
         #   {
@@ -195,7 +195,12 @@ class BuildOrderService
   end
 
   def valid_container_params?
-    included_image_ids = params[:containers].map {|i| i[:image_id].to_i if i[:image_id]}
+    # included_image_ids = params[:containers].map {|i| i[:image_id].to_i if i[:image_id]}
+    included_image_ids = []
+    params[:containers].each do |i|
+      iv = ContainerImage::ImageVariant.find_by id: i[:image_variant_id]
+      included_image_ids << iv.container_image.id if iv
+    end
     if project  # Include existing images when performing dependency checks
       project.container_images.each { |i| included_image_ids << i.id }
     end
@@ -212,16 +217,16 @@ class BuildOrderService
       end
 
       # Validate image
-      img_variant = ContainerImage::ImageVariant.find_by id: c[:image_variant]
+      img_variant = ContainerImage::ImageVariant.find_by id: c[:image_variant_id]
       if img_variant.nil?
-        errors << "Invalid image. Image Variant ID: #{c[:image_variant]} | #{c[:name]}."
+        errors << "Invalid image. Image Variant ID: #{c[:image_variant_id]} | #{c[:name]}."
         next
       end
 
       # Should never happen because image_source requires an image.
       img = img_variant.container_image
       if img.nil?
-        errors << "Invalid image. Image ID: #{c[:image_variant]} | #{c[:name]}."
+        errors << "Invalid image. Image ID: #{c[:image_variant_id]} | #{c[:name]}."
         next
       end
 
@@ -313,15 +318,16 @@ class BuildOrderService
       end
 
       # Validate passed parameters
-      provided_params = c[:params].nil? ? [] : c[:params].map {|param| param[:key]}
-      img.setting_params.where(param_type: 'static').each do |ii|
-        errors << "Missing parameter #{ii.name} for #{c[:name]} (#{c[:image_id]})" unless provided_params.include?(ii.name)
-      end
+      # provided_params = c[:params].nil? ? [] : c[:params].map {|param| param[:key]}
+      # img.setting_params.where(param_type: 'static').each do |ii|
+      #   errors << "Missing parameter #{ii.name} for #{c[:name]} (#{c[:image_id]})" unless provided_params.include?(ii.name)
+      # end
 
       # validate dependent containers
       img_deps = img.dependencies.pluck(:id)
       unless (img_deps - included_image_ids).empty?
         errors << "Missing required dependent services. Have #{(img_deps & included_image_ids).to_s}, Need #{(img_deps - included_image_ids).to_s}"
+        errors << c[:image_variant_id]
       end # END dependency check
 
       # Validate provided domain names

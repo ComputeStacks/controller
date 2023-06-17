@@ -34,7 +34,7 @@ class Api::OrdersController < Api::ApplicationController
   #
   # **OAuth AuthorizationRequired**: `order_read`
   #
-  # * `orders`: Object
+  # * `order`: Object
   #     * `id`: UUID
   #     * `status`: `String<open,pending,awaiting_payment,processing,cancelled,failed,completed`
   #     * `project`: Object

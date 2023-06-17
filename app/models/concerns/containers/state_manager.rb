@@ -7,6 +7,7 @@ module Containers
       return 'starting' if starting?
       return 'stopping' if stopping?
       return 'working' if working?
+      return 'unhealthy' unless healthy?
       return 'alert' if has_failed_jobs?
       return 'resource_usage' unless resources_ok?
       stopped? ? 'offline' : 'online'
@@ -40,10 +41,33 @@ module Containers
     # Default (direct = false) will use Prometheus,
     # otherwise it will directly query for the container within Docker.
     def running?(direct = false)
-      return metric_last_seen > 1.minute.ago unless metric_last_seen.nil? || direct
-      c = docker_client(true)
-      return false if c.nil?
-      c.info['State']['Running']
+      unless direct || event_logs.where("created_at > ?", 3.minutes.ago).exists?
+        return status == 'running'
+      end
+      s = health_status(direct)
+      return nil if s.nil?
+      s[:state] == 'running'
+    end
+
+    # Store larger health object for caching
+    def health_status(direct = false)
+      # direct and containers with active events will get realtime.
+      if direct || event_logs.where("created_at > ?", 3.minutes.ago).exists?
+        return container_status
+      end
+      Rails.cache.fetch("container_state_#{name}", expires_in: 2.minutes, skip_nul: true) do
+        container_status
+      end
+    end
+
+    def healthy?(direct = false)
+      unless direct || event_logs.where("created_at > ?", 3.minutes.ago).exists?
+        return status != 'degraded'
+      end
+      s = health_status(direct)
+      return true if s.nil?
+      return true if s[:health].empty?
+      %w(healthy starting).include? s[:health][:state]
     end
 
     def stopped?

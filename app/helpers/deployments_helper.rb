@@ -75,7 +75,7 @@ module DeploymentsHelper
       'panel-success'
     when 'warning'
       'panel-warning'
-    when 'alert'
+    when 'alert', 'unhealthy'
       'panel-danger'
     else # deleting
       'panel-default'
@@ -96,12 +96,15 @@ module DeploymentsHelper
       badges << icon('fa-solid', 'users', nil, { title: deployment.user.full_name })
     end
 
-    if %w(working deleting).include?(status)
+    case status
+    when 'working','deleting'
       badges << icon('fa-solid fa-spin', 'rotate', nil, { title: status })
-    elsif status != 'ok'
-      badges << icon('fa-solid', 'triangle-exclamation', nil, { title: 'Alert' })
-    else
+    when 'ok'
       badges << icon('fa-solid', 'circle-check', nil, { title: 'OK' })
+    when 'unhealthy'
+      badges << icon('fa-solid', 'triangle-exclamation', nil, { title: 'Degraded' })
+    else
+      badges << icon('fa-solid', 'triangle-exclamation', nil, { title: 'Alert' })
     end
     badges
   end
@@ -116,6 +119,8 @@ module DeploymentsHelper
       I18n.t('deployments.state.deployed')
     when 'deleting'
       I18n.t('containers.state.deleting')
+    when 'unhealthy'
+      'Degraded'
     else
       "..."
     end

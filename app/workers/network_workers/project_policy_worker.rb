@@ -8,6 +8,7 @@ module NetworkWorkers
       project = GlobalID::Locator.locate project_id
       return false if project.nil?
       project.regions.each do |region|
+        next unless region.has_clustered_networking?
         node = region.nodes.online.first
         if node.nil?
           project.event_logs.create!(
@@ -20,9 +21,6 @@ module NetworkWorkers
           return false
         end
         node.host_client.client.exec!("cat <<< '#{project.calico_policy.deep_stringify_keys.to_yaml}' | calicoctl apply -f -")
-        # project.services.each do |i|
-        #   NetworkWorkers::ServicePolicyWorker.perform_async i.id
-        # end
       end
     rescue ActiveRecord::RecordNotFound
       return

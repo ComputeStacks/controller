@@ -4,7 +4,7 @@ module ContainerServices
 
     def is_wordpress?
       return false unless Feature.check('wp_beta')
-      container_image.role == 'wordpress'
+      container_image.role == 'wordpress' && env_params.where(name: "CS_AUTH_KEY").exists?
     end
 
     def wp_protected_credentials

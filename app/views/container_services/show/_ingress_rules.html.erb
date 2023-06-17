@@ -3,5 +3,5 @@
     <strong><%= t('container_images.ingress_rules.obj_plural').upcase %></strong>
     <%= link_to icon('fa-solid', 'gear').html_safe, "/container_services/#{service.id}/ingress", class: 'pull-right' %>
   </div>
-  <%= render partial: 'container_services/ingress/index', locals: { return_to: 'service', ingress_rules: service.ingress_rules, is_public: service.public_network? } %>
+  <%= render partial: 'container_services/ingress/index', locals: { return_to: 'service', ingress_rules: service.ingress_rules } %>
 </div>

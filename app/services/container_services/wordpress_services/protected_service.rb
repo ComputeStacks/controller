@@ -10,7 +10,7 @@ module ContainerServices::WordpressServices
                   :event,
                   :errors
 
-    # @param [Deployment::ContainerService] service
+    # @param [Deployment::ContainerService,nil] service
     # @param [Audit] audit
     def initialize(service, p = nil)
       self.service = service

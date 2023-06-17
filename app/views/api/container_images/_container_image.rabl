@@ -43,8 +43,8 @@ end
 child :ingress_params do
   extends 'api/container_images/ingress_params/_ingress'
 end
-child :volumes do
-  extends 'api/container_images/volume_params/_volume'
+node :volumes do |i|
+  partial 'api/container_images/volume_params/_volume', object: i
 end
 node :required_containers do |i|
   i.dependencies.pluck(:id)
@@ -52,8 +52,8 @@ end
 node :required_by do |i|
   i.parent_containers.pluck(:id)
 end
-child :image_variants do
-  extends 'api/container_images/image_variants/_variant'
+node :image_variants do |i|
+  partial 'api/container_images/image_variants/_variant', object: i
 end
 
 node :links do |i|

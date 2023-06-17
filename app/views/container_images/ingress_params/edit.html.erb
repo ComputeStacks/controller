@@ -12,7 +12,7 @@
   <div class="<%= @ingress.errors.count.zero? ? 'col-sm-12' : 'col-sm-8' %>">
     <%= form_for @ingress, url: container_image_ingress_param_path(@ingress), method: :put do |f| %>
       <div class="panel panel-default">
-        <%= render partial: 'container_images/ingress_params/form', locals: { f: f, allow_lb: true } %>
+        <%= render partial: 'container_images/ingress_params/form', locals: { f: f } %>
         <div class="panel-footer">
           <%= link_to t('actions.cancel'), container_image_path(@ingress.container_image), class: 'btn btn-default', style: 'margin-right: 10px;' %>
           <%= submit_tag t('actions.update'), class: 'btn btn-success pull-right' %>

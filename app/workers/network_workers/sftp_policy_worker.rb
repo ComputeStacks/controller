@@ -12,6 +12,7 @@ module NetworkWorkers
         retry_job wait: 5.minutes
         return
       end
+      return unless node.region.has_clustered_networking?
       begin
         policy = service.calico_policy
       rescue DockerSSH::ConnectionFailed => e # Don't alert to our bug system!

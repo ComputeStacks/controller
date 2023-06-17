@@ -53,10 +53,8 @@
             </div>
             <div class="col-xs-6 text-right">
               <%= service_list_status_indicator i %>
-              <% unless i.public_network? %>
               &nbsp;|&nbsp;
               <%= pluralize i.containers.count, t('obj.container'), plural: t('obj.containers') %>
-              <% end %>
             </div>
           </div>
         </div>

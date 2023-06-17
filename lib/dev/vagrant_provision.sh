@@ -1,4 +1,7 @@
 #!/bin/bash
+# Debian 12 Bookworm
+
+set -e
 
 hostname csdev
 echo "csdev" > /etc/hostname
@@ -13,9 +16,7 @@ echo "alias dconsole='docker exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput
 echo "Defaults:vagrant env_keep += \"EDITOR\"" >> /etc/sudoers.d/vagrant
 echo "syntax on" >> /etc/vim/vimrc
 apt-get update && apt-get -y upgrade
-apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent etcd prometheus-node-exporter redis-server postgresql-13 postgresql-13-ip4r rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen libyaml-dev
-update-alternatives --set iptables /usr/sbin/iptables-legacy
-update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent prometheus-node-exporter redis-server postgresql-15 rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen libyaml-dev
 curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
@@ -28,9 +29,9 @@ sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 if [ $(dpkg --print-architecture) == 'amd64' ]; then
-  curl https://repo.powerdns.com/FD380FBB-pub.asc | apt-key add -
+  install -d /etc/apt/keyrings; curl https://repo.powerdns.com/FD380FBB-pub.asc | sudo tee /etc/apt/keyrings/auth-48-pub.asc
   # for arm/m1, it will fallback to the version included in the debian repository.
-  echo "deb [arch=amd64] http://repo.powerdns.com/debian bullseye-auth-46 main" > /etc/apt/sources.list.d/pdns.list
+  echo "deb [signed-by=/etc/apt/keyrings/auth-48-pub.asc arch=amd64] http://repo.powerdns.com/debian bookworm-auth-48 main" > /etc/apt/sources.list.d/pdns.list
 
   cat << 'EOF' > /etc/apt/preferences.d/pdns
 Package: pdns-*
@@ -41,15 +42,14 @@ else
   echo "Falling back to debian repository for powerdns due to arm architecture."
 fi
 
-curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor -o /usr/share/keyrings/haproxy.debian.net.gpg
+curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor > /usr/share/keyrings/haproxy.debian.net.gpg
 
 echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" \
-      http://haproxy.debian.net bullseye-backports-2.4 main \
+      http://haproxy.debian.net bookworm-backports-2.8 main \
       > /etc/apt/sources.list.d/haproxy.list
 
 apt-get update
-apt-get -y install docker-ce=5:20.10.23~3-0~debian-bullseye docker-ce-cli=5:20.10.23~3-0~debian-bullseye containerd.io consul haproxy=2.4.\* pdns-server pdns-backend-pgsql
-apt-mark hold docker-ce docker-ce-cli
+apt-get -y install docker-ce docker-ce-cli containerd.io consul haproxy=2.8.\* pdns-server pdns-backend-pgsql
 touch /etc/consul.d/consul.env && chown consul:consul /etc/consul.d/consul.env
 cat << 'EOF' > /etc/consul.d/consul.hcl
 datacenter = "dev"
@@ -112,7 +112,7 @@ webserver-address=0.0.0.0
 webserver-port=8081
 webserver-allow-from=0.0.0.0/0
 webserver-password=$PDNS_WEB_KEY
-local-port=53
+local-port=5353
 local-address=127.0.0.1
 include-dir=/etc/powerdns/pdns.d
 launch=gpgsql
@@ -307,15 +307,6 @@ else
   exit 1
 fi
 
-systemctl enable etcd && systemctl start etcd
-
-if systemctl status etcd; then
-  echo "etcd booted successfully"
-else
-  echo "etcd failed to start"
-  exit 1
-fi
-
 systemctl enable prometheus-node-exporter && systemctl start prometheus-node-exporter
 
 cat << 'EOF' > /etc/redis.conf
@@ -411,92 +402,15 @@ EOF
 
 mkdir /etc/systemd/system/docker.service.d
 
-if [ $(dpkg --print-architecture) == 'amd64' ]; then
-  cat << 'EOF' > /etc/systemd/system/docker.service.d/startup.conf
-[Service]
-ExecStart=
-ExecStart=/usr/bin/dockerd -H unix:// -H tcp://0.0.0.0:2376 --ipv6=false --icc=false --userland-proxy=false --cluster-store=etcd://127.0.0.1:2379
-TasksMax=infinity
-EOF
+echo "Allow vagrant user to access docker..."
+usermod -aG docker vagrant
 
-  systemctl daemon-reload && systemctl enable docker && systemctl restart docker
-
-  echo "Allow vagrant user to access docker..."
-  usermod -aG docker vagrant
-
-  mkdir /etc/calico
-  mkdir /var/log/calico
-  mkdir /var/run/calico
-
-  wget -O /usr/local/bin/calicoctl https://f.cscdn.cc/file/cstackscdn/packages/calico/calicoctl-v1.6.5
-  wget -O /usr/local/bin/calico-libnetwork https://f.cscdn.cc/file/cstackscdn/packages/calico/libnetwork-plugin-v1.1.3
-  chmod +x /usr/local/bin/calicoctl
-  chmod +x /usr/local/bin/calico-libnetwork
-
-  cat << 'EOF' > /etc/calico/calico-ipam.env
-ETCD_ENDPOINTS=http://127.0.0.1:2379
-NODENAME=csdev
-CALICO_NETWORKING_BACKEND=bird
-CALICO_LIBNETWORK_LABEL_ENDPOINTS=true
-EOF
-
-  cat << 'EOF' > /etc/calico/calicoctl.cfg
-apiVersion: v1
-kind: calicoApiConfig
-metadata:
-spec:
-  datastoreType: "etcdv2"
-  etcdEndpoints: http://127.0.0.1:2379
-EOF
-
-  cat << 'EOF' > /etc/systemd/system/calico-ipam.service
-[Unit]
-Description=calico-ipam
-Before=docker.service
-
-[Service]
-EnvironmentFile=/etc/calico/calico-ipam.env
-ExecStart=/usr/local/bin/calico-libnetwork
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-  cat << 'EOF' > /usr/local/bin/run_calico
-docker run --net=host --privileged --name=calico-node -d --restart=always \
-  -e ETCD_ENDPOINTS=http://127.0.0.1:2379 \
-  -e CALICO_LIBNETWORK_LABEL_ENDPOINTS=true \
-  -e CALICO_NETWORKING_BACKEND=bird \
-  -e CALICO_LIBNETWORK_ENABLED=false \
-  -e CALICO_LIBNETWORK_CREATE_PROFILES=false \
-  -e NO_DEFAULT_POOLS=true \
-  -e NODENAME=csdev \
-  -v /var/log/calico:/var/log/calico \
-  -v /var/run/calico:/var/run/calico \
-  -v /lib/modules:/lib/modules \
-  -v /run:/run \
-  -v /run/docker/plugins:/run/docker/plugins \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  quay.io/calico/node:release-v2.6
-EOF
-  chmod +x /usr/local/bin/run_calico
-
-  systemctl daemon-reload && systemctl enable calico-ipam && systemctl start calico-ipam
-
-  bash /usr/local/bin/run_calico
-
-else
-  echo "$(dpkg --print-architecture) is an unsupported architecture. The network policy manager is not being installed."
-  cat << 'EOF' > /etc/systemd/system/docker.service.d/startup.conf
+cat << 'EOF' > /etc/systemd/system/docker.service.d/startup.conf
 [Service]
 ExecStart=
 ExecStart=/usr/bin/dockerd -H unix:// -H tcp://0.0.0.0:2376 --icc=false --userland-proxy=false
 TasksMax=infinity
 EOF
-
-fi
 
 export CONSUL_HTTP_TOKEN=$(curl -X PUT http://127.0.0.1:8500/v1/acl/bootstrap | jq -r '.SecretID')
 echo "export CONSUL_HTTP_TOKEN=$CONSUL_HTTP_TOKEN" >> /home/vagrant/.profile
@@ -508,6 +422,8 @@ echo "eval \"\$(direnv hook bash)\"" >> /home/vagrant/.profile
 echo $CONSUL_HTTP_TOKEN > /home/vagrant/consul.token && chown vagrant:vagrant /home/vagrant/consul.token
 
 sed -i 's/allow/deny/g' /etc/consul.d/consul.hcl && systemctl restart consul
+
+consul acl set-agent-token default $CONSUL_HTTP_TOKEN
 
 mkdir /etc/computestacks
 cat << EOF > /etc/computestacks/agent.yml
@@ -526,6 +442,8 @@ backups:
     compress: "zstd,3"
     image: "ghcr.io/computestacks/cs-docker-borg:latest"
     nfs: false
+    ssh:
+      enabled: false
 docker:
   version: "1.41"
 EOF
@@ -742,7 +660,7 @@ groups:
 - name: ContainerHealth
   rules:
     - alert: ContainerCpuUsage
-      expr: (sum(rate(container_cpu_usage_seconds_total{name!~"alertmanager|consul|loki|loki-logs|cadvisor|portal|prometheus|grafana|calico-node|vault-bootstrap|nginx|haproxy|"}[3m])) BY (instance, name) * 100) > 95
+      expr: (sum(rate(container_cpu_usage_seconds_total{name!~"alertmanager|consul|loki|loki-logs|cadvisor|portal|prometheus|grafana|vault-bootstrap|nginx|haproxy|"}[3m])) BY (instance, name) * 100) > 95
       for: 1m
       labels:
         severity: warning
@@ -751,7 +669,7 @@ groups:
         description: "Container CPU usage is above 95%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
         value: "{{ $value }}"
     - alert: ContainerMemoryUsage
-      expr: (sum(container_memory_usage_bytes{name!~"alertmanager|consul|loki|loki-logs|cadvisor|portal|prometheus|grafana|calico-node|vault-bootstrap|nginx|haproxy|"}) BY (instance, name) / sum(container_spec_memory_limit_bytes{name!~"alertmanager|consul|loki|loki-logs|cadvisor|portal|prometheus|grafana|calico-node|vault-bootstrap|nginx|haproxy|"}) BY (instance, name) * 100) > 92
+      expr: (sum(container_memory_usage_bytes{name!~"alertmanager|consul|loki|loki-logs|cadvisor|portal|prometheus|grafana|vault-bootstrap|nginx|haproxy|"}) BY (instance, name) / sum(container_spec_memory_limit_bytes{name!~"alertmanager|consul|loki|loki-logs|cadvisor|portal|prometheus|grafana|vault-bootstrap|nginx|haproxy|"}) BY (instance, name) * 100) > 92
       for: 1m
       labels:
         severity: warning
@@ -1067,23 +985,6 @@ OUTER
 
 su - vagrant -c "bash /home/vagrant/gh_auth.sh" && rm /home/vagrant/gh_auth.sh
 
-if [ $(dpkg --print-architecture) == 'amd64' ]; then
-  cat << 'EOF' > /root/calico_net.yml
-apiVersion: v1
-kind: ipPool
-metadata:
-  cidr: 10.167.186.0/24
-spec:
-  nat-outgoing: true
-EOF
-
-  calicoctl apply -f /root/calico_net.yml
-
-  docker network create --driver calico --ipam-driver calico-ipam --subnet=10.167.186.0/24 dev
-else
-  echo "Skipping docker network setup due to unsupported architecture."
-fi
-
 echo "Provisioning PowerDNS for ComputeStacks..."
 pdnsutil create-zone cstacks.local ns1.cstacks.local
 pdnsutil add-record cstacks.local @ A 127.0.0.1
@@ -1093,9 +994,12 @@ pdnsutil add-record cstacks.local registry A 127.0.0.1
 pdnsutil add-record cstacks.local a A 127.0.0.1
 pdnsutil add-record cstacks.local *.a CNAME a.cstacks.local
 pdnsutil add-record cstacks.local @ CAA "0 issue \"letsencrypt.org\""
-echo "...loading test domains..."
-mv /tmp/cs_pdns_up /usr/local/bin/ \
-  && bash /usr/local/bin/cs_pdns_up >/dev/null
+
+if [ -f /tmp/cs_pdns_ip ]; then
+  echo "...loading test domains..."
+  mv /tmp/cs_pdns_up /usr/local/bin/ \
+    && bash /usr/local/bin/cs_pdns_up >/dev/null
+fi
 
 echo "Pulling docker images..."
 docker pull ghcr.io/computestacks/cs-docker-bastion:latest

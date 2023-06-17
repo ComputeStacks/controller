@@ -22,8 +22,10 @@ module DeployServices
 
     def perform
 
-      # Apply Project Service Policy
-      NetworkWorkers::ProjectPolicyWorker.perform_async project.global_id
+      if project.region.has_clustered_networking?
+        # Apply Project Service Policy
+        NetworkWorkers::ProjectPolicyWorker.perform_async project.global_id
+      end
 
       # Collect all the services that we need to deploy
       services = []

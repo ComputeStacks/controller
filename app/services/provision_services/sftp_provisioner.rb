@@ -74,7 +74,7 @@ module ProvisionServices
       # Shouldn't happen! But catch it, if it does.
       if nodes.empty?
         errors << "Unknown error occurred."
-        errors << "We ended up with no nodes requiring an SFTP container!"
+        errors << "We ended up with no nodes asking for an SFTP container!"
         return false
       end
 
@@ -82,7 +82,6 @@ module ProvisionServices
       nodes = [] if project.skip_ssh
 
       # 4. Cleanup existing SFTP containers
-
       project.sftp_containers.active.each do |i|
         next if nodes.include? i.node # We need this one!
         ContainerServices::TrashContainer.new(i, event).perform

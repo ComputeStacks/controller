@@ -12,6 +12,7 @@ module NetworkWorkers
         retry_job wait: 5.minutes
         return false
       end
+      return true unless service.region.has_clustered_networking?
       begin
         policy = service.calico_policy
       rescue => e # capture any errors from generating the policy

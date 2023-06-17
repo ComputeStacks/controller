@@ -4,7 +4,7 @@ class Api::UsersController < Api::ApplicationController
 
   before_action -> { doorkeeper_authorize! :profile_read }, only: %i[show], unless: :current_user
   before_action -> { doorkeeper_authorize! :profile_update }, only: %i[update], unless: :current_user
-  before_action -> { doorkeeper_authorize! :register }, only: :create
+  before_action -> { doorkeeper_authorize! :register }, only: :create, unless: :current_user
 
   ##
   # View your user account
@@ -187,16 +187,20 @@ class Api::UsersController < Api::ApplicationController
   #     * `phone`: String
   #     * `currency`: String
   #     * `merge_labels`: Object
+  #     * `provider`: String | The name of the provider we're generating credentials for, such as `cpanel`. Default is cpanel.
   #     * `provider_server`: String (required) | The url or unique server name of the provider's server. This is used to scope the username.
   #     * `provider_username`: String (required) | the user's username on the server.
   #
   # @example
   #   {
   #     "user": {
+  #       "id": "integer",
   #       "fname":  "string",
   #       "lname":  "string",
   #       "email":  "string",
   #       "locale": "string",
+  #       "company_name": "string",
+  #       "external_id": "string",
   #       "api":    {
   #         "username": "string",
   #         "password": "string"
@@ -221,11 +225,12 @@ class Api::UsersController < Api::ApplicationController
     if params[:provider_username].blank? || params[:provider_server].blank?
       return api_obj_error(["missing provider settings"])
     else
-      @user.labels = {
-        cpanel: {
-          params[:provider_server] => params[:provider_username]
-        }
-      }
+      provider = params[:provider].blank? ? :cpanel : params[:provider].downcase.to_sym
+      labels = { provider => { params[:provider_server] => params[:provider_username] } }
+      if params[:labels]
+        labels = labels.merge! create_user_params[:labels]
+      end
+      @user.labels = labels
     end
 
     # Default to en
@@ -253,11 +258,18 @@ class Api::UsersController < Api::ApplicationController
 
   private
 
+  def create_user_params
+    params.permit(
+      :fname, :lname, :email, :company_name, :provider, :provider_server, :provider_username,
+      :external_id, :c_sftp_pass, labels: {}
+    )
+  end
+
   def user_params # :doc:
     params.require(:user).permit(
       :fname, :lname, :email, :locale, :city, :state, :zip, :c_sftp_pass,
       :country, :address1, :address2, :company_name, :phone, :currency,
-      merge_labels: {}
+      :external_id, merge_labels: {}
     )
   end
 

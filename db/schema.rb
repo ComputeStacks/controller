@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_20_201157) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_23_052131) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -894,8 +894,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_20_201157) do
     t.string "password"
   end
 
-  create_table "network_cidrs", id: :serial, force: :cascade do |t|
-    t.integer "network_id"
+  create_table "network_cidrs", force: :cascade do |t|
+    t.bigint "network_id"
     t.inet "cidr", null: false
     t.integer "rel_id"
     t.string "rel_model"
@@ -933,24 +933,23 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_20_201157) do
     t.index ["tcp_lb"], name: "index_network_ingress_rules_on_tcp_lb"
   end
 
-  create_table "networks", id: :serial, force: :cascade do |t|
-    t.string "cidr", default: "0.0.0.0/0", null: false
-    t.boolean "is_public", default: false, null: false
-    t.boolean "is_ipv4", default: true, null: false
+  create_table "networks", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.string "name"
     t.string "label"
-    t.boolean "cross_region", default: false, null: false
-    t.index ["cross_region"], name: "index_networks_on_cross_region"
-  end
-
-  create_table "networks_regions", id: false, force: :cascade do |t|
-    t.integer "network_id", null: false
-    t.integer "region_id", null: false
-    t.index ["network_id", "region_id"], name: "index_networks_regions_on_network_id_and_region_id"
-    t.index ["region_id", "network_id"], name: "index_networks_regions_on_region_id_and_network_id"
+    t.bigint "deployment_id"
+    t.boolean "is_shared", default: true, null: false
+    t.bigint "region_id"
+    t.cidr "subnet"
+    t.bigint "parent_network_id"
+    t.string "network_driver", default: "bridge", null: false
+    t.index ["deployment_id"], name: "index_networks_on_deployment_id"
+    t.index ["is_shared"], name: "index_networks_on_is_shared"
+    t.index ["network_driver"], name: "index_networks_on_network_driver"
+    t.index ["parent_network_id"], name: "index_networks_on_parent_network_id"
+    t.index ["region_id"], name: "index_networks_on_region_id"
   end
 
   create_table "nodes", id: :serial, force: :cascade do |t|
@@ -1139,6 +1138,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_20_201157) do
     t.integer "ulimit_nofile_soft", default: 0, null: false
     t.integer "ulimit_nofile_hard", default: 0, null: false
     t.string "consul_token"
+    t.integer "p_net_size", default: 27, null: false
+    t.string "network_driver", default: "calico_docker", null: false
     t.index ["location_id"], name: "index_regions_on_location_id"
   end
 

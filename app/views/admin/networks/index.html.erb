@@ -13,8 +13,9 @@
           <tr>
             <th colspan="2">Name</th>
             <th>Network</th>
+            <th>Driver</th>
             <th>In Use</th>
-            <th>Regions</th>
+            <th>Region</th>
             <th></th>
           </tr>
         </thead>
@@ -28,9 +29,18 @@
             <tr>
               <td><%= link_to net.name, admin_network_url(net) %></td>
               <td><%= link_to net.label, admin_network_url(net) %></td>
-              <td><%= link_to net.cidr, admin_network_url(net) %> <%= net.is_public ? tag.span('Public', class: 'label label-warning') : tag.span('Private', class: 'label label-primary') %></td>
-              <td><%= link_to net.addresses.count, admin_network_url(net) %></td>
-              <td><%= raw net.regions.map {|i| link_to(i.name, "/admin/regions?filter=#{i.id}") }.join(', ') %></td>
+              <td><%= link_to net.subnet, admin_network_url(net) %></td>
+              <td><%= net.network_driver == 'calico_docker' ? 'Clustered' : 'Local Bridge' %></td>
+              <td>
+                <% if net.is_shared %>
+                  <%= link_to net_in_use_label(net), admin_network_url(net) %>
+                <% elsif net.deployment %>
+                  <%= link_to net.deployment.name, "/admin/deployments/#{net.deployment.id}" %>
+                <% else %>
+                ...
+                <% end %>
+              </td>
+              <td><%= link_to net.region.name, "/admin/regions?filter=#{net.region.id}" %></td>
               <td class="text-right">
                 <%= link_to icon('fa-solid', 'wrench'), edit_admin_network_url(net), class: 'btn btn-default btn-sm' %>
                 <%= link_to icon('fa-solid', 'trash'), admin_network_url(net), method: :delete, data: { confirm: 'Are you sure?' },class: 'btn btn-danger btn-sm' %>
@@ -40,5 +50,11 @@
         </tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <%= will_paginate @networks %>
   </div>
 </div>

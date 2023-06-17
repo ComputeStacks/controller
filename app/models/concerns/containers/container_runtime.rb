@@ -11,13 +11,7 @@ module Containers
 
       return nil unless setup_custom_hosts!(audit)
 
-      # Ensure we have an ip address
-      if local_ip.blank?
-        generate_container_ip!
-        reload
-        reload_ip_address
-        return nil if local_ip.blank?
-      end
+      return nil if local_ip.blank?
 
       # Config
       c = {
@@ -26,14 +20,9 @@ module Containers
         'Domainname' => "service.internal",
         'ExposedPorts' => {},
         'Labels' => {
-          'org.projectcalico.label.token' => deployment.token,
-          'org.projectcalico.label.service' => service.name,
           'com.computestacks.service_id' => service.id.to_s,
           'com.computestacks.deployment_id' => deployment.id.to_s,
           'com.computestacks.image_name' => image_variant.full_image_path
-        },
-        'Healthcheck' => {
-          'Test' => ["NONE"]
         },
         'Image' => image_variant.full_image_path,
         'HostConfig' => {
@@ -52,6 +41,15 @@ module Containers
           }
         }
       }
+
+      unless health_check_config.nil?
+        c['Healthcheck'] = health_check_config
+      end
+
+      if region.has_clustered_networking?
+        c['Labels']['org.projectcalico.label.token'] = deployment.token
+        c['Labels']['org.projectcalico.label.service'] = service.name
+      end
       runtime_env.each do |k, v|
         (c['Env'] ||= []) << "#{k}=#{v}"
       end
@@ -212,6 +210,25 @@ module Containers
         end
       end
       result + metadata_env_params
+    end
+
+    def health_check_config
+      return nil if is_a?(Deployment::Sftp)
+      case container_image.role
+      when 'redis'
+        { 'Test' => ["CMD", "redis-cli", "--raw", "incr", "ping"] }
+      when 'mariadb'
+        { 'Test' => ["CMD", '/usr/local/bin/healthcheck.sh', '--connect'] }
+      when 'mysql'
+        # mysql does not include the healthcheck script
+        if container_image.registry_image_path == 'mariadb'
+          { 'Test' => ["CMD", '/usr/local/bin/healthcheck.sh', '--connect'] }
+        end
+      when 'postgres'
+        { 'Test' => ["CMD", "pg_isready"] }
+      else
+        nil
+      end
     end
 
   end

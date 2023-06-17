@@ -130,7 +130,8 @@ Rails.application.routes.draw do
 
     resources :regions do
       scope module: 'regions' do
-        resources :nodes
+        resources :nodes,
+                  :network_migrate
       end
     end
 

@@ -1,10 +1,29 @@
 attributes :id, :name, :label, :default_domain, :public_ip, :command,
-           :is_load_balancer, :has_domain_management, :container_image_id,
+           :is_load_balancer, :has_domain_management,
            :current_state, :auto_scale, :auto_scale_horizontal, :auto_scale_max,
            :labels, :created_at, :updated_at
 
 child deployment: :project do
   attributes :id, :name
+end
+
+node :image do |i|
+
+  {
+    id: i.container_image.id,
+    name: i.container_image.name,
+    label: i.container_image.label,
+    role: i.container_image.role,
+    variant: {
+      id: i.image_variant.id,
+      label: i.image_variant.label,
+      name: i.image_variant.friendly_name,
+      path: i.image_variant.full_image_path,
+      default: i.image_variant.is_default,
+      sort: i.image_variant.version
+    }
+  }
+
 end
 
 node :package do |i|

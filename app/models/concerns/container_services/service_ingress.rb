@@ -13,11 +13,6 @@ module ContainerServices
       has_many :internal_load_balancers, -> { distinct }, through: :ingress_rules, source: :internal_load_balancer
     end
 
-    # public IP Addresses
-    def public_network?
-      region&.public_network?
-    end
-
     def has_iptable_rules?
       tcp_ingress_rules.exists? || udp_ingress_rules.exists?
     end

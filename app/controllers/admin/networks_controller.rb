@@ -3,7 +3,7 @@ class Admin::NetworksController < Admin::ApplicationController
   before_action :find_network, except: %w(index new create)
 
   def index
-    @networks = Network.sorted
+    @networks = Network.active.sorted.paginate page: params[:page], per_page: 30
   end
 
   def show
@@ -12,14 +12,15 @@ class Admin::NetworksController < Admin::ApplicationController
 
   def new
     @network = Network.new
-    @network.cidr = "192.168.0.0/24"
+    @network.subnet = IPAddr.new "192.168.0.0/21"
+    @network.network_driver = 'bridge'
   end
 
   def edit; end
 
   def update
-    if network_params[:cidr].split(':').count > 1
-      params[:node].delete(:cidr) # Just don't update it
+    if network_params[:subnet].split(':').count > 1
+      params[:node].delete(:subnet) # Just don't update it
     end
     if @network.update(network_params)
       redirect_to "/admin/networks", notice: "#{@network.label} successfully updated."
@@ -29,7 +30,7 @@ class Admin::NetworksController < Admin::ApplicationController
   end
 
   def create
-    if network_params[:cidr].split(':').count > 1
+    if network_params[:subnet].split(':').count > 1
       redirect_to '/admin/networks/new', alert: "Network must be IPv4."
       return false
     end
@@ -53,7 +54,7 @@ class Admin::NetworksController < Admin::ApplicationController
   private
 
   def network_params
-    params.require(:network).permit(:cidr, :is_public, :name, :label, {region_ids: []})
+    params.require(:network).permit(:subnet, :name, :label, :region_id, :network_driver)
   end
 
   def find_network

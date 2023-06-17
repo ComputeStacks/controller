@@ -1,36 +1,71 @@
 ##
 # Networks
 #
-# cdir:string
-# is_public:boolean
+# @!attribute name
+#   The name of the network on the docker node
+#   @return [String]
 #
-# https://docs.ruby-lang.org/en/2.0.0/Range.html
-# https://docs.ruby-lang.org/en/2.0.0/IPAddr.html
+# @!attribute label
+#   @return [String]
 #
-# http://docs.projectcalico.org/v2.1/usage/troubleshooting/faq#how-can-i-enable-nat-for-incoming-traffic-to-containers-with-private-ip-addresses
+# @!attribute subnet
+#   Note: To change the subnet, you need to force it with update_attribute, otherwise rails won't see the value
+#   as having changed and will not actually update the db record.
+#   @return [String]
+#
+# @!attribute is_shared
+#   For calico deployments, it's shared with multiple projects
+#   For
+#   @return [Boolean]
+#
+# @!attribute network_driver
+#   Used to aid in the migration from calico to private networks.
+#   @return [String]
 #
 class Network < ApplicationRecord
 
   include Auditable
+  include NetworkSubnetManager
 
-  scope :sorted, -> { order(Arel.sql("lower(name) DESC, lower(label) DESC")) }
-  scope :public_net, -> { where is_public: true }
+  scope :sorted, -> { order "lower(name) DESC" }
+  scope :active, -> { where active: true }
+  scope :inactive, -> { where active: false }
+  scope :shared, -> { where is_shared: true }
+  scope :bridged, -> { where network_driver: 'bridge' }
+  scope :clustered, -> { where network_driver: 'calico_docker' }
 
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: { scope: :region_id }
   validates :label, presence: true
-  validates :cidr, presence: true
+  validates :subnet, presence: true, uniqueness: { scope: :region_id }
+  validates :network_driver, inclusion: { in: %w(calico_docker bridge) }
 
   validate :check_cidr_range
 
-  has_and_belongs_to_many :regions
-  has_many :locations, -> { distinct }, through: :regions
-  has_many :nodes, through: :regions
+  belongs_to :parent_network, class_name: 'Network', foreign_key: 'parent_network_id', optional: true
+  has_many :child_networks, class_name: 'Network', foreign_key: 'parent_network_id', dependent: :destroy
+
+  belongs_to :deployment, optional: true
+  belongs_to :region, optional: true
+
+  has_one :location, through: :region
+  has_many :nodes, through: :region
 
   has_many :addresses, class_name: 'Network::Cidr', dependent: :restrict_with_error
 
-
-  before_save :check_ip_type
   before_save :format_network_name
+
+  def to_net
+    "#{subnet.to_s}/#{subnet.prefix}"
+  end
+
+  def to_addr
+    # https://www.rubydoc.info/gems/netaddr
+    NetAddr::IPv4Net.parse to_net
+  end
+
+  def has_clustered_networking?
+    network_driver == 'calico_docker'
+  end
 
   def docker_client(node)
     Docker::Network.get(name, {}, node.client(3))
@@ -58,125 +93,43 @@ class Network < ApplicationRecord
     docker_client(node).is_a? Docker::Network
   end
 
-  ##
-  # Active IPs in use on Node.
-  #
-  # Load directly from docker the raw, in use, ip addresses. Regardless of what CS says.
-  # Short expiration on cache -- we want close to real time data, but if we're deploying a lot of containers
-  # really quickly, lets not kill the docker daemon with requests over this.
-  #
-  def active_in_use
-    # return [] if Rails.env.test?
-    Rails.cache.fetch("net_#{id}_ips", expires_in: 90.seconds, unless: lambda { |i| i.empty? }) do
-      node_check = nodes.available.first
-      return [] if node_check.nil?
-      used_on_node = Timeout::timeout(2) do
-        docker_client(node_check)
-      end
-      return [] if used_on_node.nil? || used_on_node.info.nil?
-      Timeout::timeout(5) do
-        used_on_node.info['Containers'].values.map { |i| i['IPv4Address'].gsub("/32", "") }
-      end
-    end
-  rescue Timeout::Error => e
-    n = nodes.available.first
-    if n.nil?
-      Rails.logger.warn %Q(message="Error connecting to docker daemon" error=#{e.message})
-    else
-      Rails.logger.warn %Q(message="Error connecting to docker daemon" host=#{n.hostname} error=#{e.message})
-    end
-    []
-  rescue => e
-    ExceptionAlertService.new(e, 'f937f614d1593fa6').perform
-    []
+  def addresses_available
+    to_addr.len - addresses_in_use.count
   end
 
-
-  ##
-  # Find next available IP
-  def next_ip
-    range = IPAddr.new(cidr).to_range
-
-    # Bring some randomness into the ip selection process.
-    rstep = rand(1..3)
-    flip_check = rand(1..2).even?
-
-    if flip_check
-      range.step(rstep).each do |addr|
-        reload
-        used = addresses.pluck(:cidr)
-        used_on_node = active_in_use
-        next if restricted?(addr)
-        next if used_on_node.include?(addr)
-        return addr.to_s unless used.include?("#{addr}/32")
-      end
-    else
-      range.step(rstep).reverse_each do |addr|
-        reload
-        used = addresses.pluck(:cidr)
-        used_on_node = active_in_use
-        next if restricted?(addr)
-        next if used_on_node.include?(addr)
-        return addr.to_s unless used.include?("#{addr}/32")
-      end
+  # @return [Array<Integer>]
+  def addresses_in_use
+    a = to_addr
+    # network, gateway, broadcast
+    in_use = [a.nth(0).addr, a.nth(1).addr, a.nth(a.len - 1).addr]
+    addresses.each do |i|
+      in_use << i.cidr.to_i
     end
-    nil
+    in_use
   end
-
-  # @param [String] endpoint
-  # @param [Node] req_node
-  #
-  # [root@ch02 ~]# docker start youthful-jennings640
-  # Error response from daemon: endpoint with name youthful-jennings640 already exists in network net100
-  # Error: failed to start containers: youthful-jennings640
-  #
-  # docker rm <container-name>
-  # docker network disconnect --force <network-name> <container-name>
-  #
-  # def disconnect!(endpoint, req_node = nil)
-  #   return false if endpoint.nil?
-  #   req_node = self.nodes.available.first
-  #   req_node.host_client.client.exec!("docker network disconnect --force #{self.name} #{endpoint}")
-  # end
 
   private
 
   def check_cidr_range
-    ipaddr = IPAddr.new(self.cidr)
-    errors.add(:cidr, 'Only IPv4 is enabled.') if ipaddr.ipv6?
-    errors.add(:cidr, 'Must be at least a /29') if ipaddr.to_range.count < 16
-    return if is_public
+    errors.add(:subnet, 'Only IPv4 is enabled.') if subnet.ipv6?
+    errors.add(:subnet, 'Must be at least a /29') if subnet.to_range.count < 16
     # Check for private ranges
-    case ipaddr.to_s.split('.').first.to_i
+    case subnet.to_s.split('.').first.to_i
     when 10
-      errors.add(:cidr, 'Must be a private IP range. 10.x networks need to be within 10.0.0.0/8.') unless IPAddr.new('10.0.0.0/8').include?(ipaddr)
+      errors.add(:subnet, 'Must be a private IP range. 10.x networks need to be within 10.0.0.0/8.') unless IPAddr.new('10.0.0.0/8').include?(subnet)
     when 172
-      errors.add(:cidr, 'Must be a private IP range. 172.x networks need to be within 172.16.0.0/12.') unless IPAddr.new('172.16.0.0/12').include?(ipaddr)
+      errors.add(:subnet, 'Must be a private IP range. 172.x networks need to be within 172.16.0.0/12.') unless IPAddr.new('172.16.0.0/12').include?(subnet)
     when 192
-      errors.add(:cidr, 'Must be a private IP range. 192.x networks need to be within 192.168.0.0/16.') unless IPAddr.new('192.168.0.0/16').include?(ipaddr)
+      errors.add(:subnet, 'Must be a private IP range. 192.x networks need to be within 192.168.0.0/16.') unless IPAddr.new('192.168.0.0/16').include?(subnet)
     else
-      errors.add(:cidr, 'Must be a private IP range')
+      errors.add(:subnet, 'Must be a private IP range')
     end
   rescue
     errors.add(:cidr)
   end
 
-  def check_ip_type
-    # TODO: Look at `cidr` and determine if ipv4 or not
-    self.is_ipv4 = true
-  end
-
   def format_network_name
-    self.name = self.name.strip.downcase.gsub(/[^0-9A-Za-z]/, '')
-  end
-
-  # Determine if an IP is reserved.
-  def restricted?(ip)
-    if ip.ipv4?
-      ipaddr = ip.to_s.split('.').last.to_i
-      return true if ipaddr.zero? || ipaddr == 1 || ipaddr == 255
-    end
-    false
+    self.name = name.strip.downcase.gsub(/[^0-9A-Za-z]/, '')
   end
 
 end

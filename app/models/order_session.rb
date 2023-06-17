@@ -282,7 +282,7 @@ class OrderSession
     images.each do |image|
       c = {
         image_id: image[:image_id].to_i,
-        image_variant: image[:image_variant_id].to_i,
+        image_variant_id: image[:image_variant_id].to_i,
         source: image[:source], # Deployment::ContainerService.csrn
         params: [],
         volumes: image[:volumes],

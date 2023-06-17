@@ -17,11 +17,19 @@ module ProjectServices
     # @return [Boolean]
     def perform
       return false unless valid?
-      clean_network_policy!
-      clean_consul_policy!
-      trash_sftp_containers! # failure can be ignored
-      return false unless trash_services!
-      return true if project.destroy
+      ActiveRecord::Base.uncached do
+        clean_consul_policy!
+        if project.private_network
+          # Immediately remove our link to it
+          project.private_network.update deployment_id: nil
+        else
+          clean_network_policy!
+        end
+        trash_sftp_containers! # failure can be ignored
+        return false unless trash_services!
+        project.reload
+        return true if project.destroy
+      end
       event.event_details.create!(
         event_code: "8a1349f61c2a2dcb",
         data: if project.errors.full_messages.empty?

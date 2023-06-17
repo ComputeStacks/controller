@@ -22,6 +22,8 @@
 
 <div class="row"><%= render partial: "container_services/show/top" %></div>
 
-<%=
-  render partial: (show_error_page?(@service) ? 'container_services/show/fatal_error' : 'container_services/show'), locals: { service: @service }
-%>
+<% if show_error_page?(@service) %>
+  <%= render partial: 'container_services/show/fatal_error', locals: { service: @service } %>
+<% else %>
+  <%= render partial: ENGINE_VIEW_OVERRIDES[:service_dashboard], locals: { service: @service } %>
+<% end %>

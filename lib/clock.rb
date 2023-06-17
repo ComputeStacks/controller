@@ -7,11 +7,11 @@ module Clockwork
     puts "Running #{job}, at #{time}"
   end
 
-  every(5.minutes, 'nodes.heartbeat') do
+  every(1.minute, 'nodes.heartbeat') do
     NodeWorkers::HeartbeatWorker.perform_async
   end
 
-  every(7.minutes, 'nodes.health_check') do
+  every(5.minutes, 'nodes.health_check') do
     NodeWorkers::HealthCheckWorker.perform_async
   end
 
@@ -21,6 +21,10 @@ module Clockwork
 
   every(10.minutes, 'sftp.cleanup') do
     ContainerWorkers::SftpCleanupWorker.perform_async
+  end
+
+  every(10.minutes, 'network.cleanup') do
+    NetworkWorkers::PrivateNetCleanupWorker.perform_async
   end
 
   every(20.minutes, 'volume.cleanup') do

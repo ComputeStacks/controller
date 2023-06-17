@@ -37,12 +37,20 @@ module Containers
       []
     end
 
-    private
+    # private
 
     # provision ip address
     def set_ip_address!
       return false if region.nil?
-      net = region.networks.first
+
+      net = if deployment.private_network
+              deployment.private_network
+            elsif region.has_clustered_networking?
+              region.networks.clustered.shared.active.first
+            else
+              nil
+            end
+
       if net.nil?
         l = event_logs.create!(
           status: 'alert',
@@ -66,7 +74,7 @@ module Containers
               event_code: 'f29a81e15c68eabf',
               state_reason: 'missing ip address'
             )
-            l.event_details.create!(data: "Error generating local IP for #{name}.\n\n #{new_ip.errors.full_messages.join(' ')}", event_code: 'f29a81e15c68eabf')
+            l.event_details.create!(data: "Error generating local IP for #{name}.", event_code: 'f29a81e15c68eabf')
             l.deployments << deployment if deployment
             l.users << user if user
             false
@@ -91,15 +99,24 @@ module Containers
     end
 
     def generate_container_ip!
-      count = 1
+      net = if deployment.private_network
+              deployment.private_network
+            elsif region.has_clustered_networking?
+              region.networks.clustered.shared.active.first
+            else
+              nil
+            end
 
-      net = region.networks.first
-      region.networks.each do |n|
-        next if net == n
-        range = IPAddr.new(n.cidr).to_range
-        next if range.count - n.addresses.count < 2
-        net = n if n.addresses.count < net.addresses.count
+      # For shared networks (calico), find the least utilized network.
+      if deployment.private_network.nil?
+        region.networks.clustered.shared.active.each do |n|
+          next if net == n
+          range = n.subnet.to_range
+          next if range.count - n.addresses.count < 2
+          net = n if n.addresses.count < net.addresses.count
+        end
       end
+
       if net.nil?
         l = event_logs.create!(
           status: 'alert',
@@ -113,6 +130,10 @@ module Containers
         l.users << user if user
         return false
       end
+
+      ##
+      # We could be building multiple containers at the same time, and could end up assigning the same IP. This will keep trying if that fails.
+      count = 1
       need_ip = true
       while count < 5 && need_ip do
         reload

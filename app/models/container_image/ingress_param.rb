@@ -44,11 +44,6 @@ class ContainerImage::IngressParam < ApplicationRecord
     "#{port}#{proto}"
   end
 
-  # Helper method since our forms are shared between both ingress rules and ingress params.
-  def public_network?
-    false
-  end
-
   private
 
   def custom_load_balancer

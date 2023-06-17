@@ -1,5 +1,15 @@
 # Change Log
 
+## v9.0.0
+
+Version 9 includes major changes related to networking and integrations.
+
+* [FEATURE] Support for plugins via Rails Engines.
+* [FEATURE] Support for using linux bridges instead of Calico for container network.
+* [CHANGE] Use docker api to determine container state, rather than prometheus.
+
+***
+
 ## v8.1.1
 
 * [FIX] Bug fixes around admin management of volumes.

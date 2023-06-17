@@ -25,17 +25,12 @@ module ContainerImages
       "#{container_image_path(ingress.container_image)}/ingress_params/#{ingress.id}"
     end
 
-    def ingress_param_proto_options(rule = nil)
-      rule_list = [
+    def ingress_param_proto_options
+      [
         %w[HTTP(S) http],
         %w(TCP tcp),
         %w[TCP+TLS tls],
         %w[UDP udp]
-      ]
-      return rule_list if rule.nil? || !rule.public_network?
-      [
-        %w(TCP tcp),
-        %w(UDP udp)
       ]
     end
 

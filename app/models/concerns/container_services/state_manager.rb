@@ -7,6 +7,7 @@ module ContainerServices
     # * working
     # * alert <-- most recent job failed
     # * resource_usage - cpu/mem usage is too high
+    # * unhealthy - containers with failed healtchecks
     # * offline_containers -- not all containers are running
     # * online
     # * inactive
@@ -15,6 +16,7 @@ module ContainerServices
       return 'alert' if has_failed_jobs?
       return 'alert' if provisioning_failed?
       return 'active_alert' if has_active_alerts?
+      return 'unhealthy' unless healthy?
       return 'offline_containers' unless all_containers_online?
       return 'resource_usage' unless resources_ok?
       active? ? 'online' : 'inactive'
@@ -53,6 +55,13 @@ module ContainerServices
     def resources_ok?
       containers.each do |i|
         return false unless i.resources_ok?
+      end
+      true
+    end
+
+    def healthy?
+      containers.each do |i|
+        return false unless i.healthy?
       end
       true
     end

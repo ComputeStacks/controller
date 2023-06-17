@@ -98,6 +98,7 @@ class ContainerMigratorService
 
   # @return [Boolean]
   def can_migrate?
+    return false unless container.region.has_clustered_networking?
     unless container.can_migrate?
       event.event_details.create!(
         event_code: '27bae2d7240d3b98',

@@ -4,7 +4,7 @@ module ContainerServices::WordpressServices
     attr_accessor :service,
                   :errors
 
-    # @param [Deployment::ContainerService] service
+    # @param [Deployment::ContainerService,nil] service
     def initialize(service)
       self.service = service
       self.errors = []
@@ -24,7 +24,10 @@ module ContainerServices::WordpressServices
     #       }
     #     ]
     #
-    def users
+    # @param [String] role
+    # @return [Array]
+    def users(role = "administrator")
+      return [] if service.nil?
       # Try to use the sftp container, which is generally less susceptible to issues with the wordpress installation.
       container = service.sftp_containers.first
       container = service.containers.active.first if container.nil?
@@ -33,9 +36,9 @@ module ContainerServices::WordpressServices
         return []
       end
       c = if container.is_a?(Deployment::Container)
-            %W(sudo -u www-data wp user list --skip-plugins --skip-themes --quiet --role=administrator --json --path=/var/www/html/wordpress)
+            %W(sudo -u www-data wp user list --skip-plugins --skip-themes --quiet --role=#{role} --json --path=/var/www/html/wordpress)
           else
-            %W(sudo -u sftpuser wp user list --skip-plugins --skip-themes --quiet --role=administrator --json --path=#{container.service_files_path(service)}/wordpress/html/wordpress)
+            %W(sudo -u sftpuser wp user list --skip-plugins --skip-themes --quiet --role=#{role} --json --path=#{container.service_files_path(service)}/wordpress/html/wordpress)
           end
       data = container.container_exec!(c, nil, 20)
 

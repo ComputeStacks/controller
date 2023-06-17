@@ -16,7 +16,7 @@
         <%= link_to "Create Rule", "ingress/new", class: "btn btn-primary btn-sm pull-right" %>
         <small>INGRESS RULES</small>
         <p class="lead"><%= @service.label %></p>
-        <%= render partial: 'container_services/ingress/index', locals: { return_to: 'list', ingress_rules: @ingress_rules, is_public: @service.public_network? } %>
+        <%= render partial: 'container_services/ingress/index', locals: { return_to: 'list', ingress_rules: @ingress_rules } %>
       </div>
     </div>
   </div>

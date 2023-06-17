@@ -26,7 +26,7 @@
 #   @return [Deployment::ContainerDomain]
 #
 # @!attribute [r] current_state
-#   @return [working,alert,active_alert,offline_containers,resource_usage,online,inactive]
+#   @return [working,alert,active_alert,offline_containers,resource_usage,online,inactive,unhealthy]
 #
 # @!attribute labels
 #   @return [Hash]
@@ -179,8 +179,6 @@ class Deployment::ContainerService < ApplicationRecord
 
   has_many :dependent_services, through: :dependent_links, source: :service
 
-  before_destroy :flag_volumes
-
   def csrn
     "csrn:caas:project:service:#{resource_name}:#{id}"
   end
@@ -191,7 +189,7 @@ class Deployment::ContainerService < ApplicationRecord
   end
 
   def can_scale?
-    !public_network? && container_image.can_scale
+    container_image.can_scale
   end
 
   def current_load_balancer
@@ -313,18 +311,6 @@ class Deployment::ContainerService < ApplicationRecord
       'ingress_rules' => ingress_rules.map(&:attributes),
       'containers' => container_ar
     }
-  end
-
-  private
-
-  def flag_volumes
-    owned_volumes.each do |i|
-      i.to_trash = true
-      i.trashed_by = current_audit if current_audit
-      unless i.save
-        Rails.logger.warn "[VOL] #{i.errors.full_messages.inspect}"
-      end
-    end
   end
 
 end

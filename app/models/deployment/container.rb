@@ -8,7 +8,11 @@
 #   @return [String]
 #
 # @!attribute [r] current_state
-#   @return [migrating,starting,stopping,working,alert,resource_usage,online,offline]
+#   @return [migrating,starting,stopping,working,alert,resource_usage,online,offline,unhealthy]
+#
+# @!attribute status
+#   pending,running,stopped,error,degraded
+#   @return [String]
 #
 # @!attribute req_state
 #   @return [running,stopped]

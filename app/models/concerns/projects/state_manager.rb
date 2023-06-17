@@ -13,6 +13,7 @@ module Projects
       return 'working' if working?
       return 'alert' if has_failed_jobs? # TODO: Ignore failed backup jobs if container is not running
       return 'alert' if provisioning_failed?
+      return 'unhealthy' unless healthy?
       return 'warning' if has_active_alerts?
       'ok'
     end
@@ -54,6 +55,13 @@ module Projects
       return false if last_event.nil?
       return false if last_event.cancelled? # Cancelled events != failing!
       !last_event.success? && !last_event.active?
+    end
+
+    def healthy?
+      services.each do |i|
+        return false unless i.healthy?
+      end
+      true
     end
 
   end

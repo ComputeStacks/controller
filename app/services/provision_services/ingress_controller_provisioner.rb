@@ -82,7 +82,9 @@ module ProvisionServices
           errors << i
         end
       end
-      NetworkWorkers::ServicePolicyWorker.perform_async lb_service.id
+      if service.region.has_clustered_networking?
+        NetworkWorkers::ServicePolicyWorker.perform_async lb_service.id
+      end
     end
 
     def valid?

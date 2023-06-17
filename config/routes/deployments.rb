@@ -55,10 +55,6 @@ Rails.application.routes.draw do
         end
       end
       get 'events/last_event' => 'events#last_event'
-      namespace :wordpress do
-        delete 'protect' => 'protect#destroy'
-        resources :protect, :sso, :users
-      end
       resources :alerts,
                 :connect,
                 :containers,

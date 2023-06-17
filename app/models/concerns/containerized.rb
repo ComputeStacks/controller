@@ -104,15 +104,32 @@ module Containerized
     data[:message] = e.message
     data[:count] = data[:count] + 1
     se.update_attribute :data, data
+  rescue Excon::Error::Socket => e
+    # Unable to connect due to _missing_ tls certs on docker
+    ec = '06daa76c88d5f72a'
+    se = SystemEvent.find_by(event_code: ec)
+    se = SystemEvent.create!(
+      message: "Missing Docker TLS Cert on Node: #{self.node&.region.name}",
+      log_level: 'warn',
+      data: { message: nil, count: 0 },
+      event_code: ec
+    ) if se.nil?
+    data = se.data
+    data[:message] = e.message
+    data[:count] = data[:count] + 1
+    se.update_attribute :data, data
   rescue
     nil
   end
 
   # @param [Array] command
-  # @param [EventLog] event
+  # @param [EventLog,nil] event
   def container_exec!(command, event, timeout = 10)
     result = []
-    response = docker_client.exec(command, wait: timeout)
+    client = docker_client
+    return { response: [], exit_code: 2 } if client.nil?
+
+    response = client.exec(command, wait: timeout)
     exit_code = 0
     result << response[0]
     result << response[1] unless response[1].empty?
@@ -198,43 +215,40 @@ module Containerized
     !%w(removing rebuilding building migrating).include?(status)
   end
 
-  # =Get current state of machine:
-  # responds: [error, running, restarting, paused, stopped]
+  ##
+  # Container Status
+  # low-level api to grab raw container state
   #
-  # API Possible state values: https://github.com/docker/docker/blob/master/container/state.go#L150
-  def container_status
+  # running,stopped,error,degraded
+  #
+  # degraded = running but healthcheck failed
+  ##
+  # @return [Hash,nil] { state: state, health: { state: string, count: int, log: [] } }
+  def container_status(raw = {})
     return nil if %w(building migrating pending rebuilding trashed).include? status
-    return nil unless node.online?
-    raw_data = nil
-    if self.node.nil?
-      self.update_attribute :status, "pending"
-      return "pending"
-    end
-    begin
-      raw_data = self.docker_client(true).info
-      raw_state = raw_data['State']['Status']
-    rescue
-      raw_state = 'error'
-    end
-    if raw_state.nil?
-      state = 'error'
-    else
-      state = case raw_state
-              when 'dead', 'exited', 'removing', 'created'
-                'stopped'
-              else
-                raw_state
-              end
-    end
-    unless state == 'error'
-      state = 'error' if raw_data['State']['ExitCode'] > 0 && req_state != 'stopped'
-    end
-    if state == 'error' && self.created_at > 3.minutes.ago
-      self.update_column :status, 'pending'
+    if raw.empty?
+      if node.nil?
+        update status: 'pending'
+        nil
+      end
+      return nil unless node.online?
+    elsif raw['State'].nil?
       return nil
     end
-    self.update_columns(built: true, status: state)
-    raw_data
+    state_raw = raw.empty? ? docker_client(true).info['State'] : raw
+    state = (state_raw['Running'] || state_raw['Restarting']) ? 'running' : 'stopped'
+    state = 'error' if state == 'stopped' && !state_raw['ExitCode'].zero?
+    if state_raw['Health'].nil?
+      update status: state
+      return { state: state, health: {} }
+    end
+    if state == 'running'
+      state = 'degraded' if state_raw['Health']['Status'] == 'unhealthy'
+    end
+    update status: state
+    { state: state, health: { state: state_raw['Health']['Status'], count: state_raw['Health']['FailingStreak'], log: state_raw['Health']['Log'] }}
+  rescue
+    nil
   end
 
   ##

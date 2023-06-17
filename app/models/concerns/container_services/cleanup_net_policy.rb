@@ -14,6 +14,8 @@ module ContainerServices
     private
 
     def clean_net_policy!
+      return if deployment.nil?
+      return unless deployment.private_network.nil?
       NetworkWorkers::TrashPolicyWorker.perform_async region.id, name
     end
 

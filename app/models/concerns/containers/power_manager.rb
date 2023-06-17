@@ -40,8 +40,9 @@ module Containers
 
     def delete_from_node!(event)
       c = docker_client_with_event(event, true)
-      return true if c.nil? # Already gone!
-      c.delete
+      unless c.nil?
+        c.delete
+      end
       true
     end
 

@@ -102,6 +102,15 @@ module ProvisionServices
           return false
         end
       end
+
+      # Ensure we have space in the network (private net only)
+      if container_service.deployment.private_network
+        if (qty + current_count) > container_service.deployment.private_network.addresses_available
+          event.cancel! 'Network size can not accommodate the requested number of containers.'
+          return false
+        end
+      end
+
       true
     end
 

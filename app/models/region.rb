@@ -19,6 +19,11 @@
 #   @return [String] path to nfs volume on remote server. the volume name will be appended to this, so dont add trailing slash.
 # @!attribute consul_token
 #   @return [String] token used to connect to consul
+#
+# @!attribute network_driver
+#   calico_docker, bridge
+#   @return [String]
+#
 class Region < ApplicationRecord
 
   include Auditable
@@ -27,7 +32,7 @@ class Region < ApplicationRecord
   include Regions::NfsStorage
   include Regions::VolumeStorable
 
-  scope :sorted, -> { order( Arel.sql("lower(name)") ) }
+  scope :sorted, -> { order "lower(name)" }
   scope :active, -> { where(active: true) }
   scope :has_nodes, -> { joins(:nodes) }
   scope :local_storage, -> { where(volume_backend: 'local') }
@@ -36,7 +41,8 @@ class Region < ApplicationRecord
   belongs_to :location
   belongs_to :provision_driver, optional: true
 
-  has_and_belongs_to_many :networks
+  has_many :networks, dependent: :destroy
+
   has_and_belongs_to_many :billing_resource_prices
   has_and_belongs_to_many :user_groups
 
@@ -62,6 +68,8 @@ class Region < ApplicationRecord
   validates :pid_limit, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :ulimit_nofile_soft, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :ulimit_nofile_hard, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :network_driver, inclusion: { in: %w(calico_docker bridge) }
+  validates :p_net_size, numericality: { only_integer: true, greater_than: 23, less_than: 30 } # 24-29
 
   serialize :settings, JSON
   serialize :features, JSON
@@ -74,8 +82,8 @@ class Region < ApplicationRecord
     volume_driver.clustered_storage?
   end
 
-  def public_network?
-    networks.public_net.exists?
+  def has_clustered_networking?
+    network_driver == 'calico_docker'
   end
 
   def volume_driver
@@ -98,6 +106,14 @@ class Region < ApplicationRecord
       dc: dc.blank? ? nil : dc,
       token: consul_token
     }
+  end
+
+  # @return [Boolean]
+  def can_migrate_network_driver?
+    return false if has_clustered_networking? # Must have clustered networking enabled by default
+    return false unless nodes.count == 1 # Can't use bridged networking on clusters
+    return false if networks.bridged.empty? # Must have created bridged networking
+    !deployments.where(private_network: { id: nil }).includes(:private_network).empty?
   end
 
   ##

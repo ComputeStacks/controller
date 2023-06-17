@@ -119,6 +119,8 @@ gem 'font-awesome-sass', '~> 6.4'
 
 gem 'puma'
 
+gem 'netaddr', '~> 2.0'
+
 group :development do
   gem 'yard'
   gem 'listen'
@@ -147,4 +149,5 @@ source "https://rubygems.pkg.github.com/computestacks" do
   gem "whmcs", "2.3.7"
 end
 
-gem 'docker-api', github: 'ComputeStacks/docker-api', ref: 'a36e692'
+gem 'docker-api', github: 'ComputeStacks/docker-api', ref: '499e609'
+

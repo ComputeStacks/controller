@@ -4,13 +4,15 @@ module ContainerServices::WordpressServices
     attr_accessor :service,
                   :username,
                   :ttl,
+                  :plugin,
                   :link
 
-    # @param [Deployment::ContainerService] service
+    # @param [Deployment::ContainerService, nil] service
     def initialize(service, user = 'admin')
       self.service = service
       self.username = user
       self.ttl = 10.seconds
+      self.plugin = nil
     end
 
     def perform
@@ -24,7 +26,8 @@ module ContainerServices::WordpressServices
       )
       signature = ec_key.sign payload
       sig_data = Base64.strict_encode64 signature
-      self.link = "https://#{service.default_domain}/wp-admin/?cs_auth_payload=#{ERB::Util.url_encode(payload)}&cs_auth_sig=#{ERB::Util.url_encode(sig_data)}"
+      redirect_path = plugin == 'extendify' ? '/post-new.php?extendify=onboarding&' : '/?'
+      self.link = "https://#{service.default_domain}/wp-admin#{redirect_path}cs_auth_payload=#{ERB::Util.url_encode(payload)}&cs_auth_sig=#{ERB::Util.url_encode(sig_data)}"
       true
     end
 

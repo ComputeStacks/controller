@@ -80,6 +80,29 @@
   <%= render partial: 'volumes/volume_backend', locals: { f: f } %>
 
   <hr>
+  <div class="row">
+    <div class="col-xs-12">
+      <h5>Network Settings</h5>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 col-xs-12">
+      <div class="form-group">
+        <%= f.label :p_net_size, 'Project Network Size' %>
+        <%= f.number_field :p_net_size, class: 'form-control'%>
+        <span class="help-block">Only applicable if network driver is bridge.</span>
+      </div>
+    </div>
+    <div class="col-md-6 col-xs-12">
+      <div class="form-group">
+        <%= f.label :network_driver, 'Network Driver' %>
+        <%= f.select :network_driver, [%w(Clustered calico_docker), %w(Bridge bridge)], {}, { class: 'form-control'} %>
+      </div>
+    </div>
+  </div>
+
+  <hr>
 
   <div class="row">
     <div class="col-md-12">

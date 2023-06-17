@@ -1,4 +1,5 @@
 module RegionServices
+  # unused
   class RegionMigratorService
 
     attr_accessor :region,
@@ -315,6 +316,7 @@ module RegionServices
       projects = []
       new_region.container_services.each do |s|
         next if @skipped_services.include? s
+        next unless new_region.has_clustered_networking?
         NetworkWorkers::ServicePolicyWorker.perform_async s.id
         sleep 1
         unless projects.include? s.deployment

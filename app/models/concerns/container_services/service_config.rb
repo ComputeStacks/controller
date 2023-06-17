@@ -191,15 +191,14 @@ module ContainerServices
       success = true
       container_image.ingress_params.each do |i|
         next if ingress_rules.where(parent_param: i).exists?
-        rule_proto = ( i.proto == 'http' && public_network? ) ? 'tcp' : i.proto
         pp = ingress_rules.new(
           parent_param: i,
           external_access: i.external_access,
-          proto: rule_proto,
+          proto: i.proto,
           port: i.port,
           backend_ssl: i.backend_ssl,
           tcp_proxy_opt: i.tcp_proxy_opt,
-          tcp_lb: public_network? ? false : i.tcp_lb,
+          tcp_lb: i.tcp_lb,
           sys_no_reload: true, # Don't reload the LB.
           skip_metadata_refresh: true,
           region: region

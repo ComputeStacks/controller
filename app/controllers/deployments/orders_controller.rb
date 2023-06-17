@@ -165,7 +165,6 @@ class Deployments::OrdersController < AuthController
         return redirect_to("/deployments/orders/containers", alert: "Failed to change variant for image #{i[:image_id]} to variant #{order_params[:image_variant_selector][i[:image_id].to_s]}")
       end
     end
-
     @order_session.save
     create
   end

@@ -132,18 +132,18 @@ module ProvisionServices
       p_region = subscription.nil? ? BillingPackage.new(cpu: 1, memory: 512) : subscription.package
       1.upto(qty).each do
         new_container = ProvisionServices::ContainerProvisioner.new(container_service)
+        if subscription.package.nil?
+          errors << "Unable to provision container, missing package"
+          next
+        end
         if region.has_clustered_storage?
-          if subscription.package.nil?
-            errors << "Unable to provision container, missing package"
-            next
-          end
           new_container.node = region.find_node p_region
-          if new_container.node.nil?
-            errors << "Unable to place container on node"
-            next
-          end
         else
           new_container.node = node
+        end
+        if new_container.node.nil?
+          errors << "Unable to place container on node"
+          next
         end
         unless new_container.perform
           new_container.errors.each do |i|
@@ -188,6 +188,7 @@ module ProvisionServices
 
     # @return [Boolean]
     def finalize!
+      return true unless region.has_clustered_networking?
       # Setup network policy for service
       NetworkWorkers::ServicePolicyWorker.perform_async container_service.id
       true
@@ -198,7 +199,7 @@ module ProvisionServices
     # if the service has no volumes, then we can allow it to run across nodes. Otherwise,
     # we will pin them all to the same node.
     def select_node!
-      return node unless node.nil?
+      return true unless node.nil?
       return true if region.has_clustered_storage?
 
       # Find any volumes that have been marked as skip during the order process.

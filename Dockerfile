@@ -49,13 +49,14 @@ RUN set -ex; \
 
 WORKDIR /usr/src/app
 
-COPY Gemfile /usr/src/app
-COPY Gemfile.lock /usr/src/app
+ADD Gemfile* /usr/src/app/
+ADD engines/ /usr/src/app/engines/
 
 RUN bundle config https://rubygems.pkg.github.com/ComputeStacks $github_user:$github_token \
                 && bundle config set without 'test development' \
         ; \
         cd /usr/src/app \
+                && if [ ! -f Gemfile ]; then mv Gemfile.common Gemfile; fi \
                 && bundle install \
         ; \
         bundle config --delete https://rubygems.pkg.github.com/computestacks/

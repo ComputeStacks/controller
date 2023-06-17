@@ -2,6 +2,7 @@ object false
 
 node :user do
   {
+    id: @user.id,
     fname: @user.fname,
     lname: @user.lname,
     email: @user.email,

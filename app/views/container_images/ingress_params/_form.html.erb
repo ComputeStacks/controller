@@ -10,7 +10,7 @@
     <div class="col-sm-7">
       <div class="form-group">
         <%= f.label :proto, t('container_images.ingress_rules.form.proto') %>
-        <%= f.select :proto, options_for_select(ingress_param_proto_options(@ingress), @ingress.proto), {}, class: 'form-control'  %>
+        <%= f.select :proto, options_for_select(ingress_param_proto_options, @ingress.proto), {}, class: 'form-control'  %>
         <span class="help-block"><%= t 'container_images.ingress_rules.form.proto_help_html' %></span>
       </div>
     </div>
@@ -23,37 +23,35 @@
     </div>
   </div>
   <hr>
-  <% if allow_lb %>
-    <div class="row">
-      <div class="col-sm-12">
-        <h5>Load Balancer Settings</h5>
+  <div class="row">
+    <div class="col-sm-12">
+      <h5>Load Balancer Settings</h5>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <%= f.label :tcp_proxy_opt, t('container_images.ingress_rules.form.tcp_proxy') %>
+      <%= f.select :tcp_proxy_opt, options_for_select(ingress_param_tcp_options, @ingress.tcp_proxy_opt), {}, class: 'form-control' %>
+      <span class="help-block"><%= t('container_images.ingress_rules.form.tcp_proxy_help_html') %></span>
+    </div>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= f.label :backend_ssl, t('container_images.ingress_rules.form.backend_ssl') %>
+        <%= f.check_box :backend_ssl, class: 'form-control'  %>
+        <span class="help-block"><%= t('container_images.ingress_rules.form.backend_ssl_help_html') %></span>
       </div>
     </div>
-    <div class="row">
-      <div class="col-sm-6">
-        <%= f.label :tcp_proxy_opt, t('container_images.ingress_rules.form.tcp_proxy') %>
-        <%= f.select :tcp_proxy_opt, options_for_select(ingress_param_tcp_options, @ingress.tcp_proxy_opt), {}, class: 'form-control' %>
-        <span class="help-block"><%= t('container_images.ingress_rules.form.tcp_proxy_help_html') %></span>
-      </div>
-      <div class="col-sm-6">
-        <div class="form-group">
-          <%= f.label :backend_ssl, t('container_images.ingress_rules.form.backend_ssl') %>
-          <%= f.check_box :backend_ssl, class: 'form-control'  %>
-          <span class="help-block"><%= t('container_images.ingress_rules.form.backend_ssl_help_html') %></span>
-        </div>
-      </div>
-    </div>
+  </div>
 
-    <% if Feature.check('tcp_iptables', current_user) %>
-    <div class="row">
-      <div class="col-sm-12">
-        <%= f.label :tcp_lb, t('container_images.ingress_rules.form.tcp_lb') %>
-        <%= f.check_box :tcp_lb, class: "form-control" %>
-        <span class="help-block"><%= t 'container_images.ingress_rules.form.tcp_lb_help' %></span>
-        <br>
-        <span class="help-block">Warning: This will cause all data sent by this container to be tracked as billable, including inter-project data.</span>
-      </div>
+  <% if Feature.check('tcp_iptables', current_user) %>
+  <div class="row">
+    <div class="col-sm-12">
+      <%= f.label :tcp_lb, t('container_images.ingress_rules.form.tcp_lb') %>
+      <%= f.check_box :tcp_lb, class: "form-control" %>
+      <span class="help-block"><%= t 'container_images.ingress_rules.form.tcp_lb_help' %></span>
+      <br>
+      <span class="help-block">Warning: This will cause all data sent by this container to be tracked as billable, including inter-project data.</span>
     </div>
-    <% end %>
+  </div>
   <% end %>
 </div>

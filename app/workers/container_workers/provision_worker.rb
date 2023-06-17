@@ -4,11 +4,15 @@ module ContainerWorkers
 
     sidekiq_options retry: 1
 
-    # @param [String] container_id Global ID
-    # @param [String] event_id Global
-    def perform(container_id, event_id)
-      container = GlobalID::Locator.locate container_id
-      event = GlobalID::Locator.locate event_id
+    # args[0] = container_id GLOBALID
+    # args[1] = event_id GLOBALID
+    # args[2] = requested_state == default is 'running'
+    def perform(*args)
+      container = GlobalID::Locator.locate args[0]
+      event = GlobalID::Locator.locate args[1]
+      requested_state = args[2].nil? ? 'running' : args[2]
+
+      return if container.nil? || event.nil?
 
       return unless event.start!
 
@@ -27,8 +31,16 @@ module ContainerWorkers
         return
       end
 
-      ContainerWorkers::StartWorker.perform_async container_id, event_id
+      if requested_state == 'stopped'
+        event.event_details.create!(
+          data: 'Requested state was stop, so we are not starting this service.',
+          event_code: 'ee3be79e03dd3994'
+        )
+        event.done!
+        return
+      end
 
+      ContainerWorkers::StartWorker.perform_async container.to_global_id.to_s, event.to_global_id.to_s
     rescue ActiveRecord::RecordNotFound
       return # Silently fail
     rescue Timeout::Error

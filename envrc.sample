@@ -5,3 +5,4 @@ export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 export GITHUB_GEM_PULL_USER=changme
 export GITHUB_GEM_PULL_TOKEN=changme
 export RUBYOPT='-W:no-deprecated'
+export BUNDLE_GEMFILE=Gemfile.common

@@ -116,11 +116,6 @@ class Network::IngressRule < ApplicationRecord
     nil
   end
 
-  def public_network?
-    return region.public_network? if region
-    false
-  end
-
   def lb_proxy_name
     Digest::MD5.hexdigest("#{container_service.name}#{id}") if container_service
   end
@@ -175,30 +170,24 @@ class Network::IngressRule < ApplicationRecord
   def set_nat_port
     if external_access && port_nat.zero? && %w(tcp tls udp).include?(proto)
       unless load_balancer_rule # Only for ingress rules attached to our global LB.
-        if public_network?
-          self.port_nat = port
-        else
-
-          ActiveRecord::Base.uncached do
-            # If tcp or udp exists, share the port with each other.
-            if %w(tcp udp).include? proto
-              port_pair = nil
-              port_pair = container_service.ingress_rules.find_by(proto: (proto == 'tcp' ? 'udp' : 'tcp'), port: port) if container_service
-              port_pair = sftp_container.ingress_rules.find_by(proto: (proto == 'tcp' ? 'udp' : 'tcp'), port: port) if sftp_container
-              if port_pair && !Network::IngressRule.where(proto: proto, port: port, region: region).exists?
-                self.port_nat = port_pair.port_nat
-              end
-            end
-
-            if port_nat.zero?
-              ports_in_use = Network::IngressRule.where.not(port_nat: 0).where(region: region, proto: proto).pluck(:port_nat)
-              # https://serverfault.com/questions/401040/maximizing-tcp-connections-on-haproxy-load-balancer
-              # as stated, i guess linux will use 32k+ for connections
-              p = rand(10000..30000) while p.nil? || ports_in_use.include?(p)
-              self.port_nat = p
+        ActiveRecord::Base.uncached do
+          # If tcp or udp exists, share the port with each other.
+          if %w(tcp udp).include? proto
+            port_pair = nil
+            port_pair = container_service.ingress_rules.find_by(proto: (proto == 'tcp' ? 'udp' : 'tcp'), port: port) if container_service
+            port_pair = sftp_container.ingress_rules.find_by(proto: (proto == 'tcp' ? 'udp' : 'tcp'), port: port) if sftp_container
+            if port_pair && !Network::IngressRule.where(proto: proto, port: port, region: region).exists?
+              self.port_nat = port_pair.port_nat
             end
           end
 
+          if port_nat.zero?
+            ports_in_use = Network::IngressRule.where.not(port_nat: 0).where(region: region, proto: proto).pluck(:port_nat)
+            # https://serverfault.com/questions/401040/maximizing-tcp-connections-on-haproxy-load-balancer
+            # as stated, i guess linux will use 32k+ for connections
+            p = rand(10000..30000) while p.nil? || ports_in_use.include?(p)
+            self.port_nat = p
+          end
         end
       end
     elsif !external_access && !port_nat.zero?
@@ -221,7 +210,7 @@ class Network::IngressRule < ApplicationRecord
     elsif external_access && container_service
       LoadBalancerServices::DeployConfigService.new(region.load_balancer).perform if region&.load_balancer
     end
-    unless skip_policy_updates
+    if region.has_clustered_networking? && !skip_policy_updates
       NetworkWorkers::ServicePolicyWorker.perform_async(container_service.id) if container_service
       NetworkWorkers::SftpPolicyWorker.perform_async(sftp_container.id) if sftp_container
     end
@@ -236,14 +225,13 @@ class Network::IngressRule < ApplicationRecord
 
   # Set related service load balancer based on load_balanced_type setting.
   def update_global_load_balancer!
-    return if public_network?
     if external_access && (global_load_balancer.nil? && load_balancer_rule.nil?)
       lb = region.load_balancer
       return unless lb
       if container_service && container_service.load_balancer.nil?
-        container_service.update_attribute(:load_balancer, lb)
+        container_service.update load_balancer: lb
       elsif sftp_container && sftp_container.load_balancer.nil?
-        sftp_container.update_attribute(:load_balancer, lb)
+        sftp_container.update load_balancer: lb
       end
     end
   end
@@ -251,7 +239,6 @@ class Network::IngressRule < ApplicationRecord
   def provision_domain
     return if proto == "udp"
     return unless container_service
-    return if public_network?
     Deployment::ContainerDomain.create_system_domain!(container_service)
   end
 

@@ -93,7 +93,6 @@ class Deployment::ContainerDomain < ApplicationRecord
   end
 
   def self.create_system_domain!(service)
-    return [] if service.public_network?
     sysd = Deployment::ContainerDomain.sys_domain(service.region).first
     return [] if sysd.nil?
     return [] if service.nil? || service.user.nil?

@@ -1,0 +1,5 @@
+##
+# Define any custom engines (ComputeStacks plugins) mount points here.
+Rails.application.routes.draw do
+  mount MyPlugin::Engine, at: "/engine/my_plugin"
+end

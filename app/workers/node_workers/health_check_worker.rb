@@ -71,7 +71,8 @@ module NodeWorkers
       containers_on_node.each do |i|
         clist[i.info['Names'].first.gsub("/", '')] = {
           status: i.info['State'] == 'exited' ? 'stopped' : i.info['State'],
-          network: i.info.dig('NetworkSettings', 'Networks')&.keys&.first
+          network: i.info.dig('NetworkSettings', 'Networks')&.keys&.first,
+          raw: i.info['State']
         }
       end
 
@@ -79,6 +80,9 @@ module NodeWorkers
         next if clist[i.name].nil?
         cstatus = clist[i.name][:status]
         has_network = clist[i.name][:network]
+
+        # Update local state
+        i.container_status clist[i.name][:raw]
 
         next if i.is_a?(Deployment::Container) && i.service.nil?
 

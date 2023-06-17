@@ -22,7 +22,6 @@ class Api::ContainerServicesController < Api::ApplicationController
   #     * `command`: String
   #     * `is_load_balancer`: Boolean
   #     * `has_domain_management`: Boolean
-  #     * `container_image_id`: Integer
   #     * `current_state`: String
   #     * `auto_scale`: Boolean
   #     * `auto_scale_horizontal`: Boolean
@@ -30,6 +29,18 @@ class Api::ContainerServicesController < Api::ApplicationController
   #     * `labels`: Object
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
+  #     * `image`: Object
+  #         * `id`: Integer
+  #         * `name`: String
+  #         * `label`: String
+  #         * `role`: String
+  #         * `variant`: Object
+  #             * `id`: Integer
+  #             * `label`: String
+  #             * `name`: String
+  #             * `path`: String
+  #             * `default`: Boolean
+  #             * `sort`: Integer
   #     * `project`: Object
   #         * `id`: Integer
   #         * `name`: String

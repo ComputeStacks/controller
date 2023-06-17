@@ -32,6 +32,8 @@ module ContainerServicesHelper
             "<span style='color:rgb(217,175,95);'>Offline Containers</span>"
           when 'active_alert'
             %Q(<span style='color:rgb(217,175,95);'><i class="fa-solid fa-triangle-exclamation"></i> Active Alert</span>)
+          when 'unhealthy'
+            "<span style='color:rgb(190,66,48);'>Failing Health checks</span>"
           else
             nil
           end
@@ -53,7 +55,7 @@ module ContainerServicesHelper
       'panel-info'
     when 'alert'
       'panel-danger'
-    when 'offline_containers', 'resource_usage', 'active_alert'
+    when 'offline_containers', 'resource_usage', 'active_alert', 'unhealthy'
       'panel-warning'
     when 'online'
       'panel-success'
@@ -80,7 +82,6 @@ module ContainerServicesHelper
 
   # What's displayed in the domain portion of the service list page for a project
   def service_list_domain(service)
-    return service.containers.first&.local_ip if service.public_network?
     if service.default_domain && service.has_domain_management
       link_to truncate(service.default_domain, length: 50), "https://#{service.default_domain}", target: '_blank'
     else
@@ -104,6 +105,8 @@ module ContainerServicesHelper
       %Q( #{tag.i(nil, class: 'text-danger fa-solid fa-triangle-exclamation')} Alert ).html_safe
     when 'working'
       'Operation In Progress'
+    when 'unhealthy'
+      %Q( #{tag.i(nil, class: 'text-danger fa-solid fa-triangle-exclamation')} Failing Health Checks ).html_safe
     else
       service.current_state
     end

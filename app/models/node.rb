@@ -145,7 +145,6 @@ Node < ApplicationRecord
   end
 
   def iptable_rules
-    return [] if region.public_network?
     q = "external_access = true AND port_nat > 0 AND (proto = 'udp' OR (proto = 'tcp' AND tcp_lb = false))"
     (container_services.map { |i| i.ingress_rules.where( Arel.sql q ) } + sftp_containers.map { |i| i.ingress_rules.where( Arel.sql q ) }).flatten
   end

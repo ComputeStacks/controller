@@ -54,8 +54,7 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
   #     * `restrict_cf`: Boolean | If true, only allow CloudFlare
   #     * `tcp_lb`: Boolean
   #
-  def update
-    params[:ingress_rule][:tcp_lb] = false if @ingress_rule.public_network? # enforce this being disabled.
+  def update # enforce this being disabled.
     return api_obj_error(@ingress_rule.errors.full_messages) unless @ingress_rule.update(ingress_rule_params)
     respond_to do |format|
       format.any(:json, :xml) { render template: 'api/networks/ingress_rules/show', status: :accepted }
@@ -81,7 +80,6 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
   #
   def create
     @ingress_rule = @service.ingress_rules.new(create_ingress_rule_params)
-    @ingress_rule.tcp_lb = false if @service.public_network?
     @ingress_rule.current_user = current_user
     @ingress_rule.region = @service.region
     return api_obj_error(@ingress_rule.errors.full_messages) unless @ingress_rule.save

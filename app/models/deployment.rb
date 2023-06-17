@@ -1,7 +1,5 @@
 ##
-# Deployment
-#
-# TODO: Rename to 'Project'.
+# Deployment (Project)
 #
 # @!attribute [r] id
 #   @return [Integer]
@@ -10,7 +8,7 @@
 #   @return [String]
 #
 # @!attribute current_state
-#   One of: working, deleting ,alert, ok.
+#   One of: working, deleting ,alert, ok, unhealthy.
 #   @return [String]
 #
 # @!attribute skip_ssh
@@ -113,6 +111,8 @@ class Deployment < ApplicationRecord
   has_many :setting_params, through: :services
   has_many :networks, -> { distinct }, through: :services
 
+  has_one :private_network, class_name: 'Network', foreign_key: 'deployment_id'
+
 
   has_many :volumes, -> { distinct }, through: :services
   has_many :ssl_certificates, through: :services
@@ -167,10 +167,6 @@ class Deployment < ApplicationRecord
   # Projects will be limited to a single region going forward.
   def region
     regions[0]
-  end
-
-  def uses_public_net?
-    networks.where(is_public: true).exists?
   end
 
   ##

@@ -76,6 +76,13 @@ yarn-debug.log*
 rgloader
 lib/dev/bin/
 lib/dev/keys/
-plugins/
 .yarn/
 workspace/
+
+# Allow for modifications through Engines
+Gemfile
+Gemfile.lock
+Gemfile.common.lock
+config/routes/engines.rb
+engines/**
+!engines/.keep

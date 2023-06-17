@@ -29,6 +29,7 @@ module ContainerServices
     # @param [Region] r The region this container will be placed in.
     # @return [Boolean]
     def pin_to_node?(r)
+      return true unless r.has_clustered_storage?
       ##
       # Ensure the region supports clustered storage, and we have no local volumes.
       # If we can migrate, then we don't need to be pinned to a node.

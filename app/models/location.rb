@@ -55,7 +55,7 @@ class Location < ApplicationRecord
 
   scope :active, -> { where(active: true) }
 
-  scope :sorted, -> { order(Arel.sql("lower(name) ASC")) }
+  scope :sorted, -> { order "lower(name)" }
 
   has_many :regions, dependent: :restrict_with_error
   has_many :user_groups, -> { distinct }, through: :regions

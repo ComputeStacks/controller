@@ -22,7 +22,6 @@ class ContainerServices::IngressController < ContainerServices::BaseController
   def edit; end
 
   def create
-    params[:network_ingress_rule][:tcp_lb] = false if @service.public_network?
     @ingress = @service.ingress_rules.new(ingress_params)
     @ingress.region = @service.region
     if @ingress.save
@@ -38,7 +37,6 @@ class ContainerServices::IngressController < ContainerServices::BaseController
   end
 
   def update
-    params[:network_ingress_rule][:tcp_lb] = false if @service.public_network?
     if @ingress.update(ingress_params)
       flash[:success] = "updated"
       if params[:return_to] == 'service'

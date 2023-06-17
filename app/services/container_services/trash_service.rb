@@ -30,6 +30,7 @@ module ContainerServices
       end
       clean_ingress_rules
       pause_subscriptions
+      flag_volumes
       return false unless delete_containers
       return true if service.destroy
       event.event_details.create!(
@@ -40,6 +41,16 @@ module ContainerServices
     end
 
     private
+
+    def flag_volumes
+      service.owned_volumes.each do |i|
+        i.to_trash = true
+        i.trashed_by = event.audit if event
+        unless i.save
+          Rails.logger.warn "[VOL] #{i.errors.full_messages.inspect}"
+        end
+      end
+    end
 
     ##
     # If using custom load balancer, delete that now.

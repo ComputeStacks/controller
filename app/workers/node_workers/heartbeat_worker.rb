@@ -20,9 +20,6 @@ module NodeWorkers
       return unless can_proceed?(node)
       node.toggle_checkup!
 
-      # TODO: Support checking the last metric timestamp.
-      # offline = node.in_offline_window? ? false : docker_client_check(node)
-
       offline = docker_client_check(node)
 
       if offline && !node.disconnected # Recently offline
