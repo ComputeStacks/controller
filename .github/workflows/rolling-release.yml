@@ -5,7 +5,7 @@ on: workflow_dispatch
 env:
   # The default repo env will be 'ComputeStacks'; uppercase is not allowed.
   GH_REPO: computestacks/controller
-  IMAGE_TAG: 8
+  IMAGE_TAG: 9
 
 jobs:
   build:
