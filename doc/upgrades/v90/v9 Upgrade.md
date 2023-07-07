@@ -14,15 +14,27 @@ docker pull hashicorp/consul:1.16 \
 
 ## Update Node Agent
 
+Newer installations now include a script to update the agent. Please install that script and run it:
+
 ```bash
-cd /tmp && wget https://f.cscdn.cc/file/cstackscdn/packages/cs-agent/cs-agent.tar.gz
+cat << 'EOF' > /usr/local/bin/update-agent
+#!/bin/bash
+
+set -e
+
+AGENT_TAR=$(mktemp)
+curl -sSL --fail -o $AGENT_TAR https://f.cscdn.cc/file/cstackscdn/packages/cs-agent/cs-agent.tar.gz
+tar -xzvf $AGENT_TAR --directory .
+gpg --verify cs-agent.sig cs-agent || exit_code=$?
+if [[ ${exit_code} -ne 0 ]]; then exit ${exit_code}; fi
 systemctl stop cs-agent
-tar -xzvf cs-agent.tar.gz
-rm -f /usr/local/bin/cs-agent
 mv cs-agent /usr/local/bin/
 chown root:root /usr/local/bin/cs-agent && chmod +x /usr/local/bin/cs-agent
-rm -rf /tmp/cs-agent*
-systemctl daemon-reload && systemctl start cs-agent
+rm $AGENT_TAR
+rm cs-agent.sig
+systemctl start cs-agent
+EOF
+chmod +x /usr/local/bin/update-agent
 ```
 
 ---
@@ -38,7 +50,17 @@ In v9.0 we introduced support for single-node installations that utilize linux b
 
 The first step is to define what your new network range will be and what size of network each project will get. In this example, we will define a network of `10.134.0.0/21` for all projects on this node, and tell ComputeStacks to give a `/28` to each project. This will give `14` IPs per project.
 
-On the node, allow access via iptables from that subnet: `iptables -A INPUT -s 10.134.0.0/21 -j ACCEPT`. _Be sure to also add that to `/usr/local/bin/cs-recover_iptables`._
+Add the following to `/usr/local/bin/cs-recover_iptables`:
+
+```
+iptables -N container-inbound
+iptables -A FORWARD -j container-inbound
+iptables -A INPUT -s 10.134.0.0/21 -j ACCEPT
+```
+
+_WHERE `10.134.0.0/21` IS THE SUBNET YOU'RE USING_.
+
+Be sure to also manually run those iptable commands to apply them now.
 
 > You must also ensure that this network does not overlap in your existing environment.
 
