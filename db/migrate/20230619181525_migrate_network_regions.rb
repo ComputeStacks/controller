@@ -17,6 +17,10 @@ class MigrateNetworkRegions < ActiveRecord::Migration[7.0]
     remove_column :networks, :cidr, :string
     drop_join_table :regions, :networks
 
+    # ensure existing networks did not have their driver changed
+    Region.all.each do |i|
+      i.update_column :network_driver, 'calico_docker'
+    end
 
   end
 end

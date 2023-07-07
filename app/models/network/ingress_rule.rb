@@ -116,6 +116,17 @@ class Network::IngressRule < ApplicationRecord
     nil
   end
 
+  # @return [Network,nil]
+  def network
+    if container_service
+      if container_service.containers.first
+        return container_service.containers.first.network
+      end
+    end
+    return sftp_container.network if sftp_container
+    nil
+  end
+
   def lb_proxy_name
     Digest::MD5.hexdigest("#{container_service.name}#{id}") if container_service
   end

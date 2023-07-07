@@ -46,6 +46,9 @@ class ServiceProvisionFlowTest < ActionDispatch::IntegrationTest
     Sidekiq::Testing.inline! do
       order_prov_success = order_process.perform
       puts order_process.errors.join(" ") unless order_process.errors.empty?
+      event.event_details.each do |i|
+        puts i.data
+      end unless order_prov_success
       assert order_prov_success
     end
 

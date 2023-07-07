@@ -25,6 +25,7 @@ module LetsEncryptServices
       self.event = event
       @dns = Dnsruby::Resolver.new( {
                                       nameserver: NS_LIST,
+                                      port: NS_PORT,
                                       do_caching: false,
                                       retry_delay: 1,
                                       retry_times: 3
@@ -111,9 +112,9 @@ module LetsEncryptServices
             event_code: '2721edc59787a807'
           )
           is_valid = false
-        elsif dns_resource_wildcard.name.to_s != domain
+        elsif dns_resource_wildcard != domain
           event.event_details.create!(
-            data: "Invalid CNAME record. Expected *.#{domain} to point to #{domain}, instead we found #{dns_resource_wildcard.name.to_s}.",
+            data: "Invalid CNAME record. Expected *.#{domain} to point to #{domain}, instead we found #{dns_resource_wildcard}.",
             event_code: '635285f7f2889009'
           )
           is_valid = false
@@ -231,7 +232,7 @@ module LetsEncryptServices
         end
 
         # if we have ANY CAA records, we MUST also have a wildcard record.
-        if !le_wildcard_caa_exists && load_balancer
+        if load_balancer && !le_wildcard_caa_exists
           if invalid_wild_records.empty?
             event.event_details.create!(
               data: "CAA record found on #{d}, but missing LetsEncrypt. Please add: 0 issuewild \"letsencrypt.org\".\nLearn more about CAA records and LetsEncrypt: https://letsencrypt.org/docs/caa/.",
@@ -268,11 +269,16 @@ module LetsEncryptServices
     end
 
     def load_wildcard_cname!
-      dns = Resolv::DNS.new(nameserver: NS_LIST)
-      dns.timeouts = Rails.env.test? ? 15 : 5
-      dns.getresource("#{SecureRandom.hex(8)}.#{domain}", Resolv::DNS::Resource::IN::CNAME)
-    rescue Resolv::ResolvError # Record does not exist.
-      nil
+      dns_resource = @dns.query("#{SecureRandom.hex(8)}.#{domain}", 'CNAME').answer.select { |i| i.is_a?(Dnsruby::RR::IN::CNAME) }.map { |i| i.rdata.to_s }
+      dns_resource.first
+    rescue Dnsruby::NXDomain
+      return nil
+    rescue Dnsruby::Refused
+      event.event_details.create!(
+        data: "Error! #{SecureRandom.hex(8)}.#{domain} does not exist!",
+        event_code: '17e94a61f01a2799'
+      )
+      return
     end
 
   end

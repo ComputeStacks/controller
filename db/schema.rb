@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_23_052131) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_04_010353) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -1139,7 +1139,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_23_052131) do
     t.integer "ulimit_nofile_hard", default: 0, null: false
     t.string "consul_token"
     t.integer "p_net_size", default: 27, null: false
-    t.string "network_driver", default: "calico_docker", null: false
+    t.string "network_driver", default: "bridge", null: false
     t.index ["location_id"], name: "index_regions_on_location_id"
   end
 

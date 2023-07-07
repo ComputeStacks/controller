@@ -149,7 +149,7 @@ module MarketplaceServices
     def controller_ip
       ip = Rails.cache.fetch("controller_ip", expires_in: 1.hour, skip_nul: true) do
         begin
-          dns = Dnsruby::Resolver.new({ nameserver: %w(ns1.google.com ns2.google.com ns3.google.com ns4.google.com) })
+          dns = Dnsruby::Resolver.new({ port: NS_PORT, nameserver: %w(ns1.google.com ns2.google.com ns3.google.com ns4.google.com) })
           dns.retry_delay = 1
           dns.retry_times = 3
           dns.query("o-o.myaddr.l.google.com", "TXT").answer.first.strings.first

@@ -24,6 +24,8 @@ NS_LIST = if Rails.env.production?
             ['127.0.0.1']
           end
 
+NS_PORT = Rails.env.production? ? 53 : 5353
+
 PORTAL_HTTP_SCHEME = Rails.env.production? ? "https" : "http"
 
 begin

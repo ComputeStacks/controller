@@ -17,9 +17,7 @@ echo "Defaults:vagrant env_keep += \"EDITOR\"" >> /etc/sudoers.d/vagrant
 echo "syntax on" >> /etc/vim/vimrc
 apt-get update && apt-get -y upgrade
 apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent prometheus-node-exporter redis-server postgresql-15 rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen libyaml-dev
-curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
   $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
@@ -49,35 +47,17 @@ echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" \
       > /etc/apt/sources.list.d/haproxy.list
 
 apt-get update
-apt-get -y install docker-ce docker-ce-cli containerd.io consul haproxy=2.8.\* pdns-server pdns-backend-pgsql
-touch /etc/consul.d/consul.env && chown consul:consul /etc/consul.d/consul.env
-cat << 'EOF' > /etc/consul.d/consul.hcl
-datacenter = "dev"
-client_addr = "0.0.0.0"
-ui_config{
-  enabled = true
-}
-bind_addr = "127.0.0.1"
-acl{
-  enabled = true
-  default_policy = "allow"
-  enable_token_persistence = true
-}
-data_dir = "/opt/consul"
-bootstrap_expect = 1
-server = true
-EOF
-systemctl enable consul && systemctl start consul
+apt-get -y install docker-ce docker-ce-cli containerd.io haproxy=2.8.\* pdns-server pdns-backend-pgsql
 
-echo "Setting up NVM & nodejs..."
-su - vagrant -c "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | PROFILE=/Users/vagrant/profile bash"
-su - vagrant -c "\. /home/vagrant/.nvm/nvm.sh && nvm install --lts && nvm use --lts && corepack enable"
-
-cat << 'EOF' >> /home/vagrant/.profile
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+mkdir -p /etc/systemd/system/docker.service.d
+cat << 'EOF' > /etc/systemd/system/docker.service.d/startup.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd -H unix:// -H tcp://0.0.0.0:2376 --icc=false --userland-proxy=false
+TasksMax=infinity
 EOF
+
+systemctl daemon-reload && systemctl restart docker
 
 systemctl stop pdns
 
@@ -126,6 +106,72 @@ allow-dnsupdate-from=
 EOF
 
 systemctl enable pdns && systemctl start pdns
+
+
+mkdir -p /etc/consul
+cat << 'EOF' > /etc/consul/config.hcl
+datacenter = "dev"
+client_addr = "0.0.0.0"
+ui_config{
+  enabled = true
+}
+bind_addr = "127.0.0.1"
+acl{
+  enabled = true
+  default_policy = "allow"
+  enable_token_persistence = true
+}
+data_dir = "/consul/data"
+bootstrap_expect = 1
+server = true
+EOF
+
+cat << 'EOF' > /etc/systemd/system/consul.service
+[Unit]
+Description=Consul
+Requires=docker.service
+After=docker.service
+DefaultDependencies=no
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/env sh -c '/usr/bin/env docker kill consul 2>/dev/null'
+ExecStartPre=-/usr/bin/env sh -c '/usr/bin/env docker rm consul 2>/dev/null'
+
+ExecStart=/usr/bin/env docker run --rm --name consul \
+      --log-driver=none \
+      --network=host \
+      --label com.computestacks.role=system \
+      -v consul-data:/consul/data \
+      -v /etc/consul:/consul/config \
+      hashicorp/consul:1.16 consul agent -config-file=/consul/config/config.hcl
+
+ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker kill consul 2>/dev/null'
+ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker rm consul 2>/dev/null'
+Restart=always
+RestartSec=30
+SyslogIdentifier=consul
+LimitNOFILE=infinity
+
+[Install]
+WantedBy=multi-user.target
+WantedBy=docker.service
+EOF
+
+docker pull hashicorp/consul:1.16
+systemctl daemon-reload \
+  && systemctl enable consul \
+  && systemctl start consul
+
+echo "Setting up NVM & nodejs..."
+su - vagrant -c "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | PROFILE=/Users/vagrant/profile bash"
+su - vagrant -c "\. /home/vagrant/.nvm/nvm.sh && nvm install --lts && nvm use --lts && corepack enable"
+
+cat << 'EOF' >> /home/vagrant/.profile
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+EOF
 
 echo "Installing Overmind processor manager..."
 cd /tmp
@@ -300,13 +346,6 @@ Content-Type: text/html
 </html>
 EOF
 
-if systemctl status consul; then
-  echo "Consul booted successfully"
-else
-  echo "Consul failed to start"
-  exit 1
-fi
-
 systemctl enable prometheus-node-exporter && systemctl start prometheus-node-exporter
 
 cat << 'EOF' > /etc/redis.conf
@@ -400,17 +439,8 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 EOF
 
-mkdir /etc/systemd/system/docker.service.d
-
 echo "Allow vagrant user to access docker..."
 usermod -aG docker vagrant
-
-cat << 'EOF' > /etc/systemd/system/docker.service.d/startup.conf
-[Service]
-ExecStart=
-ExecStart=/usr/bin/dockerd -H unix:// -H tcp://0.0.0.0:2376 --icc=false --userland-proxy=false
-TasksMax=infinity
-EOF
 
 export CONSUL_HTTP_TOKEN=$(curl -X PUT http://127.0.0.1:8500/v1/acl/bootstrap | jq -r '.SecretID')
 echo "export CONSUL_HTTP_TOKEN=$CONSUL_HTTP_TOKEN" >> /home/vagrant/.profile
@@ -421,9 +451,9 @@ echo "export REDIS_HOST=127.0.0.1" >> /home/vagrant/.profile
 echo "eval \"\$(direnv hook bash)\"" >> /home/vagrant/.profile
 echo $CONSUL_HTTP_TOKEN > /home/vagrant/consul.token && chown vagrant:vagrant /home/vagrant/consul.token
 
-sed -i 's/allow/deny/g' /etc/consul.d/consul.hcl && systemctl restart consul
+curl -X PUT -H "X-Consul-Token: $CONSUL_HTTP_TOKEN" -H "Content-Type: application/json" --data "{\"Token\": \"$CONSUL_HTTP_TOKEN\"}" http://localhost:8500/v1/agent/token/default
 
-consul acl set-agent-token default $CONSUL_HTTP_TOKEN
+sed -i 's/allow/deny/g' /etc/consul/config.hcl && systemctl restart consul
 
 mkdir /etc/computestacks
 cat << EOF > /etc/computestacks/agent.yml
@@ -466,6 +496,7 @@ ExecStart=/usr/bin/env docker run --rm --name cadvisor \
       --log-driver=none \
       --network=host \
       --privileged \
+      --label com.computestacks.role=system \
       -v /:/rootfs:ro \
       -v /var/run:/var/run:ro \
       -v /sys:/sys:ro \
@@ -640,6 +671,7 @@ ExecStartPre=-/usr/bin/env sh -c '/usr/bin/env docker rm prometheus 2>/dev/null'
 ExecStart=/usr/bin/env docker run --rm --name prometheus \
       --log-driver=none \
       --network=host \
+      --label com.computestacks.role=system \
       -v prometheus-data:/prometheus \
       -v /etc/prometheus:/etc/prometheus:z \
       prom/prometheus:latest --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=10d --storage.tsdb.wal-compression --web.console.templates=/usr/share/prometheus/consoles --web.console.libraries=/usr/share/prometheus/console_libraries --storage.tsdb.max-block-duration=1d12h
@@ -750,6 +782,7 @@ ExecStartPre=-/usr/bin/env sh -c '/usr/bin/env docker rm alertmanager 2>/dev/nul
 ExecStart=/usr/bin/env docker run --rm --name alertmanager \
       --log-driver=none \
       --network=host \
+      --label com.computestacks.role=system \
       -v alertmanager-data:/alertmanager \
       -v /etc/prometheus:/etc/alertmanager:z \
       prom/alertmanager:latest
@@ -785,6 +818,7 @@ ExecStartPre=-/usr/bin/env sh -c '/usr/bin/env docker rm loki-logs 2>/dev/null'
 ExecStart=/usr/bin/env docker run --rm --name loki-logs \
       --log-driver=none \
       --network=host \
+      --label com.computestacks.role=system \
       -v loki-data:/loki \
       -v /etc/loki/loki-config.yml:/etc/loki/local-config.yaml:z \
       grafana/loki:2.7.3
@@ -920,6 +954,7 @@ ExecStartPre=-/usr/bin/env sh -c '/usr/bin/env docker kill fluentd 2>/dev/null'
 ExecStart=/usr/bin/env docker run --rm --name fluentd \
       --log-driver none \
       --network=host \
+      --label com.computestacks.role=system \
       -e LOKI_URL=http://127.0.0.1:3100 \
       -v /etc/fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro \
       grafana/fluent-plugin-loki:main
@@ -983,7 +1018,65 @@ else
 fi
 OUTER
 
+# GitHub Authentication
 su - vagrant -c "bash /home/vagrant/gh_auth.sh" && rm /home/vagrant/gh_auth.sh
+
+# IPTable Configuration
+if [ -f /usr/local/bin/cs-recover_iptables ]; then
+  echo "Existing iptable script is present, skipping iptables configuration."
+else
+  cat << 'EOF' > /etc/systemd/system/cs-iptables.service
+[Unit]
+Description=CS Persist IP Tables
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/local/bin/cs-recover_iptables
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+
+  cat << 'EOF' > /usr/local/bin/cs-recover_iptables
+#!/usr/bin/env bash
+iptables -t nat -N expose-ports
+iptables -t nat -A OUTPUT -j expose-ports
+iptables -t nat -A PREROUTING -j expose-ports
+iptables -N container-inbound
+iptables -A FORWARD -j container-inbound
+
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -p icmp -j ACCEPT
+
+# For dev, open up...
+# ...SSH
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+# ...computestacks controller
+iptables -A INPUT -p tcp --dport 3005 -j ACCEPT
+# ...consul UI
+iptables -A INPUT -p tcp --dport 8500 -j ACCEPT
+# ...prometheus
+iptables -A INPUT -p tcp --dport 9090 -j ACCEPT
+
+# Standard CS Ports
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport 10000:50000 -j ACCEPT
+iptables -A INPUT -p udp --dport 10000:50000 -j ACCEPT
+
+# Allow Private Container Network Access to Host
+iptables -A INPUT -s 10.134.0.0/21 -j ACCEPT
+
+iptables -P INPUT DROP
+EOF
+
+  systemctl daemon-reload && systemctl enable cs-iptables.service
+  chmod +x /usr/local/bin/cs-recover_iptables && bash /usr/local/bin/cs-recover_iptables
+fi
 
 echo "Provisioning PowerDNS for ComputeStacks..."
 pdnsutil create-zone cstacks.local ns1.cstacks.local

@@ -2,6 +2,8 @@ regionone:
   location: testlocation
   name: dev
   volume_backend: local
+  p_net_size: 28
+  network_driver: bridge
   log_client: vagrant_log_client
   metric_client: vagrant_metric_client
   consul_token: '<%= File.exist?("/home/vagrant/consul.token") ? File.read("/home/vagrant/consul.token").gsub("\n","") : "" %>'

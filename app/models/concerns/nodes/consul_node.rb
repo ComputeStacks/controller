@@ -41,15 +41,17 @@ module Nodes
             proto: i.proto,
             nat: i.port_nat,
             port: i.port,
-            dest: i.sftp_container.local_ip
+            dest: i.sftp_container.local_ip,
+            driver: i.network.nil? ? 'none' : i.network.network_driver
           }
         elsif i.container_service
-          i.container_service.containers.each do |contianer|
+          i.container_service.containers.each do |container|
             data[:rules] << {
               proto: i.proto,
               nat: i.port_nat,
               port: i.port,
-              dest: contianer.local_ip
+              dest: container.local_ip,
+              driver: i.network.nil? ? 'none' : i.network.network_driver
             }
           end
         end

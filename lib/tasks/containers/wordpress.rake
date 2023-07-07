@@ -14,7 +14,7 @@ namespace :containers do
       wp = ContainerImage.create!(
         name:                     "wordpress",
         label:                    "Wordpress",
-        description:              "Wordpress powered by the OpenLiteSpeed web server. Includes advanced caching and performance tuning, with out of the box support for redis object cache (requires separate container).",
+        description:              "Wordpress with PHP FPM and nginx",
         role:                     "wordpress",
         category:               "web",
         can_scale:                true,
@@ -37,48 +37,40 @@ namespace :containers do
 
       wp.image_variants.create!(
         label: "php 7.4",
-        registry_image_tag: "php7.4-litespeed",
+        registry_image_tag: "php7.4-nginx",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 2,
-        skip_tag_validation: true,
-        after_migrate: "/usr/local/bin/migrate_php_version",
-        rollback_migrate: "echo \"Please rebuild container and try again\""
+        skip_tag_validation: true
       )
 
       wp.image_variants.create!(
         label: "php 8.0",
-        registry_image_tag: "php8.0-litespeed",
+        registry_image_tag: "php8.0-nginx",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 1,
-        skip_tag_validation: true,
-        after_migrate: "/usr/local/bin/migrate_php_version",
-        rollback_migrate: "echo \"Please rebuild container and try again\""
+        skip_tag_validation: true
       )
 
       wp.image_variants.create!(
         label: "php 8.1",
-        registry_image_tag: "php8.1-litespeed",
+        registry_image_tag: "php8.1-nginx",
         validated_tag: true,
         validated_tag_updated: Time.now,
         is_default: false,
         version: 0,
-        skip_tag_validation: true,
-        after_migrate: "/usr/local/bin/migrate_php_version",
-        rollback_migrate: "echo \"Please rebuild container and try again\""
+        skip_tag_validation: true
       )
 
       wp.image_variants.create!(
         label: "php 8.2",
-        registry_image_tag: "php8.2-litespeed",
+        registry_image_tag: "php8.2-nginx",
         validated_tag: true,
         validated_tag_updated: Time.now,
         is_default: true,
         version: 0,
-        skip_tag_validation: true,
-        after_migrate: "/usr/local/bin/migrate_php_version",
-        rollback_migrate: "echo \"Please rebuild container and try again\""
+        skip_tag_validation: true
       )
 
       wp.dependency_parents.create!(
@@ -88,11 +80,6 @@ namespace :containers do
       wp.setting_params.create!(
         name:       'wordpress_password',
         label:      'Password',
-        param_type: 'password'
-      )
-      wp.setting_params.create!(
-        name:       'litespeed_admin_pw',
-        label:      'Litespeed Password',
         param_type: 'password'
       )
       wp.setting_params.create!(
@@ -118,21 +105,10 @@ namespace :containers do
         proto:           'http',
         external_access: true
       )
-      wp.ingress_params.create!(
-        port:            7080,
-        proto:           'http',
-        external_access: true,
-        backend_ssl:     true
-      )
       wp.env_params.create!(
         name:       'CS_AUTH_KEY',
         param_type: 'variable',
         env_value:  'build.self.ec_pub_key'
-      )
-      wp.env_params.create!(
-        name:       'LS_ADMIN_PW',
-        param_type: 'variable',
-        env_value:  'build.settings.litespeed_admin_pw'
       )
       wp.env_params.create!(
         name:       'WORDPRESS_DB_PASSWORD',
@@ -183,18 +159,6 @@ namespace :containers do
         label:             'wordpress',
         mount_path:        '/var/www',
         enable_sftp:       true,
-        borg_enabled:      true,
-        borg_freq:         '@daily',
-        borg_strategy:     'file',
-        borg_keep_hourly:  1,
-        borg_keep_daily:   7,
-        borg_keep_weekly:  4,
-        borg_keep_monthly: 0
-      )
-      wp.volumes.create!(
-        label:             'webconfig',
-        mount_path:        '/usr/local/lsws',
-        enable_sftp:       false,
         borg_enabled:      true,
         borg_freq:         '@daily',
         borg_strategy:     'file',

@@ -1,14 +1,88 @@
 netone:
-  cidr: "10.100.0.0/21"
+  subnet: "10.178.154.0/24"
   active: true
   name: 'net1'
   label: 'Primary Network'
-  regions:
-    - regionone
-nettwo:
-  cidr: "10.100.0.0/21"
+  region: regionone
+  is_shared: true
+  network_driver: bridge
+
+test_project_net:
+  parent_network: netone
+  subnet: "10.178.154.0/28"
   active: true
-  name: 'net2'
-  label: 'Primary Network'
-  regions:
-    - regiontwo
+  name: test_project_net
+  label: test project
+  region: regionone
+  is_shared: true
+  network_driver: bridge
+
+user_test_project_net:
+  parent_network: netone
+  subnet: "10.178.154.16/28"
+  active: true
+  name: user_test_project_net
+  label: user test project
+  region: regionone
+  is_shared: true
+  network_driver: bridge
+
+net_gen_0:
+  parent_network: netone
+  subnet: "10.178.154.32/28"
+  active: false
+  name: net_gen_0
+  label: net_gen_0
+  region: regionone
+  is_shared: true
+  network_driver: bridge
+
+net_gen_1:
+  parent_network: netone
+  subnet: "10.178.154.48/28"
+  active: false
+  name: net_gen_1
+  label: net_gen_1
+  region: regionone
+  is_shared: true
+  network_driver: bridge
+
+net_gen_2:
+  parent_network: netone
+  subnet: "10.178.154.64/28"
+  active: false
+  name: net_gen_2
+  label: net_gen_2
+  region: regionone
+  is_shared: true
+  network_driver: bridge
+
+net_gen_3:
+  parent_network: netone
+  subnet: "10.178.154.80/28"
+  active: false
+  name: net_gen_3
+  label: net_gen_3
+  region: regionone
+  is_shared: true
+  network_driver: bridge
+
+net_gen_4:
+  parent_network: netone
+  subnet: "10.178.154.96/28"
+  active: false
+  name: net_gen_4
+  label: net_gen_4
+  region: regionone
+  is_shared: true
+  network_driver: bridge
+
+net_gen_5:
+  parent_network: netone
+  subnet: "10.178.154.112/28"
+  active: false
+  name: net_gen_5
+  label: net_gen_5
+  region: regionone
+  is_shared: true
+  network_driver: bridge
