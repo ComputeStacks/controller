@@ -14,19 +14,29 @@ module NetworkServices
       return false unless @network.addresses.empty?
       # if we have a project, stop
       return false unless @network.deployment.nil?
+
       region = @network.region
-      node = region.nodes.online.first
-      client = node.client(10)
-      # Trash network
-      existing_network = Docker::Network.get(@network.name, {}, client)
-      existing_network.remove
+
+      # Some nodes are offline
+      if region.nodes.online.count != region.nodes.count
+        # Will be tried later
+        return false
+      end
+
+      region.nodes.online.each do |node|
+        begin
+          client = node.client(10)
+          # Trash network
+          existing_network = Docker::Network.get(@network.name, {}, client)
+        rescue Docker::Error::NotFoundError # already off the node!
+          next
+        rescue => e
+          ExceptionAlertService.new(e, '23cd7b2c8715f112').perform
+          next
+        end
+        existing_network.remove
+      end
       make_ready!
-    rescue Docker::Error::NotFoundError # already off the node!
-      make_ready!
-      true
-    rescue => e
-      ExceptionAlertService.new(e, '23cd7b2c8715f112').perform
-      false
     end
 
     private
