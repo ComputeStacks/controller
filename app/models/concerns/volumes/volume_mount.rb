@@ -11,7 +11,13 @@ module Volumes
         p = []
         path.split('/').each do |i|
           next if i.blank?
-          p << Zaru.sanitize!(i).gsub(" ","_")
+          if i.start_with?('.')
+            # Allow dot files/directories (Zaru will not allow it)
+            i = i[1..-1]
+            p << ".#{Zaru.sanitize!(i).gsub(" ","_")}"
+          else
+            p << Zaru.sanitize!(i).gsub(" ","_")
+          end
         end
         "/#{p.join('/')}"
       end
