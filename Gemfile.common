@@ -6,7 +6,7 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
 gem 'timeout', '= 0.3.2'
 
-gem 'rails', '= 7.0.4.3'
+gem 'rails', '= 7.0.6'
 gem 'json', '= 2.6.3'
 
 # Redis
