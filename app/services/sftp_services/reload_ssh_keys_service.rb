@@ -24,6 +24,13 @@ module SftpServices
         event.global_id,
         %w(/usr/bin/ruby /usr/local/bin/load_ssh_keys.rb)
       )
+    rescue => e
+      return unless defined?(event) && event
+      event.event_details.create!(
+        event_code: "e9dd53209013f08a",
+        data: e.message
+      )
+      event.fail! "Fatal Error"
     end
 
     private
