@@ -238,7 +238,7 @@ module ProvisionServices
           return false
         end
         p_region = subscription.nil? ? BillingPackage.new(cpu: 1, memory: 512) : subscription.package
-        n = container_service.nodes.empty? ? region.find_node(p_region) : container_services.nodes.first
+        n = container_service.nodes.empty? ? region.find_node(p_region) : container_service.nodes.first
         if n.nil?
           errors << "Expected to have a node, but nil was returned."
           event.event_details.create!(
