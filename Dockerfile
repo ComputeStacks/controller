@@ -36,9 +36,11 @@ RUN set -ex; \
     ; \
     echo "set_real_ip_from 127.0.0.1;" > /etc/nginx/conf.d/restore_ip.conf \
     ; \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
     ; \
-    apt-get install -y nodejs \
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
+    ; \
+    apt-get update && apt-get install -y nodejs \
       && corepack enable \
     ; \
     gem install -N puma sassc nokogiri \
