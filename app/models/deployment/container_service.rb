@@ -105,7 +105,6 @@ class Deployment::ContainerService < ApplicationRecord
   include ContainerServices::ServiceUsage
   include ContainerServices::ServiceVariant
   include ContainerServices::StateManager
-  include ContainerServices::Wordpress
 
   scope :sorted, -> { order(:label) }
   scope :web_only, -> { where(network_ingress_rules: { external_access: true, proto: 'http' }).joins(:ingress_rules).distinct }

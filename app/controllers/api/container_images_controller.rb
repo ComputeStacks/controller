@@ -137,6 +137,7 @@ class Api::ContainerImagesController < Api::ApplicationController
   #     * `can_scale`: Boolean
   #     * `min_cpu`: Decimal
   #     * `min_memory`: Integer
+  #     * `shm_size`: Integer (Admin) | Override docker's default SHM Size
   #     * `container_image_provider_id`: Integer
   #     * `registry_auth`: Boolean
   #     * `registry_custom`: String
@@ -185,6 +186,7 @@ class Api::ContainerImagesController < Api::ApplicationController
   #     * `registry_username`: String
   #     * `registry_password`: String
   #     * `is_free`: Boolean (Admin)
+  #     * `shm_size`: Integer (Admin) | Override docker's default SHM Size
   #     * `product_id`: Integer (Admin only)
   #     * `override_autoremove`: Boolean (Admin)
   #     * `env_params_attributes`: Array
@@ -295,6 +297,7 @@ class Api::ContainerImagesController < Api::ApplicationController
       :registry_image_path,
       :registry_image_tag,
       :role,
+      :shm_size,
       :product_id,
       :category,
       :tag_list,
@@ -364,6 +367,7 @@ class Api::ContainerImagesController < Api::ApplicationController
       :role,
       :category,
       :product_id,
+      :shm_size,
       :tag_list,
       dependency_parents:        [:requires_container_id],
       env_params_attributes:     [:name, :label, :param_type, :env_value, :static_value],

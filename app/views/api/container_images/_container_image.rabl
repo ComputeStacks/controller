@@ -18,6 +18,7 @@ attributes :id,
            :labels,
            :validated_tag,
            :validated_tag_updated,
+           :shm_size,
            :created_at,
            :updated_at
 

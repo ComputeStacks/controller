@@ -141,10 +141,6 @@ module ProvisionServices
         else
           new_container.node = node
         end
-        if new_container.node.nil?
-          errors << "Unable to place container on node"
-          next
-        end
         unless new_container.perform
           new_container.errors.each do |i|
             errors << i

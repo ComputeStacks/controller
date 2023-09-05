@@ -11,8 +11,7 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-lg-4 col-md-5 col-sm-12">
-
+  <div class="<%= service_single_column?(service) ? '' : 'col-lg-4 col-md-5 ' %>col-sm-12">
     <%= render partial: "container_services/show/overview", locals: {service: service, settings: service.combined_settings} %>
     <%= render partial: "container_services/show/volumes",
                locals: { volumes: service.volumes.order(:label), service: service } unless service.volumes.empty? %>
@@ -20,7 +19,7 @@
     <%= render partial: 'container_services/show/custom/pma' if service.container_image.service_container? %>
 
   </div>
-  <div class="col-lg-8 col-md-7 col-sm-12">
+  <div class="<%= service_single_column?(service) ? '' : 'col-lg-8 col-md-7 ' %>col-sm-12">
 
     <%= render partial: 'container_services/show/domains', locals: { service: service } unless service.domains.empty? %>
 

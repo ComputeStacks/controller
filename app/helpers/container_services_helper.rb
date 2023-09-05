@@ -112,4 +112,13 @@ module ContainerServicesHelper
     end
   end
 
+  ##
+  # Helper for determining if we're going to use 2 columns or 1 column when viewing a service
+  def service_single_column?(service)
+    service.combined_settings.empty? &&
+      service.volumes.empty? &&
+      !service.is_load_balancer &&
+      !service.container_image&.service_container?
+  end
+
 end

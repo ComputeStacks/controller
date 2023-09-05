@@ -29,6 +29,10 @@ module ProvisionServices
     def perform
       return false unless valid?
       set_node!
+      if node.nil?
+        errors << "Unable to locate node."
+        return false
+      end
       return false unless build_container!
       return true if service.is_load_balancer # TEMPORARY
       init_subscription!

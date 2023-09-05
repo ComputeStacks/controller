@@ -124,7 +124,7 @@ class ContainerImagesController < AuthController
       :label, :description, :command, :role, :category, :can_scale, :active, :enable_sftp,
       :parent_image_id, :registry_username, :registry_password, :registry_custom, :registry_image_path,
       :registry_image_tag, :registry_auth, :container_image_provider_id, :min_cpu, :min_memory, :tag_list,
-      :force_local_volume, :override_autoremove, :is_free, variant_pos: []
+      :force_local_volume, :override_autoremove, :is_free, :shm_size, variant_pos: []
     )
   end
 

@@ -35,8 +35,8 @@
         <%= f.label :override_autoremove, 'Prevent AutoRemove?' %>
         <%= f.check_box :override_autoremove, class: 'form-control' %>
         <span class="help-block">
-          Override the User Group setting and prevent automatically removing this stopped container from the node.
-        </span>
+        Override the User Group setting and prevent automatically removing this stopped container from the node.
+      </span>
       </div>
     </div>
     <div class="col-sm-8">
@@ -48,6 +48,17 @@
           <%= f.check_box :is_load_balancer, class: 'form-control', disabled: true %>
         <% end %>
         <span class="help-block">Load Balancer images allow you to build your own custom load balancer, instead of using the global load balancer. <b>This can not be changed later.</b></span>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <%= f.label :shm_size, 'SHM Size in Bytes' %>
+        <%= f.text_field :shm_size, class: 'form-control' %>
+        <span class="help-block">
+          Override the image's default /dev/shm size. Setting a value of 0 will use the default of (64MB).
+        </span>
       </div>
     </div>
   </div>

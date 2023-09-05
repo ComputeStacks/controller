@@ -1,5 +1,13 @@
 # Change Log
 
+## v9.0.1
+
+* [CHANGE] Allow customization of ShmSize (Admin only).
+* [CHANGE] Better service display for containers without volumes, settings, or domains.
+* [FIX] Containers without a volume would fail to deploy.
+
+***
+
 ## v9.0.0
 
 Version 9 includes major changes related to networking and integrations.

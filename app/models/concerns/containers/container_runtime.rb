@@ -94,6 +94,12 @@ module Containers
       service.service_plugins.each do |p|
         c = p.apply_plugin_config! c
       end
+
+      ##
+      # SHM Size Override
+      shm = service.shm_size.zero? ? container_image.shm_size : service.shm_size
+      c['HostConfig']['ShmSize'] = shm unless shm.zero?
+
       c
     rescue => e
       ExceptionAlertService.new(e, 'a974dd3087e0cf79').perform
