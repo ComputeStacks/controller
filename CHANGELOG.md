@@ -5,6 +5,8 @@
 * [CHANGE] Allow customization of ShmSize (Admin only).
 * [CHANGE] Better service display for containers without volumes, settings, or domains.
 * [FIX] Containers without a volume would fail to deploy.
+* [FIX] phpMyAdmin Containers would fail to provision.
+* [FIX] Vagrant installer was not creating the volume.
 
 ***
 

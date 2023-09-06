@@ -234,7 +234,7 @@ class ContainerImage < ApplicationRecord
   end
 
   def service_container?
-    %w(cmptstks/phpmyadmin ghcr.io/computestacks/cs-docker-pma).include?(registry_image_path)
+    %w(cmptstks/phpmyadmin computestacks/cs-docker-pma).include?(registry_image_path)
   end
 
   def content_variables

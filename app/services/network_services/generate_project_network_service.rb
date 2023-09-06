@@ -27,7 +27,7 @@ module NetworkServices
       end
       unless @project.private_network.nil?
         @event.event_details.create!(
-          data: "Project already has a private network, skipping.",
+          data: "Project network already configured, skipping.",
           event_code: "159f58a91922552b"
         )
         return true

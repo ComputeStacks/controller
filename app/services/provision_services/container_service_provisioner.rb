@@ -132,7 +132,7 @@ module ProvisionServices
       p_region = subscription.nil? ? BillingPackage.new(cpu: 1, memory: 512) : subscription.package
       1.upto(qty).each do
         new_container = ProvisionServices::ContainerProvisioner.new(container_service)
-        if subscription.package.nil?
+        if !container_service.container_image.is_free && subscription.package.nil?
           errors << "Unable to provision container, missing package"
           next
         end

@@ -107,7 +107,7 @@ EOF
 
 systemctl enable pdns && systemctl start pdns
 
-
+docker volume create consul-data
 mkdir -p /etc/consul
 cat << 'EOF' > /etc/consul/config.hcl
 datacenter = "dev"
