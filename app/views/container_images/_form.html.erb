@@ -84,22 +84,32 @@
   </div>
 
   <div class="row">
-    <div class="col-sm-4 col-xs-6">
+    <div class="col-xs-6">
       <div class="form-group">
         <%= f.label :min_cpu, t('container_images.form.min_cpu') %>
         <%= f.text_field :min_cpu, class: 'form-control' %>
       </div>
     </div>
-    <div class="col-sm-4 col-xs-6">
+    <div class="col-xs-6">
       <div class="form-group">
         <%= f.label :min_memory, t('container_images.form.min_mem') %>
         <%= f.text_field :min_memory, class: 'form-control' %>
       </div>
     </div>
-    <div class="col-sm-4 col-xs-6">
+  </div>
+
+  <div class="row">
+    <div class="col-xs-6">
       <div class="form-group">
         <%= f.label :can_scale, t('container_images.form.scaling') %>
         <%= f.check_box :can_scale, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="col-xs-6">
+      <div class="form-group">
+        <%= f.label :docker_init, 'Use Docker Init?' %>
+        <%= f.check_box :docker_init, class: 'form-control' %>
+        <span class="help-block">If true, use tini as the parent process. See <a href="https://docs.docker.com/engine/reference/run/#specify-an-init-process" target="_blank">Docker Init</a> for more details.</span>
       </div>
     </div>
   </div>

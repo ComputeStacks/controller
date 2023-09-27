@@ -54,6 +54,7 @@ class Api::ContainerImagesController < Api::ApplicationController
   #     * `required_containers`: `Array<Integer>`
   #     * `required_by`: `Array<Integer`
   #     * `product`: Object | admin only
+  #     * `docker_init`: Boolean | If true, use docker's init system.
   #     * `image_variants`: Array
   #         * `id`: Integer
   #         * `label`: String
@@ -189,6 +190,7 @@ class Api::ContainerImagesController < Api::ApplicationController
   #     * `shm_size`: Integer (Admin) | Override docker's default SHM Size
   #     * `product_id`: Integer (Admin only)
   #     * `override_autoremove`: Boolean (Admin)
+  #     * `docker_init`: Boolean | If true, use docker's init system.
   #     * `env_params_attributes`: Array
   #         * `name`: String
   #         * `label`: String
@@ -321,6 +323,7 @@ class Api::ContainerImagesController < Api::ApplicationController
       :registry_image_path,
       :registry_image_tag,
       :role,
+      :docker_init,
       :category,
       :tag_list,
       dependency_parents:        [:requires_container_id],
@@ -363,6 +366,7 @@ class Api::ContainerImagesController < Api::ApplicationController
       :registry_image_path,
       :registry_image_tag,
       :is_free,
+      :docker_init,
       :override_autoremove,
       :role,
       :category,

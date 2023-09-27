@@ -115,7 +115,7 @@ class ContainerImagesController < AuthController
       :label, :description, :command, :role, :category, :can_scale, :active, :enable_sftp,
       :parent_image_id, :registry_username, :registry_password, :registry_custom, :registry_image_path,
       :registry_image_tag, :registry_auth, :container_image_provider_id, :min_cpu, :min_memory, :tag_list,
-      :force_local_volume, variant_pos: []
+      :docker_init, :force_local_volume, variant_pos: []
     )
   end
 
@@ -124,12 +124,12 @@ class ContainerImagesController < AuthController
       :label, :description, :command, :role, :category, :can_scale, :active, :enable_sftp,
       :parent_image_id, :registry_username, :registry_password, :registry_custom, :registry_image_path,
       :registry_image_tag, :registry_auth, :container_image_provider_id, :min_cpu, :min_memory, :tag_list,
-      :force_local_volume, :override_autoremove, :is_free, :shm_size, variant_pos: []
+      :docker_init, :force_local_volume, :override_autoremove, :is_free, :shm_size, variant_pos: []
     )
   end
 
   def new_container_params
-    params.require(:container_image).permit(:container_image_provider_id, :registry_image_path, :registry_image_tag, :parent_image_id, :tag_list, :force_local_volume)
+    params.require(:container_image).permit(:docker_init, :container_image_provider_id, :registry_image_path, :registry_image_tag, :parent_image_id, :tag_list, :force_local_volume)
   rescue ActionController::ParameterMissing
     nil
   end

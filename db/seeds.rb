@@ -230,6 +230,7 @@ Setting.find_by(name: 'registry_base_url').update value: 'registry.cstacks.local
 Setting.find_by(name: 'registry_node').update value: '127.0.0.1'
 Setting.find_by(name: 'registry_ssh_port').update value: '22'
 Setting.find_by(name: 'le_validation_server').update value: '127.0.0.1:3005'
+Setting.find_by(name: 'cs_bastion_image').update value: 'ghcr.io/computestacks/cs-docker-bastion:latest'
 
 puts "Creating log & metric clients..."
 mc = MetricClient.create! endpoint: 'http://127.0.0.1:9090'
@@ -312,4 +313,5 @@ user = User.new fname: 'Default',
                 user_group: group
 user.skip_confirmation!
 user.save
+
 

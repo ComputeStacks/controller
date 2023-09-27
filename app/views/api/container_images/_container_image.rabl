@@ -19,6 +19,7 @@ attributes :id,
            :validated_tag,
            :validated_tag_updated,
            :shm_size,
+           :docker_init,
            :created_at,
            :updated_at
 

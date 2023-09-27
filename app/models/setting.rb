@@ -422,6 +422,22 @@ class Setting < ApplicationRecord
       s
     end
 
+    ##
+    # ComputeStacks Bastion Image
+    def computestacks_bastion_image
+      s = Setting.find_by(name: 'cs_bastion_image', category: 'computestacks')
+      if s.nil?
+        s = Setting.create!(
+          name: 'cs_bastion_image',
+          category: 'computestacks',
+          description: 'ComputeStacks Bastion Image',
+          value: 'ghcr.io/computestacks/cs-docker-bastion:v2',
+          encrypted: false
+        )
+      end
+      s.value
+    end
+
     # LetsEncrypt
     def le
       s = Setting.find_by(name: 'le', category: 'lets_encrypt')

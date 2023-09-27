@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_05_194226) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_21_015955) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -391,6 +391,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_05_194226) do
     t.string "category"
     t.bigint "product_id"
     t.bigint "shm_size", default: 0, null: false
+    t.boolean "docker_init", default: false, null: false
     t.index ["category"], name: "index_container_images_on_category"
     t.index ["container_image_provider_id"], name: "index_container_images_on_container_image_provider_id"
     t.index ["is_load_balancer"], name: "index_container_images_on_is_load_balancer"

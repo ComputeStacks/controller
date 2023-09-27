@@ -42,6 +42,10 @@ module Containers
         }
       }
 
+      if container_image.docker_init
+        c['HostConfig']['Init'] = true
+      end
+
       unless health_check_config.nil?
         c['Healthcheck'] = health_check_config
       end

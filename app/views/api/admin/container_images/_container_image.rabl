@@ -17,6 +17,7 @@ attributes :id,
            :category,
            :labels,
            :override_autoremove,
+           :docker_init,
            :created_at,
            :updated_at
 

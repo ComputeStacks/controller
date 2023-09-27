@@ -126,7 +126,7 @@ class Deployment::Sftp < ApplicationRecord
   end
 
   def image
-    "ghcr.io/computestacks/cs-docker-bastion:#{Rails.env.production? ? 'v2' : 'latest'}"
+    Setting.computestacks_bastion_image
   end
 
   def reset_password!
@@ -216,7 +216,8 @@ class Deployment::Sftp < ApplicationRecord
         'Binds' => volume_binds,
         'NanoCPUs' => (0.5 * 1e9).to_i, # 1/2 Core
         'Memory' => mem_value,
-        'MemorySwap' => mem_value
+        'MemorySwap' => mem_value,
+        'Init' => true
       },
       'NetworkingConfig' => {
         'EndpointsConfig' => {

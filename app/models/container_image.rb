@@ -50,6 +50,11 @@
 # @!attribute registry_image_tag
 #   @return [String]
 #
+# @!attribute docker_init
+#   If true, will use docker's process manager (`--init`).
+#   Default is false.
+#   @return [Boolean]
+#
 # @!attribute role
 #   @return [String] Used for generating variable names
 #
