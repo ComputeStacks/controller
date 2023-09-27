@@ -1,5 +1,11 @@
 # Change Log
 
+## v8.1.2
+
+* [CHANGE] Enable secure flag on `SERVERID` cookie in HAProxy.
+
+***
+
 ## v8.1.1
 
 * [FIX] Bug fixes around admin management of volumes.
