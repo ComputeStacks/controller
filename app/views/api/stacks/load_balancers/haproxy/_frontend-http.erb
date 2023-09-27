@@ -35,7 +35,7 @@ frontend https
   <% if domain.enable_hsts_header? %>
   http-response set-header Strict-Transport-Security "max-age=16000000; preload;" if host_rule_<%= index %>
   <% end %>
-  use_backend <%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %> if host_rule_<%= index %>
+  use_backend S_<%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %> if host_rule_<%= index %>
         <% index += 1 %>
       <% end %>
     <% end %>
