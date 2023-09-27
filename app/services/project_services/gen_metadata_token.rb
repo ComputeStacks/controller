@@ -38,7 +38,7 @@ module ProjectServices
       self.policy = Diplomat::Policy.create({
                                          Name: "proj-#{deployment.token}",
                                          Description: "MetaData Policy for Project #{deployment.name}",
-                                         Rules: %Q(key_prefix "projects/#{deployment.token}/" { policy = "read" })
+                                         Rules: %Q(key_prefix "projects/#{deployment.token}/" { policy = "read" } key_prefix "projects/#{deployment.token}/db/" { policy = "write" })
                                        }, deployment.region.consul_config)
 
     end
