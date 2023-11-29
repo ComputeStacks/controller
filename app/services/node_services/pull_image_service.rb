@@ -20,7 +20,7 @@ module NodeServices
     # @return [Boolean]
     def perform
       return false unless valid?
-      result = Timeout::timeout(90) do
+      result = Timeout::timeout(300) do
         Docker::Image.create({'fromImage' => image_path}, image_auth, node.client(5))
       end
       result.is_a? Docker::Image
