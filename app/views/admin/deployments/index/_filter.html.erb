@@ -37,11 +37,11 @@
               <input type="text" name="disk_usage" class="form-control" <%= params[:disk_usage].to_i.zero? ? '' : %Q(value=#{params[:disk_usage].to_i}) %> placeholder="0 GB">
               <span class="help-block">Container disk usage, excluding volumes</span>
             </div>
-            <div class="col-md-8 col-xs-12">
-              <label>CREATED BETWEEN</label>
-              <input type="text" name="created_between" class="datetimefilter form-control" value="<%= params[:created_between] %>" />
-              <span class="help-block">Filter by the date the project was created</span>
-            </div>
+<!--            <div class="col-md-8 col-xs-12">-->
+<!--              <label>CREATED BETWEEN</label>-->
+<!--              <input type="text" name="created_between" class="datetimefilter form-control" value="<%#= params[:created_between] %>" />-->
+<!--              <span class="help-block">Filter by the date the project was created</span>-->
+<!--            </div>-->
           </div>
         </div>
         <div class="panel-footer text-right">

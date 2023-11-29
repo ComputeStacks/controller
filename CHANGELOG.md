@@ -1,5 +1,14 @@
 # Change Log
 
+## v9.1.0
+
+* [FEATURE] Introduced a new writable metadata endpoint `/db/` to allow for custom images to pass data back to ComputeStack Engines.
+* [FEATURE] Added `docker_init` to container images. See [docker run --init](https://docs.docker.com/engine/reference/run/#specify-an-init-process) for more details.
+* [CHANGE] The container image used for the bastion container can now be set in the admin settings.
+* [CHANGE] Add secure cookies to HAProxy for SSL frontends. (`SERVERID` used for session stick)
+
+***
+
 ## v9.0.1
 
 * [CHANGE] Allow customization of ShmSize (Admin only).

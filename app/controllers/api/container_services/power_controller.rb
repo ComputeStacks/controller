@@ -5,7 +5,7 @@ class Api::ContainerServices::PowerController < Api::ContainerServices::BaseCont
   ##
   # Perform a power action on all containers belonging to a service
   #
-  # `POST /api/container_services/{container-service-id}/power/{action}`
+  # `PUT /api/container_services/{container-service-id}/power/{action}`
   #
   # **OAuth AuthorizationRequired**: `projects_write`
   #
