@@ -39,7 +39,6 @@ module LoadBalancerServices
       end
 
       lecert = load_balancer.lets_encrypt
-      lecert = LetsEncrypt.find_by(user: nil) if lecert.nil?
       lecert = LetsEncrypt.create!(user_id: nil, account: LetsEncryptAccount.find_or_create) if lecert.nil?
 
       if lecert.nil?
