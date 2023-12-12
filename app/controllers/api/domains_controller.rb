@@ -37,7 +37,7 @@ class Api::DomainsController < Api::ApplicationController
   #
   # **OAuth AuthorizationRequired**: `projects_read`
   #
-  # * `domains`: Array
+  # * `domain`: Object
   #     * `id`: Integer
   #     * `domain`: String
   #     * `system_domain`: Boolean
@@ -66,6 +66,7 @@ class Api::DomainsController < Api::ApplicationController
   #     * `le_enabled`: Boolean
   #     * `heder_hsts`: Boolean
   #     * `container_service_id`: Integer
+  #     * `set_primary`: Boolean
   #
   def create
     @domain = current_user.container_domains.new(domain_params)
@@ -124,7 +125,7 @@ class Api::DomainsController < Api::ApplicationController
   private
 
   def domain_params
-    params.require(:domain).permit(:domain, :le_enabled, :ingress_rule_id, :header_hsts)
+    params.require(:domain).permit(:domain, :le_enabled, :ingress_rule_id, :header_hsts, :make_primary)
   end
 
   def load_domain

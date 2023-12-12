@@ -1,7 +1,7 @@
 <% index = 1 %>
 <% if load_balancer.has_ssl_certs? %>
 frontend https
-  bind :443 ssl <% if load_balancer.has_shared_cert? %>crt /etc/haproxy/shared_cert.pem<% end %> crt /etc/haproxy/certs/ <%= load_balancer.haproxy_http_proto %>
+  bind <% if load_balancer.ipv6_enabled? %>[::]<% end %>:443 ssl <% if load_balancer.has_shared_cert? %>crt /etc/haproxy/shared_cert.pem<% end %> crt /etc/haproxy/certs/ <%= load_balancer.haproxy_http_proto %>
   mode http
   maxconn <%= load_balancer.maxconn %>
   option httplog
@@ -46,7 +46,7 @@ frontend https
   <% end %>
 
 frontend http
-  bind :80
+  bind <% if load_balancer.ipv6_enabled? %>[::]<% end %>:80
   mode http
   maxconn <%= load_balancer.maxconn %>
   <% if load_balancer.proxy_ipaddrs.empty? %>

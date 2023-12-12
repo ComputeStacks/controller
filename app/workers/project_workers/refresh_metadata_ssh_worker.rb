@@ -10,7 +10,7 @@ module ProjectWorkers
     def perform(project_id, audit_id)
       project = Deployment.find_by id: project_id
       audit = Audit.find_by id: audit_id
-      return if project.nil?
+      return if project.nil? || audit.nil?
       ProjectServices::MetadataSshKeys.new(project).perform
       project.sftp_containers.each do |i|
         SftpServices::ReloadSshKeysService.new(i, audit).perform

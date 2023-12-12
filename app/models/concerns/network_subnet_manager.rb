@@ -57,7 +57,7 @@ module NetworkSubnetManager
     return unless subnet_changed?
     return if region.nil?
     region.networks.each do |n|
-      next unless n.parent_network.nil? # only parent networks
+      next if n.parent_network.nil? # only parent networks
       next if n.id == id # don't look out ourselves
       if n.subnet.include?(subnet) || subnet.include?(n.subnet)
         errors.add :subnet, 'overlaps with an existing network in this availability zone'

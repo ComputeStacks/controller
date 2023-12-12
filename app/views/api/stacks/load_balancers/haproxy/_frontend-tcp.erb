@@ -2,7 +2,7 @@
   <% next if service.containers.empty? %>
   <% service.ingress_rules.tcp.tcp_lb_rules.nat.lb.each do |ingress| %>
 frontend TCP_<%= ingress.port_nat %>
-  bind :<%= ingress.port_nat %>
+  bind <% if load_balancer.ipv6_enabled? %>[::]<% end %>:<%= ingress.port_nat %>
   mode tcp
   log global
   option tcplog
@@ -21,7 +21,7 @@ frontend TCP_<%= ingress.port_nat %>
   <% service.ingress_rules.tls.nat.lb.each do |ingress| %>
 <% if load_balancer.has_shared_cert? %>
 frontend TLS_<%= ingress.port_nat %>
-  bind :<%= ingress.port_nat %> ssl crt /etc/haproxy/shared_cert.pem
+  bind <% if load_balancer.ipv6_enabled? %>[::]<% end %>:<%= ingress.port_nat %> ssl crt /etc/haproxy/shared_cert.pem
   mode tcp
   timeout connect 5s
   timeout client 5m

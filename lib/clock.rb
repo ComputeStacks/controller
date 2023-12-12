@@ -11,6 +11,10 @@ module Clockwork
     NodeWorkers::HeartbeatWorker.perform_async
   end
 
+  every(2.minutes, 'container.stats_refresh') do
+    ContainerWorkers::RefreshStatsWorker.perform_async
+  end
+
   every(5.minutes, 'nodes.health_check') do
     NodeWorkers::HealthCheckWorker.perform_async
   end

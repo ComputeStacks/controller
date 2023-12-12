@@ -5,13 +5,15 @@ backend <%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %>
   mode http
   option redispatch
   option httpchk HEAD /
+<% if service.containers.count > 1 %>
   cookie SERVERID insert indirect nocache httponly
+<% end %>
     <% service.containers.each do |container| %>
       <% next if container.ip_address.nil? %>
       <% if !load_balancer.direct_connect && (node != container.node) %>
-  server <%= container.name %> <%= container.node.primary_ip %>:443 ssl verify none maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %> cookie s<%= container.name.split('-').last %>
+  server <%= container.name %> <%= container.node.primary_ip %>:443 ssl verify none maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %><% if service.containers.count > 1 %> cookie s<%= container.name.split('-').last %><% end %>
       <% else %>
-  server <%= container.name %> <%= container.ip_address.ipaddr %>:<%= ingress.port %> maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %> cookie s<%= container.name.split('-').last %><% if ingress.backend_ssl %> ssl verify none<% end %>
+  server <%= container.name %> <%= container.ip_address.ipaddr %>:<%= ingress.port %> maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %><% if service.containers.count > 1 %> cookie s<%= container.name.split('-').last %><% end %><% if ingress.backend_ssl %> ssl verify none<% end %>
       <% end %>
     <% end %>
   <% end %>
@@ -24,13 +26,15 @@ backend S_<%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %>
   mode http
   option redispatch
   option httpchk HEAD /
+<% if service.containers.count > 1 %>
   cookie SERVERID insert indirect nocache httponly secure
+<% end %>
     <% service.containers.each do |container| %>
       <% next if container.ip_address.nil? %>
       <% if !load_balancer.direct_connect && (node != container.node) %>
-  server <%= container.name %> <%= container.node.primary_ip %>:443 ssl verify none maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %> cookie s<%= container.name.split('-').last %>
+  server <%= container.name %> <%= container.node.primary_ip %>:443 ssl verify none maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %><% if service.containers.count > 1 %> cookie s<%= container.name.split('-').last %><% end %>
       <% else %>
-  server <%= container.name %> <%= container.ip_address.ipaddr %>:<%= ingress.port %> maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %> cookie s<%= container.name.split('-').last %><% if ingress.backend_ssl %> ssl verify none<% end %>
+  server <%= container.name %> <%= container.ip_address.ipaddr %>:<%= ingress.port %> maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %><% if service.containers.count > 1 %> cookie s<%= container.name.split('-').last %><% end %><% if ingress.backend_ssl %> ssl verify none<% end %>
       <% end %>
     <% end %>
   <% end %>

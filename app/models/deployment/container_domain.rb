@@ -50,7 +50,7 @@ class Deployment::ContainerDomain < ApplicationRecord
   # @return [Array<EventLogDatum>]
   has_many :event_details, through: :event_logs
 
-  attr_accessor :is_sys, :sys_no_reload
+  attr_accessor :is_sys, :sys_no_reload, :make_primary
 
   validates :user, presence: true
   validates :domain, presence: true
@@ -62,6 +62,8 @@ class Deployment::ContainerDomain < ApplicationRecord
   before_destroy :reload_load_balancer!, unless: Proc.new { sys_no_reload }
 
   after_update :update_le_on_user_change
+
+  after_update :set_primary_domain, if: :make_primary
 
   def csrn
     "csrn:caas:project:domain:#{resource_name}:#{id}"
@@ -163,6 +165,11 @@ class Deployment::ContainerDomain < ApplicationRecord
     if ingress_rule.nil?
       errors.add(:ingress_rule_id, "is missing")
     end
+  end
+
+  def set_primary_domain
+    return unless make_primary
+    container_service.update master_domain_id: id
   end
 
 end

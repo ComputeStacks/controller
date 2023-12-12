@@ -1,5 +1,13 @@
 # Change Log
 
+## v9.1.1
+
+* [CHANGE] Add `make_primary` to container domains api.
+* [CHANGE] Add caching to container stats.
+* [CHANGE] Fix haproxy ipv6 support.
+
+***
+
 ## v9.1.0
 
 * [FEATURE] Introduced a new writable metadata endpoint `/db/` to allow for custom images to pass data back to ComputeStack Engines.

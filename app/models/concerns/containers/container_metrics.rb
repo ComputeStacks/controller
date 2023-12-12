@@ -28,11 +28,14 @@ module Containers
     ##
     # General
 
-    def stats
-      {
-        cpu: metric_cpu[:cpu],
-        mem: metric_mem_perc
-      }
+    def stats(cached = true)
+      Rails.cache.delete("c_metrics_stats_#{name}") unless cached
+      Rails.cache.fetch("c_metrics_stats_#{name}", expires_in: 10.minutes, skip_nil: true) do
+        {
+          cpu: metric_cpu[:cpu],
+          mem: metric_mem_perc
+        }
+      end
     end
 
     def metric_last_seen

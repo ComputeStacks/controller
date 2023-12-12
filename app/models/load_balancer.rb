@@ -133,6 +133,10 @@ class LoadBalancer < ApplicationRecord
   serialize :ext_ip, JSON
   serialize :internal_ip, JSON
 
+  def ipv6_enabled?
+    !region.has_clustered_networking?
+  end
+
   # Determine if all the parameters have been met and we can deploy/activate this load balancer
   # @return [Boolean]
   def active?
