@@ -17,6 +17,8 @@ module MetadataServices
     # @param [String] path "modules/database"
     def get(path)
       Diplomat::Kv.get("#{consul_base_path}/#{path}", consul_config)
+    rescue Diplomat::KeyNotFound
+      return '[]'
     end
 
     # @param [String] path "modules/database"
