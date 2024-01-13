@@ -50,13 +50,16 @@ class ContainerImages::ImageRelationshipsController < ContainerImages::BaseContr
   end
 
   def destroy
-    c = @container.dependencies.find_by(id: params[:id])
+    c = @container.dependency_parents.find_by(id: params[:id])
     if c.nil?
       redirect_to helpers.container_image_path(@container), alert: I18n.t('crud.unknown', resource: 'dependent container')
       return false
     end
-    @container.dependencies.delete(c)
-    redirect_to helpers.container_image_path(@container), notice: I18n.t('crud.deleted', resource: I18n.t('obj.container'))
+    if c.destroy
+      redirect_to helpers.container_image_path(@container), notice: I18n.t('crud.deleted', resource: I18n.t('obj.container'))
+    else
+      redirect_to helpers.container_image_path(@container), alert: c.errors.full_messages
+    end
   end
 
 end
