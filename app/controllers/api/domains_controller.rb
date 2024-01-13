@@ -65,7 +65,7 @@ class Api::DomainsController < Api::ApplicationController
   #     * `domain`: String
   #     * `le_enabled`: Boolean
   #     * `heder_hsts`: Boolean
-  #     * `container_service_id`: Integer
+  #     * `ingress_rule_id`: Integer
   #     * `set_primary`: Boolean
   #
   def create
@@ -91,7 +91,7 @@ class Api::DomainsController < Api::ApplicationController
   #     * `domain`: String
   #     * `le_enabled`: Boolean
   #     * `heder_hsts`: Boolean
-  #     * `container_service_id`: Integer
+  #     * `ingress_rule_id`: Integer
   #
   def update
     return api_obj_error(@domain.errors.full_messages) unless @domain.update(domain_params)
