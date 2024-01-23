@@ -5,6 +5,7 @@
 * [CHANGE] Add `make_primary` to container domains api.
 * [CHANGE] Add caching to container stats.
 * [CHANGE] Fix haproxy ipv6 support.
+* [CHANGE] Add `X-Robots-Tag: noindex, nofollow` header to all sites using the default load balancer domain.
 
 ***
 

@@ -29,6 +29,9 @@ frontend https
     <% service.ingress_rules.where(external_access: true, proto: 'http').each do |ingress| %>
       <% ingress.global_container_domains.each do |domain| %>
   acl host_rule_<%= index %> var(txn.host) -m str <%= domain.domain %>
+        <% if domain.system_domain %>
+  http-response set-header X-Robots-Tag "noindex, nofollow" if host_rule_<%= index %>
+        <% end %>
   <% if ingress.restrict_cf %>
   acl restricted_url var(txn.host) -m str <%= domain.domain %>
   <% end %>
@@ -72,6 +75,9 @@ frontend http
     <% service.ingress_rules.where(external_access: true, proto: 'http').each do |ingress| %>
       <% ingress.global_container_domains.each do |domain| %>
   acl host_rule_<%= index %> hdr(host) -i <%= domain.domain %>
+        <% if domain.system_domain %>
+  http-response set-header X-Robots-Tag "noindex, nofollow" if host_rule_<%= index %>
+        <% end %>
   <% if ingress.restrict_cf %>
   acl restricted_url hdr(host) -i <%= domain.domain %>
   <% end %>
