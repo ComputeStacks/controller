@@ -4,7 +4,11 @@ module NodeWorkers
     sidekiq_options retry: false, queue: 'dep_critical'
 
     def perform(node_id, audit_id = nil)
+
       node = GlobalID::Locator.locate node_id
+      return if node.nil?
+      return unless node.region&.has_clustered_networking?
+
       audit = nil
       audit = GlobalID::Locator.locate(audit_id) if audit_id
       audit = Audit.create_from_object!(node, 'updated', '127.0.0.1') if audit.nil?

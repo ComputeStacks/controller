@@ -1,5 +1,9 @@
 # Change Log
 
+## v9.1.2
+
+* [FIX] Don't attempt node evacuation with local networking.
+
 ## v9.1.1
 
 * [CHANGE] Add `make_primary` to container domains api.

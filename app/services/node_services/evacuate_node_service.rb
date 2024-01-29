@@ -27,6 +27,11 @@ module NodeServices
       event.start!
       return false unless valid?
 
+      unless node.region&.has_clustered_networking?
+        event.cancel! "Node not eligible for evacuation"
+        return false
+      end
+
       # Quickly flag containers as migrating
       node.containers.update_all status: 'migrating'
 
