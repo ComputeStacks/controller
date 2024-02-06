@@ -16,17 +16,19 @@ echo "alias dconsole='docker exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput
 echo "Defaults:vagrant env_keep += \"EDITOR\"" >> /etc/sudoers.d/vagrant
 echo "syntax on" >> /etc/vim/vimrc
 apt-get update && apt-get -y upgrade
-apt-get -y install apt-utils build-essential software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent prometheus-node-exporter redis-server postgresql-15 rbenv icu-devtools libicu-dev libreadline-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev git direnv libpq-dev tmux pwgen libyaml-dev
-curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+apt-get -y install apt-utils software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent prometheus-node-exporter git tmux pwgen
+
+if [[ ! -f /usr/share/keyrings/docker-archive-keyring.gpg ]]; then
+  curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --batch --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+fi
+
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
   $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
 
 sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
-if [ $(dpkg --print-architecture) == 'amd64' ]; then
+if [ "$(dpkg --print-architecture)" == 'amd64' ]; then
   install -d /etc/apt/keyrings; curl https://repo.powerdns.com/FD380FBB-pub.asc | sudo tee /etc/apt/keyrings/auth-48-pub.asc
   # for arm/m1, it will fallback to the version included in the debian repository.
   echo "deb [signed-by=/etc/apt/keyrings/auth-48-pub.asc arch=amd64] http://repo.powerdns.com/debian bookworm-auth-48 main" > /etc/apt/sources.list.d/pdns.list
@@ -40,14 +42,16 @@ else
   echo "Falling back to debian repository for powerdns due to arm architecture."
 fi
 
-curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --dearmor > /usr/share/keyrings/haproxy.debian.net.gpg
+if [[ ! -f /usr/share/keyrings/haproxy.debian.net.gpg ]]; then
+  curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --batch --dearmor > /usr/share/keyrings/haproxy.debian.net.gpg
+fi
 
 echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" \
       http://haproxy.debian.net bookworm-backports-2.8 main \
       > /etc/apt/sources.list.d/haproxy.list
 
 apt-get update
-apt-get -y install docker-ce docker-ce-cli containerd.io haproxy=2.8.\* pdns-server pdns-backend-pgsql
+apt-get -y install docker-ce docker-ce-cli containerd.io haproxy=2.8.\* pdns-server pdns-backend-pgsql postgresql-16 postgresql-client-16
 
 mkdir -p /etc/systemd/system/docker.service.d
 cat << 'EOF' > /etc/systemd/system/docker.service.d/startup.conf
@@ -162,29 +166,6 @@ docker pull hashicorp/consul:1.16
 systemctl daemon-reload \
   && systemctl enable consul \
   && systemctl start consul
-
-echo "Setting up NVM & nodejs..."
-su - vagrant -c "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | PROFILE=/Users/vagrant/profile bash"
-su - vagrant -c "\. /home/vagrant/.nvm/nvm.sh && nvm install --lts && nvm use --lts && corepack enable"
-
-cat << 'EOF' >> /home/vagrant/.profile
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-EOF
-
-echo "Installing Overmind processor manager..."
-cd /tmp
-curl -s https://api.github.com/repos/DarthSim/overmind/releases/latest \
-  | grep browser_download_url \
-  | grep linux-amd64 \
-  | cut -d '"' -f 4 \
-  | wget -qi -
-
-gunzip /tmp/overmind*.gz
-rm /tmp/overmind*.gz.sha256sum
-mv /tmp/overmind* /usr/local/bin/overmind && chmod +x /usr/local/bin/overmind
-cd ~
 
 echo "Setting up self-signed wildcard SSL..."
 mkdir /home/vagrant/.ssl_wildcard
@@ -348,71 +329,6 @@ EOF
 
 systemctl enable prometheus-node-exporter && systemctl start prometheus-node-exporter
 
-cat << 'EOF' > /etc/redis.conf
-bind 127.0.0.1
-protected-mode yes
-port 6379
-tcp-backlog 511
-timeout 0
-tcp-keepalive 300
-daemonize yes
-supervised no
-pidfile /var/run/redis/redis-server.pid
-loglevel notice
-logfile /var/log/redis/redis-server.log
-databases 16
-always-show-logo yes
-save ""
-stop-writes-on-bgsave-error yes
-rdbcompression yes
-rdbchecksum yes
-dbfilename dump.rdb
-dir /var/lib/redis
-replica-serve-stale-data yes
-replica-read-only yes
-repl-diskless-sync no
-repl-diskless-sync-delay 5
-repl-disable-tcp-nodelay no
-replica-priority 100
-lazyfree-lazy-eviction no
-lazyfree-lazy-expire no
-lazyfree-lazy-server-del no
-replica-lazy-flush no
-appendonly no
-appendfilename "appendonly.aof"
-appendfsync everysec
-no-appendfsync-on-rewrite no
-auto-aof-rewrite-percentage 100
-auto-aof-rewrite-min-size 64mb
-aof-load-truncated yes
-aof-use-rdb-preamble yes
-lua-time-limit 5000
-slowlog-log-slower-than 10000
-slowlog-max-len 128
-latency-monitor-threshold 0
-notify-keyspace-events ""
-hash-max-ziplist-entries 512
-hash-max-ziplist-value 64
-list-max-ziplist-size -2
-list-compress-depth 0
-set-max-intset-entries 512
-zset-max-ziplist-entries 128
-zset-max-ziplist-value 64
-hll-sparse-max-bytes 3000
-stream-node-max-bytes 4096
-stream-node-max-entries 100
-activerehashing yes
-client-output-buffer-limit normal 0 0 0
-client-output-buffer-limit replica 256mb 64mb 60
-client-output-buffer-limit pubsub 32mb 8mb 60
-hz 10
-dynamic-hz yes
-aof-rewrite-incremental-fsync yes
-rdb-save-incremental-fsync yes
-EOF
-
-systemctl restart redis-server
-
 wget -O /tmp/cs-agent.tar.gz https://f.cscdn.cc/file/cstackscdn/packages/cs-agent/cs-agent-$(dpkg --print-architecture).tar.gz
 tar -xzvf /tmp/cs-agent.tar.gz -C /tmp
 mv /tmp/cs-agent /usr/local/bin/ && chmod +x /usr/local/bin/cs-agent
@@ -442,14 +358,14 @@ EOF
 echo "Allow vagrant user to access docker..."
 usermod -aG docker vagrant
 
-export CONSUL_HTTP_TOKEN=$(curl -X PUT http://127.0.0.1:8500/v1/acl/bootstrap | jq -r '.SecretID')
+CONSUL_HTTP_TOKEN=$(curl -X PUT http://127.0.0.1:8500/v1/acl/bootstrap | jq -r '.SecretID')
+export CONSUL_HTTP_TOKEN
+
 echo "export CONSUL_HTTP_TOKEN=$CONSUL_HTTP_TOKEN" >> /home/vagrant/.profile
 echo "export CONSUL_HTTP_TOKEN=$CONSUL_HTTP_TOKEN" >> /root/.profile
 echo "export SECRET_KEY_BASE=$(openssl rand -hex 64)" >> /home/vagrant/.profile
 echo "export USER_AUTH_SECRET=$(openssl rand -hex 64)" >> /home/vagrant/.profile
-echo "export REDIS_HOST=127.0.0.1" >> /home/vagrant/.profile
-echo "eval \"\$(direnv hook bash)\"" >> /home/vagrant/.profile
-echo $CONSUL_HTTP_TOKEN > /home/vagrant/consul.token && chown vagrant:vagrant /home/vagrant/consul.token
+echo "$CONSUL_HTTP_TOKEN" > /home/vagrant/consul.token && chown vagrant:vagrant /home/vagrant/consul.token
 
 curl -X PUT -H "X-Consul-Token: $CONSUL_HTTP_TOKEN" -H "Content-Type: application/json" --data "{\"Token\": \"$CONSUL_HTTP_TOKEN\"}" http://localhost:8500/v1/agent/token/default
 
@@ -976,50 +892,10 @@ systemctl daemon-reload \
 sudo -u postgres psql -c 'create role vagrant with superuser login'
 sudo -u postgres psql -c 'create database vagrant owner vagrant'
 
-echo "Generating SSH Keys for vagrant user..."
-sudo -u vagrant ssh-keygen -b 2048 -t rsa -f /home/vagrant/.ssh/id_rsa -q -C "vagrant" -N ""
-sudo -u vagrant cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
-
-echo "...adding ssh key to authorized_keys..."
+echo "Adding vagrant public key to root user"
 mkdir -p /root/.ssh && chmod 700 /root/.ssh
-cat /home/vagrant/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+cat /home/vagrant/.ssh/authorized_keys >> /root/.ssh/authorized_keys
 chmod 600 /root/.ssh/authorized_keys
-
-echo "Installing Ruby Version Manager..."
-sudo -u vagrant mkdir -p /home/vagrant/.rbenv/plugins
-sudo -u vagrant git clone https://github.com/rbenv/ruby-build.git /home/vagrant/.rbenv/plugins/ruby-build
-echo "export PATH=/home/vagrant/.rbenv/shims:$PATH" >> /home/vagrant/.profile
-echo "export OVERMIND_SOCKET=/home/vagrant/.overmind.sock" >> /home/vagrant/.profile
-
-echo "Installing ruby 3.2 (This may take a few minutes)..."
-su - vagrant -c "rbenv install 3.2.3"
-su - vagrant -c "rbenv global 3.2.3"
-
-echo "Performing GitHub authentication..."
-cat << 'OUTER' > /home/vagrant/gh_auth.sh
-#!/bin/bash
-
-if [ -f /home/vagrant/controller/.envrc ]; then
-  cd /home/vagrant/controller
-  . /home/vagrant/controller/.envrc
-  bundle config https://rubygems.pkg.github.com/computestacks $GITHUB_GEM_PULL_USER:$GITHUB_GEM_PULL_TOKEN
-  cat << EOF > ~/.gemrc
-gem: --no-document
-:backtrace: false
-:bulk_threshold: 1000
-:sources:
-- https://rubygems.org/
-- https://$GITHUB_GEM_PULL_USER:$GITHUB_GEM_PULL_TOKEN@rubygems.pkg.github.com/computestacks/
-:update_sources: true
-:verbose: true
-EOF
-else
-  echo "Missing controller .envrc file, skipping github authentication."
-fi
-OUTER
-
-# GitHub Authentication
-su - vagrant -c "bash /home/vagrant/gh_auth.sh" && rm /home/vagrant/gh_auth.sh
 
 # IPTable Configuration
 if [ -f /usr/local/bin/cs-recover_iptables ]; then
@@ -1061,6 +937,8 @@ iptables -A INPUT -p tcp --dport 3005 -j ACCEPT
 iptables -A INPUT -p tcp --dport 8500 -j ACCEPT
 # ...prometheus
 iptables -A INPUT -p tcp --dport 9090 -j ACCEPT
+# ...vagrant default ip range. Adjust as needed
+iptables -A INPUT -s 192.168.121.0/24 -j ACCEPT
 
 # Standard CS Ports
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT

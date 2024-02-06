@@ -86,3 +86,6 @@ Gemfile.common.lock
 config/routes/engines.rb
 engines/**
 !engines/.keep
+
+# Ignore Docker Compose for now...
+docker-compose.yml
