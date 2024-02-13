@@ -29,6 +29,7 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
   #     * `ulimit_nofile_soft`: Integer (0 = unlimited)
   #     * `ulimit_nofile_hard`: Integer (0 = unlimited)
   #     * `disable_oom`: Boolean (default: false) Disable OomKiller. Warning, process may freeze and require manual intervention.
+  #     * `acme_server`: String | Should be in the form <ip:port> for accessing the controller from the node, ideally over private ip.
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
@@ -62,6 +63,7 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
   #     * `ulimit_nofile_soft`: Integer (0 = unlimited)
   #     * `ulimit_nofile_hard`: Integer (0 = unlimited)
   #     * `disable_oom`: Boolean (default: false) Disable OomKiller. Warning, process may freeze and require manual intervention.
+  #     * `acme_server`: String
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
@@ -93,6 +95,7 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
   #     * `pid_limit`: Integer (0 = unlimited)
   #     * `ulimit_nofile_soft`: Integer (0 = unlimited)
   #     * `ulimit_nofile_hard`: Integer (0 = unlimited)
+  #     * `acme_server`: String
   #     * `disable_oom`: Boolean (default: false) Disable OomKiller. Warning, process may freeze and require manual intervention.
   #
   def update
@@ -124,6 +127,7 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
   #     * `pid_limit`: Integer (0 = unlimited)
   #     * `ulimit_nofile_soft`: Integer (0 = unlimited)
   #     * `ulimit_nofile_hard`: Integer (0 = unlimited)
+  #     * `acme_server`: String
   #     * `disable_oom`: Boolean (default: false) Disable OomKiller. Warning, process may freeze and require manual intervention.
   #
   def create
@@ -153,7 +157,7 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
     params.require(:region).permit(
       :name, :active, :fill_to, :metric_client_id, :loki_endpoint, :log_client_id, :loki_retries, :loki_batch_size,
       :volume_backend, :nfs_remote_host, :nfs_remote_path, :offline_window, :failure_count, :nfs_controller_ip,
-      :ulimit_nofile_soft, :ulimit_nofile_hard, :pids_limit, :disable_oom
+      :ulimit_nofile_soft, :ulimit_nofile_hard, :pids_limit, :disable_oom, :acme_server
     )
   end
 
@@ -161,7 +165,7 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
     params.require(:region).permit(
       :active, :fill_to, :metric_client_id, :loki_endpoint, :log_client_id, :loki_retries, :loki_batch_size,
       :volume_backend, :nfs_remote_host, :nfs_remote_path, :offline_window, :failure_count, :nfs_controller_ip,
-      :ulimit_nofile_soft, :ulimit_nofile_hard, :pids_limit, :disable_oom
+      :ulimit_nofile_soft, :ulimit_nofile_hard, :pids_limit, :disable_oom, :acme_server
     )
   end
 

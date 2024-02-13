@@ -33,6 +33,7 @@ module ImageServices
     # @return [Boolean]
     def perform
       return false unless valid?
+
       image.current_user = current_user
       if image.update add_plugin_id: plugin.id
         cascade_plugin! if cascade
@@ -93,6 +94,7 @@ module ImageServices
       subscription.current_user = current_user
       sp = subscription.add_product! plugin.product
       return true if sp.errors.empty?
+
       self.errors << "Error saving subscription product for service : #{service.id} | #{sp.errors.full_messages.join(", ")}"
       false
     end

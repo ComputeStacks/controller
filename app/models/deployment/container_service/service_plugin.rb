@@ -16,6 +16,7 @@ class Deployment::ContainerService::ServicePlugin < ApplicationRecord
   scope :optional, -> { where is_optional: true }
 
   belongs_to :container_service, class_name: "Deployment::ContainerService", foreign_key: 'deployment_container_service_id'
+  has_many :containers, through: :container_service
   belongs_to :container_image_plugin
   has_one :product, through: :container_image_plugin
 

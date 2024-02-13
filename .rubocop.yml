@@ -1,5 +1,15 @@
+Metrics/AbcSize:
+  Enabled: False
+Metrics/ClassLength:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Enabled: false
 Metrics/LineLength:
   Max: 100
+Metrics/MethodLength:
+  Max: 100
+Metrics/PerceivedComplexity:
+  Enabled: false
 Style/TernaryParentheses:
   Enabled: false
 Layout/FirstParameterIndentation:
@@ -14,3 +24,4 @@ Layout/SpaceInsideParens:
   Enabled: false
 Layout/SpaceInsideArrayLiteralBrackets:
   Enabled: false
+

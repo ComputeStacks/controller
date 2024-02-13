@@ -1,0 +1,10 @@
+<table class="table-list">
+  <tbody>
+  <% log.labels.each_key do |i| %>
+    <tr>
+      <td><%= i %></td>
+      <td><%= truncate log.labels[i] %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

@@ -21,6 +21,8 @@ module Containers
           }
         end
         data
+      rescue
+        []
       end
 
     end
@@ -46,6 +48,8 @@ module Containers
       return nil unless response
       return nil unless response['result'][0]
       Time.at(response['result'][0]['value'][1].to_i)
+    rescue
+      nil
     end
 
     # TODO: Rewrite container `resource_status` for new prometheus system.
@@ -99,6 +103,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     def metric_swap_usage(start_time, end_time)
@@ -118,6 +124,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     def metric_mem
@@ -131,6 +139,8 @@ module Containers
         time: Time.at(response['result'][0]['value'][0]),
         memory: response['result'][0]['value'][1].to_f.round(4)
       }
+    rescue
+      nil
     end
 
     def metric_mem_perc
@@ -156,6 +166,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     ##
@@ -187,6 +199,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     def metric_cpu_throttled(start_time, end_time)
@@ -205,6 +219,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     ##
@@ -235,6 +251,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     def metric_net_rx(start_time, end_time)
@@ -255,6 +273,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     ##
@@ -285,6 +305,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     def metric_lb_rx(start_time, end_time)
@@ -305,6 +327,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     def metric_lb_sessions(start_time, end_time)
@@ -323,6 +347,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     # Retrieve total usage (in BYTES) on the load balancer
@@ -339,6 +365,8 @@ module Containers
         bytes += val
       end
       bytes
+    rescue
+      []
     end
 
     # Retrieve total usage (in BYTES) for a container
@@ -355,6 +383,8 @@ module Containers
         bytes += val
       end
       bytes
+    rescue
+      []
     end
 
     def metric_current_disk_usage
@@ -384,6 +414,8 @@ module Containers
         end
       end
       data
+    rescue
+      []
     end
 
     private

@@ -1,4 +1,4 @@
-FROM tcely/powerdns-server
+FROM ghcr.io/kwatson/docker-powerdns:main
 
 ADD pdns.conf /etc/pdns/pdns.conf
 

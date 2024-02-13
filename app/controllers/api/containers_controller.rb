@@ -22,6 +22,7 @@ class Api::ContainersController < Api::ApplicationController
   #         * `cpu`: Decimal
   #         * `mem`: Decimal
   #     * `current_state`: String<migrating,starting,stopping,working,alert,resource_usage,online,offline,unhealthy>
+  #     * `on_latest_image`: Boolean
   #     * `local_ip`: String
   #     * `public_ip`: String
   #     * `created_at`: DateTime

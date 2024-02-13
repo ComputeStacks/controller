@@ -1045,34 +1045,9 @@ sudo -u vagrant git clone https://github.com/rbenv/ruby-build.git /home/vagrant/
 echo "export PATH=/home/vagrant/.rbenv/shims:$PATH" >> /home/vagrant/.profile
 echo "export OVERMIND_SOCKET=/home/vagrant/.overmind.sock" >> /home/vagrant/.profile
 
-echo "Installing ruby 3.2 (This may take a few minutes)..."
-su - vagrant -c "rbenv install 3.2.2"
-su - vagrant -c "rbenv global 3.2.2"
-
-echo "Performing GitHub authentication..."
-cat << 'OUTER' > /home/vagrant/gh_auth.sh
-#!/bin/bash
-
-if [ -f /home/vagrant/controller/.envrc ]; then
-  cd /home/vagrant/controller
-  . /home/vagrant/controller/.envrc
-  bundle config https://rubygems.pkg.github.com/computestacks $GITHUB_GEM_PULL_USER:$GITHUB_GEM_PULL_TOKEN
-  cat << EOF > ~/.gemrc
-gem: --no-document
-:backtrace: false
-:bulk_threshold: 1000
-:sources:
-- https://rubygems.org/
-- https://$GITHUB_GEM_PULL_USER:$GITHUB_GEM_PULL_TOKEN@rubygems.pkg.github.com/computestacks/
-:update_sources: true
-:verbose: true
-EOF
-else
-  echo "Missing controller .envrc file, skipping github authentication."
-fi
-OUTER
-
-su - vagrant -c "bash /home/vagrant/gh_auth.sh" && rm /home/vagrant/gh_auth.sh
+echo "Installing ruby 3.3 (This may take a few minutes)..."
+su - vagrant -c "rbenv install 3.3.0"
+su - vagrant -c "rbenv global 3.3.0"
 
 if [ $(dpkg --print-architecture) == 'amd64' ]; then
   cat << 'EOF' > /root/calico_net.yml

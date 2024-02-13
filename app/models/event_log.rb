@@ -17,6 +17,9 @@
 # @!attribute supervised
 #   Flag to prevent child processes from prematurely closing an active event
 #   @return [Boolean]
+# @!attribute labels
+#   @return [Hash]
+#
 class EventLog < ApplicationRecord
 
   include Events::CodeState

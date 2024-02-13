@@ -9,16 +9,125 @@ class NamesGenerator
   class << self
 
     def name(scoped)
-      adj_max = adjective.count - 1
-      sur_max = surname.count - 1
-      "#{adjective[rand(0..adj_max)]}-#{surname[rand(0..sur_max)]}#{scoped}"
+      adj_max = left.count - 1
+      sur_max = right.count - 1
+      "#{left[rand(0..adj_max)]}-#{right[rand(0..sur_max)]}#{scoped}"
     end
 
-    def adjective
-      %w[admiring adoring affectionate agitated amazing angry awesome blissful boring brave clever cocky compassionate competent condescending confident cranky dazzling determined distracted dreamy eager ecstatic elastic elated elegant eloquent epic fervent festive flamboyant focused friendly frosty gallant gifted goofy gracious happy heuristic hip hopeful hungry infallible inspiring jolly jovial keen kind laughing loving lucid mystifying modest musing nervous nifty nimble nostalgic objective optimistic peaceful pedantic pensive practical priceless quirky quizzical relaxed reverent romantic sad serene sharp silly sleepy stoic stupefied suspicious tender thirsty trusting unruffled upbeat vibrant vigilant vigorous wizardly wonderful xenodochial youthful zany zealous zen]
+    def left
+      %w[
+        admiring
+        adoring
+        affectionate
+        agitated
+        amazing
+        angry
+        awesome
+        beautiful
+        blissful
+        bold
+        boring
+        brave
+        busy
+        charming
+        clever
+        compassionate
+        competent
+        condescending
+        confident
+        cool
+        cranky
+        crazy
+        dazzling
+        determined
+        distracted
+        dreamy
+        eager
+        ecstatic
+        elastic
+        elated
+        elegant
+        eloquent
+        epic
+        exciting
+        fervent
+        festive
+        flamboyant
+        focused
+        friendly
+        frosty
+        funny
+        gallant
+        gifted
+        goofy
+        gracious
+        great
+        happy
+        hardcore
+        heuristic
+        hopeful
+        hungry
+        infallible
+        inspiring
+        intelligent
+        interesting
+        jolly
+        jovial
+        keen
+        kind
+        laughing
+        loving
+        lucid
+        magical
+        modest
+        musing
+        mystifying
+        naughty
+        nervous
+        nice
+        nifty
+        nostalgic
+        objective
+        optimistic
+        peaceful
+        pedantic
+        pensive
+        practical
+        priceless
+        quirky
+        quizzical
+        recursing
+        relaxed
+        reverent
+        romantic
+        sad
+        serene
+        sharp
+        silly
+        sleepy
+        stoic
+        strange
+        stupefied
+        suspicious
+        sweet
+        tender
+        thirsty
+        trusting
+        unruffled
+        upbeat
+        vibrant
+        vigilant
+        vigorous
+        wizardly
+        wonderful
+        xenodochial
+        youthful
+        zealous
+        zen
+      ]
     end
 
-    def surname
+    def right
       [
         # Maria Gaetana Agnesi - Italian mathematician, philosopher, theologian and humanitarian. She was the first woman to write a mathematics handbook and the first woman appointed as a Mathematics Professor at a University. https://en.wikipedia.org/wiki/Maria_Gaetana_Agnesi
         "agnesi",
@@ -170,13 +279,13 @@ class NamesGenerator
         # Seymour Roger Cray was an American electrical engineer and supercomputer architect who designed a series of computers that were the fastest in the world for decades. https://en.wikipedia.org/wiki/Seymour_Cray
         "cray",
 
+        # Marie Curie discovered radioactivity. https://en.wikipedia.org/wiki/Marie_Curie.
+        "curie",
+
         # This entry reflects a husband and wife team who worked together:
         # Joan Curran was a Welsh scientist who developed radar and invented chaff, a radar countermeasure. https://en.wikipedia.org/wiki/Joan_Curran
         # Samuel Curran was an Irish physicist who worked alongside his wife during WWII and invented the proximity fuse. https://en.wikipedia.org/wiki/Samuel_Curran
         "curran",
-
-        # Marie Curie discovered radioactivity. https://en.wikipedia.org/wiki/Marie_Curie.
-        "curie",
 
         # Charles Darwin established the principles of natural evolution. https://en.wikipedia.org/wiki/Charles_Darwin.
         "darwin",
@@ -310,11 +419,11 @@ class NamesGenerator
         # Stephen Hawking pioneered the field of cosmology by combining general relativity and quantum mechanics. https://en.wikipedia.org/wiki/Stephen_Hawking
         "hawking",
 
-        # Martin Edward Hellman - American cryptologist, best known for his invention of public-key cryptography in co-operation with Whitfield Diffie and Ralph Merkle. https://en.wikipedia.org/wiki/Martin_Hellman
-        "hellman",
-
         # Werner Heisenberg was a founding father of quantum mechanics. https://en.wikipedia.org/wiki/Werner_Heisenberg
         "heisenberg",
+
+        # Martin Edward Hellman - American cryptologist, best known for his invention of public-key cryptography in co-operation with Whitfield Diffie and Ralph Merkle. https://en.wikipedia.org/wiki/Martin_Hellman
+        "hellman",
 
         # Grete Hermann was a German philosopher noted for her philosophical work on the foundations of quantum mechanics. https://en.wikipedia.org/wiki/Grete_Hermann
         "hermann",
@@ -475,14 +584,14 @@ class NamesGenerator
         # Kay McNulty - one of the original programmers of the ENIAC. https://en.wikipedia.org/wiki/ENIAC - https://en.wikipedia.org/wiki/Kathleen_Antonelli
         "mcnulty",
 
+        # Lise Meitner - Austrian/Swedish physicist who was involved in the discovery of nuclear fission. The element meitnerium is named after her - https://en.wikipedia.org/wiki/Lise_Meitner
+        "meitner",
+
         # Gregor Johann Mendel - Czech scientist and founder of genetics. https://en.wikipedia.org/wiki/Gregor_Mendel
         "mendel",
 
         # Dmitri Mendeleev - a chemist and inventor. He formulated the Periodic Law, created a farsighted version of the periodic table of elements, and used it to correct the properties of some already discovered elements and also to predict the properties of eight elements yet to be discovered. https://en.wikipedia.org/wiki/Dmitri_Mendeleev
         "mendeleev",
-
-        # Lise Meitner - Austrian/Swedish physicist who was involved in the discovery of nuclear fission. The element meitnerium is named after her - https://en.wikipedia.org/wiki/Lise_Meitner
-        "meitner",
 
         # Carla Meninsky, was the game designer and programmer for Atari 2600 games Dodge 'Em and Warlords. https://en.wikipedia.org/wiki/Carla_Meninsky
         "meninsky",
@@ -505,11 +614,11 @@ class NamesGenerator
         # Samuel Morse - contributed to the invention of a single-wire telegraph system based on European telegraphs and was a co-developer of the Morse code - https://en.wikipedia.org/wiki/Samuel_Morse
         "morse",
 
-        # Ian Murdock - founder of the Debian project - https://en.wikipedia.org/wiki/Ian_Murdock
-        "murdock",
-
         # May-Britt Moser - Nobel prize winner neuroscientist who contributed to the discovery of grid cells in the brain. https://en.wikipedia.org/wiki/May-Britt_Moser
         "moser",
+
+        # Ian Murdock - founder of the Debian project - https://en.wikipedia.org/wiki/Ian_Murdock
+        "murdock",
 
         # John Napier of Merchiston - Scottish landowner known as an astronomer, mathematician and physicist. Best known for his discovery of logarithms. https://en.wikipedia.org/wiki/John_Napier
         "napier",
@@ -577,14 +686,14 @@ class NamesGenerator
         # Srinivasa Ramanujan - Indian mathematician and autodidact who made extraordinary contributions to mathematical analysis, number theory, infinite series, and continued fractions. - https://en.wikipedia.org/wiki/Srinivasa_Ramanujan
         "ramanujan",
 
+        # Ida Rhodes - American pioneer in computer programming, designed the first computer used for Social Security. https://en.wikipedia.org/wiki/Ida_Rhodes
+        "rhodes",
+
         # Sally Kristen Ride was an American physicist and astronaut. She was the first American woman in space, and the youngest American astronaut. https://en.wikipedia.org/wiki/Sally_Ride
         "ride",
 
         # Dennis Ritchie - co-creator of UNIX and the C programming language. - https://en.wikipedia.org/wiki/Dennis_Ritchie
         "ritchie",
-
-        # Ida Rhodes - American pioneer in computer programming, designed the first computer used for Social Security. https://en.wikipedia.org/wiki/Ida_Rhodes
-        "rhodes",
 
         # Julia Hall Bowman Robinson - American mathematician renowned for her contributions to the fields of computability theory and computational complexity theory. https://en.wikipedia.org/wiki/Julia_Robinson
         "robinson",
@@ -658,9 +767,6 @@ class NamesGenerator
         # Helen Brooke Taussig - American cardiologist and founder of the field of paediatric cardiology. https://en.wikipedia.org/wiki/Helen_B._Taussig
         "taussig",
 
-        # Valentina Tereshkova is a Russian engineer, cosmonaut and politician. She was the first woman to fly to space in 1963. In 2013, at the age of 76, she offered to go on a one-way mission to Mars. https://en.wikipedia.org/wiki/Valentina_Tereshkova
-        "tereshkova",
-
         # Nikola Tesla invented the AC electric system and every gadget ever used by a James Bond villain. https://en.wikipedia.org/wiki/Nikola_Tesla
         "tesla",
 
@@ -731,7 +837,7 @@ class NamesGenerator
         "yonath",
 
         # Nikolay Yegorovich Zhukovsky (Russian: Никола́й Его́рович Жуко́вский, January 17 1847 – March 17, 1921) was a Russian scientist, mathematician and engineer, and a founding father of modern aero- and hydrodynamics. Whereas contemporary scientists scoffed at the idea of human flight, Zhukovsky was the first to undertake the study of airflow. He is often called the Father of Russian Aviation. https://en.wikipedia.org/wiki/Nikolay_Yegorovich_Zhukovsky
-        "zhukovsky"
+        "zhukovsky",
       ]
     end
   end

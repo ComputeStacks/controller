@@ -19,6 +19,7 @@ class Api::DomainsController < Api::ApplicationController
   #     * `domain`: String
   #     * `system_domain`: Boolean
   #     * `header_hsts`: Boolean
+  #     * `force_https`: Boolean
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #     * `container_service`: Integer
@@ -64,15 +65,20 @@ class Api::DomainsController < Api::ApplicationController
   # * `domain`: Object
   #     * `domain`: String
   #     * `le_enabled`: Boolean
+  #     * `make_primary`: Boolean
   #     * `heder_hsts`: Boolean
   #     * `ingress_rule_id`: Integer
-  #     * `set_primary`: Boolean
+  #     * `make_primary`: Boolean
   #
   def create
     @domain = current_user.container_domains.new(domain_params)
     @domain.current_user = current_user
     return api_obj_error(['missing domain route']) if @domain.ingress_rule.nil?
     return api_obj_error(@domain.errors.full_messages) unless @domain.save
+
+    # Make primary
+    @domain.update(make_primary: true) if domain_params[:make_primary]
+
     respond_to do |format|
       format.any(:json, :xml) { render action: :show }
     end
@@ -91,9 +97,11 @@ class Api::DomainsController < Api::ApplicationController
   #     * `domain`: String
   #     * `le_enabled`: Boolean
   #     * `heder_hsts`: Boolean
+  #     * `force_https`: Boolean
   #     * `ingress_rule_id`: Integer
   #
   def update
+    return api_obj_error(["Can't update system domains."]) if @domain.system_domain
     return api_obj_error(@domain.errors.full_messages) unless @domain.update(domain_params)
     respond_to do |format|
       format.any(:json, :xml) { render action: :show }
@@ -125,7 +133,9 @@ class Api::DomainsController < Api::ApplicationController
   private
 
   def domain_params
-    params.require(:domain).permit(:domain, :le_enabled, :ingress_rule_id, :header_hsts, :make_primary)
+    params.require(:domain).permit(
+      :domain, :le_enabled, :ingress_rule_id, :header_hsts, :make_primary, :force_https
+    )
   end
 
   def load_domain

@@ -3,6 +3,15 @@ attributes :id, :name, :skip_ssh, :current_state, :created_at, :updated_at
 node :container_image_ids do |i|
   i.container_images.uniq.pluck(:id)
 end
+
+child location: :region do
+  attributes :id, :name
+end
+
+child region: :availability_zone do
+  attributes :id, :name
+end
+
 node :links do |i|
   {
     services: "/api/projects/#{i.id}/services",

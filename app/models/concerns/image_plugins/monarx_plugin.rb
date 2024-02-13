@@ -29,6 +29,8 @@ module ImagePlugins
       return false if Setting.monarx_api_secret.blank?
       return false if Setting.monarx_agent_key.blank?
       return false if Setting.monarx_agent_secret.blank?
+      return false if Setting.monarx_enterprise_id.blank?
+
       true
     end
 

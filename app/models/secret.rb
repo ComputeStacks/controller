@@ -45,9 +45,12 @@ class Secret < ApplicationRecord
     # TODO: Upgrade from `cbc` to `gcm` encryption. https://github.com/rails/rails/pull/29263/files
     #
     def crypt_key
+      if ENV["SECRET_KEY_BASE"].blank? || ENV["SECRET_KEY_BASE"].length < 128
+        raise "Missing SECRET_KEY_BASE environmental variable"
+      end
       ActiveSupport::MessageEncryptor.new(
-        Rails.application.secrets.secret_key_base.byteslice(0,32),
-        Rails.application.secrets.secret_key_base,
+        ENV["SECRET_KEY_BASE"].byteslice(0,32),
+        ENV["SECRET_KEY_BASE"],
         cipher: "aes-256-cbc",
         digest: 'SHA256'
       )

@@ -7,16 +7,20 @@ workflow:
       when: never
     - when: always
 
-##
-# Set at job
-# CS_MINOR_VERSION
-# CS_MAJOR_VERSION
 variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+  FF_NETWORK_PER_BUILD: "true"
   FULL_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
+  POSTGRES_DB: cstacks
+  POSTGRES_USER: cstacks
+  POSTGRES_PASSWORD: cstacks
+  REDIS_HOST: redis
+  DATABASE_URL: "postgres://cstacks:cstacks@postgres/cstacks"
+  CS_MINOR_VERSION: "9.3"
+  CS_MAJOR_VERSION: "9"
 
 default:
-  tags:
-    - shell
+  image: docker:25
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
   after_script:
@@ -25,20 +29,15 @@ default:
 
 stages:
   - build
-  - deploy
 
 build:
   stage: build
-  before_script:
-    - 'docker run -d --rm --name cstacks-pg -e POSTGRES_USER=cstacks -e POSTGRES_DB=cstacks -e POSTGRES_PASSWORD=cstacks postgres:16'
-    - 'docker run -d --rm --name cstacks-redis --network "container:cstacks-pg" redis:alpine'
-  after_script:
-    - docker stop cstacks-redis cstacks-pg
+  services:
+    - docker:25-dind
+    - postgres:16
+    - redis:alpine
   script:
-    - 'docker build --network "container:cstacks-pg" --progress plain --build-arg github_user=$GITHUB_GEM_PULL_USER --build-arg github_token=$GITHUB_GEM_PULL_TOKEN -t $FULL_IMAGE .'
-deploy:
-  stage: deploy
-  script:
+    - "docker build --network=host --add-host=redis:$(getent hosts redis  | awk '{ print $1 }') --add-host=postgres:$(getent hosts postgres  | awk '{ print $1 }') --cache-from $CI_REGISTRY_IMAGE:$CS_MAJOR_VERSION --progress plain --build-arg db_url=$DATABASE_URL --build-arg redis_host=$REDIS_HOST -t $FULL_IMAGE ."
     - "docker tag $FULL_IMAGE $CI_REGISTRY_IMAGE:$CS_MINOR_VERSION"
     - "docker tag $FULL_IMAGE $CI_REGISTRY_IMAGE:$CS_MAJOR_VERSION"
     - "docker tag $FULL_IMAGE $CI_REGISTRY_IMAGE:latest"

@@ -64,7 +64,7 @@ class Subscription < ApplicationRecord
 
   accepts_nested_attributes_for :container
 
-  serialize :details, JSON
+  serialize :details, coder: JSON
 
   after_update :toggle_active_event
   after_create_commit :trigger_create_event
@@ -77,6 +77,7 @@ class Subscription < ApplicationRecord
 
   def resource_name
     return "null" if label.blank?
+
     label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
   end
 
@@ -85,10 +86,12 @@ class Subscription < ApplicationRecord
     total = 0e0
     self.subscription_products.each do |i|
       next if i.product.nil?
+
       case i.product.kind
       when 'resource'
         bu = i.billing_usages.first
         next if bu.nil?
+
         total += bu.hourly_run_rate
       else
         total += i.run_rate
@@ -100,11 +103,13 @@ class Subscription < ApplicationRecord
   # Returns all subscriptions in the same service
   def related
     return [] if linked_obj.nil? || linked_obj.service.nil?
+
     linked_obj.service.subscriptions.where.not(id: id) if linked_obj.is_a? Deployment::Container
   end
 
   def linked_obj
     return nil if container.nil?
+
     container
   end
 
@@ -148,10 +153,12 @@ class Subscription < ApplicationRecord
   def new_package!(new_package)
     current_package = package
     return false if current_package.nil? # package-to-package only.
+
     current_product = current_package.product
     return false if current_product == new_package
     return false if new_package.product.nil?
     return false if new_package.nil?
+
     sub_product = subscription_products.find_by(product: current_product)
     return false if sub_product.nil? # Error! Shouldn't be here.
 
@@ -186,6 +193,7 @@ class Subscription < ApplicationRecord
   # }
   def new_resource_qty!(resources)
     return false if package # Not allowed for packages.
+
     cpu_product = Product.lookup(user.billing_plan, 'cpu')
     cpu = subscription_products.find_by(product: cpu_product)
     mem_product = Product.lookup(user.billing_plan, 'memory')
@@ -248,6 +256,7 @@ class Subscription < ApplicationRecord
   # For new subscriptions, trigger event.
   def trigger_create_event
     return unless active # Only if we're active now.
+
     be = billing_events.new( from_status: false, to_status: true )
     be.audit = current_audit if current_audit
     be.save

@@ -10,9 +10,21 @@ class Admin::Volumes::RestoreController < Admin::Volumes::BaseController
     audit = Audit.create_from_object!(@volume, 'backup.restore', request.remote_ip, current_user)
     @volume.current_audit = audit
     name = Base64.decode64(params[:id])
+
+    event = @volume.event_logs.create!(
+      locale: 'volume.restore',
+      locale_keys: {},
+      status: 'pending',
+      audit: audit,
+      event_code: 'agent-bde07117ae85937d'
+    )
+    event.deployments << @volume.deployment if @volume.deployment
+    event.container_services << @volume.container_service
+
     if @volume.restore_backup!(name)
       flash[:success] = "Backup will be restored shortly. Follow volume event logs."
     else
+      event.fail! "Fatal error"
       flash[:alert] = "Failed to restore backup, check volume event logs."
     end
     redirect_to helpers.volume_path(@volume)

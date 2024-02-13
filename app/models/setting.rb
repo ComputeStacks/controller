@@ -30,7 +30,7 @@ class Setting < ApplicationRecord
   end
 
   def is_boolean?
-    %w(t f).include? value
+    %w[t f].include? value
   end
 
   # Toggle the current value
@@ -136,11 +136,11 @@ class Setting < ApplicationRecord
     # eventually this should dynamically load hooks from the module
     def billing_hooks
       return [] unless Setting.billing_module['klass'] == 'Whmcs'
-      %i(
+      %i[
         process_usage
         user_created
         user_updated
-      )
+      ]
     end
 
     def call_billing_hook(hook, data)
@@ -469,20 +469,6 @@ class Setting < ApplicationRecord
       ActiveRecord::Type::Boolean.new.cast s.value
     end
 
-    def le_server
-      s = Setting.find_by(name: 'le_validation_server', category: 'lets_encrypt')
-      if s.nil?
-        s = Setting.create!(
-          name: 'le_validation_server',
-          category: 'lets_encrypt',
-          description: 'The direct IP & port of the controller, accessible from the nodes',
-          value: "localhost:3000",
-          encrypted: false
-        )
-      end
-      s.value
-    end
-
     # @return [Integer]
     def le_domains_per_account
       s = Setting.find_by(name: 'le_domains_per_account', category: 'lets_encrypt')
@@ -689,7 +675,7 @@ class Setting < ApplicationRecord
       # webhook_billing_event
       # webhook_users
       #
-      %w(
+      %w[
         app_name
         belco_enabled?
         belco_api_key
@@ -716,8 +702,6 @@ class Setting < ApplicationRecord
         le_dns_sleep
         le_server
         le_single_domain?
-        marketplace_username
-        marketplace_password
         monarx_init!
         registry_base_url
         registry_node
@@ -728,7 +712,7 @@ class Setting < ApplicationRecord
         webhook_billing_event
         webhook_billing_usage
         webhook_users
-      ).each do |i|
+      ].each do |i|
         eval("Setting::#{i}")
       end
       true
@@ -739,17 +723,17 @@ class Setting < ApplicationRecord
   private
 
   def set_value
-    if self.encrypted && !self.value.blank?
-      self.value = Secret.encrypt!(self.value)
-    elsif self.name == 'billing_module'
+    if encrypted && !value.blank?
+      self.value = Secret.encrypt!(value)
+    elsif name == 'billing_module'
       self.value = value.blank? ? 'none' : value.capitalize.strip
     end
     # Remove leading HTTP(s).
-    self.value = self.value.gsub("http://", "").gsub("https://", "").strip if self.name == 'hostname'
+    self.value = value.gsub("http://", "").gsub("https://", "").strip if name == 'hostname'
   end
 
   def check_billing_module
-    Setting.billing_module if self.name == 'billing_module'
+    Setting.billing_module if name == 'billing_module'
   end
 
   def plugin_changes

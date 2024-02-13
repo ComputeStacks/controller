@@ -1,17 +1,15 @@
 ##
-# Volumes API
-class Api::VolumesController < Api::ApplicationController
+# Project Volumes
+class Api::Projects::VolumesController < Api::Projects::BaseController
 
-  before_action -> { doorkeeper_authorize! :projects_read }, only: %i[index show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :projects_write }, only: %i[update], unless: :current_user
+  before_action -> { doorkeeper_authorize! :projects_read }, unless: :current_user
 
-  before_action :load_volume, only: :show
-  before_action :load_volume_edit, only: :update
+  before_action :load_volume, except: %i[ index ]
 
   ##
   # List all volumes
   #
-  # `GET /api/volumes`
+  # `GET /api/projects/{project-id}/volumes`
   #
   # **OAuth AuthorizationRequired**: `projects_read`
   #
@@ -62,13 +60,14 @@ class Api::VolumesController < Api::ApplicationController
   #             * `label`: String
   #
   def index
-    @volumes = paginate Volume.find_all_for(current_user).active
+    @volumes = paginate @deployment.volumes.active
+    render template: 'api/volumes/index'
   end
 
   ##
   # View Volume
   #
-  # `GET /api/volumes/{id}`
+  # `GET /api/projects/{project-id}/volumes/{id}`
   #
   # **OAuth AuthorizationRequired**: `projects_read`
   #
@@ -118,52 +117,16 @@ class Api::VolumesController < Api::ApplicationController
   #             * `csrn`: String
   #             * `label`: String
   #
-  def show; end
-
-  ##
-  # Update a volume
-  #
-  # `PATCH /api/volumes/{id}`
-  #
-  # **OAuth AuthorizationRequired**: `projects_write`
-  #
-  # * `volume`: Object
-  #     * `borg_enabled`: Boolean
-  #     * `borg_strategy`: String | custom file mariadb mysql postgres
-  #     * `borg_freq`: String | cron schedule. Supports @daily, @weekly, @monthly.
-  #     * `borg_keep_hourly`: Integer | Number of 'hourly' backups to keep.
-  #     * `borg_keep_daily`: Integer | Number of 'daily' backups to keep.
-  #     * `borg_keep_weekly`: Integer | Number of 'weekly' backups to keep.
-  #     * `borg_keep_monthly`: Integer | Number of 'monthly' backups to keep.
-  #     * `borg_keep_annually`: Integer | Number of 'annual' backups to keep.
-  #
-  def update
-    if @volume.update(volume_params)
-      render :show
-    else
-      api_obj_error @volume.errors.full_messages.to_sentence
-    end
+  def show
+    render template: 'api/volumes/show'
   end
 
   private
 
-  # View permission
   def load_volume
-    @volume = Volume.find_for current_user, id: params[:id]
-    return api_obj_missing if @volume.nil?
+    @volume = @deployment.volumes.find_by id: params[:id]
+    return api_obj_missing if @volume.nil? || !@volume.can_view?(current_user)
   end
 
-  # Edit permission
-  def load_volume_edit
-    @volume = Volume.find_for_edit current_user, id: params[:id]
-    return api_obj_missing if @volume.nil?
-  end
-
-  def volume_params
-    params.require(:volume).permit(
-      :borg_freq, :borg_strategy, :borg_keep_hourly, :borg_keep_daily, :borg_keep_weekly,
-      :borg_keep_monthly, :borg_rollback, :borg_enabled, :borg_keep_annually
-    )
-  end
 
 end

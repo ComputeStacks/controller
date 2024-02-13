@@ -81,7 +81,7 @@ class ClusterAuthService
     d[:load_balancer_id] = load_balancer.id if load_balancer
     return nil if d.nil?
     d[:nonce] = SecureRandom.urlsafe_base64
-    JWT.encode(d, Rails.application.secrets.secret_key_base, 'HS256', headers)
+    JWT.encode(d, ENV["SECRET_KEY_BASE"], 'HS256', headers)
   end
 
   def load_from_payload!(payload)
@@ -107,7 +107,7 @@ class ClusterAuthService
   end
 
   def decoded_payload(payload)
-    body = JWT.decode(payload, Rails.application.secrets.secret_key_base, true, { algorithm: 'HS256' })
+    body = JWT.decode(payload, ENV["SECRET_KEY_BASE"], true, { algorithm: 'HS256' })
     if body[1]['exp']
       return nil if Time.parse(body[1]['exp']) < Time.now
     end

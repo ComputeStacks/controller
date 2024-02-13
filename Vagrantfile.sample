@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :libvirt do |vm|
     vm.driver = "kvm"
     vm.title = "computestacks"
-    vm.description = "ComputeStacks Controller"
+    vm.description = "ComputeStacks Node"
     vm.memory = 4096
     vm.cpus = 4
     vm.cputopology sockets: "1", cores: "2", threads: "2"

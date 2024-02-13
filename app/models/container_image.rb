@@ -204,6 +204,7 @@ class ContainerImage < ApplicationRecord
 
   def resource_name
     return "null" if name.blank?
+
     name.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
   end
 
@@ -220,6 +221,7 @@ class ContainerImage < ApplicationRecord
   def variant_pull_status
     if image_variants.where(validated_tag: false).exists?
       return :pending if has_pending_pull_validations?
+
       image_variants.where(validated_tag: true).exists? ? :partial : :invalid
     else
       :valid
@@ -239,7 +241,7 @@ class ContainerImage < ApplicationRecord
   end
 
   def service_container?
-    %w(cmptstks/phpmyadmin computestacks/cs-docker-pma).include?(registry_image_path)
+    %w[cmptstks/phpmyadmin computestacks/cs-docker-pma].include?(registry_image_path)
   end
 
   def content_variables
@@ -260,49 +262,61 @@ class ContainerImage < ApplicationRecord
   private
 
   def set_name
-    return nil if self.label.blank?
-    return true unless self.name.blank?
-    name_check = if self.user
-                   "#{self.label.strip.parameterize}-#{self.user.id}"
+    return nil if label.blank?
+    return true unless name.blank?
+
+    name_check = if user
+                   "#{label.strip.parameterize}-#{user.id}"
                  else
-                   self.label.strip.parameterize
+                   label.strip.parameterize
                  end
-    self.name = ContainerImage.where(name: name_check).exists? ? "#{name_check}#{SecureRandom.rand(1..1000)}" : name_check
+    self.name = if ContainerImage.where(name: name_check).exists?
+                  "#{name_check}#{SecureRandom.rand(1..1000)}"
+                else
+                  name_check
+                end
   end
 
   def allowed_params
-    %w(env args settings)
+    %w[env args settings]
   end
 
   def clean_collaborators
     return if container_image_collaborators.empty?
+
     if user_performer.nil?
       errors.add(:base, "Missing user performing delete action.")
       return
     end
     container_image_collaborators.each do |i|
       i.current_user = user_performer
-      unless i.destroy
-        errors.add(:base, %Q(Error deleting collaborator #{i.id} - #{i.errors.full_messages.join("\n")}))
-      end
+      next if i.destroy
+
+      errors.add(
+        :base,
+        %(Error deleting collaborator #{i.id} - #{i.errors.full_messages.join("\n")})
+      )
     end
   end
 
   # Ensure we have a tag
   def ensure_tag
-    if !skip_variant_setup && registry_image_tag.blank?
-      errors.add(:base, "Missing image tag")
-    end
+    return unless !skip_variant_setup && registry_image_tag.blank?
+
+    errors.add(:base, "Missing image tag")
+
   end
 
   # Create initial default tag on commit
   def setup_default_tag
+    return if skip_variant_setup
+
     image_variants.create!(
       registry_image_tag: registry_image_tag.strip,
       label: registry_image_tag.strip,
       version: 0,
       is_default: true
-    ) unless skip_variant_setup
+    )
   end
 
   # Ensure clean destruction of variants before deleting image
@@ -318,6 +332,7 @@ class ContainerImage < ApplicationRecord
 
   def update_variant_sorting
     return unless variant_pos.is_a?(Array)
+
     k = 0
     variant_pos.each do |i|
       v = image_variants.find_by id: i
@@ -334,6 +349,7 @@ class ContainerImage < ApplicationRecord
 
   def format_category
     return if category.blank?
+
     self.category = category.strip.downcase
   end
 
@@ -347,12 +363,13 @@ class ContainerImage < ApplicationRecord
         false
       end
     else
-      Rails.application.assets.find_asset(icon_path) != nil
+      !Rails.application.assets.find_asset(icon_path).nil?
     end
   end
 
   def valid_product
     return if product_id.blank?
+
     p = Product.find_by id: product_id
     if p.nil?
       errors.add(:product_id, 'invalid')

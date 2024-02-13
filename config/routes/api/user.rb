@@ -39,7 +39,8 @@ Rails.application.routes.draw do
                   :power,
                   :resize,
                   :scale,
-                  :ssl
+                  :ssl,
+                  :volumes
       end
     end
 
@@ -80,7 +81,12 @@ Rails.application.routes.draw do
             resources :reset_password
           end
         end
-        resources :containers, :collaborators, :events, :images, :services
+        resources :containers,
+                  :collaborators,
+                  :events,
+                  :images,
+                  :volumes,
+                  :services
       end
     end
 

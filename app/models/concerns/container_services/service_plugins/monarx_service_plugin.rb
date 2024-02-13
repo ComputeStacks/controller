@@ -25,8 +25,9 @@ module ContainerServices
       end
 
       def monarx_plugin_url
-        Rails.cache.fetch("monarx_url_#{name}", expires_in: 2.hours, skip_nil: true) do
+        Rails.cache.fetch("monarx_url_#{container_service.name}", expires_in: 2.hours, skip_nil: true) do
           return nil if monarx_agent_id.nil?
+
           data = {
             enterprise_id: Setting.monarx_enterprise_id,
             agent_id: monarx_agent_id,
@@ -49,11 +50,12 @@ module ContainerServices
       end
 
       def monarx_agent_id
-        Rails.cache.fetch("monarx_agentid_#{name}", expires_in: 1.week, skip_nil: true) do
+        Rails.cache.fetch("monarx_agentid_#{container_service.name}", expires_in: 1.week, skip_nil: true) do
           return nil unless container_image_plugin.monarx_available?
+
           result = HTTP.timeout(30)
                        .headers(container_image_plugin.monarx_api_headers)
-                       .get "#{container_image_plugin.monarx_enterprise_url}/agent", params: { filter: "agent.tags==#{name}" }
+                       .get "#{container_image_plugin.monarx_enterprise_url}/agent", params: { filter: "tags==#{container_service.name}" }
 
           if result.status.success?
             begin

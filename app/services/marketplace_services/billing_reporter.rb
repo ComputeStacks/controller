@@ -38,6 +38,7 @@ module MarketplaceServices
 
       ContainerImagePlugin.all.each do |plugin|
         next unless plugin.marketplace_billable?
+
         case plugin.marketplace_billable_group
         when :service, :container
           plugin.service_plugins.each do |service_plugin|
@@ -68,8 +69,9 @@ module MarketplaceServices
         return false
       end
       return false unless ingress_connection.is_a?(PG::Connection)
+
       fields = data[:fields]
-      fields = %w(username controller_ip hostname) + fields
+      fields = %w[username controller_ip hostname] + fields
       value_count = []
       1.upto(fields.count) do |i|
         value_count << "$#{i}"
@@ -83,20 +85,21 @@ module MarketplaceServices
 
     def report_heartbeat!
       return false unless ingress_connection.is_a?(PG::Connection)
+
       result = ingress_connection.exec_params "INSERT INTO v1.metrics (username,app_name,company_name,controller_ip,hostname,users,containers,projects,nodes,regions,locations) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
-                                     [
-                                       Setting.marketplace_username,
-                                       Setting.app_name,
-                                       Setting.company_name,
-                                       controller_ip,
-                                       Setting.hostname,
-                                       User.count,
-                                       Deployment::Container.count,
-                                       Deployment.count,
-                                       Node.count,
-                                       Region.count,
-                                       Location.count
-                                     ]
+                                              [
+                                                Setting.marketplace_username,
+                                                Setting.app_name,
+                                                Setting.company_name,
+                                                controller_ip,
+                                                Setting.hostname,
+                                                User.count,
+                                                Deployment::Container.count,
+                                                Deployment.count,
+                                                Node.count,
+                                                Region.count,
+                                                Location.count
+                                              ]
       valid_result? result
     rescue => e
       ExceptionAlertService.new(e, '2778bf93a28c1c70').perform
@@ -118,6 +121,7 @@ module MarketplaceServices
       else
         errors << "Fatal error"
       end
+
       false
     end
 
@@ -126,6 +130,7 @@ module MarketplaceServices
       last_attempt = Rails.cache.read METRICS_CACHE_KEY
       return true if last_attempt.nil?
       return false if Time.at(last_attempt) > 1.day.ago.to_time
+
       true
     rescue => e
       ExceptionAlertService.new(e, 'c50ba5909d9984e2').perform
@@ -138,6 +143,7 @@ module MarketplaceServices
       last_attempt = Rails.cache.read USAGE_CACHE_KEY
       return true if last_attempt.nil?
       return false if Time.at(last_attempt) > 1.hour.ago.to_time
+
       true
     rescue => e
       ExceptionAlertService.new(e, 'a851b169e2f2b052').perform
@@ -149,7 +155,15 @@ module MarketplaceServices
     def controller_ip
       ip = Rails.cache.fetch("controller_ip", expires_in: 1.hour, skip_nul: true) do
         begin
-          dns = Dnsruby::Resolver.new({ port: NS_PORT, nameserver: %w(ns1.google.com ns2.google.com ns3.google.com ns4.google.com) })
+          dns = Dnsruby::Resolver.new({
+                                        port: 53,
+                                        nameserver: %w[
+                                          ns1.google.com
+                                          ns2.google.com
+                                          ns3.google.com
+                                          ns4.google.com
+                                        ]
+                                      })
           dns.retry_delay = 1
           dns.retry_times = 3
           dns.query("o-o.myaddr.l.google.com", "TXT").answer.first.strings.first
@@ -165,13 +179,14 @@ module MarketplaceServices
     def ingress_connection
       return nil if Setting.marketplace_username.blank?
       return nil if Setting.marketplace_password.blank?
+
       marketplace_endpoint = if Rails.env.production?
                                "ingress.marketplace.cmptstks.com/ingress?sslmode=require"
                              else
                                ENV['INGRESS_TEST_URI']
                              end
       uri = "postgresql://#{Setting.marketplace_username}:#{Setting.marketplace_password}@#{marketplace_endpoint}"
-      if PG::Connection.ping(uri) > 0
+      if PG::Connection.ping(uri).positive?
         errors << "Unable to connect to ingress endpoint"
         return nil
       end

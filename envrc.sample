@@ -1,14 +1,24 @@
+# Secrets - Generate with: `./bin/rails secret`
+export SECRET_KEY_BASE=
+export USER_AUTH_SECRET=
+
+# DEV LB
+export DEV_LB_HOSTNAME="a.cstacks.local"
+
 # Linux should be `localhost`
 # Using Colima on mac? `colima start --network-address && colima status -e` to get the IP.
+# Note, you may also need to run the following commands if you don't see an address.
+#
+# `sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add /usr/libexec/bootpd`
+# `sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblock /usr/libexec/bootpd`
+#
+# See [this github issue](https://github.com/abiosoft/colima/issues/458#issuecomment-1989839779) for more details.
+#
 export DOCKER_IP=localhost
 
 # Vagrant IP will be assigned on first startup, and should not change until you destroy the VM.
 # This IP should be accessible from your local machine.
 export VAGRANT_VM_IP=localhost
-
-# You need to authenticate with Github to access our public gem repository.
-export GITHUB_GEM_PULL_USER="your github username"
-export GITHUB_GEM_PULL_TOKEN="your github personal token"
 
 ##
 # You should not need to change anything else below this section.

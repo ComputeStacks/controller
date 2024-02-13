@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_21_015955) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_19_153846) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -718,6 +718,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_21_015955) do
     t.datetime "updated_at", precision: nil, null: false
     t.string "state_reason"
     t.string "event_code"
+    t.jsonb "labels", default: {}, null: false
     t.index ["audit_id"], name: "index_event_logs_on_audit_id"
     t.index ["event_code"], name: "index_event_logs_on_event_code"
     t.index ["locale"], name: "index_event_logs_on_locale"
@@ -1143,6 +1144,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_21_015955) do
     t.string "consul_token"
     t.integer "p_net_size", default: 27, null: false
     t.string "network_driver", default: "bridge", null: false
+    t.string "acme_server", default: "127.0.0.1:3000", null: false
     t.index ["location_id"], name: "index_regions_on_location_id"
   end
 

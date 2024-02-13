@@ -27,6 +27,7 @@ module ContainerServices
     # This should be replaced with something that works for all plugins
     def monarx_available?
       return false if service_plugins.active.monarx.empty?
+
       service_plugins.active.monarx.first.monarx_available?
     end
 

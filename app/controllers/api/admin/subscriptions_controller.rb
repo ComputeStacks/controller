@@ -198,7 +198,7 @@ class Api::Admin::SubscriptionsController < Api::Admin::ApplicationController
       end
       if is_ok && params[:container_service][:qty] && !params[:container_service][:qty].to_i.zero?
         # Scale!
-        event = @service.event_logs.create(
+        event = @service.event_logs.create!(
             locale: 'service.scaling',
             locale_keys: {
                 'label' => @service.label,

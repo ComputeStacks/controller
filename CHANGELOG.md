@@ -1,5 +1,57 @@
 # Change Log
 
+## v9.3.0
+
+- [FEATURE] Introducing Callbacks for the API. This allows you to receive a webhook from ComputeStacks when a api request is completed by a background worker.
+- [FEATURE] Move acme validation IP to a database field on the region. This allows different IPs for different regions.
+
+## v9.2.2
+
+- [FEATURE] Added volume and backups api.
+
+## v9.2.1
+
+- [FEATURE] `on_latest_image` Boolean field added to container and bastion api calls. If false, there is a new image on the node and a rebuild will use the new image.
+
+## v9.2.0
+
+**YJIT and JEMALLOC for ComputeStacks Production Environments**
+
+Please add the following to your `/etc/default/computestacks` file:
+
+```
+MALLOC_CONF=dirty_decay_ms:1000,narenas:2,background_thread:true,stats_print:false
+RUBY_YJIT_ENABLE=1
+```
+
+And download the latest `cstacks` helper script onto the controller with this command:
+
+```bash
+wget -O /usr/local/bin/cstacks https://raw.githubusercontent.com/ComputeStacks/ansible-install/main/roles/controller/files/cstacks.sh \
+  && chmod +x /usr/local/bin/cstacks
+```
+
+Please see[v92 Notes.md](./doc/v92 Notes.md) for more details.
+
+**Major Changes to the development environment**
+
+This release includes major changes to how our development environment is configured.
+
+- The controller, postgres, and redis are now run by calling `docker compose up -d` locally on your development machine. This means you'll need to have docker installed locally.
+- Our vagrant image is now much closer to a production compute node, in that it only runs the containers as a node and no longer runs any of the controller.
+- The controller's gemfile no longer pulls the gem from Github, but just does a git clone. This removes the requirement of having a github account to build the controller.
+
+See [DEV_SETUP.md](./doc/DEV_SETUP.md) for specific instructions.
+
+***
+
+* [CHANGE] Upgrade ruby to 3.3, and rails to 7.1, and fix deprecations and bugs introduced with this upgrade.
+* [CHANGE] Remove Rails.secrets in favor of environmental variables.
+* [CHANGE] Disable marketplace reporting. This project is on an indefinite hold.
+* [FIX] Updated monarx integration to resolve api issues.
+
+***
+
 ## v9.1.2
 
 * [FIX] Don't attempt node evacuation with local networking.

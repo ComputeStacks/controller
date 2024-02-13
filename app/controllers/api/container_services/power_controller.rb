@@ -10,6 +10,9 @@ class Api::ContainerServices::PowerController < Api::ContainerServices::BaseCont
   # **OAuth AuthorizationRequired**: `projects_write`
   #
   # * `action`: String<start,stop,restart,rebuild>
+  # * `callback`: Object
+  #     * `authorization`: String
+  #     * `url`: String
   #
   def update
     allowed_actions = %w(start stop restart rebuild)
@@ -18,7 +21,12 @@ class Api::ContainerServices::PowerController < Api::ContainerServices::BaseCont
     end
     audit = Audit.create_from_object!(@service, 'updated', request.remote_ip, current_user)
     @service.containers.each do |container|
-      PowerCycleContainerService.new(container, params[:id].to_s, audit).perform
+      s = PowerCycleContainerService.new(container, params[:id].to_s, audit)
+      if params[:callback]
+        s.callback_auth = params[:callback][:authorization]
+        s.callback_url = params[:callback][:url]
+      end
+      s.perform
     end
     respond_to do |f|
       f.json { render json: {}, status: :accepted }

@@ -30,8 +30,8 @@ namespace :containers do
         skip_variant_setup: true
       )
       redis.image_variants.create!(
-        label: "latest",
-        registry_image_tag: "alpine",
+        label: "7.2",
+        registry_image_tag: "7.2-alpine",
         validated_tag: true,
         validated_tag_updated: Time.now,
         version: 0,

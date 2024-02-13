@@ -40,7 +40,7 @@ defaults
 <%= render partial: 'api/stacks/load_balancers/haproxy/stats', locals: { load_balancer: @load_balancer } %>
 backend letsencrypt
   mode http
-  server acme <%= Setting.le_server %>
+  server acme <%= @node.region.acme_server %>
 
 <%= render partial: 'api/stacks/load_balancers/haproxy/backend-http', locals: { load_balancer: @load_balancer, node: @node } %>
 <%= render partial: 'api/stacks/load_balancers/haproxy/backend-tcp', locals: { load_balancer: @load_balancer, node: @node } %>

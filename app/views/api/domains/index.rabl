@@ -1,5 +1,5 @@
 collection @domains, root: 'domains', object_root: false
-attributes :id, :domain, :system_domain, :header_hsts, :created_at, :updated_at
+attributes :id, :domain, :system_domain, :header_hsts, :force_https, :created_at, :updated_at
 node :container_service do |i|
   i.container_service&.id
 end

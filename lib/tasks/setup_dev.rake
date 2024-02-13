@@ -1,3 +1,4 @@
+desc "Setup for vagrant / dev environment"
 task setup_dev: :environment do
 
   vagrant_vm_ip = if ENV['USER'] == 'vagrant' # Anything else and we're running local, so just use 127.0.0.1
@@ -19,6 +20,11 @@ task setup_dev: :environment do
                  else
                    ''
                  end
+
+  # Configure vagrant VM to communicate with controller
+  split_ip = vagrant_vm_ip.split('.')
+  controller_ip = vagrant_vm_ip == '127.0.0.1' ? vagrant_vm_ip : "#{split_ip[0]}.#{split_ip[1]}.#{split_ip[2]}.1"
+  ssh_client.client.exec!("echo '#{controller_ip} controller.cstacks.local' >> /etc/hosts")
 
   if consul_token.blank?
     puts "Error, unable to read consul token. Check connection settings."
@@ -60,8 +66,8 @@ task setup_dev: :environment do
   if LoadBalancer.all.empty?
     LoadBalancer.create! label: 'dev',
                          region: region,
-                         domain: 'a.cstacks.local',
-                         ext_ip: [ '127.0.0.1' ],
+                         domain: ENV.fetch('DEV_LB_HOSTNAME', 'a.cstacks.local'),
+                         ext_ip: [ vagrant_vm_ip ],
                          internal_ip: [ '127.0.0.1', vagrant_vm_ip ],
                          public_ip: '127.0.0.1',
                          direct_connect: true,
@@ -83,6 +89,16 @@ task setup_dev: :environment do
     container_product_resource.prices.create! price: 0.00343,
                                               currency: 'USD',
                                               billing_phase: container_product_resource.billing_phases.first,
+                                              regions: Region.all
+  end
+
+  container_product_med = Product.find_by name: 'medium', kind: 'package'
+  if container_product_med.package.nil?
+    container_product_med.create_package cpu: 1, memory: 1024, storage: 10, local_disk: 5, bandwidth: 1024
+    container_product_med_resource = plan.billing_resources.create! product: container_product_med
+    container_product_med_resource.prices.create! price: 0.005145,
+                                              currency: 'USD',
+                                              billing_phase: container_product_med_resource.billing_phases.first,
                                               regions: Region.all
   end
 
@@ -131,13 +147,15 @@ task setup_dev: :environment do
   Setting.find_by(name: 'registry_base_url').update value: 'registry.cstacks.local'
   Setting.find_by(name: 'registry_node').update value: vagrant_vm_ip
   Setting.find_by(name: 'registry_ssh_port').update value: '22'
-  Setting.find_by(name: 'le_validation_server').update value: '192.168.121.1:3005'
   Setting.find_by(name: 'cs_bastion_image').update value: 'ghcr.io/computestacks/cs-docker-bastion:latest'
 
   puts "Creating log & metric clients..."
   mc = MetricClient.first.nil? ? MetricClient.create!(endpoint: "http://#{vagrant_vm_ip}:9090") : MetricClient.first
   lc = LogClient.first.nil? ? LogClient.create!(endpoint: "http://#{vagrant_vm_ip}:3100") : LogClient.first
-  region.update metric_client: mc, log_client: lc, loki_endpoint: "http://#{vagrant_vm_ip}:3100"
+  region.update metric_client: mc,
+                log_client: lc,
+                loki_endpoint: "http://#{vagrant_vm_ip}:3100",
+                acme_server: "192.168.121.1:3005"
 
   if region.nodes.empty?
     puts "Creating dev node..."

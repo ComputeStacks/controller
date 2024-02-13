@@ -3,12 +3,12 @@ class JsonWebToken
 
   class << self
 
-    def encode(payload, jwt_key = Rails.application.secrets.secret_key_base)
+    def encode(payload, jwt_key = ENV["SECRET_KEY_BASE"])
       payload.reverse_merge!(meta)
       JWT.encode(payload, jwt_key, 'HS256')
     end
 
-    def decode(token, jwt_key = Rails.application.secrets.secret_key_base)
+    def decode(token, jwt_key = ENV["SECRET_KEY_BASE"])
       body = JWT.decode(token, jwt_key, true, { algorithm: 'HS256' })[0]
       HashWithIndifferentAccess.new body
     rescue

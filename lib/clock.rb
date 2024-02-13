@@ -48,9 +48,9 @@ module Clockwork
     LetsEncryptWorkers::ValidateDomainWorker.perform_async
   end
 
-  every(1.hour, 'marketplace.usage') do
-    MarketplaceWorkers::UsageWorker.perform_async
-  end
+  # every(1.hour, 'marketplace.usage') do
+  #   MarketplaceWorkers::UsageWorker.perform_async
+  # end
 
   every(3.hours, 'volume.metrics', at: '**:00') do
     RegionWorkers::VolumeUsageWorker.perform_async

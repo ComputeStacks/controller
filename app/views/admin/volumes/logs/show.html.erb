@@ -1,9 +1,12 @@
 <% content_for :breadcrumb do %>
   <div class="row has-breadcrumb">
     <ol class="breadcrumb">
-      <li><%= link_to "Volumes", "/admin/volumes" %></li>
+      <% if @volume.deployment %>
+        <li><%= link_to @volume.deployment.name, "/admin/deployments/#{@volume.deployment.id}#volumes" %></li>
+      <% else %>
+        <li><%= link_to "Volumes", "/admin/volumes" %></li>
+      <% end %>
       <li><%= link_to "Volume: #{@volume.id}", "/admin/volumes/#{@volume.id}" %></li>
-      <li><%= link_to "Events", "/admin/volumes/#{@volume.id}/logs" %></li>
       <li class="active">Event: <%= @log.id %></li>
     </ol>
   </div>

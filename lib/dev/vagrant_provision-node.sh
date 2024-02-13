@@ -16,7 +16,7 @@ echo "Defaults:vagrant env_keep += \"EDITOR\"" >> /etc/sudoers.d/vagrant
 echo "syntax on" >> /etc/vim/vimrc
 apt-get -y remove ufw
 apt-get update && apt-get -y upgrade
-apt-get -y install apt-utils software-properties-common ca-certificates net-tools curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent prometheus-node-exporter git tmux pwgen
+apt-get -y install make apt-utils software-properties-common ca-certificates zip unzip net-tools curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent prometheus-node-exporter git tmux pwgen
 
 # Distro specific
 if [[ "${CURRENT_DISTRO}" == 'Ubuntu' ]]; then
@@ -60,6 +60,26 @@ EOF
 
 systemctl daemon-reload && systemctl restart docker
 
+##
+# Install Go
+##
+golang_archive=$(mktemp)
+wget -O "$golang_archive" "https://go.dev/dl/go1.21.7.linux-$(dpkg --print-architecture).tar.gz"
+
+if [ -d /usr/local/go ]; then
+  rm -rf /usr/local/go
+fi
+
+tar -C /usr/local -xzf "$golang_archive"
+
+if grep -q "go\/bin" /etc/profile; then
+  echo "Go path already setup"
+else
+  echo "export PATH=\$PATH:/usr/local/go/bin" >> /etc/profile
+fi
+
+## end go installation ####
+
 docker volume create consul-data
 mkdir -p /etc/consul
 cat << 'EOF' > /etc/consul/config.hcl
@@ -77,6 +97,7 @@ acl{
 data_dir = "/consul/data"
 bootstrap_expect = 1
 server = true
+server_rejoin_age_max = "43800h"
 EOF
 
 cat << 'EOF' > /etc/systemd/system/consul.service
@@ -97,7 +118,7 @@ ExecStart=/usr/bin/env docker run --rm --name consul \
       --label com.computestacks.role=system \
       -v consul-data:/consul/data \
       -v /etc/consul:/consul/config \
-      hashicorp/consul:1.16 consul agent -config-file=/consul/config/config.hcl
+      hashicorp/consul:1.17 consul agent -config-file=/consul/config/config.hcl
 
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker kill consul 2>/dev/null'
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker rm consul 2>/dev/null'
@@ -111,7 +132,7 @@ WantedBy=multi-user.target
 WantedBy=docker.service
 EOF
 
-docker pull hashicorp/consul:1.16
+docker pull hashicorp/consul:1.17
 systemctl daemon-reload \
   && systemctl enable consul \
   && systemctl start consul
@@ -278,10 +299,6 @@ EOF
 
 systemctl enable prometheus-node-exporter && systemctl start prometheus-node-exporter
 
-wget -O /tmp/cs-agent.tar.gz https://f.cscdn.cc/file/cstackscdn/packages/cs-agent/cs-agent-$(dpkg --print-architecture).tar.gz
-tar -xzvf /tmp/cs-agent.tar.gz -C /tmp
-mv /tmp/cs-agent /usr/local/bin/ && chmod +x /usr/local/bin/cs-agent
-
 cat << 'EOF' > /etc/systemd/system/cs-agent.service
 [Unit]
 Description="ComputeStacks Agent"
@@ -320,8 +337,10 @@ sed -i 's/allow/deny/g' /etc/consul/config.hcl && systemctl restart consul
 
 mkdir /etc/computestacks
 cat << EOF > /etc/computestacks/agent.yml
+host:
+  iptables-cmd: iptables
 computestacks:
-  host: http://127.0.0.1:3005
+  host: http://controller.cstacks.local:3005
 consul:
   host: 127.0.0.1:8500
   tls: false
@@ -333,12 +352,48 @@ backups:
   key: "changme!"
   borg:
     compress: "zstd,3"
-    image: "ghcr.io/computestacks/cs-docker-borg:latest"
+    image: "ghcr.io/computestacks/cs-docker-borg:1.4"
     nfs: false
     ssh:
       enabled: false
+log:
+  level: DEBUG
 docker:
   version: "1.41"
+EOF
+cat << EOF > /etc/systemd/system/cs-agent.service
+[Unit]
+Description="ComputeStacks Agent"
+Documentation=https://computestacks.com
+Requires=docker.service
+After=docker.service
+Requires=consul.service
+After=consul.service
+ConditionFileNotEmpty=/etc/computestacks/agent.yml
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/env sh -c '/usr/bin/env docker stop cs-agent 2>/dev/null'
+ExecStartPre=-/usr/bin/env sh -c '/usr/bin/env docker rm cs-agent 2>/dev/null'
+
+ExecStart=/usr/bin/env docker run --init --rm --name cs-agent \
+      --log-driver=none \
+      --network=host \
+      --cap-add=NET_ADMIN \
+      --label com.computestacks.role=system \
+      -v /etc/computestacks:/etc/computestacks:ro \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      ghcr.io/computestacks/backup-agent:1.6
+
+ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker stop cs-agent 2>/dev/null'
+ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker rm cs-agent 2>/dev/null'
+Restart=always
+RestartSec=30
+SyslogIdentifier=cs-agent
+
+[Install]
+WantedBy=multi-user.target
+WantedBy=docker.service
 EOF
 
 systemctl start cs-agent && systemctl enable cs-agent
@@ -367,7 +422,7 @@ ExecStart=/usr/bin/env docker run --rm --name cadvisor \
       -v /dev/disk/:/dev/disk:ro \
       -v /etc/machine-id:/etc/machine-id:ro \
       --device=/dev/kmsg \
-      gcr.io/cadvisor/cadvisor:v0.43.0
+      gcr.io/cadvisor/cadvisor:v0.47.2
 
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker kill cadvisor 2>/dev/null'
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker rm cadvisor 2>/dev/null'
@@ -820,7 +875,7 @@ ExecStart=/usr/bin/env docker run --rm --name fluentd \
       --label com.computestacks.role=system \
       -e LOKI_URL=http://127.0.0.1:3100 \
       -v /etc/fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro \
-      grafana/fluent-plugin-loki:main
+      FLUENTD_IMAGE
 
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker stop fluentd 2>/dev/null'
 Restart=always
@@ -831,6 +886,37 @@ SyslogIdentifier=fluentd
 WantedBy=multi-user.target
 WantedBy=docker.service
 EOF
+
+if [ "$(dpkg --print-architecture)" == 'arm64' ]; then
+
+  ##
+  # There is no arm64 image of grafana/fluent-plugin-loki, so we build our own image
+  # Taken from https://github.com/grafana/loki/blob/main/clients/cmd/fluentd/Dockerfile
+  ##
+
+  FLUENTD_IMAGE="fluentd:latest"
+
+  mkdir -p /root/fluentd
+  cat << 'EOF' > /root/fluentd/Dockerfile
+FROM fluent/fluentd:v1.16-debian-arm64-2
+
+ENV LOKI_URL "https://logs-prod-us-central1.grafana.net"
+
+ADD https://raw.githubusercontent.com/grafana/loki/main/clients/cmd/fluentd/lib/fluent/plugin/out_loki.rb /fluentd/plugins/out_loki.rb
+ADD https://raw.githubusercontent.com/grafana/loki/main/clients/cmd/fluentd/docker/Gemfile /fluentd/Gemfile
+ADD https://github.com/grafana/loki/raw/main/clients/cmd/fluentd/docker/conf/loki.conf /fluentd/etc/loki.conf
+
+USER root
+RUN sed -i '$i''  @include loki.conf' /fluentd/etc/fluent.conf \
+    && chown fluent:fluent -R /fluentd
+USER fluent
+EOF
+  docker build -t fluentd:latest /root/fluentd/
+else
+  FLUENTD_IMAGE="grafana/fluent-plugin-loki:main"
+fi
+
+sed -i "s/FLUENTD_IMAGE/$FLUENTD_IMAGE/g" /etc/systemd/system/fluentd.service
 
 systemctl daemon-reload \
   && systemctl start alertmanager prometheus loki fluentd \
@@ -881,6 +967,8 @@ iptables -A INPUT -p tcp --dport 2376 -j ACCEPT
 iptables -A INPUT -p tcp --dport 8500 -j ACCEPT
 # ...prometheus
 iptables -A INPUT -p tcp --dport 9090 -j ACCEPT
+# ...loki
+iptables -A INPUT -p tcp --dport 3100 -j ACCEPT
 # ...vagrant default ip range. Adjust as needed
 iptables -A INPUT -s 192.168.121.0/24 -j ACCEPT
 

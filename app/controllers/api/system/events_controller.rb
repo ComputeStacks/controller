@@ -25,14 +25,33 @@ class Api::System::EventsController < Api::System::BaseController
         end
       end
     end
+
+    # This is how we can pre-create events for backups.
+    @event = if event_params[:audit_id]
+               audit = Audit.find_by id: event_params[:audit_id]
+               if audit
+                 audit.event_logs.active.find_by(event_code: event_params[:event_code])
+               end
+             end
+
+    if @event&.update(existing_event_params)
+
+      @event.perform_callback_reply! if @event.done?
+
+      respond_to do |format|
+        format.any(:json, :xml) { render template: 'api/event_logs/show', status: :created }
+      end
+      return
+    end
+
     @event = EventLog.new(event_params)
     if event_params[:audit_id].blank? || event_params[:audit_id].to_i.zero?
       if @event.deployments.empty? && !@event.volumes.empty?
         audit = Audit.new(
-                       event: "updated",
-                       ip_addr: req_ip,
-                       rel_id: @event.volumes.first.id,
-                       rel_model: 'Volume'
+          event: "updated",
+          ip_addr: req_ip,
+          rel_id: @event.volumes.first.id,
+          rel_model: 'Volume'
         )
         if audit.save
           @event.audit = audit
@@ -60,17 +79,23 @@ class Api::System::EventsController < Api::System::BaseController
   end
 
   def update
+
+    if @event.update(event_params)
+      @event.perform_callback_reply! if @event.done?
+    else
+      return api_obj_error(@event.errors.full_messages)
+    end
+
     respond_to do |format|
-      if @event.update(event_params)
-        format.any(:json, :xml) { render template: 'api/event_logs/show' }
-      else
-        format.json { render json: {errors: @event.errors.full_messages}, status: :unprocessable_entity }
-        format.xml { render xml: {errors: @event.errors.full_messages}, status: :unprocessable_entity }
-      end
+      format.any(:json, :xml) { render template: 'api/event_logs/show' }
     end
   end
 
   private
+
+  def existing_event_params
+    params.require(:event_log).permit(:status)
+  end
 
   def event_params
     params.require(:event_log).permit(

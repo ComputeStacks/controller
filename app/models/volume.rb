@@ -47,7 +47,8 @@
 #   @return [String] A cron string
 #
 # @!attribute borg_strategy
-#   @return [file,mysql]
+#   custom file mariadb mysql postgres
+#   @return [String]
 #
 # @!attribute borg_keep_hourly
 #   @return [Integer] How many hourly backups to keep

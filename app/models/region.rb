@@ -71,8 +71,8 @@ class Region < ApplicationRecord
   validates :network_driver, inclusion: { in: %w(calico_docker bridge) }
   validates :p_net_size, numericality: { only_integer: true, greater_than: 23, less_than: 30 } # 24-29
 
-  serialize :settings, JSON
-  serialize :features, JSON
+  serialize :settings, coder: JSON
+  serialize :features, coder: JSON
 
   def container_count
     containers.count + sftp_containers.count

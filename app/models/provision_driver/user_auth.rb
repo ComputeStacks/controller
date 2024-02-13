@@ -4,7 +4,7 @@ class ProvisionDriver::UserAuth < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :provision_driver, optional: true
 
-  serialize :details, JSON
+  serialize :details, coder: JSON
 
   after_create :refresh_limits!
 

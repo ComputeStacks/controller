@@ -12,17 +12,17 @@ namespace :containers do
       mysql = ContainerImage.find_by(name: 'mariadb')
 
       wp = ContainerImage.create!(
-        name:                     "wordpress",
-        label:                    "Wordpress",
-        description:              "Wordpress with PHP FPM and nginx",
-        role:                     "wordpress",
-        category:               "web",
-        can_scale:                true,
+        name: "wordpress",
+        label: "Wordpress",
+        description: "Wordpress with PHP FPM and nginx",
+        role: "wordpress",
+        category: "web",
+        can_scale: true,
         container_image_provider: provider,
-        registry_image_path:      "computestacks/cs-docker-wordpress",
-        min_cpu:                  1,
-        min_memory:               512,
-        labels:                   {
+        registry_image_path: "computestacks/cs-docker-wordpress",
+        min_cpu: 1,
+        min_memory: 512,
+        labels: {
           system_image_name: "wordpress-litespeed"
         },
         skip_variant_setup: true,
@@ -75,96 +75,96 @@ namespace :containers do
 
       wp.dependency_parents.create!(
         requires_container_id: mysql.id,
-        bypass_auth_check:     true
+        bypass_auth_check: true
       )
       wp.setting_params.create!(
-        name:       'wordpress_password',
-        label:      'Password',
+        name: 'wordpress_password',
+        label: 'Password',
         param_type: 'password'
       )
       wp.setting_params.create!(
-        name:       'title',
-        label:      'Title',
+        name: 'title',
+        label: 'Title',
         param_type: 'static',
-        value:      'My Blog'
+        value: 'My Blog'
       )
       wp.setting_params.create!(
-        name:       'email',
-        label:      'email',
+        name: 'email',
+        label: 'email',
         param_type: 'static',
-        value:      'user@example.com'
+        value: 'user@example.com'
       )
       wp.setting_params.create!(
-        name:       'username',
-        label:      'Username',
+        name: 'username',
+        label: 'Username',
         param_type: 'static',
-        value:      'admin'
+        value: 'admin'
       )
       wp.ingress_params.create!(
-        port:            80,
-        proto:           'http',
+        port: 80,
+        proto: 'http',
         external_access: true
       )
       wp.env_params.create!(
-        name:       'CS_AUTH_KEY',
+        name: 'CS_AUTH_KEY',
         param_type: 'variable',
-        env_value:  'build.self.ec_pub_key'
+        env_value: 'build.self.ec_pub_key'
       )
       wp.env_params.create!(
-        name:       'WORDPRESS_DB_PASSWORD',
+        name: 'WORDPRESS_DB_PASSWORD',
         param_type: 'variable',
-        env_value:  'dep.mysql.parameters.settings.mysql_password'
+        env_value: 'dep.mysql.parameters.settings.mysql_password'
       )
       wp.env_params.create!(
-        name:       'WORDPRESS_DB_HOST',
+        name: 'WORDPRESS_DB_HOST',
         param_type: 'variable',
-        env_value:  'dep.mysql.self.ip'
+        env_value: 'dep.mysql.self.ip'
       )
       wp.env_params.create!(
-        name:       'WORDPRESS_DB_NAME',
+        name: 'WORDPRESS_DB_NAME',
         param_type: 'variable',
-        env_value:  'build.self.service_name_short'
+        env_value: 'build.self.service_name_short'
       )
       wp.env_params.create!(
-        name:       'WORDPRESS_URL',
+        name: 'WORDPRESS_URL',
         param_type: 'variable',
-        env_value:  'build.self.default_domain'
+        env_value: 'build.self.default_domain'
       )
       wp.env_params.create!(
-        name:       'WORDPRESS_TITLE',
+        name: 'WORDPRESS_TITLE',
         param_type: 'variable',
-        env_value:  'build.settings.title'
+        env_value: 'build.settings.title'
       )
       wp.env_params.create!(
-        name:       'WORDPRESS_USER',
+        name: 'WORDPRESS_USER',
         param_type: 'variable',
-        env_value:  'build.settings.username'
+        env_value: 'build.settings.username'
       )
       wp.env_params.create!(
-        name:       'WORDPRESS_PASSWORD',
+        name: 'WORDPRESS_PASSWORD',
         param_type: 'variable',
-        env_value:  'build.settings.wordpress_password'
+        env_value: 'build.settings.wordpress_password'
       )
       wp.env_params.create!(
-        name:       'WORDPRESS_EMAIL',
+        name: 'WORDPRESS_EMAIL',
         param_type: 'variable',
-        env_value:  'build.settings.email'
+        env_value: 'build.settings.email'
       )
       wp.env_params.create!(
-        name:         'WORDPRESS_DB_USER',
-        param_type:   'static',
+        name: 'WORDPRESS_DB_USER',
+        param_type: 'static',
         static_value: 'root'
       )
       wp.volumes.create!(
-        label:             'wordpress',
-        mount_path:        '/var/www',
-        enable_sftp:       true,
-        borg_enabled:      true,
-        borg_freq:         '@daily',
-        borg_strategy:     'file',
-        borg_keep_hourly:  1,
-        borg_keep_daily:   7,
-        borg_keep_weekly:  4,
+        label: 'wordpress',
+        mount_path: '/var/www',
+        enable_sftp: true,
+        borg_enabled: true,
+        borg_freq: '@daily',
+        borg_strategy: 'file',
+        borg_keep_hourly: 1,
+        borg_keep_daily: 7,
+        borg_keep_weekly: 4,
         borg_keep_monthly: 0
       )
     end

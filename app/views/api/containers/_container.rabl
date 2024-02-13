@@ -3,15 +3,23 @@ attributes :id, :name, :req_state, :stats, :current_state,
 
 attributes deployment_id: :project_id, service_id: :container_service_id
 
+child location: :region do
+  attributes :id, :name
+end
+
+child region: :availability_zone do
+  attributes :id, :name
+end
+
 if @logs
   node :logs do
     @logs
   end
 end
 
-node :ingress_rules do |i|
-  i.api_ingress_rules
-end
+node :ingress_rules, &:api_ingress_rules
+
+node :on_latest_image, &:latest_image?
 
 node :links do |i|
   {

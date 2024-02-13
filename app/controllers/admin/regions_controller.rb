@@ -52,7 +52,7 @@ class Admin::RegionsController < Admin::ApplicationController
     params.require(:region).permit(
       :name, :active, :fill_to, :metric_client_id, :loki_endpoint, :log_client_id, :loki_retries, :loki_batch_size,
       :volume_backend, :nfs_remote_host, :nfs_remote_path, :offline_window, :failure_count, :nfs_controller_ip,
-      :disable_oom, :pid_limit, :ulimit_nofile_hard, :ulimit_nofile_soft, :location_id, :p_net_size, :network_driver
+      :disable_oom, :pid_limit, :ulimit_nofile_hard, :ulimit_nofile_soft, :location_id, :p_net_size, :network_driver, :acme_server
     )
   end
 
@@ -60,7 +60,7 @@ class Admin::RegionsController < Admin::ApplicationController
     params.require(:region).permit(
       :active, :fill_to, :metric_client_id, :loki_endpoint, :log_client_id, :loki_retries, :loki_batch_size,
       :volume_backend, :nfs_remote_host, :nfs_remote_path, :offline_window, :failure_count, :nfs_controller_ip,
-      :disable_oom, :pid_limit, :ulimit_nofile_hard, :ulimit_nofile_soft, :p_net_size, :network_driver
+      :disable_oom, :pid_limit, :ulimit_nofile_hard, :ulimit_nofile_soft, :p_net_size, :network_driver, :acme_server
     )
   end
 

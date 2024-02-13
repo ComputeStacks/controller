@@ -15,6 +15,7 @@ module ProviderForContainerImage
   def image_auth
     return nil if container_image_provider.nil? && registry_custom.blank? # Shouldn't happen.
     return nil if container_registry.nil? && !registry_auth
+
     if container_registry
       {
         'username' => registry_username,
@@ -39,6 +40,7 @@ module ProviderForContainerImage
 
   def registry_password
     return nil if registry_password_encrypted.blank?
+
     Secret.decrypt!(registry_password_encrypted)
   end
 
@@ -75,17 +77,17 @@ module ProviderForContainerImage
 
   def registry_image_client
     p = if (provider_path.blank? || container_image_provider&.name == 'DockerHub') && registry_image_path.split('/').count == 1
-      "library/#{registry_image_path}"
-    else
-      registry_image_path
-    end
+          "library/#{registry_image_path}"
+        else
+          registry_image_path
+        end
     DockerRegistry::Image.new(registry_client, p)
   end
 
   def cleanup_registry_custom
-    unless registry_custom.blank?
-      self.registry_custom = registry_custom.gsub("http://",'').gsub("https://",'').split('/').first.strip
-    end
+    return if registry_custom.blank?
+
+    self.registry_custom = registry_custom.gsub("http://",'').gsub("https://",'').split('/').first.strip
   end
 
 end

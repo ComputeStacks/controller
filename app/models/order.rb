@@ -43,7 +43,7 @@ class Order < ApplicationRecord
 
   after_create :generate_details
 
-  serialize :order_data, JSON
+  serialize :order_data, coder: JSON
 
   def data
     return {} if order_data.nil?

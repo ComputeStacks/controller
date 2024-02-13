@@ -41,6 +41,15 @@
       </div>
     </div>
   <% end %>
+  <% unless log.labels.empty? %>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <%= render partial: "admin/event_logs/show/labels", locals: { log: log } %>
+        </div>
+      </div>
+    </div>
+  <% end %>
   <% unless subscribers.empty? %>
     <div class="row">
       <div class="col-md-12">

@@ -26,7 +26,7 @@ class ProvisionDriver < ApplicationRecord
 
   has_and_belongs_to_many :product_modules
 
-  serialize :settings, JSON
+  serialize :settings, coder: JSON
 
   def virtual_machine
     eval("#{self.module_name}::VirtualMachine")

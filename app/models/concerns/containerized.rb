@@ -9,12 +9,36 @@ module Containerized
     # Given a container name, find the local resource
     def resource_by_name(name)
       return nil if name.blank?
+
       c = Deployment::Container.find_by(name: name)
       c = Deployment::Sftp.find_by(name: name) if c.nil?
       c = LoadBalancer.find_by(name: name) if c.nil?
       c
     end
 
+  end
+
+  # @return [Boolean]
+  def latest_image?
+    c = docker_client
+    # if the container is not on the node, then we _will_ have the latest image
+    return true if c.nil?
+
+    c_image_tag = c.info['Config']['Image']
+    c_image_id = c.info['Image']
+
+    running_image = Docker::Image.get(c_image_id, {}, node.client(3))
+
+    running_image.info['RepoTags'].include? c_image_tag
+
+  rescue Docker::Error::NotFoundError
+    true
+  rescue => e
+    event.event_details.create!(
+      data: e.message,
+      event_code: "20fb4e443fde83de"
+    )
+    false
   end
 
   def halt_auto_recovery?
@@ -29,14 +53,15 @@ module Containerized
   # @return [Boolean]
   def requires_intervention?(docker_status)
     return true if docker_status == 'running' && !active?
-    %w(created stopped exited).include?(docker_status) && active?
+
+    %w[created stopped exited].include?(docker_status) && active?
   end
 
   def metadata_env_params
     [
-      %W(METADATA_SERVICE http://metadata.internal:8500/v1/kv/projects/#{deployment.token}),
-      %W(METADATA_URL http://metadata.internal:8500/v1/kv/projects/#{deployment.token}/metadata?raw=true),
-      %W(METADATA_AUTH #{deployment.consul_auth_key})
+      %W[METADATA_SERVICE http://metadata.internal:8500/v1/kv/projects/#{deployment.token}],
+      %W[METADATA_URL http://metadata.internal:8500/v1/kv/projects/#{deployment.token}/metadata?raw=true],
+      %W[METADATA_AUTH #{deployment.consul_auth_key}]
     ]
   end
 
@@ -50,6 +75,7 @@ module Containerized
                      nil
                    end
     return false if build_client.nil?
+
     Docker::Container.create(build_client, node.client).is_a? Docker::Container
   rescue Docker::Error::ConflictError => e
     event.event_details.create!(
@@ -88,36 +114,44 @@ module Containerized
     true
   end
 
+  # @param [Boolean] fast_client
+  # @return [Docker::Container,nil]
   def docker_client(fast_client = false)
-    Docker::Container.get(self.name, {}, (fast_client ? self.node.fast_client : self.node.client(3)))
+    Docker::Container.get(self.name, {}, (fast_client ? node.fast_client : node.client(3)))
   rescue Excon::Error::Certificate => e
     # Unable to connect due to invalid certificateX
     ec = '12b4317e8dde17af'
     se = SystemEvent.find_by(event_code: ec)
-    se = SystemEvent.create!(
-        message: "Docker Connection Error: #{self.node&.region.name}",
+    if se.nil?
+      se = SystemEvent.create!(
+        message: "Docker Connection Error: #{node&.region&.name}",
         log_level: 'warn',
         data: { message: nil, count: 0 },
         event_code: ec
-    ) if se.nil?
+      )
+    end
     data = se.data
     data[:message] = e.message
     data[:count] = data[:count] + 1
     se.update_attribute :data, data
+    nil
   rescue Excon::Error::Socket => e
     # Unable to connect due to _missing_ tls certs on docker
     ec = '06daa76c88d5f72a'
     se = SystemEvent.find_by(event_code: ec)
-    se = SystemEvent.create!(
-      message: "Missing Docker TLS Cert on Node: #{self.node&.region.name}",
-      log_level: 'warn',
-      data: { message: nil, count: 0 },
-      event_code: ec
-    ) if se.nil?
+    if se.nil?
+      se = SystemEvent.create!(
+        message: "Missing Docker TLS Cert on Node: #{node&.region&.name}",
+        log_level: 'warn',
+        data: { message: nil, count: 0 },
+        event_code: ec
+      )
+    end
     data = se.data
     data[:message] = e.message
     data[:count] = data[:count] + 1
     se.update_attribute :data, data
+    nil
   rescue
     nil
   end
@@ -148,10 +182,12 @@ module Containerized
         result = d.join(" ")
       end
     end
-    event.event_details.create!(
-      event_code: '76ed2ba5c0ef8883',
-      data: "Exit Code: #{exit_code}\n\nResponse: #{result}"
-    ) if event
+    if event
+      event.event_details.create!(
+        event_code: '76ed2ba5c0ef8883',
+        data: "Exit Code: #{exit_code}\n\nResponse: #{result}"
+      )
+    end
     {
       response: result,
       exit_code: exit_code
@@ -189,7 +225,7 @@ module Containerized
       id = m.split(":").first.strip
       vol_ids << id unless vol_ids.include?(id)
     end
-    if c.info.dig('Volumes')
+    if c.info['Volumes']
       vols = c.info['Volumes']
       vols.each_with_index do |(k, v), i|
         id = Volume.name_by_path(v)
@@ -200,9 +236,9 @@ module Containerized
       vol = Volume.find_by(name: i)
       if vol
         result << {
-            'service' => vol.container_service&.name,
-            'volume' => vol.name,
-            'label' => vol.label.blank? ? vol.container_service.label : vol.label
+          'service' => vol.container_service&.name,
+          'volume' => vol.name,
+          'label' => vol.label.blank? ? vol.container_service.label : vol.label
         }
       end
     end
@@ -212,7 +248,7 @@ module Containerized
   end
 
   def can_power?
-    !%w(removing rebuilding building migrating).include?(status)
+    !%w[removing rebuilding building migrating].include?(status)
   end
 
   ##
@@ -225,7 +261,8 @@ module Containerized
   ##
   # @return [Hash,nil] { state: state, health: { state: string, count: int, log: [] } }
   def container_status(raw = {})
-    return nil if %w(building migrating pending rebuilding trashed).include? status
+    return nil if %w[building migrating pending rebuilding trashed].include? status
+
     if raw.empty?
       if node.nil?
         update status: 'pending'

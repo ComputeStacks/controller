@@ -3,6 +3,14 @@ attributes :id, :name, :label, :default_domain, :public_ip, :command,
            :current_state, :auto_scale, :auto_scale_horizontal, :auto_scale_max,
            :labels, :created_at, :updated_at
 
+child location: :region do
+  attributes :id, :name
+end
+
+child region: :availability_zone do
+  attributes :id, :name
+end
+
 child deployment: :project do
   attributes :id, :name
 end
@@ -44,9 +52,7 @@ node :package do |i|
   end
 end
 
-node :has_sftp do |i|
-  i.requires_sftp_containers?
-end
+node :has_sftp, &:requires_sftp_containers?
 node :ingress_rules do |i|
   i.ingress_rules.pluck(:id)
 end

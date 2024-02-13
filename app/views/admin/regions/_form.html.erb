@@ -190,6 +190,21 @@
     </div>
   </div>
 
+  <hr>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <h5>ACME Settings</h5>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <%= f.label :acme_server, 'ACME server' %>
+      <%= f.text_field :acme_server, class: 'form-control' %>
+      <span class="help-block">Should be in the form: <code>{IP:PORT}</code> for the controller. Don't use the public domain, this needs to bypass nginx on the controller.</span>
+    </div>
+  </div>
+
 </div>
 <div class="panel-footer text-right">
   <%= link_to "Delete", "/admin/regions/#{@region.id}", method: :delete, data: { confirm: 'Are you sure? This is destructive and irreversible.' }, class: 'btn btn-danger pull-left' if (controller.action_name == 'edit' || controller.action_name == 'update') %>

@@ -130,8 +130,8 @@ class LoadBalancer < ApplicationRecord
 
   before_validation :set_ext_ip
 
-  serialize :ext_ip, JSON
-  serialize :internal_ip, JSON
+  serialize :ext_ip, coder: JSON
+  serialize :internal_ip, coder: JSON
 
   def ipv6_enabled?
     !region.has_clustered_networking?

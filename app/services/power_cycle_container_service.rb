@@ -17,7 +17,9 @@ class PowerCycleContainerService
                 :container,
                 :event,
                 :delay, # eg: 30.seconds
-                :errors
+                :errors,
+                :callback_auth,
+                :callback_url
 
   # @param [Deployment::Container] container
   # @param [String] action
@@ -29,6 +31,8 @@ class PowerCycleContainerService
     self.delay = nil
     self.event = nil
     self.errors = []
+    self.callback_auth = nil
+    self.callback_url = nil
   end
 
   # @return [Boolean]
@@ -156,6 +160,11 @@ class PowerCycleContainerService
     else
       event.event_code = '79eb562a7e6d5d61'
       event.locale = 'unknown'
+    end
+
+    unless callback_url.blank?
+      event.labels['callback_url'] = callback_url
+      event.labels['callback_auth'] = callback_auth
     end
 
     unless event.save

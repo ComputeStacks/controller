@@ -35,7 +35,7 @@ module Volumes
       archives = repo_info['archives']
       return list if archives.nil?
       archives.reverse.each do |i|
-        id = Base64.encode64(i).gsub("\n","")
+        id = Base64.urlsafe_encode64(i)
         split_name = i.split('auto-')
         split_name = i.split('-m-') if split_name.count == 1
         if split_name.count > 1

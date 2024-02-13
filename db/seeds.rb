@@ -17,7 +17,7 @@ puts "...Collaborate: Invitation - Registry..."
 block_collaborate = Block.create!(title: 'Collaborate: Registry Invite', content_key: 'collaborate.invite.registry')
 block_collaborate.block_contents.create!(
   locale: ENV['LOCALE'],
-  body: %Q(<h4>Container Registry Collaboration Invite</h4><div>{{ user }} has invited you to collaborate on the container registry {{ registry }}. Please click the link below to accept or reject this invitation.</div>)
+  body: %Q(<h4>Container Registry Collaboration Invite</loadh4><div>{{ user }} has invited you to collaborate on the container registry {{ registry }}. Please click the link below to accept or reject this invitation.</div>)
 )
 
 puts "...Collaborate: Invitation - Project..."
@@ -128,6 +128,10 @@ plan = BillingPlan.create! name: 'default', is_default: true
 # Container Package: Small
 puts "..small container product"
 Product.create! label: 'Small', kind: 'package'
+
+# Container Package: Medium
+puts "..medium container product"
+Product.create! label: 'Medium', kind: 'package'
 
 # Storage Product
 Product.create! label: 'Storage',

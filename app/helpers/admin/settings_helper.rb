@@ -22,7 +22,6 @@ module Admin::SettingsHelper
   def normalize_setting_title(name)
     return 'Container Registry Certificate Name' if name == 'cr_le'
     return 'Enable LetsEncrypt' if name == 'le'
-    return 'LetsEncrypt Validation Server' if name == 'le_validation_server'
     return '1 Certificate per Domain' if name == 'le_single_domain'
     return 'Certificates per LE Account' if name == 'le_domains_per_account'
     return 'DNS Validation Waiting Period' if name == 'le_dns_sleep'
