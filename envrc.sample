@@ -1,8 +1,43 @@
+# Linux should be `localhost`
+# Using Colima on mac? `colima start --network-address && colima status -e` to get the IP.
+export DOCKER_IP=localhost
+
+# Vagrant IP will be assigned on first startup, and should not change until you destroy the VM.
+# This IP should be accessible from your local machine.
+export VAGRANT_VM_IP=localhost
+
+# You need to authenticate with Github to access our public gem repository.
+export GITHUB_GEM_PULL_USER="your github username"
+export GITHUB_GEM_PULL_TOKEN="your github personal token"
+
+##
+# You should not need to change anything else below this section.
+##
+
 export LOCALE=en
 export CURRENCY=USD
-export CS_SSH_KEY=/home/vagrant/.ssh/id_rsa
+export CS_SSH_KEY=lib/dev/keys/id_ed25519
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
-export GITHUB_GEM_PULL_USER=changme
-export GITHUB_GEM_PULL_TOKEN=changme
-export RUBYOPT='-W:no-deprecated'
+export INGRESS_TEST_URI=localhost/ingress
 export BUNDLE_GEMFILE=Gemfile.common
+
+# PowerDNS And ACME (used for testing).
+export PDNS_DNS_PORT=55003
+export PDNS_API_PORT=55004
+export ACME_API_PORT=55005
+
+# Local Resolver for testing
+export RESOLVER_LIST="$DOCKER_IP"
+export RESOLVER_PORT="$PDNS_DNS_PORT"
+
+# this will be copied from the Vagrant VM during the rake task `setup_dev`.
+export CONSUL_TOKEN_PATH=".consul.token"
+
+# Postgres
+export DB_PORT=55001
+export DEV_DB_URL=postgresql://controller:controller@$DOCKER_IP:$DB_PORT/computestacks
+export TEST_DB_URL=postgresql://controller:controller@$DOCKER_IP:$DB_PORT/computestacks_test
+
+# Redis
+export REDIS_HOST="$DOCKER_IP"
+export REDIS_PORT=55002

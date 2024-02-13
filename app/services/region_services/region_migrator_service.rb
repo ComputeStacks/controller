@@ -130,7 +130,7 @@ module RegionServices
       n = new_region.nodes.online.first.primary_ip
       begin
         Diplomat::Node.get_all({
-                                 http_addr: Diplomat.configuration.options.empty? ? "http://#{n}:8500" : "https://#{n}:8501",
+                                 http_addr: "#{CONSUL_API_PROTO}://#{n}:#{CONSUL_API_PORT}",
                                  dc: dc.blank? ? nil : dc,
                                  token: new_region.consul_token
                                })

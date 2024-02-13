@@ -57,7 +57,7 @@ Rails.application.configure do
   # config.action_view.raise_on_missing_translations = true
   # config.cache_store = :redis_store, "redis://127.0.0.1:6379/9/cache", { expires_in: 1.minute }
   config.cache_store = :redis_cache_store, {
-    url: "redis://127.0.0.1:6379/7",
+    url: "redis://#{ENV['REDIS_HOST'].blank? ? 'localhost' : ENV['REDIS_HOST']}:#{ENV['REDIS_PORT'].blank? ? '6379' : ENV['REDIS_PORT']}/7",
     expires_in: 10.minutes
   }
   config.action_mailer.default_url_options = { host: "127.0.0.1" }

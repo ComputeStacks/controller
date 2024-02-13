@@ -2,7 +2,7 @@ testone:
   label: 'test01'
   hostname: 'test01'
   public_ip: '127.0.0.1'
-  primary_ip: '127.0.0.1'
+  primary_ip: <%= ENV['VAGRANT_VM_IP'] %>
   region: regionone
   active: true
 

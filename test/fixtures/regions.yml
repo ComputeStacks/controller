@@ -6,7 +6,7 @@ regionone:
   network_driver: bridge
   log_client: vagrant_log_client
   metric_client: vagrant_metric_client
-  consul_token: '<%= File.exist?("/home/vagrant/consul.token") ? File.read("/home/vagrant/consul.token").gsub("\n","") : "" %>'
+  consul_token: '<%= File.exist?("/home/vagrant/consul.token") ? File.read("/home/vagrant/consul.token").strip : File.read("#{Rails.root}/#{ENV['CONSUL_TOKEN_PATH']}") %>'
 #regiontwo:
 #  location: testlocation
 #  name: dev2

@@ -11,9 +11,7 @@ class CollectUsageTest < ActionDispatch::IntegrationTest
     # Note: This currently assumes 1 container per service.
     BillingUsage.all.each do |i|
 
-      if i.total > 0
-        refute i.processed
-      end
+      refute i.processed if i.total.positive?
 
       # We must have a subscription product!
       refute_nil i.subscription_product
@@ -44,19 +42,16 @@ class CollectUsageTest < ActionDispatch::IntegrationTest
           sum + (id * 1024)
         end
         expected_amount = expected_amount.zero? ? expected_amount : (expected_amount / BYTE_TO_GB).round(4)
-        if expected_amount != i.qty
-          puts "ID: #{i.id} | E: #{expected_amount} | A: #{i.qty}"
-        end
+        puts "ID: #{i.id} | E: #{expected_amount} | A: #{i.qty}" if expected_amount != i.qty
         assert_equal expected_amount, i.qty
       when 'storage'
         next if i.subscription.linked_obj.service.volumes.empty?
+
         # add all IDs together
         expected_usage = i.subscription.linked_obj.service.volumes.pluck(:id).inject(:+)
         # deduct what's included in their plan
-        expected_usage = expected_usage - i.subscription.package.storage
-        if expected_usage != i.qty
-          puts "ID: #{i.id} | E: #{expected_usage} | A: #{i.qty}"
-        end
+        expected_usage -= i.subscription.package.storage
+        puts "ID: #{i.id} | E: #{expected_usage} | A: #{i.qty}" if expected_usage != i.qty
         assert_equal expected_usage, i.qty
       end
 

@@ -35,14 +35,13 @@ module MetadataServices
     end
 
     def consul_config
-      return {} if Rails.env.test? # for test, we dont want any config here!
       return {} if @service.nodes.online.empty?
       dc = @service.region.nil? ? @service.nodes.online.first.region.name.strip.downcase : @service.region.name.strip.downcase
       token = @service.region.nil? ? @service.nodes.online.first.region.consul_token : @service.region.consul_token
       return {} if token.blank?
       consul_ip = @service.nodes.online.first.primary_ip
       {
-        http_addr: Diplomat.configuration.options.empty? ? "http://#{consul_ip}:8500" : "https://#{consul_ip}:8501",
+        http_addr: "#{CONSUL_API_PROTO}://#{consul_ip}:#{CONSUL_API_PORT}",
         dc: dc.blank? ? nil : dc,
         token: token
       }

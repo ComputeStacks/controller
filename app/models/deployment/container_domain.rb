@@ -71,6 +71,7 @@ class Deployment::ContainerDomain < ApplicationRecord
 
   def resource_name
     return "null" if domain.blank?
+
     domain.strip.downcase.gsub(".","-")[0..10]
   end
 
@@ -82,6 +83,7 @@ class Deployment::ContainerDomain < ApplicationRecord
     # expected to be an array
     pub = []
     return pub if container_service&.load_balancer.nil?
+
     pub << container_service.load_balancer.public_ip
     container_service.load_balancer.ipaddrs.where(role: 'public').each do |i|
       addr = i.ip_addr.to_s
@@ -98,9 +100,11 @@ class Deployment::ContainerDomain < ApplicationRecord
     sysd = Deployment::ContainerDomain.sys_domain(service.region).first
     return [] if sysd.nil?
     return [] if service.nil? || service.user.nil?
+
     domains = []
     service.ingress_rules.where(external_access: true).each do |ingress|
       next if ingress.container_domains.where(system_domain: true).exists?
+
       domains << ingress.container_domains.create!(
         domain: "#{service.name}#{ingress.id}.#{sysd}",
         system_domain: true,
@@ -117,6 +121,7 @@ class Deployment::ContainerDomain < ApplicationRecord
       LoadBalancer.all.map { |i| i.domain unless i.domain.blank? }
     else
       return [] if region.load_balancer.nil?
+
       [region.load_balancer.domain]
     end
   end
@@ -125,16 +130,15 @@ class Deployment::ContainerDomain < ApplicationRecord
 
   def reload_load_balancer!
     return true unless ingress_rule
+
     if ingress_rule.external_access
       if ingress_rule.load_balancer_rule
         # internal load balancer
         # @type [Deployment::ContainerService]
         lb_service = ingress_rule.load_balancer_rule&.container_service
-        if lb_service
-          lb_service.containers.each do |container|
+        lb_service&.containers&.each do |container|
             PowerCycleContainerService.new(container, 'restart', current_audit).perform
           end
-        end
       elsif container_service&.load_balancer
         LoadBalancerServices::DeployConfigService.new(container_service.load_balancer).perform
       end
@@ -169,6 +173,7 @@ class Deployment::ContainerDomain < ApplicationRecord
 
   def set_primary_domain
     return unless make_primary
+
     container_service.update master_domain_id: id
   end
 

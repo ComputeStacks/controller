@@ -1,7 +1,7 @@
 Sidekiq.strict_args!
 
 sidekiq_redis_conf = {
-  url: Rails.env.production? ? ENV["REDIS_URL"] : "redis://localhost:6379/#{Rails.env.test? ? '8' : '6'}",
+  url: "redis://#{ENV['REDIS_HOST'].blank? ? 'localhost' : ENV['REDIS_HOST']}:#{ENV['REDIS_PORT'].blank? ? '6379' : ENV['REDIS_PORT']}/#{Rails.env.test? ? '8' : '6'}",
   network_timeout: 3
 }
 

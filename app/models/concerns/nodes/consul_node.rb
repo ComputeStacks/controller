@@ -21,11 +21,10 @@ module Nodes
     end
 
     def consul_config
-      return {} if Rails.env.test? # for test, we dont want any config here!
       return {} unless online?
       dc = region.name.strip.downcase
       {
-        http_addr: Diplomat.configuration.options.empty? ? "http://#{primary_ip}:8500" : "https://#{primary_ip}:8501",
+        http_addr: "#{CONSUL_API_PROTO}://#{primary_ip}:#{CONSUL_API_PORT}",
         dc: dc.blank? ? nil : dc,
         token: region.consul_token
       }

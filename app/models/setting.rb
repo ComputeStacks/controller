@@ -703,6 +703,7 @@ class Setting < ApplicationRecord
         branding_img_login
         branding_email_logo
         company_name
+        computestacks_bastion_image
         computestacks_cr_le
         enable_signup_form?
         general_support_line

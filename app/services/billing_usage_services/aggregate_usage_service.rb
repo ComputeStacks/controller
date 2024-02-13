@@ -47,6 +47,7 @@ module BillingUsageServices
       BillingUsage.unscoped.select("distinct on (subscription_product_id) id, subscription_product_id, processed").where(processed: false).each do |i|
         aggreg_total = BillingUsage.unscoped.select("SUM(total) as bill_total, SUM(qty) as bill_qty").find_by(subscription_product_id: i.subscription_product_id, processed: false)
         next if aggreg_total.nil? || aggreg_total.bill_total < 0.01 # 1 Cent is the smallest unit we will process.
+
         pstart = nil
         pend = nil
         ext_id = nil
@@ -56,6 +57,7 @@ module BillingUsageServices
           pstart = usage.period_start if pstart.nil? || usage.period_start < pstart
           pend = usage.period_end if pend.nil? || usage.period_end > pend
           next if pstart.nil? || pend.nil?
+
           ext_id = usage.external_id if ext_id.nil? && !usage.external_id.nil?
           processed_records << usage
           items << {
@@ -70,11 +72,14 @@ module BillingUsageServices
         end
         sub_product = i.subscription_product
         next if sub_product.nil?
+
         sub = sub_product.subscription
         next if sub.nil?
+
         product = sub_product.product
         next if product.nil?
         next if sub_product.billing_resource.nil? || sub_product.user.nil?
+
         aggregated << {
             subscription_id: sub.id,
             subscription_product_id: i.subscription_product_id,
@@ -104,7 +109,7 @@ module BillingUsageServices
         event.event_details.create!(data: aggregated.to_json, event_code: 'af5dbfa43bebd5f5')
         event.done!
       end
-      self.result = aggregated.map { |i| i.with_indifferent_access }
+      self.result = aggregated.map(&:with_indifferent_access)
       # Even if it does not succeed, you still need to mark them as processed because the `process_usage!()` function does not
       # check if data already exists before processing it; you can't run it more than once.
       billing_users.each do |u|

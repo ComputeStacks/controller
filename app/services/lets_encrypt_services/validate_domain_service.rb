@@ -64,7 +64,11 @@ module LetsEncryptServices
     def valid_http?
       return true if Rails.env.test? # No good way to test this right now...
       return true if load_balancer # Not performing this check on load balancer domains right now.
-      response = HTTParty.get("https://#{domain}/.well-known/acme-challenge/http_check", verify: false, follow_redirects: false)
+
+      response = HTTParty.get(
+        "https://#{domain}/.well-known/acme-challenge/http_check",
+        verify: false, follow_redirects: false
+      )
       unless response.code == 200
         event.event_details.create!(
           data: "Invalid domain configuration: Unable to connect to validation url. Please ensure there are no redirect rules on '/.well-known/acme-challenge/' URLs.",
@@ -96,12 +100,16 @@ module LetsEncryptServices
       is_valid = true
       (dns_resource + dns_resource_six).each do |resource|
         break unless is_valid
+
         is_valid = if load_balancer
-          load_balancer.ip_allowed? resource
-        else
-          container_domain.le_dns_allowed? resource
+                     load_balancer.ip_allowed? resource
+                   else
+                     container_domain.le_dns_allowed? resource
+                   end
+        unless is_valid
+          event.event_details.create!(data: "Invalid DNS resource found: #{resource}",
+                                      event_code: '510806d5621c97d5')
         end
-        event.event_details.create!(data: "Invalid DNS resource found: #{resource}", event_code: '510806d5621c97d5') unless is_valid
       end
 
       if load_balancer
@@ -146,7 +154,8 @@ module LetsEncryptServices
                  end
 
       if root_tld.nil? # We should always have a valid TLD!
-        event.event_details.create!( data: "Invalid TLD: #{full_domain}.", event_code: '1a6505df079a9b3c' )
+        event.event_details.create!( data: "Invalid TLD: #{full_domain}.",
+                                     event_code: '1a6505df079a9b3c' )
         return false
       end
 
@@ -155,6 +164,7 @@ module LetsEncryptServices
       domains = []
       full_domain.gsub(".#{root_tld}",'').split('.').each do |i|
         break if full_domain == root_tld # Stop when we hit the root domain.
+
         domains << full_domain
         full_domain = full_domain.split("#{i}.")[1] # Remove subdomain from `full_domain` and continue loop.
       end
@@ -192,6 +202,7 @@ module LetsEncryptServices
           next
         end
         next if response.empty?
+
         invalid_records = []
         invalid_wild_records = []
         le_caa_exists = false

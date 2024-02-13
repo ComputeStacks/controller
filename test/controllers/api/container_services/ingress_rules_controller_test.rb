@@ -16,8 +16,6 @@ class Api::ContainerServices::IngressRulesControllerTest < ActionDispatch::Integ
 
     data = JSON.parse(response.body)
 
-    puts data['ingress_rules']
-
     assert_equal @service.ingress_rules.count, data['ingress_rules'].count
 
   end

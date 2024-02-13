@@ -2,8 +2,6 @@ require 'test_helper'
 
 class LoadBalancerTest < ActiveSupport::TestCase
 
-  include AcmeTestContainerConcern
-
   setup do
     @lb = load_balancers(:default)
   end

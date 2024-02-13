@@ -17,7 +17,7 @@ Node < ApplicationRecord
 
   # Able to connect, and existing deployments can use it.
   scope :online, -> { where(disconnected: false, maintenance: false) }
-  scope :offline, -> { where( Arel.sql( %q(disconnected = true OR maintenance = true) ) ) }
+  scope :offline, -> { where( Arel.sql( 'disconnected = true OR maintenance = true' ) ) }
 
   # Available for new orders
   scope :available, -> { where(active: true, disconnected: false, maintenance: false) }
@@ -59,7 +59,7 @@ Node < ApplicationRecord
   end
 
   def self.system_containers
-    %w(
+    %w[
       alertmanager
       cadvisor
       calico-node
@@ -68,51 +68,62 @@ Node < ApplicationRecord
       loki
       prometheus
       vault-bootstrap
-    )
+    ]
   end
 
   def ingress_rules
-    container_services.map { |i| i.ingress_rules } + sftp_containers.map { |i| i.ingress_rules }
+    container_services.map(&:ingress_rules) + sftp_containers.map(&:ingress_rules)
   end
 
   # @return [Hash]
   def container_io_limits
     return {} if volume_device.blank?
-    return {} if (block_write_bps.zero? && block_read_bps.zero?)
+    return {} if block_write_bps.zero? && block_read_bps.zero?
+
     h = {}
-    h['BlkioDeviceWriteBps'] = [
-      {
-        'Path' => volume_device,
-        'Rate' => block_write_bps
-      }
-    ] unless block_write_bps.zero?
-    h['BlkioDeviceReadBps'] = [
-      {
-        'Path' => volume_device,
-        'Rate' => block_read_bps
-      }
-    ] unless block_read_bps.zero?
-    h['BlkioDeviceWriteIOps'] = [
-      {
-        'Path' => volume_device,
-        'Rate' => block_write_iops
-      }
-    ] unless block_write_iops.zero?
-    h['BlkioDeviceReadIOps'] = [
-      {
-        'Path' => volume_device,
-        'Rate' => block_read_iops
-      }
-    ] unless block_read_iops.zero?
+    unless block_write_bps.zero?
+      h['BlkioDeviceWriteBps'] = [
+        {
+          'Path' => volume_device,
+          'Rate' => block_write_bps
+        }
+      ]
+    end
+    unless block_read_bps.zero?
+      h['BlkioDeviceReadBps'] = [
+        {
+          'Path' => volume_device,
+          'Rate' => block_read_bps
+        }
+      ]
+    end
+    unless block_write_iops.zero?
+      h['BlkioDeviceWriteIOps'] = [
+        {
+          'Path' => volume_device,
+          'Rate' => block_write_iops
+        }
+      ]
+    end
+    unless block_read_iops.zero?
+      h['BlkioDeviceReadIOps'] = [
+        {
+          'Path' => volume_device,
+          'Rate' => block_read_iops
+        }
+      ]
+    end
     h['OomKillDisable'] = true if region.disable_oom
     h['PidsLimit'] = region.pid_limit unless region.pid_limit.zero?
-    h['Ulimits'] = [
-      {
-        'Name' => 'nofile',
-        'Soft' => region.ulimit_nofile_soft,
-        'Hard' => region.ulimit_nofile_hard
-      }
-    ] unless region.ulimit_nofile_soft.zero? || region.ulimit_nofile_hard.zero?
+    unless region.ulimit_nofile_soft.zero? || region.ulimit_nofile_hard.zero?
+      h['Ulimits'] = [
+        {
+          'Name' => 'nofile',
+          'Soft' => region.ulimit_nofile_soft,
+          'Hard' => region.ulimit_nofile_hard
+        }
+      ]
+    end
     h
   end
 
@@ -123,7 +134,7 @@ Node < ApplicationRecord
     opts[:connect_timeout] = 15 * timeout
     opts[:read_timeout] = 60 * timeout
     opts[:write_timeout] = 60 * timeout
-    Docker::Connection.new("tcp://#{self.primary_ip}:2376", opts)
+    Docker::Connection.new("tcp://#{primary_ip}:2376", opts)
   end
 
   def fast_client
@@ -131,11 +142,11 @@ Node < ApplicationRecord
     opts[:connect_timeout] = 5
     opts[:read_timeout] = 5
     opts[:write_timeout] = 5
-    Docker::Connection.new("tcp://#{self.primary_ip}:2376", opts)
+    Docker::Connection.new("tcp://#{primary_ip}:2376", opts)
   end
 
   def host_client
-    DockerSSH::Node.new("ssh://#{self.primary_ip}:#{ssh_port}", {key: ENV['CS_SSH_KEY']})
+    DockerSSH::Node.new("ssh://#{primary_ip}:#{ssh_port}", {key: "#{Rails.root}/#{ENV['CS_SSH_KEY']}"})
   end
 
   def list_all_containers
@@ -146,7 +157,7 @@ Node < ApplicationRecord
 
   def iptable_rules
     q = "external_access = true AND port_nat > 0 AND (proto = 'udp' OR (proto = 'tcp' AND tcp_lb = false))"
-    (container_services.map { |i| i.ingress_rules.where( Arel.sql q ) } + sftp_containers.map { |i| i.ingress_rules.where( Arel.sql q ) }).flatten
+    (container_services.map { |i| i.ingress_rules.where( Arel.sql(q) ) } + sftp_containers.map { |i| i.ingress_rules.where( Arel.sql(q) ) }).flatten
   end
 
   private
@@ -155,6 +166,7 @@ Node < ApplicationRecord
   # When using clustered storage, we need to ensure that our volumes exist for faster fail over.
   def sync_volumes
     return true unless region.has_clustered_storage?
+
     region.volumes.active.each do |vol|
       unless vol.nodes.include? self
         vol.nodes << self
@@ -165,6 +177,7 @@ Node < ApplicationRecord
 
   def valid_volume_path
     return if volume_device.blank?
+
     if volume_device.count('/').zero?
       errors.add(:volume_device, 'is not a valid path')
     end

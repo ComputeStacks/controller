@@ -204,11 +204,11 @@ class Product < ApplicationRecord
   end
 
   def set_aggregation
-    self.is_aggregated = self.resource_kind == 'bandwidth'
+    self.is_aggregated = resource_kind == 'bandwidth'
   end
 
   def update_product_name
-    self.name = self.label.parameterize
+    self.name = label.parameterize
   end
 
 end

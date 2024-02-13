@@ -10,3 +10,7 @@ Layout/TrailingWhitespace:
   Enabled: false
 Style/RescueStandardError:
   Enabled: false
+Layout/SpaceInsideParens:
+  Enabled: false
+Layout/SpaceInsideArrayLiteralBrackets:
+  Enabled: false

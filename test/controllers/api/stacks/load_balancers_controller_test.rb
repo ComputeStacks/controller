@@ -26,10 +26,10 @@ class Api::Stacks::LoadBalancersControllerTest < ActionDispatch::IntegrationTest
     node.container_services.web_only.each do |service|
       service.ingress_rules.each do |ingress|
         rule = Digest::MD5.hexdigest("#{service.name}#{ingress.id}")
-        assert_match /backend #{rule}/, response.body
-        assert_match /use_backend #{rule}/, response.body
+        assert_match(/backend #{rule}/, response.body)
+        assert_match(/use_backend S_#{rule}/, response.body)
         service.containers.each do |container|
-          assert_match /server #{container.name} #{container.ip_address.ipaddr}:#{ingress.port}/, response.body
+          assert_match(/server #{container.name} #{container.ip_address.ipaddr}:#{ingress.port}/, response.body)
         end
       end
     end

@@ -37,7 +37,7 @@ namespace :test_connection do
         next
       end
       begin
-        addr = Diplomat.configuration.options.empty? ? "http://#{n}:8500" : "https://#{n}:8501"
+        addr = "#{CONSUL_API_PROTO}://#{n}:#{CONSUL_API_PORT}"
         peers = Diplomat::Status.peers({ http_addr: addr, dc: dc })
         puts %Q[Consul Region: #{dc} #{n} - #{peers.is_a?(Array) ? "found #{peers.count} nodes": peers}]
       rescue

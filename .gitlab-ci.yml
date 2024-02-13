@@ -13,14 +13,12 @@ workflow:
 # CS_MAJOR_VERSION
 variables:
   FULL_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
-  DH_IMAGE: cmptstks/controller
 
 default:
   tags:
     - shell
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
-    - echo "$DH_PW" | docker login -u $DH_USER --password-stdin
   after_script:
     - docker logout $CI_REGISTRY
     - docker logout
@@ -32,8 +30,8 @@ stages:
 build:
   stage: build
   before_script:
-    - 'docker run -d --rm --name cstacks-pg -e POSTGRES_USER=cstacks -e POSTGRES_DB=cstacks -e POSTGRES_PASSWORD=cstacks postgres:13-alpine'
-    - 'docker run -d --rm --name cstacks-redis --network "container:cstacks-pg" redis:latest'
+    - 'docker run -d --rm --name cstacks-pg -e POSTGRES_USER=cstacks -e POSTGRES_DB=cstacks -e POSTGRES_PASSWORD=cstacks postgres:16'
+    - 'docker run -d --rm --name cstacks-redis --network "container:cstacks-pg" redis:alpine'
   after_script:
     - docker stop cstacks-redis cstacks-pg
   script:

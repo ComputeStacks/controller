@@ -6,10 +6,10 @@ pdnsutil add-record csdevserver.local @ CAA "0 issue \"letsencrypt.org\""
 pdnsutil create-zone usrcloud.local ns1.cstacks.local
 pdnsutil add-record usrcloud.local @ A 127.0.0.1
 pdnsutil add-record usrcloud.local www CNAME usrcloud.local
-pdnsutil create-zone  usrca.local ns1.cstacks.local
-pdnsutil add-record  usrca.local @ A 127.0.0.1
-pdnsutil add-record  usrca.local www CNAME  usrca.local
-pdnsutil add-record  usrca.local @ CAA "0 issue \"letsencrypt.org\""
+pdnsutil create-zone usrca.local ns1.cstacks.local
+pdnsutil add-record usrca.local @ A 127.0.0.1
+pdnsutil add-record usrca.local www CNAME usrca.local
+pdnsutil add-record usrca.local @ CAA "0 issue \"letsencrypt.org\""
 pdnsutil create-zone cstacksorg.local ns1.cstacks.local
 pdnsutil add-record cstacksorg.local @ A 127.0.0.1
 pdnsutil create-zone csnet.local ns1.cstacks.local

@@ -45,12 +45,11 @@ module VolumeServices
 
     # @param [Region] region
     def consul_config(region)
-      return {} if Rails.env.test? # for test, we dont want any config here!
       return {} if region.nodes.online.empty?
       return {} if region.nodes.online.empty?
       consul_ip = region.nodes.online.first.primary_ip
       {
-        http_addr: Diplomat.configuration.options.empty? ? "http://#{consul_ip}:8500" : "https://#{consul_ip}:8501",
+        http_addr: "#{CONSUL_API_PROTO}://#{consul_ip}:#{CONSUL_API_PORT}",
         dc: region.name.strip.downcase,
         token: region.consul_token
       }

@@ -1,13 +1,12 @@
-#!/bin/bash
-# Debian 12 Bookworm
+#!/usr/bin/env bash
 
 set -e
+
+CURRENT_DISTRO=$(lsb_release -i | awk -F"\t" '{print $2}')
 
 hostname csdev
 echo "csdev" > /etc/hostname
 echo "127.0.0.1 csdev" >> /etc/hosts
-echo "127.0.0.1 controller.cstacks.local" >> /etc/hosts
-echo "127.0.0.1 ns1.cstacks.local" >> /etc/hosts
 echo "export EDITOR=vim" >> /etc/profile
 echo "export EDITOR=vim" >> /root/.profile
 echo "export EDITOR=vim" >> /home/vagrant/.profile
@@ -15,43 +14,41 @@ echo "alias dconsole='docker exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput
 echo "alias dconsole='docker exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" -it'" >> /home/vagrant/.bashrc
 echo "Defaults:vagrant env_keep += \"EDITOR\"" >> /etc/sudoers.d/vagrant
 echo "syntax on" >> /etc/vim/vimrc
+apt-get -y remove ufw
 apt-get update && apt-get -y upgrade
-apt-get -y install apt-utils software-properties-common ca-certificates curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent prometheus-node-exporter git tmux pwgen
+apt-get -y install apt-utils software-properties-common ca-certificates net-tools curl wget lsb-release iputils-ping vim openssl dnsutils gnupg2 pass traceroute tree iptables jq whois socat git rsync apt-transport-https gnupg-agent prometheus-node-exporter git tmux pwgen
 
-if [[ ! -f /usr/share/keyrings/docker-archive-keyring.gpg ]]; then
-  curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --batch --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+# Distro specific
+if [[ "${CURRENT_DISTRO}" == 'Ubuntu' ]]; then
+  install -m 0755 -d /etc/apt/keyrings
+
+  if [[ ! -f /etc/apt/keyrings/docker.asc ]]; then
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  fi
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  add-apt-repository -y ppa:vbernat/haproxy-2.8
+
+else # Debian
+
+  if [[ ! -f /usr/share/keyrings/docker-archive-keyring.gpg ]]; then
+    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --batch --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  fi
+
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  if [[ ! -f /usr/share/keyrings/haproxy.debian.net.gpg ]]; then
+    curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --batch --dearmor > /usr/share/keyrings/haproxy.debian.net.gpg
+  fi
+
+  echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" http://haproxy.debian.net bookworm-backports-2.8 main > /etc/apt/sources.list.d/haproxy.list
+
 fi
 
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
-  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-
-if [ "$(dpkg --print-architecture)" == 'amd64' ]; then
-  install -d /etc/apt/keyrings; curl https://repo.powerdns.com/FD380FBB-pub.asc | sudo tee /etc/apt/keyrings/auth-48-pub.asc
-  # for arm/m1, it will fallback to the version included in the debian repository.
-  echo "deb [signed-by=/etc/apt/keyrings/auth-48-pub.asc arch=amd64] http://repo.powerdns.com/debian bookworm-auth-48 main" > /etc/apt/sources.list.d/pdns.list
-
-  cat << 'EOF' > /etc/apt/preferences.d/pdns
-Package: pdns-*
-Pin: origin repo.powerdns.com
-Pin-Priority: 600
-EOF
-else
-  echo "Falling back to debian repository for powerdns due to arm architecture."
-fi
-
-if [[ ! -f /usr/share/keyrings/haproxy.debian.net.gpg ]]; then
-  curl https://haproxy.debian.net/bernat.debian.org.gpg | gpg --batch --dearmor > /usr/share/keyrings/haproxy.debian.net.gpg
-fi
-
-echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" \
-      http://haproxy.debian.net bookworm-backports-2.8 main \
-      > /etc/apt/sources.list.d/haproxy.list
+## End distro-specific
 
 apt-get update
-apt-get -y install docker-ce docker-ce-cli containerd.io haproxy=2.8.\* pdns-server pdns-backend-pgsql postgresql-16 postgresql-client-16
+apt-get -y install docker-ce docker-ce-cli containerd.io haproxy=2.8.\*
 
 mkdir -p /etc/systemd/system/docker.service.d
 cat << 'EOF' > /etc/systemd/system/docker.service.d/startup.conf
@@ -62,54 +59,6 @@ TasksMax=infinity
 EOF
 
 systemctl daemon-reload && systemctl restart docker
-
-systemctl stop pdns
-
-echo "Setting up powerdns..."
-export PDNS_API_KEY=$(pwgen -s 32 1)
-export PDNS_WEB_KEY=$(pwgen -s 32 1)
-export PDNS_DB_PASS=$(pwgen -s 32 1)
-
-mkdir /home/vagrant/.pdns
-echo $PDNS_API_KEY > /home/vagrant/.pdns/api_key
-echo $PDNS_WEB_KEY > /home/vagrant/.pdns/web_auth_pass
-
-sudo -u postgres psql -c "create role pdns with superuser login password '$PDNS_DB_PASS'"
-sudo -u postgres psql -c 'create database pdns owner pdns'
-sudo -u postgres psql -d pdns -f /usr/share/doc/pdns-backend-pgsql/schema.pgsql.sql
-rm /etc/powerdns/named.conf
-rm /etc/powerdns/pdns.d/bind.conf
-
-cat << EOF > /etc/powerdns/pdns.d/pdns.local.gpgsql.conf
-gpgsql-host=localhost
-gpgsql-dbname=pdns
-gpgsql-user=pdns
-gpgsql-password=$PDNS_DB_PASS
-gpgsql-dnssec=yes
-EOF
-
-cat << EOF > /etc/powerdns/pdns.conf
-api=yes
-api-key=$PDNS_API_KEY
-webserver=yes
-webserver-address=0.0.0.0
-webserver-port=8081
-webserver-allow-from=0.0.0.0/0
-webserver-password=$PDNS_WEB_KEY
-local-port=5353
-local-address=127.0.0.1
-include-dir=/etc/powerdns/pdns.d
-launch=gpgsql
-config-dir=/etc/powerdns
-default-soa-edit=inception-increment
-default-ttl=14400
-default-soa-content=ns1.cstacks.local hostmaster.@ 0 10800 3600 604800 3600
-query-cache-ttl=20
-dnsupdate=yes
-allow-dnsupdate-from=
-EOF
-
-systemctl enable pdns && systemctl start pdns
 
 docker volume create consul-data
 mkdir -p /etc/consul
@@ -363,8 +312,6 @@ export CONSUL_HTTP_TOKEN
 
 echo "export CONSUL_HTTP_TOKEN=$CONSUL_HTTP_TOKEN" >> /home/vagrant/.profile
 echo "export CONSUL_HTTP_TOKEN=$CONSUL_HTTP_TOKEN" >> /root/.profile
-echo "export SECRET_KEY_BASE=$(openssl rand -hex 64)" >> /home/vagrant/.profile
-echo "export USER_AUTH_SECRET=$(openssl rand -hex 64)" >> /home/vagrant/.profile
 echo "$CONSUL_HTTP_TOKEN" > /home/vagrant/consul.token && chown vagrant:vagrant /home/vagrant/consul.token
 
 curl -X PUT -H "X-Consul-Token: $CONSUL_HTTP_TOKEN" -H "Content-Type: application/json" --data "{\"Token\": \"$CONSUL_HTTP_TOKEN\"}" http://localhost:8500/v1/agent/token/default
@@ -590,7 +537,7 @@ ExecStart=/usr/bin/env docker run --rm --name prometheus \
       --label com.computestacks.role=system \
       -v prometheus-data:/prometheus \
       -v /etc/prometheus:/etc/prometheus:z \
-      prom/prometheus:latest --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=10d --storage.tsdb.wal-compression --web.console.templates=/usr/share/prometheus/consoles --web.console.libraries=/usr/share/prometheus/console_libraries --storage.tsdb.max-block-duration=1d12h
+      prom/prometheus:latest --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=10d --storage.tsdb.wal-compression --web.console.templates=/usr/share/prometheus/consoles --web.console.libraries=/usr/share/prometheus/console_libraries --storage.tsdb.max-block-duration=1d12h
 
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker kill prometheus 2>/dev/null'
 ExecStop=-/usr/bin/env sh -c '/usr/bin/env docker rm prometheus 2>/dev/null'
@@ -889,9 +836,6 @@ systemctl daemon-reload \
   && systemctl start alertmanager prometheus loki fluentd \
   && systemctl enable alertmanager prometheus loki fluentd
 
-sudo -u postgres psql -c 'create role vagrant with superuser login'
-sudo -u postgres psql -c 'create database vagrant owner vagrant'
-
 echo "Adding vagrant public key to root user"
 mkdir -p /root/.ssh && chmod 700 /root/.ssh
 cat /home/vagrant/.ssh/authorized_keys >> /root/.ssh/authorized_keys
@@ -931,8 +875,8 @@ iptables -A INPUT -p icmp -j ACCEPT
 # For dev, open up...
 # ...SSH
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-# ...computestacks controller
-iptables -A INPUT -p tcp --dport 3005 -j ACCEPT
+# ...Docker API
+iptables -A INPUT -p tcp --dport 2376 -j ACCEPT
 # ...consul UI
 iptables -A INPUT -p tcp --dport 8500 -j ACCEPT
 # ...prometheus
@@ -946,9 +890,6 @@ iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 iptables -A INPUT -p tcp --dport 10000:50000 -j ACCEPT
 iptables -A INPUT -p udp --dport 10000:50000 -j ACCEPT
 
-# Allow Private Container Network Access to Host
-iptables -A INPUT -s 10.134.0.0/21 -j ACCEPT
-
 iptables -P INPUT DROP
 EOF
 
@@ -956,21 +897,9 @@ EOF
   chmod +x /usr/local/bin/cs-recover_iptables && bash /usr/local/bin/cs-recover_iptables
 fi
 
-echo "Provisioning PowerDNS for ComputeStacks..."
-pdnsutil create-zone cstacks.local ns1.cstacks.local
-pdnsutil add-record cstacks.local @ A 127.0.0.1
-pdnsutil add-record cstacks.local ns1 A 127.0.0.1
-pdnsutil add-record cstacks.local controller A 127.0.0.1
-pdnsutil add-record cstacks.local registry A 127.0.0.1
-pdnsutil add-record cstacks.local a A 127.0.0.1
-pdnsutil add-record cstacks.local *.a CNAME a.cstacks.local
-pdnsutil add-record cstacks.local @ CAA "0 issue \"letsencrypt.org\""
-
-if [ -f /tmp/cs_pdns_ip ]; then
-  echo "...loading test domains..."
-  mv /tmp/cs_pdns_up /usr/local/bin/ \
-    && bash /usr/local/bin/cs_pdns_up >/dev/null
-fi
+echo "Adding controller ssh key..."
+echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGQo4kmGXgVQMOw7uKVc5mZowf0ZhAXMhqWleYBq1tJ7 controller@dev" >> /home/vagrant/.ssh/authorized_keys
+echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGQo4kmGXgVQMOw7uKVc5mZowf0ZhAXMhqWleYBq1tJ7 controller@dev" >> /root/.ssh/authorized_keys
 
 echo "Pulling docker images..."
 docker pull ghcr.io/computestacks/cs-docker-bastion:latest

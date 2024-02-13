@@ -1,83 +1,27 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-##
-# ComputeStacks Vagrantfile
-# 1. Copy `envrc.sample` to `.envrc` and update values appropriately.
-#    * Take note that the `GITHUB_GEM_PULL_TOKEN` is a personal access token with the `read_packages` permission.
-# 2. Copy `config/database.sample.yml` to `config/database.yml`.
-#    * _No changes are required._
-# 2. Copy `Vagrantfile.sample` to `Vagrantfile` and make any relevant changes, however it should work out of the box without any modification.
-# 3. Bring up with `vagrant up`. This will take a few minutes depending on your computer -- compiling ruby takes a bit.
-#
-#   **Enter the vagrant VM with: `vagrant ssh`**
-#
-# 4. Install NodeJS & Yarn
-#    1. Install nodejs with `nvm install --lts`
-#    2. Install yarn `npm -g install yarn`
-# 5. `cd ~/controller` and run:
-#    1. `direnv allow .`
-#    2. `bundle`
-#       * if you did not setup your `.envrc` correctly, you will get an authorization error. Our provision script will automatically take the credentials in your `.envrc` file and authenticate with Github, but please also reference this document if you run into issues: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-rubygems-registry
-#
-# 6. Once all the gems have been installed, bootstrap your database with:
-#    1. `bundle exec rails db:create`
-#    2. `bundle exec rails db:schema:load`
-#    3. `bundle exec rails db:seed`
-#
-# 7. Bootstrap the controller assets (from inside `~/controller` in vagrant)
-#    1. Run `yarn`
-#    2. Run `bundle exec rake assets:precompile`
-#
-# 8. _(optional)_ Install our default CS theme. Skip if you're building your own.
-#    1. `mkdir ~/controller/public/assets/custom`
-#    2. `wget -q -O ~/controller/public/assets/custom/application.css https://storage.googleapis.com/cstacks/provision_assets/branding/application.css`
-#    3. `wget -q -O ~/controller/public/assets/custom/application.css.map https://storage.googleapis.com/cstacks/provision_assets/branding/application.css.map`
-#    4. `wget -q -O ~/controller/public/assets/custom/logo-login.png https://storage.googleapis.com/cstacks/provision_assets/branding/logo-login.png`
-#
-# 9. _(optional)_ Run our test suite with: `bundle exec rails test`
-#
-# You may now launch ComputeStacks by running `overmind s` from the ~/controller directory within the vagrant vm.
-#
-# Next, proceed to your browser and visit http://localhost:3005 -- the default credentials are `admin@cstacks.local` / `changeme!`
-#
+# Read `./doc/DEV_SETUP.md`.
 Vagrant.configure("2") do |config|
 
-  config.vm.synced_folder ".", "/home/vagrant/controller"
+  config.vm.box = "bento/ubuntu-22.04"
+  config.vm.synced_folder '.', '/vagrant', disabled: true
 
-  # ComputeStacks Web UI: http://localhost:3005
-  config.vm.network "forwarded_port", guest: 3005, host: 3005, auto_correct: true
-
-  # Prometheus: http://localhost:9090
-  config.vm.network "forwarded_port", guest: 9090, host: 9090, auto_correct: true
-
-  # Consul: http://localhost:8500/ui/
-  config.vm.network "forwarded_port", guest: 8500, host: 8500, auto_correct: true
-
-  # ComputeStacks Load Balancer
-  config.vm.network "forwarded_port", guest: 80, host: 80
-  config.vm.network "forwarded_port", guest: 443, host: 443
-
-  config.vm.box = "bento/debian-12"
-  config.vm.provider "virtualbox" do |vm|
-    vm.name = "computestacks"
+  config.vm.provider :libvirt do |vm|
+    vm.driver = "kvm"
+    vm.title = "computestacks"
+    vm.description = "ComputeStacks Controller"
     vm.memory = 4096
-    vm.cpus = 2
+    vm.cpus = 4
+    vm.cputopology sockets: "1", cores: "2", threads: "2"
   end
 
-  ##
-  # Mac M1/2 with Parallels
-  #
-  # config.vm.box = "bento/debian-12-arm64"
-  # config.vm.provider "parallels" do |vm|
-  #   vm.name = "computestacks"
-  #   vm.memory = 4096
-  #   vm.cpus = 2
-  #   vm.check_guest_tools = true
-  #   vm.update_guest_tools = true
-  # end
+  # For use on MacOS M1 with vmware fusion player.
+  config.vm.provider "vmware_desktop" do |vm|
+    vm.vmx["memsize"] = "4096"
+    vm.vmx["numvcpus"] = "4"
+  end
 
-  config.vm.provision "file", source: "lib/test/powerdns/pdns_up.sh", destination: "/tmp/cs_pdns_up"
-  config.vm.provision "shell", path: "lib/dev/vagrant_provision.sh"
+  config.vm.provision "shell", path: "lib/dev/vagrant_provision-node.sh"
 
 end

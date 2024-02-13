@@ -19,7 +19,7 @@ module Volumes
     def volume_client
       case volume_backend
       when 'nfs'
-        DockerVolumeNfs.configure ssh_key: ENV['CS_SSH_KEY']
+        DockerVolumeNfs.configure ssh_key: "#{Rails.root}/#{ENV['CS_SSH_KEY']}"
         DockerVolumeNfs::Volume.new self
       else
         DockerVolumeLocal::Volume.new self
@@ -29,7 +29,7 @@ module Volumes
     def volume_driver_client
       case volume_backend
       when 'nfs'
-        DockerVolumeNfs.configure ssh_key: ENV['CS_SSH_KEY']
+        DockerVolumeNfs.configure ssh_key: "#{Rails.root}/#{ENV['CS_SSH_KEY']}"
         DockerVolumeNfs
       else
         DockerVolumeLocal

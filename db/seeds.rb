@@ -1,19 +1,3 @@
-vagrant_vm_ip = if RUBY_PLATFORM =~ /linux/ # Anything else and we're running local, so just use 127.0.0.1
-                  `ip -j addr show dev eth0 | jq -r '.[0].addr_info | map(select(.family == "inet"))[0].local'`
-                else
-                  '127.0.0.1'
-                end
-lb_cert_path = if `whoami`.strip == 'vagrant'
-                 '/home/vagrant/.ssl_wildcard/sharedcert.pem'
-               else
-                 "#{Rails.root.to_s}/lib/dev/test_wildcard_ssl/sharedcert-test-crt"
-               end
-puts "Creating default location and region..."
-location = Location.create! name: "dev"
-
-consul_token = File.exist?("/home/vagrant/consul.token") ? File.read("/home/vagrant/consul.token").gsub("\n","") : ""
-
-region = location.regions.create! name: "dev", pid_limit: 150, ulimit_nofile_soft: 1024, ulimit_nofile_hard: 1024, consul_token: consul_token, network_driver: 'bridge'
 
 puts "Creating system block content..."
 puts "...Collaborate: Warning..."
@@ -108,7 +92,7 @@ block_email_confirmation.block_contents.create!(
 
 puts "Creating container image providers..."
 puts "Creating DockerHub Image Provider..."
-dh_provider = ContainerImageProvider.create!(
+ContainerImageProvider.create!(
   name: "DockerHub",
   is_default: true,
   hostname: ""
@@ -138,38 +122,24 @@ ContainerImageProvider.create!(
   hostname: "ghcr.io"
 )
 
-puts "Creating Container Images..."
-Rake::Task['load_containers'].execute
-
 puts "Setting up billing products..."
-
 plan = BillingPlan.create! name: 'default', is_default: true
 
 # Container Package: Small
-container_product = Product.create! name: 'small', label: 'Small', kind: 'package'
-container_product.create_package cpu: 1, memory: 512, storage: 10, local_disk: 5, bandwidth: 500
-container_product_resource = plan.billing_resources.create! product: container_product
-container_product_resource.prices.create! price: 0.00343,
-                                          currency: 'USD',
-                                          billing_phase: container_product_resource.billing_phases.first,
-                                          regions: Region.all
+puts "..small container product"
+Product.create! label: 'Small', kind: 'package'
 
 # Storage Product
-storage_product = Product.create! name: 'storage',
-                                  label: 'Storage',
-                                  kind: 'resource',
-                                  unit: 1,
-                                  unit_type: 'GB',
-                                  resource_kind: 'storage',
-                                  is_aggregated: false # billed per hour/month, per GB
-storage_resource = plan.billing_resources.create! product: storage_product
-storage_resource.prices.create! price: 0.0001369863,
-                                currency: 'USD',
-                                billing_phase: storage_resource.billing_phases.first,
-                                regions: Region.all
+Product.create! label: 'Storage',
+                kind: 'resource',
+                unit: 1,
+                unit_type: 'GB',
+                resource_kind: 'storage',
+                is_aggregated: false # billed per hour/month, per GB
+
 # Local Disk
-local_disk_product = Product.create!(
-  name: 'local_disk',
+puts "...local disk product"
+Product.create!(
   label: 'Temporary Disk',
   kind: 'resource',
   unit: 1,
@@ -177,15 +147,10 @@ local_disk_product = Product.create!(
   resource_kind: 'local_disk',
   is_aggregated: false
 )
-local_disk_resource = plan.billing_resources.create! product: local_disk_product
-local_disk_resource.prices.create! price: 0.0001369863,
-                                   currency: 'USD',
-                                   billing_phase: local_disk_resource.billing_phases.first,
-                                   regions: Region.all
 
 # Bandwidth Product
-bandwidth_product = Product.create!(
-  name: 'bandwidth',
+puts "...local bandwidth product"
+Product.create!(
   label: 'Bandwidth',
   kind: 'resource',
   unit: 1,
@@ -193,14 +158,10 @@ bandwidth_product = Product.create!(
   resource_kind: 'bandwidth',
   is_aggregated: true # Once you used it, you pay for it.
 )
-bandwidth_resource = plan.billing_resources.create!(product: bandwidth_product)
-bandwidth_resource.prices.create!(price: 0, max_qty: 1024, currency: 'USD', billing_phase: bandwidth_resource.billing_phases.first, regions: Region.all) # First 1TB is free
-bandwidth_resource.prices.create!(price: 0.09, max_qty: 10240, currency: 'USD', billing_phase: bandwidth_resource.billing_phases.first, regions: Region.all) # 1TB - 10TB
-bandwidth_resource.prices.create!(price: 0.07, max_qty: nil, currency: 'USD', billing_phase: bandwidth_resource.billing_phases.first, regions: Region.all) # 10TB+
 
 # Backup Product
-backup_product = Product.create!(
-  name: 'backup',
+puts "...local backup product"
+Product.create!(
   label: 'Backup & Template Storage',
   kind: 'resource',
   unit: 1,
@@ -208,100 +169,16 @@ backup_product = Product.create!(
   resource_kind: 'backup',
   is_aggregated: false
 )
-backup_resource = plan.billing_resources.create!(product: backup_product)
-backup_resource.prices.create!(price: 0.0000684932, currency: 'USD', billing_phase: backup_resource.billing_phases.first, regions: Region.all)
-
-BillingResourcePrice.all.each do |i|
-  i.regions << Region.first
-end
-
-UserGroup.all.each do |g|
-  g.update billing_plan: plan
-end
 
 puts "Setting up settings & features..."
 Setting.setup!
 Feature.setup!
 
-puts "Setting default settings to dev environment..."
-Setting.find_by(name: 'hostname').update value: 'controller.cstacks.local:3005'
-Setting.find_by(name: 'cr_le').update value: 'controller.cstacks.local'
-Setting.find_by(name: 'registry_base_url').update value: 'registry.cstacks.local'
-Setting.find_by(name: 'registry_node').update value: '127.0.0.1'
-Setting.find_by(name: 'registry_ssh_port').update value: '22'
-Setting.find_by(name: 'le_validation_server').update value: '127.0.0.1:3005'
-Setting.find_by(name: 'cs_bastion_image').update value: 'ghcr.io/computestacks/cs-docker-bastion:latest'
-
-puts "Creating log & metric clients..."
-mc = MetricClient.create! endpoint: 'http://127.0.0.1:9090'
-lc = LogClient.create! endpoint: 'http://127.0.0.1:3100'
-region.update metric_client: mc, log_client: lc, loki_endpoint: 'http://127.0.0.1:3100'
-
-puts "Creating dev node..."
-region.nodes.create! label: 'csdev',
-                     hostname: 'csdev',
-                     primary_ip: vagrant_vm_ip.gsub("\n",""),
-                     public_ip: '127.0.0.1',
-                     active: true,
-                     ssh_port: 22,
-                     block_write_bps: 0,
-                     block_read_bps: 0,
-                     block_write_iops: 0,
-                     block_read_iops: 0
-
-puts "Creating network..."
-network = Network.create! subnet: "10.167.0.0/21",
-                          is_public: true,
-                          is_ipv4: true,
-                          active: true,
-                          name: "dev",
-                          label: "Dev Network",
-                          network_driver: 'bridge',
-                          region: region
-network.regions << region
-
-puts "Configuring DNS..."
-pdns_api_key = File.exist?("/home/vagrant/.pdns/api_key") ? File.read("/home/vagrant/.pdns/api_key").gsub("\n","") : ""
-pdns_web_key = File.exist?("/home/vagrant/.pdns/web_auth_pass") ? File.read("/home/vagrant/.pdns/web_auth_pass").gsub("\n","") : ""
-
-pdns_driver = ProvisionDriver.create!(
-  endpoint: 'http://localhost:8081/api/v1/servers',
-  settings: {
-    config: {
-      zone_type: 'Native',
-      masters: [], # When zone_type == 'Master', add the primary NS server here.
-      nameservers: ['ns1.cstacks.local.'],
-      server: 'localhost'
-    }
-  },
-  module_name: 'Pdns',
-  username: 'admin',
-  api_key: Secret.encrypt!(pdns_web_key), # WebServer PW
-  api_secret: Secret.encrypt!(pdns_api_key) # API-Key
-)
-
-dns_type = ProductModule.create!(name: 'dns', primary: pdns_driver)
-pdns_driver.product_modules << dns_type
-Dns::Zone.create! name: 'cstacks.local',
-                  provider_ref: 'cstacks.local.',
-                  provision_driver: pdns_driver
-
-puts "Creating load balancer..."
-LoadBalancer.create! label: 'dev',
-                     region: region,
-                     domain: 'a.cstacks.local',
-                     ext_ip: [ '127.0.0.1' ],
-                     internal_ip: [ '127.0.0.1', vagrant_vm_ip.gsub("\n","") ],
-                     public_ip: '127.0.0.1',
-                     direct_connect: true,
-                     cert_encrypted: Secret.encrypt!(File.read(lb_cert_path)),
-                     skip_validation: true
-
 puts "Creating default admin user..."
 group = UserGroup.create! name: 'default',
                           is_default: true,
                           billing_plan: plan
-group.regions << region
+
 user = User.new fname: 'Default',
                 lname: 'User',
                 email: 'admin@cstacks.local',
@@ -315,3 +192,5 @@ user.skip_confirmation!
 user.save
 
 
+puts "Creating Container Images..."
+Rake::Task['load_containers'].execute

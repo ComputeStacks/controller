@@ -33,6 +33,14 @@ RUN set -ex; \
             git \
             supervisor \
             nginx-light \
+            libjemalloc2 \
+            patchelf \
+    ; \
+    # Patch Ruby to use jemalloc
+      patchelf --add-needed libjemalloc.so.2 /usr/local/bin/ruby; \
+    # Discard patchelf after use
+      apt-get purge -y \
+        patchelf \
     ; \
     echo "set_real_ip_from 127.0.0.1;" > /etc/nginx/conf.d/restore_ip.conf \
     ; \

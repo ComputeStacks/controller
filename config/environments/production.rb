@@ -93,7 +93,7 @@ Rails.application.configure do
   ## Customizations
   # config.cache_store = :redis_store, "redis://#{ENV['REDIS_HOST']}:6379/0/cache", { expires_in: 12.hours }
   config.cache_store = :redis_cache_store, {
-    url: "redis://#{ENV['REDIS_HOST']}:6379/0",
+    url: "redis://#{ENV['REDIS_HOST'].blank? ? 'localhost' : ENV['REDIS_HOST']}:#{ENV['REDIS_PORT'].blank? ? '6379' : ENV['REDIS_PORT']}/0",
     expires_in: 12.hours
   }
 end

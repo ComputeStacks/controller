@@ -1,2 +1,2 @@
 vagrant_log_client:
-  endpoint: "http://127.0.0.1:3100"
+  endpoint: "http://<%= ENV['VAGRANT_VM_IP'].blank? ? '127.0.0.1' : ENV['VAGRANT_VM_IP'] %>:3100"

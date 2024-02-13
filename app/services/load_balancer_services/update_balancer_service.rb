@@ -45,7 +45,7 @@ module LoadBalancerServices
         is_node = Node.find_by("public_ip = ? OR primary_ip = ? OR hostname = ?", i, i, i)
         next if is_node && !is_node.online?
         ssh_port = is_node ? is_node.ssh_port : 22
-        client = DockerSSH::Node.new("ssh://#{i}:#{ssh_port}", { key: ENV['CS_SSH_KEY'] })
+        client = DockerSSH::Node.new("ssh://#{i}:#{ssh_port}", { key: "#{Rails.root}/#{ENV['CS_SSH_KEY']}" })
         # Cleanup unused certificates
         begin
           current_certs = client.client.exec!("ls #{lb.ext_cert_dir}")
@@ -120,7 +120,7 @@ module LoadBalancerServices
         cmd = %Q(bash -c 'if [ ! -f #{lb.ext_dir}/default.http ]; then curl --insecure -H "Authorization: Bearer #{auth_token}" #{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/api/stacks/load_balancers/assets/default > #{lb.ext_dir}/default.http; fi;' && curl --insecure -H "Authorization: Bearer #{auth_token}" #{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/api/stacks/load_balancers > #{lb.ext_config} && #{lb.ext_reload_cmd})
         ssh_port = is_node ? is_node.ssh_port : 22
         begin
-          DockerSSH::Node.new("ssh://#{i}:#{ssh_port}", { key: ENV['CS_SSH_KEY'] }).client.exec!(cmd)
+          DockerSSH::Node.new("ssh://#{i}:#{ssh_port}", { key: "#{Rails.root}/#{ENV['CS_SSH_KEY']}" }).client.exec!(cmd)
         rescue => e
           SystemEvent.create!(
             message: "Unable to provision LoadBalancer: #{lb.label}",

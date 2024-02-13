@@ -17,7 +17,6 @@ class Api::Networks::IngressRules::DomainsControllerTest < ActionDispatch::Integ
     get "/api/networks/ingress_rules/#{ingress.id}/domains", as: :json, headers: @basic_auth_headers
 
     data = JSON.parse(response.body)
-    puts data
 
     assert_response :success
     assert_not_empty data["domains"]

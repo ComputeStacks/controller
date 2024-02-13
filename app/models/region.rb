@@ -89,7 +89,7 @@ class Region < ApplicationRecord
   def volume_driver
     case volume_backend
     when 'nfs'
-      DockerVolumeNfs.configure ssh_key: ENV['CS_SSH_KEY']
+      DockerVolumeNfs.configure ssh_key: "#{Rails.root}/#{ENV['CS_SSH_KEY']}"
       DockerVolumeNfs
     else
       DockerVolumeLocal
@@ -97,12 +97,12 @@ class Region < ApplicationRecord
   end
 
   def consul_config
-    return {} if Rails.env.test? # for test, we dont want any config here!
     return {} if nodes.online.empty?
+
     primary_ip = nodes.online.first&.primary_ip
     dc = name.strip.downcase
     {
-      http_addr: Diplomat.configuration.options.empty? ? "http://#{primary_ip}:8500" : "https://#{primary_ip}:8501",
+      http_addr: "#{CONSUL_API_PROTO}://#{primary_ip}:#{CONSUL_API_PORT}",
       dc: dc.blank? ? nil : dc,
       token: consul_token
     }

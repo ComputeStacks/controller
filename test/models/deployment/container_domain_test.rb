@@ -7,8 +7,6 @@ require 'test_helper'
 #
 class Deployment::ContainerDomainTest < ActiveSupport::TestCase
 
-  include AcmeTestContainerConcern
-
   test 'can list all container domains' do
 
     d = Deployment::ContainerDomain.where.not(user: nil).first

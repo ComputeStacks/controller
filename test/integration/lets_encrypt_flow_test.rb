@@ -9,8 +9,6 @@ require 'test_helper'
 #
 class LetsEncryptFlowTest < ActionDispatch::IntegrationTest
 
-  include AcmeTestContainerConcern
-
   test 'can enable lets encrypt on a domain' do
     Sidekiq::Testing.inline! do
       # Create the domain and enable Lets Encrypt

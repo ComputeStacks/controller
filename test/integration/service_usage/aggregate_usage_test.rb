@@ -19,21 +19,21 @@ class AggregateUsageTest < ActionDispatch::IntegrationTest
 
       ##
       # Basic sanity checking
-      expected_keys = %w(
-          subscription_id
-          subscription_product_id
-          product
-          billing_resource
-          container_service_id
-          container_id
-          user
-          external_id
-          total
-          qty
-          period_start
-          period_end
-          usage_items
-        )
+      expected_keys = %w[
+        subscription_id
+        subscription_product_id
+        product
+        billing_resource
+        container_service_id
+        container_id
+        user
+        external_id
+        total
+        qty
+        period_start
+        period_end
+        usage_items
+      ]
       assert_empty expected_keys - group.keys
 
       refute_nil group.dig(:product, :id)
@@ -42,6 +42,7 @@ class AggregateUsageTest < ActionDispatch::IntegrationTest
 
       group.keys.each do |k|
         next if k == "external_id"
+
         refute_nil group[k]
       end
 

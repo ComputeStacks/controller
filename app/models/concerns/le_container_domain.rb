@@ -32,6 +32,7 @@ module LeContainerDomain
   def le_active?
     return false if system_domain || !le_enabled || !le_ready
     return false if lets_encrypt.nil?
+
     lets_encrypt.names.include?(domain) && lets_encrypt.active?
   end
 
@@ -47,6 +48,7 @@ module LeContainerDomain
   def le_dns_allowed?(value)
     lb = container_service.load_balancer
     return nil if lb.nil?
+
     lb.ip_allowed? value
   rescue
     false
@@ -58,8 +60,10 @@ module LeContainerDomain
   def lets_encrypt_init!
     return true if lets_encrypt
     return false unless le_ready
+
     account = LetsEncryptAccount.find_or_create
     return false if account.nil?
+
     chosen_cert = nil
     chosen_cert = user.lets_encrypts.selectable.first unless Setting.le_single_domain?
     chosen_cert = user.lets_encrypts.create!(account: account) if chosen_cert.nil?
@@ -67,14 +71,14 @@ module LeContainerDomain
       SystemEvent.create!(
         message: "Unable to generate LetsEncrypt for domain #{domain}",
         data: {
-            domain: {
-              id: id,
-              name: domain
-            },
-            user: {
-              id: user.id,
-              email: user.email
-            }
+          domain: {
+            id: id,
+            name: domain
+          },
+          user: {
+            id: user.id,
+            email: user.email
+          }
         },
         event_code: "26ed782e7ccfd47b"
       )
@@ -84,9 +88,9 @@ module LeContainerDomain
   end
 
   def validate_le_domain
-    if saved_change_to_attribute?("domain") && !skip_validation
-      LetsEncryptWorkers::ValidateDomainWorker.perform_async(id)
-    end
+    return unless saved_change_to_attribute?("domain") && !skip_validation
+
+    LetsEncryptWorkers::ValidateDomainWorker.perform_async(id)
   end
 
   def disable_le_ready

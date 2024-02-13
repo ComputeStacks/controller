@@ -238,7 +238,7 @@ class ContainerRegistry < ApplicationRecord
       :port_map => ports,
       :restart_policy => "always"
     }
-    params = {image_url: "cmptstks/registry:latest", settings: options, node: {key: ENV['CS_SSH_KEY']}}
+    params = {image_url: "cmptstks/registry:latest", settings: options, node: {key: "#{Rails.root}/#{ENV['CS_SSH_KEY']}"}}
     ssh_port = Setting.registry_ssh_port
     DockerSSH::Container.new(self.name, "ssh://#{Setting.registry_node}:#{ssh_port}", params)
   rescue => e

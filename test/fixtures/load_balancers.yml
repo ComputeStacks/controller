@@ -2,7 +2,7 @@ default:
   name: test-lb01
   label: test-lb01
   internal_ip: '["127.0.0.1"]'
-  ext_ip: '["127.0.0.1"]'
+  ext_ip: '["<%= ENV['VAGRANT_VM_IP'] %>"]'
   ext_config: '["/etc/haproxy/haproxy.cfg"]'
   ext_reload_cmd: "bash -c 'if [[ -z $(pidof haproxy) ]]; then service haproxy start; else service haproxy reload; fi;'"
   public_ip: 127.0.0.1

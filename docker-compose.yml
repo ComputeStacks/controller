@@ -1,0 +1,42 @@
+version: "3.6"
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=controller
+      - POSTGRES_USER=controller
+      - POSTGRES_DB=controller
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:5432"
+  redis:
+    image: redis:alpine
+    command: redis-server --save '' --appendonly no
+    volumes:
+      - redis:/data
+    ports:
+      - "${REDIS_PORT}:6379"
+  powerdns:
+    build: ./lib/dev/powerdns
+    # build:
+    #   context: ./lib/dev/powerdns
+    #   args:
+    #     LUA_VERSION: 5.1
+    #     AUTH_VERSION: 4.8.4
+    command: --daemon=no --guardian=no --loglevel=9
+    init: true
+    ports:
+      - "${PDNS_DNS_PORT}:53/udp"
+      - "${PDNS_API_PORT}:8081/tcp"
+  acme_test: # Only used for automated testing
+    image: letsencrypt/pebble:latest
+    command: pebble -config /test/config/pebble-config.json -strict
+    environment:
+      - GODEBUG="tls13=1"
+      - PEBBLE_VA_ALWAYS_VALID=1
+    ports:
+      - "${ACME_API_PORT}:14000"
+volumes:
+  postgres:
+  redis:

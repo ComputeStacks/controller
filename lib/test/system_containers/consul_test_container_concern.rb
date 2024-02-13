@@ -11,13 +11,13 @@ module ConsulTestContainerConcern
         'size' => i.id * 4096,
         'archives' => []
       }
-      Diplomat::Kv.put("borg/repository/#{i.name}", backup_data.to_json)
+      Diplomat::Kv.put("borg/repository/#{i.name}", backup_data.to_json, { http_addr: "#{CONSUL_API_PROTO}://#{ENV['VAGRANT_VM_IP']}:#{CONSUL_API_PORT}" })
     end
   end
 
   def after_teardown
     Volume.all.each do |i|
-      Diplomat::Kv.delete "borg/repository/#{i.name}"
+      Diplomat::Kv.delete "borg/repository/#{i.name}", { http_addr: "#{CONSUL_API_PROTO}://#{ENV['VAGRANT_VM_IP']}:#{CONSUL_API_PORT}" }
     end
     super
   end

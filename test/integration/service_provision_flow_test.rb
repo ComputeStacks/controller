@@ -12,6 +12,7 @@ class ServiceProvisionFlowTest < ActionDispatch::IntegrationTest
     order_session.images.each do |image|
       image[:package_id] = products(:containersmall).id
       next unless image[:image_id] == container_image_image_variants(:wordpress_default).container_image.id
+
       image[:params]['username'][:value] = 'devuser'
     end
 
@@ -46,9 +47,11 @@ class ServiceProvisionFlowTest < ActionDispatch::IntegrationTest
     Sidekiq::Testing.inline! do
       order_prov_success = order_process.perform
       puts order_process.errors.join(" ") unless order_process.errors.empty?
-      event.event_details.each do |i|
-        puts i.data
-      end unless order_prov_success
+      unless order_prov_success
+        event.event_details.each do |i|
+          puts i.data
+        end
+      end
       assert order_prov_success
     end
 
