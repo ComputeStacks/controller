@@ -119,7 +119,3 @@ nl:
         delete: Removing volume
         imported: "Imported volume %{volume}"
         restore: Performing volume restore
-      wordpress:
-        protect:
-          enable: "[%{service}] Enabling protect mode"
-          disable: "[%{service}] Disabling protect mode"
