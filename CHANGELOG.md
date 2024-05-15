@@ -1,19 +1,33 @@
 # Change Log
 
+## v9.3.1
+
+- [CHANGE] Include `node_id` in metadata service.
+- [FIX] Fix global search for long url's.
+- [FIX] Resolve issues with monarx API.
+
+***
+
 ## v9.3.0
 
 - [FEATURE] Introducing Callbacks for the API. This allows you to receive a webhook from ComputeStacks when a api request is completed by a background worker.
 - [FEATURE] Move acme validation IP to a database field on the region. This allows different IPs for different regions.
 
+***
+
 ## v9.2.2
 
 - [FEATURE] Added volume and backups api.
+
+***
 
 ## v9.2.1
 
 - [FEATURE] `on_latest_image` Boolean field added to container and bastion api calls. If false, there is a new image on the node and a rebuild will use the new image.
 
 ## v9.2.0
+
+***
 
 **YJIT and JEMALLOC for ComputeStacks Production Environments**
 

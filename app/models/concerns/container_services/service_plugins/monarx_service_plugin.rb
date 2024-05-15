@@ -55,28 +55,22 @@ module ContainerServices
 
           result = HTTP.timeout(30)
                        .headers(container_image_plugin.monarx_api_headers)
-                       .get "#{container_image_plugin.monarx_enterprise_url}/agent", params: { filter: "tags==#{container_service.name}" }
+                       .get "#{container_image_plugin.monarx_enterprise_url}/agent", params: { filter: "all_tags==#{container_service.name}" }
 
-          if result.status.success?
-            begin
-              response = Oj.load result.body.to_s
-            rescue
-              return nil
-            end
-            return nil if response.dig("_embedded", "items").nil?
-            return nil if response["_embedded"]["items"].empty?
-            active_container_names = containers.pluck(:name)
-            mid = nil
-            response["_embedded"]["items"].each do |i|
-              if active_container_names.include?(i['host_id'])
-                mid = i['id']
-                break
-              end
-            end
-            mid
-          else
-            nil
+          return nil unless result.status.success?
+
+          begin
+            response = Oj.load result.body.to_s
+          rescue
+            return nil
           end
+          return nil if response.dig("_embedded", "items").nil?
+          return nil if response["_embedded"]["items"].empty?
+
+          monarx_service = response["_embedded"]["items"].select { |i| container_service.name == i['host_id']}.first
+          return nil if monarx_service.nil?
+
+          monarx_service["id"]
         end
       end
 
@@ -85,19 +79,20 @@ module ContainerServices
           return nil if monarx_agent_id.nil?
           result = HTTP.timeout(30)
                        .headers(container_image_plugin.monarx_api_headers)
-                       .get "#{container_image_plugin.monarx_enterprise_url}/agent-file/metrics/agent-file-agent-classification", params: { filter: "agent_id==#{monarx_agent_id}"}
-          if result.status.success?
-            begin
-              response = Oj.load result.body.to_s
-            rescue
-              return nil
-            end
-            return nil if response.empty?
-            return nil if response[0]['counts'].nil?
-            response[0]
-          else
-            nil
+                       .get "#{container_image_plugin.monarx_enterprise_url}/agent-file/metrics/agent-file-agent-classification", params: { filter: "all_tags==#{container_service.name}" }
+
+          return nil unless result.status.success?
+
+          begin
+            response = Oj.load result.body.to_s
+          rescue
+            return nil
           end
+
+          return nil if response.empty?
+          return nil if response[0]['counts'].nil?
+
+          response[0]
         end
       end
 

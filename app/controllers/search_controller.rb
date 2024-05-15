@@ -19,7 +19,7 @@ class SearchController < AuthController
       if uuid_regex.match?(@q)
         sparams[:volumes] = Volume.find_all_for(current_user).where(name: @q)
         sparams[:deployments] = Deployment.find_all_for(current_user).where(token: @q)
-      elsif @q.split('.').count == 4 # IP!
+      elsif @q =~ Resolv::IPv4::Regex # IP Address
         sparams[:cidr] = Network::Cidr.where(cidr: @q)
       else
         sparams[:deployments] = Deployment.find_all_for(current_user).where Arel.sql %Q(lower(deployments.name) ~ '#{@q}')

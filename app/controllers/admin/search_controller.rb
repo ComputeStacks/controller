@@ -40,7 +40,7 @@ class Admin::SearchController < Admin::ApplicationController
       elsif uuid_regex.match?(@q)
         sparams[:volumes] = Volume.where(name: @q)
         sparams[:deployments] = Deployment.where(token: @q)
-      elsif @q.split('.').count == 4 # IP!
+      elsif @q =~ Resolv::IPv4::Regex # IP Address
         sparams[:cidr] = Network::Cidr.where(cidr: @q) + Node.where( Arel.sql(%Q(primary_ip = '#{@q}' OR public_ip = '#{@q}')) )
       elsif q_filter == 'user'
         sparams[:users] = User.search_by @q

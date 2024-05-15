@@ -30,7 +30,7 @@ module ProjectServices
       s = []
       deployment.services.each do |i|
         containers = i.containers.map  do |c|
-          { id: c.id, name: c.name, ip: c.ip_address&.ipaddr }
+          { id: c.id, name: c.name, ip: c.ip_address&.ipaddr, node_id: c.node.id }
         end
         ingress_rules = i.ingress_rules.map do |c|
           {
@@ -77,10 +77,10 @@ module ProjectServices
             category: i.container_image.category,
             tags: i.container_image.tags
           },
-          containers: containers,
-          ingress_rules: ingress_rules,
+          containers:,
+          ingress_rules:,
           package: package_data,
-          settings: settings
+          settings:
         }
       end
       s

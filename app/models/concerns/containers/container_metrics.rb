@@ -148,6 +148,8 @@ module Containers
       return 0.0 if m.nil?
       usage = (m[:memory] / Numeric::MEGABYTE) / memory
       (usage * 100).round(2)
+    rescue
+      0.0
     end
 
     def metric_mem_throttled(start_time, end_time)
