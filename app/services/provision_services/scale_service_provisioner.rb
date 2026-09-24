@@ -9,10 +9,9 @@ module ProvisionServices
   # @!attribute qty
   #   @return [Integer]
   class ScaleServiceProvisioner
-
     attr_accessor :container_service,
-                  :event,
-                  :qty
+      :event,
+      :qty
 
     # @param [Deployment::ContainerService] service
     # @param [EventLog] event
@@ -34,27 +33,27 @@ module ProvisionServices
             if new_container.errors.empty?
               event.event_details.create!(
                 data: "Fatal error while provisioning container",
-                event_code: 'd8b7a1905c40c7e7'
+                event_code: "d8b7a1905c40c7e7"
               )
             else
               event.event_details.create!(
                 data: new_container.errors.join("\n\n"),
-                event_code: 'c82253e070f96a83'
+                event_code: "c82253e070f96a83"
               )
             end
-            event.fail! 'Error building container'
+            event.fail! "Error building container"
             return false
           end
           event.event_details.create!(
             data: "Created container: #{new_container.container.name}",
-            event_code: 'b2059e7d695115be'
+            event_code: "b2059e7d695115be"
           )
           ContainerWorkers::ProvisionWorker.perform_async new_container.container.global_id, event.global_id
         end
       else # Remove Containers
         container_service.containers.limit(current_count - qty).order(:created_at).each do |container|
           trash_container = ContainerServices::TrashContainer.new(container, event)
-          event.fail! 'Error removing containers' unless trash_container.perform
+          event.fail! "Error removing containers" unless trash_container.perform
         end
       end
       reload_load_balancers
@@ -66,7 +65,6 @@ module ProvisionServices
 
     # @return [Boolean]
     def valid?
-
       unless container_service.can_scale?
         event.event_details.create!(
           data: "Service is not eligibale to scale",
@@ -80,16 +78,16 @@ module ProvisionServices
       if qty < 1
         event.event_details.create!(
           data: "Expected #{qty} to be 1 or greater.",
-          event_code: '13f3b157a1a84b44'
+          event_code: "13f3b157a1a84b44"
         )
-        event.fail! 'Invalid Parameters'
+        event.fail! "Invalid Parameters"
         return false
       end
 
       # Ensure QTY is different than current count
       current_count = container_service.containers.count
       if current_count == qty
-        event.cancel! 'No change required'
+        event.cancel! "No change required"
         return false
       end
 
@@ -98,20 +96,31 @@ module ProvisionServices
       if qty > current_count
         add_count = qty - current_count
         unless container_service.user.can_order_containers? add_count
-          event.fail! 'User over quota'
+          event.fail! "User over quota"
           return false
         end
       end
 
-      # Ensure we have space in the network (private net only)
-      if container_service.deployment.private_network
-        if (qty + current_count) > container_service.deployment.private_network.addresses_available
-          event.cancel! 'Network size can not accommodate the requested number of containers.'
-          return false
-        end
+      # Ensure we have space in the network for the *new* containers (private net,
+      # scale-up only). Scaling down frees addresses, so it is never blocked here.
+      if qty > current_count && !network_has_capacity_for?(container_service.deployment.private_network, qty - current_count)
+        event.cancel! "Network size can not accommodate the requested number of containers."
+        return false
       end
 
       true
+    end
+
+    # Does the (private) network have room for the additional containers?
+    # `addresses_available` is the count of *free* addresses (already net of the
+    # containers currently allocated), so we compare against the delta to add.
+    # Non-private deployments (network nil) are always allowed.
+    #
+    # @param [Network, nil] network
+    # @param [Integer] containers_to_add
+    # @return [Boolean]
+    def network_has_capacity_for?(network, containers_to_add)
+      network.nil? || containers_to_add <= network.addresses_available
     end
 
     ##
@@ -120,7 +129,7 @@ module ProvisionServices
       # Internal LBs
       container_service.internal_load_balancers.each do |service|
         service.containers.each do |container|
-          PowerCycleContainerService.new(container, 'restart', current_audit).perform
+          PowerCycleContainerService.new(container, "restart", current_audit).perform
         end
       end
 
@@ -129,6 +138,5 @@ module ProvisionServices
         LoadBalancerServices::DeployConfigService.new(container_service.load_balancer).perform
       end
     end
-
   end
 end

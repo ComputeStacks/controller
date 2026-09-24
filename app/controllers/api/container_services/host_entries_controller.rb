@@ -1,7 +1,6 @@
 ##
 # Container Service Host Entry
 class Api::ContainerServices::HostEntriesController < Api::ContainerServices::BaseController
-
   before_action :find_entry, only: [:show, :update, :destroy]
 
   ##
@@ -9,7 +8,7 @@ class Api::ContainerServices::HostEntriesController < Api::ContainerServices::Ba
   #
   # `GET /api/container_services/{container-service-id}/host_entries`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `host_entries`: Array
   #     * `hostname`: String
@@ -30,7 +29,7 @@ class Api::ContainerServices::HostEntriesController < Api::ContainerServices::Ba
   #
   # `GET /api/container_services/{container-service-id}/host_entries/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `host_entries`: Object
   #     * `hostname`: String
@@ -42,14 +41,15 @@ class Api::ContainerServices::HostEntriesController < Api::ContainerServices::Ba
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   ##
   # Update Host Entry
   #
   # `PATCH /api/container_services/{container-service-id}/host_entries/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `host_entries`: Object
   #     * `hostname`: String
@@ -71,7 +71,7 @@ class Api::ContainerServices::HostEntriesController < Api::ContainerServices::Ba
   #
   # `POST /api/container_services/{container-service-id}/host_entries`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `host_entries`: Object
   #     * `hostname`: String
@@ -94,7 +94,7 @@ class Api::ContainerServices::HostEntriesController < Api::ContainerServices::Ba
   #
   # `DELETE /api/container_services/{container-service-id}/host_entries/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   def destroy
     @entry.destroy ? api_obj_destroyed : api_obj_error(@entry.errors.full_messages)

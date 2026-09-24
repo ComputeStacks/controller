@@ -22,8 +22,8 @@
     </select>
   </div>
   <div class="col-md-3 col-sm-3 col-col-xs-4">
-    <label>LETS ENCRYPT</label>
-    <select name="le" title="Filter by lets encrypt" class="form-control chosen-select-standard">
+    <label>ACME</label>
+    <select name="le" title="Filter by acme certificates" class="form-control chosen-select-standard">
       <option value="">Show All</option>
       <option value="active" <% if params[:le] == 'active' %>selected="selected"<% end %>>Show Active</option>
       <option value="pending" <% if params[:le] == 'pending' %>selected="selected"<% end %>>Show Pending</option>

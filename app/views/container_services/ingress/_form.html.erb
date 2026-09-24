@@ -9,6 +9,11 @@
           <%= f.check_box :restrict_cf, class: 'form-control'  %>
           <span class="help-block"><%= t 'container_images.ingress_rules.form.restrict_cf_help_html' %></span>
         </div>
+        <div class="col-sm-12">
+          <%= f.label :restrict_bunny, t('container_images.ingress_rules.form.restrict_bunny') %>
+          <%= f.check_box :restrict_bunny, class: 'form-control'  %>
+          <span class="help-block"><%= t 'container_images.ingress_rules.form.restrict_bunny_help_html' %></span>
+        </div>
       </div>
     </div>
     <div class="panel-footer">

@@ -36,7 +36,6 @@
 #   @return [Array<BillingPhase>]
 #
 class SubscriptionProduct < ApplicationRecord
-
   include Auditable
 
   scope :active, -> { where active: true }
@@ -55,13 +54,13 @@ class SubscriptionProduct < ApplicationRecord
   has_many :billing_usages, dependent: :destroy
   has_many :billing_events, dependent: :destroy
 
-  validates :phase_type, inclusion: {in: %w(trial discount final)}, unless: :allow_nil_phase
+  validates :phase_type, inclusion: {in: %w[trial discount final]}, unless: :allow_nil_phase
 
   attr_accessor :allow_nil_phase, :skip_billing_event
 
   after_create :setup_defaults
   after_update :update_linked_resources
-  after_update :toggle_active_event, unless: Proc.new { |i| i.skip_billing_event }
+  after_update :toggle_active_event, unless: proc { |i| i.skip_billing_event }
 
   after_create_commit :init_usage!
   after_commit :purge_subscription_cache!
@@ -69,7 +68,6 @@ class SubscriptionProduct < ApplicationRecord
   # Return the start of the current billing period.
   #
   def current_period
-
     previous_period = billing_usages.order(created_at: :desc).first
 
     # If we have no previous usage, and no billing events, we take the initial event creation timestamp
@@ -119,15 +117,15 @@ class SubscriptionProduct < ApplicationRecord
     return false if product.nil?
     return false if current_price.nil?
     return false if linked_obj.nil?
-    return false if billing_usages.where('period_start > ? and period_end <= ?', current_period, end_time).exists?
-    raw_units = product.unit.nil? ? current_qty : ( current_qty / product.unit )
+    return false if billing_usages.where("period_start > ? and period_end <= ?", current_period, end_time).exists?
+    raw_units = product.unit.nil? ? current_qty : (current_qty / product.unit)
     if product.is_aggregated
-      raw_units = raw_units - billing_usages.order(created_at: :desc).first.qty if billing_usages.exists?
+      raw_units -= billing_usages.order(created_at: :desc).first.qty if billing_usages.exists?
       product_rate = if billing_usages.exists?
-                       current_price raw_units + billing_usages.where("period_end >= ?", 30.days.ago).sum(:qty) # Intentionally not using `qty_total`.
-                     else
-                       current_price raw_units
-                     end
+        current_price raw_units + billing_usages.where("period_end >= ?", 30.days.ago).sum(:qty) # Intentionally not using `qty_total`.
+      else
+        current_price raw_units
+      end
       usage_total = product_rate.price * billable_qty(raw_units)
     else
       product_rate = current_price raw_units
@@ -172,17 +170,17 @@ class SubscriptionProduct < ApplicationRecord
     return 0 if linked_obj.nil?
     return 1 if product.is_image? || product.is_addon?
     case product.resource_kind
-    when 'cpu'
+    when "cpu"
       linked_obj.cpu
-    when 'memory'
+    when "memory"
       linked_obj.memory
-    when 'backup'
+    when "backup"
       linked_obj.billing_backup_usage
-    when 'bandwidth'
+    when "bandwidth"
       linked_obj.billing_current_bandwidth
-    when 'storage'
+    when "storage"
       linked_obj.billing_volume_usage
-    when 'local_disk'
+    when "local_disk"
       linked_obj.billing_local_disk_usage
     else
       1
@@ -209,19 +207,19 @@ class SubscriptionProduct < ApplicationRecord
     end
 
     included_units = case product.resource_kind
-                     when 'backup'
-                       subscription.package.backup
-                     when 'storage'
-                       subscription.package.storage
-                     when 'local_disk'
-                       subscription.package.local_disk
-                     when 'bandwidth'
-                       subscription.package.bandwidth
-                     else
-                       0.0
-                     end
+    when "backup"
+      subscription.package.backup
+    when "storage"
+      subscription.package.storage
+    when "local_disk"
+      subscription.package.local_disk
+    when "bandwidth"
+      subscription.package.bandwidth
+    else
+      0.0
+    end
     return 0.0 if included_units.nil?
-    raw_units > included_units ? (raw_units - included_units) : 0.0
+    (raw_units > included_units) ? (raw_units - included_units) : 0.0
   end
 
   ##
@@ -229,9 +227,9 @@ class SubscriptionProduct < ApplicationRecord
   def run_rate
     return 0e0 if current_price.nil?
     case current_price&.term
-    when 'month'
+    when "month"
       current_price.price / 730.0
-    when 'year'
+    when "year"
       current_price.price / 8760.0
     else
       current_price.price
@@ -264,10 +262,10 @@ class SubscriptionProduct < ApplicationRecord
   #
   # Make sure we're in the correct phase, and if not, migrate.
   def validate_phase!
-    return true if phase_type == 'final'
+    return true if phase_type == "final"
     billing_plan = user.billing_plan
     if billing_plan.nil? && phase_type.nil?
-      update phase_type: 'final'
+      update phase_type: "final"
       return true
     end
     expected_phase = billing_resource.determine_phase self
@@ -292,14 +290,14 @@ class SubscriptionProduct < ApplicationRecord
     return unless billing_usages.where("period_end > ?", Time.now.utc).exists?
     existing_usage_items = billing_usages.where("period_end > ?", Time.now.utc)
     if existing_usage_items.count > 1
-      ids = existing_usage_items.map {|i| i.id}
+      ids = existing_usage_items.map { |i| i.id }
       SystemEvent.create!(
         message: "Fatal error adjusting usage item: #{id}",
         data: {
           subscription: subscription.id,
           product: product&.id,
           subscription_product: id,
-          errors: "Multiple active usage items found, halting: #{ids.join(', ')}"
+          errors: "Multiple active usage items found, halting: #{ids.join(", ")}"
         },
         event_code: "287c90bc647e070b"
       )
@@ -309,8 +307,8 @@ class SubscriptionProduct < ApplicationRecord
     hourly_rate = (item.rate / item.rate_period.to_f).round(4)
     Audit.create!(
       user: current_user,
-      ip_addr: current_user.nil? ? '127.0.0.1' : current_user.last_request_ip,
-      event: 'updated',
+      ip_addr: current_user.nil? ? "127.0.0.1" : current_user.last_request_ip,
+      event: "updated",
       rel_id: item.id,
       rel_model: item.class.to_s,
       raw_data: "Adjust usage due to SubscriptionProduct (#{id}) change."
@@ -384,7 +382,7 @@ class SubscriptionProduct < ApplicationRecord
   def setup_defaults
     update(start_on: subscription.created_at) if start_on.nil?
     if billing_plan.nil? && phase_type.nil?
-      update phase_type: 'final'
+      update phase_type: "final"
     elsif phase_type.nil? && billing_resource
       update phase_type: billing_resource.determine_phase(self)
     end
@@ -395,19 +393,21 @@ class SubscriptionProduct < ApplicationRecord
   # IF this is the package of a subscription, and we're linked
   # be sure to update the cpu/memory values of the linked obj.
   def update_linked_resources
-    subscription.linked_obj&.update(
-      cpu: package.cpu,
-      memory: package.memory
-    ) if package
+    if package
+      subscription.linked_obj&.update(
+        cpu: package.cpu,
+        memory: package.memory
+      )
+    end
   end
 
   def toggle_active_event
     if saved_change_to_attribute?("active")
       be = if active
-             billing_events.new( from_status: false, to_status: true )
-           else
-             billing_events.new( from_status: true, to_status: false )
-           end
+        billing_events.new(from_status: false, to_status: true)
+      else
+        billing_events.new(from_status: true, to_status: false)
+      end
       be.audit = current_audit if current_audit
       be.subscription = subscription
       be.save
@@ -474,5 +474,4 @@ class SubscriptionProduct < ApplicationRecord
       false
     end
   end
-
 end

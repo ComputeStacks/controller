@@ -1,7 +1,6 @@
 ##
 # # Network Ingress Rules
 class Api::Admin::Networks::IngressRulesController < Api::Admin::ApplicationController
-
   ##
   # List all ingress rules
   #
@@ -12,5 +11,4 @@ class Api::Admin::Networks::IngressRulesController < Api::Admin::ApplicationCont
   def index
     @ingress_rules = paginate Network::IngressRule.all.order(:id)
   end
-
 end

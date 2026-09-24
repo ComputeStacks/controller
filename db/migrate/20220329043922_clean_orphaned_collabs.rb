@@ -1,6 +1,5 @@
 class CleanOrphanedCollabs < ActiveRecord::Migration[6.1]
   def change
-
     ContainerImageCollaborator.all.each do |i|
       next unless i.collaborator.nil?
       i.delete
@@ -20,6 +19,5 @@ class CleanOrphanedCollabs < ActiveRecord::Migration[6.1]
       next unless i.collaborator.nil?
       i.delete
     end
-
   end
 end

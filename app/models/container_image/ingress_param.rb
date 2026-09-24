@@ -20,19 +20,18 @@
 #   @return [Boolean] False will use local iptable rules (NAT). `tls` is not possible.
 #
 class ContainerImage::IngressParam < ApplicationRecord
-
   include Auditable
   include IngressValidator
 
   scope :sorted, -> { order(:port) }
 
-  has_many :dependent_params, class_name: 'Network::IngressRule', foreign_key: 'ingress_param_id', dependent: :nullify
+  has_many :dependent_params, class_name: "Network::IngressRule", foreign_key: "ingress_param_id", dependent: :nullify
 
   belongs_to :container_image
-  belongs_to :load_balancer_rule, class_name: 'ContainerImage::IngressParam', optional: true
+  belongs_to :load_balancer_rule, class_name: "ContainerImage::IngressParam", optional: true
   has_one :internal_load_balancer, through: :load_balancer_rule, source: :container_image
 
-  validates :port, uniqueness: { scope: [:container_image_id, :proto], message: "port is already assigned to container image" }
+  validates :port, uniqueness: {scope: [:container_image_id, :proto], message: "port is already assigned to container image"}
 
   validate :custom_load_balancer
 
@@ -48,8 +47,7 @@ class ContainerImage::IngressParam < ApplicationRecord
 
   def custom_load_balancer
     if load_balancer_rule && !load_balancer_rule.container_image.is_load_balancer
-      errors.add(:load_balancer_image_id, 'is not a load balancer')
+      errors.add(:load_balancer_image_id, "is not a load balancer")
     end
   end
-
 end

@@ -1,11 +1,10 @@
 module SftpServices
   class ReloadSshKeysService
-
     attr_accessor :container,
-                  :audit,
-                  :event,
-                  :result,
-                  :errors
+      :audit,
+      :event,
+      :result,
+      :errors
 
     def initialize(container, audit)
       self.container = container
@@ -22,7 +21,7 @@ module SftpServices
       ContainerWorkers::ContainerExecWorker.perform_async(
         container.global_id,
         event.global_id,
-        %w(/usr/bin/ruby /usr/local/bin/load_ssh_keys.rb)
+        %w[/usr/bin/ruby /usr/local/bin/load_ssh_keys.rb]
       )
     rescue => e
       return unless defined?(event) && event
@@ -37,8 +36,8 @@ module SftpServices
 
     def build_event!
       self.event = EventLog.create!(
-        locale_keys: { container: container.name },
-        locale: 'sftp.reload_ssh_keys',
+        locale_keys: {container: container.name},
+        locale: "sftp.reload_ssh_keys",
         status: "pending",
         event_code: "52a00936df3e2289",
         audit: audit
@@ -52,6 +51,5 @@ module SftpServices
       errors << "Missing audit" unless audit
       errors.empty?
     end
-
   end
 end

@@ -33,8 +33,11 @@
           <% else %>
             <div class="row">
               <div class="col-md-12">
-                <label for="passwordVoidInputDisabled">Value</label>
-                <input id="passwordVoidInputDisabled" name="void" class="form-control" disabled="disabled" value="Encrypted Value">
+                <div class="form-group">
+                  <%= f.label :value, "Value" %>
+                  <%= f.password_field :value, value: nil, class: 'form-control', autocomplete: 'new-password' %>
+                  <p class="help-block">Leave blank to keep the current value.</p>
+                </div>
               </div>
             </div>
           <% end %>

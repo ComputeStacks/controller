@@ -1,8 +1,7 @@
 ##
 # User Groups
 class Api::Admin::UserGroupsController < Api::Admin::ApplicationController
-
-  before_action :load_user_group, except: %i[ index create ]
+  before_action :load_user_group, except: %i[index create]
 
   ##
   # List All User Groups
@@ -124,7 +123,7 @@ class Api::Admin::UserGroupsController < Api::Admin::ApplicationController
     params.require(:user_group).permit(
       :name, :is_default, :billing_plan_id, :q_containers,
       :allow_local_volume, :q_cr, :q_images, :bill_offline,
-      :bill_suspended, :remove_stopped, { region_ids: [] }
+      :bill_suspended, :remove_stopped, {region_ids: []}
     )
   end
 
@@ -133,5 +132,4 @@ class Api::Admin::UserGroupsController < Api::Admin::ApplicationController
     return api_obj_missing if @group.nil?
     @group.current_user = current_user
   end
-
 end

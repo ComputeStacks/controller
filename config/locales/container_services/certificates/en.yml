@@ -12,10 +12,10 @@ en:
         privkey: Private Key
       none:
         custom: No custom certificates found.
-        le: No LetsEncrypt certificates found.
+        le: No Automatic SSL certificates found.
       verify_domain: Verify DNS
       le:
-        title: LetsEncrypt Free Certificates
+        title: Automatic Free SSL Certificates
         action: Setup Free SSL
       custom:
         title: Custom SSL Certificates

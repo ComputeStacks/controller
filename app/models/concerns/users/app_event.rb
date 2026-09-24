@@ -9,13 +9,13 @@ module Users
 
     def app_event_subject(alert_name)
       case alert_name
-      when 'UserActivated'
+      when "UserActivated"
         "User Unsuspended"
-      when 'UserCreated'
+      when "UserCreated"
         "User Created"
-      when 'UserDeleted'
+      when "UserDeleted"
         "User Deleted"
-      when 'UserSuspended'
+      when "UserSuspended"
         "User Suspended"
       else
         ""
@@ -25,13 +25,13 @@ module Users
     def app_event_description(alert_name)
       base_desc = "#{full_name} (#{email})"
       case alert_name
-      when 'UserActivated'
+      when "UserActivated"
         "#{base_desc} has been unsuspended"
-      when 'UserCreated'
+      when "UserCreated"
         "#{base_desc} has been created."
-      when 'UserDeleted'
+      when "UserDeleted"
         "#{base_desc} has been deleted"
-      when 'UserSuspended'
+      when "UserSuspended"
         "#{base_desc} has been suspended"
       else
         ""
@@ -39,22 +39,21 @@ module Users
     end
 
     def app_event_labels
-      [ { 'key' => 'link', 'value' => %Q(#{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/admin/users/#{id}) } ]
+      [{"key" => "link", "value" => %(#{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/admin/users/#{id})}]
     end
 
     private
 
     def trigger_create_notifier
-      ProcessAppEventWorker.perform_async 'UserCreated', nil, global_id
+      ProcessAppEventWorker.perform_async "UserCreated", nil, global_id
     end
 
     def trigger_destroy_notifier
       data = {
-        'subject' => app_event_subject('UserDeleted'),
-        'description' => app_event_description('UserDeleted')
+        "subject" => app_event_subject("UserDeleted"),
+        "description" => app_event_description("UserDeleted")
       }
-      ProcessAppEventWorker.perform_async 'UserDeleted', nil, nil, data
+      ProcessAppEventWorker.perform_async "UserDeleted", nil, nil, data
     end
-
   end
 end

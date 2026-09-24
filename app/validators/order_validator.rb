@@ -1,12 +1,12 @@
 class OrderValidator < ActiveModel::Validator
   def validate(order)
     quota_check!(order)
-    v_deployment(order) unless order.order_data['project'].nil?
+    v_deployment(order) unless order.order_data["project"].nil?
   end
 
   def quota_check!(order)
-    if order.order_data['project']
-      container_orders = order.order_data['raw_order'].map { |i| i if i['product_type'] == 'container' }
+    if order.order_data["project"]
+      container_orders = order.order_data["raw_order"].map { |i| i if i["product_type"] == "container" }
       unless order.user.can_order_containers?(container_orders.count)
         order.errors.add(:base, "Over quota, unable to process #{container_orders.count} containers.")
       end
@@ -14,12 +14,12 @@ class OrderValidator < ActiveModel::Validator
   end
 
   def v_deployment(order)
-    location = Location.find_by id: order.order_data['location_id']
+    location = Location.find_by id: order.order_data["location_id"]
     if location.nil?
-      order.errors.add(:base, 'Unknown Location.')
+      order.errors.add(:base, "Unknown Location.")
     else
       # Verify we have access to this location
-      available_locations = Location.available_for(order.user, 'container')
+      available_locations = Location.available_for(order.user, "container")
       unless available_locations.map { |i| i.id }.include?(location.id)
         order.errors.add(:base, "#{location.name} is not available for provisioning.")
       end
@@ -27,22 +27,22 @@ class OrderValidator < ActiveModel::Validator
       # Ensure a node exists with enough CPU
       # Find max cpu we need.
       max_cpu = 0.0
-      order.order_data['raw_order'].each do |i|
-        image_variant = ContainerImage::ImageVariant.find_by(id: i['image_variant_id'])
+      order.order_data["raw_order"].each do |i|
+        image_variant = ContainerImage::ImageVariant.find_by(id: i["image_variant_id"])
         if image_variant.nil?
           errors.add(:base, "Unknown image.")
           next
         end
-        product = Product.find_by(id: i.dig('product', 'id'))
+        product = Product.find_by(id: i.dig("product", "id"))
         cpu = 0.0
         mem = 0
         if product.nil? || product.package.nil?
-          if i.dig('resources', 'cpu').nil? || i.dig('resources', 'memory').nil?
+          if i.dig("resources", "cpu").nil? || i.dig("resources", "memory").nil?
             order.errors.add(:base, "Invalid resources.")
             next
           else
-            cpu = i.dig('resources', 'cpu').to_f
-            mem = i.dig('resources', 'memory').to_i
+            cpu = i.dig("resources", "cpu").to_f
+            mem = i.dig("resources", "memory").to_i
             max_cpu = cpu unless cpu < max_cpu
           end
         else

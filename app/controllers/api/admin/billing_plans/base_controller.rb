@@ -1,5 +1,4 @@
 class Api::Admin::BillingPlans::BaseController < Api::Admin::ApplicationController
-
   before_action :load_billing_plan
 
   private
@@ -9,5 +8,4 @@ class Api::Admin::BillingPlans::BaseController < Api::Admin::ApplicationControll
     return api_obj_missing if @billing_plan.nil?
     @billing_plan.current_user = current_user
   end
-
 end

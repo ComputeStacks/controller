@@ -1,5 +1,4 @@
 class Auth::OauthTokensController < Doorkeeper::TokensController
-
   include BelcoWidget
   include LogPayload
   include SentrySetup
@@ -20,20 +19,20 @@ class Auth::OauthTokensController < Doorkeeper::TokensController
       scopes = authorize_response.token.scopes
       if user.nil?
         unless allow_nil_user?(scopes)
-          render json: { error: :unauthorized_client, error_description: I18n.t(:invalid_scope, scope: %i[doorkeeper errors messages]) }, status: :forbidden
+          render json: {error: :unauthorized_client, error_description: I18n.t(:invalid_scope, scope: %i[doorkeeper errors messages])}, status: :forbidden
         end
       elsif scopes.include?("admin_read") || scopes.include?("admin_write")
         if !user.is_admin
-          render json: { error: :unauthorized_client, error_description: I18n.t(:invalid_scope, scope: %i[doorkeeper errors messages]) }, status: :forbidden
+          render json: {error: :unauthorized_client, error_description: I18n.t(:invalid_scope, scope: %i[doorkeeper errors messages])}, status: :forbidden
         end
       end
     end
   rescue ActiveRecord::NotNullViolation, Doorkeeper::Errors::MissingRequiredParameter
-    render json: { error: :unauthorized_client, error_description: I18n.t(:server_error, scope: %i[doorkeeper errors messages]) }, status: :forbidden
+    render json: {error: :unauthorized_client, error_description: I18n.t(:server_error, scope: %i[doorkeeper errors messages])}, status: :forbidden
   rescue => e
-    ExceptionAlertService.new(e, 'b18ecdcb8c9cf922').perform
+    ExceptionAlertService.new(e, "b18ecdcb8c9cf922").perform
     Rails.logger.warn(e.message) if Rails.env.development?
-    render json: { error: :unauthorized_client, error_description: I18n.t(:server_error, scope: %i[doorkeeper errors messages]) }, status: :forbidden
+    render json: {error: :unauthorized_client, error_description: I18n.t(:server_error, scope: %i[doorkeeper errors messages])}, status: :forbidden
   end
 
   ##
@@ -44,7 +43,6 @@ class Auth::OauthTokensController < Doorkeeper::TokensController
   # * register
   #
   def allow_nil_user?(scopes)
-    (scopes + %w(public register)).uniq.sort == %w(public register).sort
+    (scopes + %w[public register]).uniq.sort == %w[public register].sort
   end
-
 end

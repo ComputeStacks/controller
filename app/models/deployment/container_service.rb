@@ -107,53 +107,53 @@ class Deployment::ContainerService < ApplicationRecord
   include ContainerServices::StateManager
 
   scope :sorted, -> { order(:label) }
-  scope :web_only, -> { where(network_ingress_rules: { external_access: true, proto: 'http' }).joins(:ingress_rules).distinct }
+  scope :web_only, -> { where(network_ingress_rules: {external_access: true, proto: "http"}).joins(:ingress_rules).distinct }
   scope :load_balancers, -> { where(is_load_balancer: true) }
 
-  belongs_to :image_variant, class_name: 'ContainerImage::ImageVariant'
+  belongs_to :image_variant, class_name: "ContainerImage::ImageVariant"
   has_one :container_image, through: :image_variant
   belongs_to :deployment
   belongs_to :region
-  belongs_to :master_domain, class_name: 'Deployment::ContainerDomain', optional: true
+  belongs_to :master_domain, class_name: "Deployment::ContainerDomain", optional: true
 
   has_one :user, through: :deployment
   has_many :collaborators, through: :deployment
 
-  belongs_to :initial_subscription, class_name: 'Subscription', optional: true
+  belongs_to :initial_subscription, class_name: "Subscription", optional: true
 
   has_many :ssl_certificates,
-       class_name: 'Deployment::Ssl',
-       dependent:  :destroy
+    class_name: "Deployment::Ssl",
+    dependent: :destroy
 
   has_many :containers,
-       class_name: 'Deployment::Container',
-       dependent:  :destroy
+    class_name: "Deployment::Container",
+    dependent: :destroy
 
   has_many :subscriptions, through: :containers
   has_many :networks, -> { distinct }, through: :containers
 
   has_many :env_params,
-       class_name:  'ContainerService::EnvConfig',
-       foreign_key: 'container_service_id',
-       dependent:   :destroy
+    class_name: "ContainerService::EnvConfig",
+    foreign_key: "container_service_id",
+    dependent: :destroy
 
   has_many :setting_params,
-       class_name:  'ContainerService::SettingConfig',
-       foreign_key: 'container_service_id',
-       dependent:   :destroy
+    class_name: "ContainerService::SettingConfig",
+    foreign_key: "container_service_id",
+    dependent: :destroy
 
   has_many :host_entries,
-           class_name: 'ContainerService::HostEntry',
-           foreign_key: 'container_service_id',
-           dependent: :destroy
+    class_name: "ContainerService::HostEntry",
+    foreign_key: "container_service_id",
+    dependent: :destroy
 
   has_many :volume_maps, dependent: :destroy
   has_many :volumes, through: :volume_maps
 
-  has_many :owned_volume_maps, -> { where is_owner: true }, class_name: 'VolumeMap', foreign_key: 'container_service_id'
+  has_many :owned_volume_maps, -> { where is_owner: true }, class_name: "VolumeMap", foreign_key: "container_service_id"
   has_many :owned_volumes, through: :owned_volume_maps, source: :volume
 
-  has_many :secrets, -> { where(rel_model: 'Deployment::ContainerService') }, foreign_key: 'rel_id', dependent: :destroy
+  has_many :secrets, -> { where(rel_model: "Deployment::ContainerService") }, foreign_key: "rel_id", dependent: :destroy
 
   has_one :metric_client, through: :region
   has_one :log_client, through: :region
@@ -163,20 +163,22 @@ class Deployment::ContainerService < ApplicationRecord
   has_one :location, through: :region
 
   # has_many :logs, class_name: 'Deployment::EventLog', dependent: :destroy, foreign_key: 'service_id'
-  has_and_belongs_to_many :event_logs, foreign_key: 'deployment_container_service_id'
+  has_and_belongs_to_many :event_logs, foreign_key: "deployment_container_service_id"
 
   # Container Links
-  has_many :links, class_name: 'Deployment::ContainerLink', foreign_key: 'service_id', dependent: :destroy
+  has_many :links, class_name: "Deployment::ContainerLink", foreign_key: "service_id", dependent: :destroy
   has_many :service_resources, through: :links, source: :service_resource
 
   has_many :alert_notifications, through: :containers
 
   has_many :dependent_links,
-       class_name:  'Deployment::ContainerLink',
-       foreign_key: 'service_resource_id',
-       dependent:   :destroy
+    class_name: "Deployment::ContainerLink",
+    foreign_key: "service_resource_id",
+    dependent: :destroy
 
   has_many :dependent_services, through: :dependent_links, source: :service
+
+  validates_with ShmSizeValidator
 
   def csrn
     "csrn:caas:project:service:#{resource_name}:#{id}"
@@ -205,7 +207,7 @@ class Deployment::ContainerService < ApplicationRecord
   end
 
   def has_domain_management
-    ingress_rules.where(proto: 'http').exists?
+    ingress_rules.where(proto: "http").exists?
   end
 
   def requires_sftp_containers?
@@ -219,6 +221,21 @@ class Deployment::ContainerService < ApplicationRecord
   # Helpers
   def label_with_id
     "#{id}-#{label}"
+  end
+
+  # Shared-memory (/dev/shm) size expressed in MB, for the web edit form. Stored as bytes in
+  # `shm_size`; 0 = use the container image default. The setter only rewrites bytes when the
+  # MB value actually changes, so re-saving a form populated from an API-set (bytes) value
+  # that isn't a whole number of MB doesn't silently re-round it.
+  def shm_size_mb
+    return 0 if shm_size.to_i.zero?
+    (shm_size / 1_048_576.0).round
+  end
+
+  def shm_size_mb=(val)
+    mb = val.to_i
+    return if mb == shm_size_mb
+    self.shm_size = mb * 1_048_576
   end
 
   def package
@@ -259,41 +276,47 @@ class Deployment::ContainerService < ApplicationRecord
     d = master_domain
     # Order by port to give higher pref to lower port
     # the idea is that `80` will be selected first over something like `7080`.
-    d = domains.where(
-      system_domain:         true,
-      network_ingress_rules: {
-        proto:           'http',
-        external_access: true
-      }
-    ).joins(:ingress_rule).order( Arel.sql("network_ingress_rules.port")).limit(1).first if d.nil?
-    d = domains.where(
-      system_domain:         true,
-      network_ingress_rules: {
-        proto:           'tls',
-        external_access: true
-      }
-    ).joins(:ingress_rule).limit(1).first if d.nil?
-    d = domains.where(
-      system_domain:         true,
-      network_ingress_rules: {
-        proto:           'tcp',
-        external_access: true
-      }
-    ).joins(:ingress_rule).limit(1).first if d.nil?
+    if d.nil?
+      d = domains.where(
+        system_domain: true,
+        network_ingress_rules: {
+          proto: "http",
+          external_access: true
+        }
+      ).joins(:ingress_rule).order(Arel.sql("network_ingress_rules.port")).limit(1).first
+    end
+    if d.nil?
+      d = domains.where(
+        system_domain: true,
+        network_ingress_rules: {
+          proto: "tls",
+          external_access: true
+        }
+      ).joins(:ingress_rule).limit(1).first
+    end
+    if d.nil?
+      d = domains.where(
+        system_domain: true,
+        network_ingress_rules: {
+          proto: "tcp",
+          external_access: true
+        }
+      ).joins(:ingress_rule).limit(1).first
+    end
     d.nil? ? nil : d.domain
   end
 
   def sftp_containers
     if requires_sftp_containers?
       sftps = []
-      self.containers.each do |i|
+      containers.each do |i|
         s = i.sftp_container
         next if s.nil?
         sftps << s unless sftps.include?(s)
       end
       sftps
     else # For all others, we just pick one!
-      deployment.sftp_containers.exists? ? [ deployment.sftp_containers.first ] : []
+      deployment.sftp_containers.exists? ? [deployment.sftp_containers.first] : []
     end
   end
 
@@ -301,15 +324,14 @@ class Deployment::ContainerService < ApplicationRecord
     container_ar = []
     containers.each do |c|
       container_ar << {
-        'name' => c.name,
-        'ip' =>  c.local_ip
+        "name" => c.name,
+        "ip" => c.local_ip
       }
     end
     {
-      'default_domain' => default_domain,
-      'ingress_rules' => ingress_rules.map(&:attributes),
-      'containers' => container_ar
+      "default_domain" => default_domain,
+      "ingress_rules" => ingress_rules.map(&:attributes),
+      "containers" => container_ar
     }
   end
-
 end

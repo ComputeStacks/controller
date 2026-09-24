@@ -66,19 +66,19 @@
 #   @return [DateTime]
 #
 class ContainerImage::VolumeParam < ApplicationRecord
-
   include Auditable
 
   include Volumes::BorgPolicy
   include Volumes::VolumeMount
 
   belongs_to :container_image
-  belongs_to :source_volume, class_name: 'ContainerImage::VolumeParam', optional: true
+  belongs_to :source_volume, class_name: "ContainerImage::VolumeParam", optional: true
 
   has_many :volumes, class_name: "Volume", foreign_key: "template_id", dependent: :nullify
-  has_many :dependent_volumes, class_name: 'ContainerImage::VolumeParam', foreign_key: 'source_volume_id', dependent: :restrict_with_error
+  has_many :dependent_volumes, class_name: "ContainerImage::VolumeParam",
+    foreign_key: "source_volume_id", dependent: :restrict_with_error
 
-  validates :borg_strategy, inclusion: { in: %w(file mysql postgres) }
+  validates :borg_strategy, inclusion: {in: %w[file mysql postgres]}
   validates :label, presence: true
   validates :mount_path, presence: true
   validate :prevent_dependency_loop
@@ -86,6 +86,8 @@ class ContainerImage::VolumeParam < ApplicationRecord
   validate :valid_mount_point?
 
   before_validation :set_from_source
+
+  attr_accessor :cascade_changes
 
   # def local_csrn
   #   "csrn:caas:template:vol:#{resource_name}:#{id}"
@@ -100,24 +102,34 @@ class ContainerImage::VolumeParam < ApplicationRecord
   # record becomes simply a placeholder.
   def csrn
     return source_volume.csrn if source_volume
+
     "csrn:caas:template:vol:#{resource_name}:#{id}"
   end
 
   def resource_name
     return source_volume.resource_name if source_volume
     return "null" if label.blank?
-    label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+
+    label.strip.downcase.gsub(/[^a-z0-9\s]/i, "").tr(" ", "_")[0..10]
   end
 
   # List volumes that are available to this user, which may be cloned
+  #
+  # Awaiting-mount volumes are excluded: they are provisioned but empty (no container has
+  # been created with the bind yet), so offering one as a clone/restore source on an order
+  # form would silently hand the customer an empty copy.
   def available_to_clone
     return [] unless current_user
-    Volume.find_all_for(current_user).where("volumes.template_id = ?", id)
+
+    Volume.find_all_for(current_user)
+      .where("volumes.template_id = ?", id)
+      .where(awaiting_mount: false)
   end
 
   # List snapshots that are available to this user, which may be restored to this new volume
   def available_to_restore
     return [] unless current_user
+
     ar = []
     available_to_clone.each { |i| ar << i }
     ar.empty? ? [] : ar.flatten
@@ -130,15 +142,15 @@ class ContainerImage::VolumeParam < ApplicationRecord
   end
 
   def valid_mount_point?
-    if !id.nil? && container_image.volumes.where("id != ? and mount_path = ?", id, mount_path).exists?
-      errors.add(:mount_path, 'already exists')
+    if !id.nil? && container_image.volumes.where("id != ? and mount_path = ?", id,
+      mount_path).exists?
+      errors.add(:mount_path, "already exists")
     elsif id.nil? && container_image.volumes.where(mount_path: mount_path).exists?
-      errors.add(:mount_path, 'already exists')
+      errors.add(:mount_path, "already exists")
     end
   end
 
   def prevent_dependency_loop
     # Ensure our source volume doesn't belong to an image that also requires a volume from us
   end
-
 end

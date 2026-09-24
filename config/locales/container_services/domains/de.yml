@@ -12,14 +12,21 @@ de:
       breadcrumb:
         new: Domain hinzufügen
         routing: Domain Routing
-      enable_le_html: '<a href="%{link}">Klick hier</a> um LetsEncrypt auf Ihren bestehenden Domains zu aktivieren.'
+      enable_le_html: '<a href="%{link}">Klick Sie hier</a> um automatisches SSL für Ihre bestehenden Domazu aktivieren.'
       form:
         enabled: "Aktiviert?"
         enabled_help:
           system: "System Domains können nur aktiviert oder deaktiviert werden. Andere Einstellungen sind nicht verfügbar."
           user: "Wenn Sie dieses Kontrollkästchen deaktivieren, wird das Routing dieser Domain sofort abgeschaltet."
-        le: Kostenloses LetsEncrypt SSL Zertifikat aktivieren
+        le: Enable Automatic Free SSL
         hsts: Aktiviere HSTS Header
         hsts_help: Dadurch wird der HSTS Header zum Load Balancer hinzugefügt. Funktioniert nur bei SSL-Verbindungen.
-        # For LetsEncrypt, we will automatically enable this. This is the message they will see in that situation.
-        hsts_auto_help: Automatisch aktiviert für Domains mit aktiviertem LetsEncrypt.
+        hsts_auto_help: Automatisch aktiviert für Domains mit aktiviertem Certificate.
+        hsts_group: HTTP Strict Transport Security (HSTS)
+        hsts_group_help: Die Optionen „includeSubDomains“ und „preload“ sind nur wirksam, solange „HSTS Header aktivieren“ ausgewählt ist.
+        hsts_include_subdomains: HSTS includeSubDomains
+        hsts_include_subdomains_help: Erfordert den HSTS-Header. Wendet HSTS auf alle Subdomains an — nur aktivieren, wenn jede Subdomain HTTPS verwendet.
+        hsts_preload: HSTS preload
+        hsts_preload_help: Erfordert includeSubDomains. Markiert die Domain für die HSTS-Preload-Listen der Browser.
+        frame_options: 'X-Frame-Options: SAMEORIGIN'
+        frame_options_help: Verhindert, dass andere Websites diese Domain in einem Frame einbetten (Clickjacking-Schutz).

@@ -5,18 +5,19 @@
 # You may also edit the ingress rule and specify `external_access`.
 #
 class Api::Networks::IngressRules::ToggleNatController < Api::Networks::IngressRules::BaseController
+  api_scope create: :project_write
 
   ##
   # Toggle External Access
   #
   # `POST /api/networks/ingress_rules/{id}/toggle_nat`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   def create
     if @ingress_rule.toggle_nat!
       respond_to do |format|
-        format.any(:json, :xml) { render template: 'api/networks/ingress_rules/show', status: :accepted }
+        format.any(:json, :xml) { render template: "api/networks/ingress_rules/show", status: :accepted }
       end
     else
       respond_to do |format|
@@ -24,5 +25,4 @@ class Api::Networks::IngressRules::ToggleNatController < Api::Networks::IngressR
       end
     end
   end
-
 end

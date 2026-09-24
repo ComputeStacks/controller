@@ -1,0 +1,87 @@
+name: Test
+
+# Runs the Rails test suite for the AGPL core. There is no root Gemfile in this
+# repository (only Gemfile.common is tracked), so the suite bundles against
+# Gemfile.common and exercises the generic container-action framework via its fake
+# handler in lib/test/fake_action_handler.rb -- engine-specific handlers live in
+# their own repositories and are not tested here.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: cstacks
+          POSTGRES_PASSWORD: cstacks
+          POSTGRES_DB: cstacks
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      RAILS_ENV: test
+      # test_helper's requires_external_infra! skips on CI, covering the integration
+      # tests that need a docker provisioning node, PowerDNS or an ACME server -- none
+      # of which exist on a runner. GitHub Actions already sets this, but the suite's
+      # correctness here depends on it, so it is set explicitly rather than inherited.
+      CI: "true"
+      # Only Gemfile.common is tracked; a root Gemfile exists solely when an engine
+      # is vendored in, and is gitignored.
+      BUNDLE_GEMFILE: Gemfile.common
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: "6379"
+      DATABASE_URL: "postgres://cstacks:cstacks@127.0.0.1:5432/cstacks"
+      TEST_DB_URL: "postgres://cstacks:cstacks@127.0.0.1:5432/cstacks"
+      # CI-only placeholders (real secrets are not needed to run the suite).
+      # SECRET_KEY_BASE must be >= 128 chars: Secret#crypt_key (app/models/secret.rb)
+      # rejects anything shorter, and fixtures encrypt fields via Secret at load time.
+      SECRET_KEY_BASE: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      USER_AUTH_SECRET: "ci-test-user-auth-secret"
+      NODE_ENROLLMENT_TOKEN: "ci-test-node-enrollment-token"
+      # nodes.yml sets primary_ip (NOT NULL) from DEV_VM_IP; also feeds the
+      # load_balancers ext_ip and metric/log client endpoint fixtures.
+      DEV_VM_IP: "127.0.0.1"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # Tracks .tool-versions so the suite and the image stay on one ruby.
+          ruby-version: .tool-versions
+          bundler-cache: true
+
+      # config/database.yml is gitignored; the sample reads DEV_DB_URL / TEST_DB_URL
+      # from the environment, which is exactly what the variables above provide.
+      - name: Configure database
+        run: cp config/database.sample.yml config/database.yml
+
+      - name: Prepare test database
+        run: bundle exec rails db:test:prepare
+
+      - name: Run test suite
+        run: bundle exec rails test

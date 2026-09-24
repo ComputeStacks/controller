@@ -18,6 +18,5 @@ module ContainerServices
       return unless deployment.private_network.nil?
       NetworkWorkers::TrashPolicyWorker.perform_async region.id, name
     end
-
   end
 end

@@ -25,7 +25,7 @@ module ContainerServices
       end
       service_usage.zero? ? service_usage : (service_usage / Numeric::GIGABYTE).round(8)
     rescue => e
-      ExceptionAlertService.new(e, 'e8956ca1ad04c052').perform
+      ExceptionAlertService.new(e, "e8956ca1ad04c052").perform
       0.0
     end
 
@@ -36,7 +36,7 @@ module ContainerServices
     def run_rate(reset_cache = false)
       cache_key = "s_run_rate_#{id}"
       Rails.cache.fetch(cache_key, force: reset_cache, expires_in: 2.hours) do
-        subscriptions.all_active.inject(0) { |sum,item| sum += item.run_rate }
+        subscriptions.all_active.inject(0) { |sum, item| sum + item.run_rate }
       end
     end
 
@@ -69,15 +69,14 @@ module ContainerServices
       end
 
       if can_scale?
-        base_rate = base_rate * containers.count
+        base_rate *= containers.count
         scale_price = current_price * 2  # simulate adding 1 additional container
-        base_rate = base_rate > scale_price ? base_rate : scale_price
+        base_rate = (base_rate > scale_price) ? base_rate : scale_price
       end
       base_rate
     rescue => e
-      ExceptionAlertService.new(e, '208a3ca3358b7c3b').perform
+      ExceptionAlertService.new(e, "208a3ca3358b7c3b").perform
       nil
     end
-
   end
 end

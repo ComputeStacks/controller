@@ -1,5 +1,4 @@
 module Deployments::OrderHelper
-
   def order_image_icon_path(image_id)
     image = ContainerImage.find_by id: image_id
     return ContainerImage.default_avatar_path if image.nil?
@@ -10,7 +9,7 @@ module Deployments::OrderHelper
     data = {}
     packages = current_user.billing_plan.packages_by_resource cpu.to_f, mem.to_i
     packages.each do |i|
-      g = i.product.group.nil? ? '' : i.product.group
+      g = i.product.group.nil? ? "" : i.product.group
       (data[g] ||= []) << i
     end
     data
@@ -25,7 +24,7 @@ module Deployments::OrderHelper
     data = {}
     packages = service.available_packages
     packages.each do |i|
-      g = i.product.group.nil? ? '' : i.product.group
+      g = i.product.group.nil? ? "" : i.product.group
       (data[g] ||= []) << i
     end
     data
@@ -35,17 +34,17 @@ module Deployments::OrderHelper
   # Skip password fields in order session
   def order_container_has_user_params?(container)
     container[:params].each_key do |i|
-      return true unless container[:params][i][:type] == 'password'
+      return true unless container[:params][i][:type] == "password"
     end
     false
   end
 
   def order_image_select_option(variant, order_session)
     is_selected = if order_session.image_variant_selected?(variant.id)
-                    true
-                  else
-                    variant.is_default
-                  end
+      true
+    else
+      variant.is_default
+    end
     tag.option value: variant.id, selected: is_selected do
       variant.label.blank? ? variant.registry_image_tag : variant.label
     end
@@ -75,5 +74,4 @@ module Deployments::OrderHelper
   def order_params_use_large_layout?
     BillingPackage.find_by_plan(current_user.billing_plan).count > 4
   end
-
 end

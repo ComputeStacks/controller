@@ -2,7 +2,6 @@
 # # Generate Basic Auth API Credentials
 #
 class Api::Admin::Users::ApiCredentialsController < Api::Admin::Users::BaseController
-
   ##
   # Generate Credentials
   #
@@ -40,8 +39,8 @@ class Api::Admin::Users::ApiCredentialsController < Api::Admin::Users::BaseContr
       end
     else
       respond_to do |format|
-        format.json { render json: { errors: @api_credential.errors.full_messages }, status: :unprocessable_entity }
-        format.xml { render xml: { errors: @api_credential.errors.full_messages }, status: :unprocessable_entity }
+        format.json { render json: {errors: @api_credential.errors.full_messages}, status: :unprocessable_entity }
+        format.xml { render xml: {errors: @api_credential.errors.full_messages}, status: :unprocessable_entity }
       end
     end
   end
@@ -65,8 +64,8 @@ class Api::Admin::Users::ApiCredentialsController < Api::Admin::Users::BaseContr
         end
       else
         respond_to do |format|
-          format.json { render json: { errors: @api_credential.errors.full_messages }, status: :unprocessable_entity }
-          format.xml { render xml: { errors: @api_credential.errors.full_messages }, status: :unprocessable_entity }
+          format.json { render json: {errors: @api_credential.errors.full_messages}, status: :unprocessable_entity }
+          format.xml { render xml: {errors: @api_credential.errors.full_messages}, status: :unprocessable_entity }
         end
       end
     end
@@ -77,5 +76,4 @@ class Api::Admin::Users::ApiCredentialsController < Api::Admin::Users::BaseContr
   def api_params
     params.require(:api_credential).permit(:name)
   end
-
 end

@@ -1,5 +1,4 @@
 module EnforceSecondFactor
-
   extend ActiveSupport::Concern
 
   private
@@ -9,9 +8,8 @@ module EnforceSecondFactor
       if current_user.req_second_factor || session[:req_second_factor]
         current_user.update_column(:req_second_factor, true) unless current_user.req_second_factor
         redirect_to "/users/security_key_auth/new"
-        return false
+        false
       end
     end
   end
-
 end

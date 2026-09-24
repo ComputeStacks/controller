@@ -19,11 +19,11 @@ module LeContainerDomain
 
     has_one :lets_encrypt_user, through: :lets_encrypt, source: :user
 
-    before_save :disable_le_ready, unless: Proc.new { le_enabled }
+    before_save :disable_le_ready, unless: proc { le_enabled }
 
-    after_save :validate_le_domain, if: Proc.new { le_enabled }
-    after_save :lets_encrypt_init!, if: Proc.new { le_ready }
-    after_save :clean_lets_encrypt, unless: Proc.new { le_ready }
+    after_save :validate_le_domain, if: proc { le_enabled }
+    after_save :lets_encrypt_init!, if: proc { le_ready }
+    after_save :clean_lets_encrypt, unless: proc { le_ready }
 
     attr_accessor :skip_validation
   end
@@ -41,7 +41,6 @@ module LeContainerDomain
     le_enabled && !le_ready
   end
 
-
   # Determine if DNS IP is allowed.
   # @param value [IPAddr]
   # @return [Boolean]
@@ -54,8 +53,6 @@ module LeContainerDomain
     false
   end
 
-  private
-
   # @return [Boolean]
   def lets_encrypt_init!
     return true if lets_encrypt
@@ -65,11 +62,10 @@ module LeContainerDomain
     return false if account.nil?
 
     chosen_cert = nil
-    chosen_cert = user.lets_encrypts.selectable.first unless Setting.le_single_domain?
-    chosen_cert = user.lets_encrypts.create!(account: account) if chosen_cert.nil?
+    chosen_cert = user.lets_encrypts.create!(account: account)
     if chosen_cert.nil?
       SystemEvent.create!(
-        message: "Unable to generate LetsEncrypt for domain #{domain}",
+        message: "Unable to generate ACME Certificate for domain #{domain}",
         data: {
           domain: {
             id: id,
@@ -87,6 +83,8 @@ module LeContainerDomain
     update_attribute :lets_encrypt, chosen_cert
   end
 
+  private
+
   def validate_le_domain
     return unless saved_change_to_attribute?("domain") && !skip_validation
 
@@ -101,5 +99,4 @@ module LeContainerDomain
   def clean_lets_encrypt
     update_attribute(:lets_encrypt, nil) if lets_encrypt
   end
-
 end

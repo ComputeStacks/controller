@@ -21,7 +21,7 @@ node :links do |i|
 end
 node :metadata do |i|
   {
-    icons: i.container_images.where(is_load_balancer: false).uniq.collect {|ii| image_path ii.icon_url},
-    image_names: i.container_images.where(is_load_balancer: false).uniq.collect {|ii| ii.label}
+    icons: i.container_images.where(is_load_balancer: false).uniq.collect { |ii| image_path ii.icon_url },
+    image_names: i.container_images.where(is_load_balancer: false).uniq.collect { |ii| ii.label }
   }
 end

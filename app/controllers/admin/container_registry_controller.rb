@@ -1,23 +1,24 @@
 class Admin::ContainerRegistryController < Admin::ApplicationController
-
   before_action :find_registry, only: %i[show edit update destroy]
 
   def index
     @registries = ContainerRegistry.all.paginate page: params[:page], per_page: 30
   end
 
-  def show; end
+  def show
+  end
 
   def new
     @registry = ContainerRegistry.new
     @registry.current_user = current_user
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if @registry.update(registry_params)
-      redirect_to "/admin/container_registry/#{@registry.id}", notice: t('container_registry.updated')
+      redirect_to "/admin/container_registry/#{@registry.id}", notice: t("container_registry.updated")
     else
       render action: :edit
     end
@@ -28,7 +29,7 @@ class Admin::ContainerRegistryController < Admin::ApplicationController
     @registry.current_user = current_user
     if @registry.save
       RegistryWorkers::ProvisionRegistryWorker.perform_async @registry.id
-      redirect_to "/admin/container_registry/#{@registry.id}", success: t('container_registry.created')
+      redirect_to "/admin/container_registry/#{@registry.id}", success: t("container_registry.created")
     else
       render action: :new
     end
@@ -56,5 +57,4 @@ class Admin::ContainerRegistryController < Admin::ApplicationController
   def registry_params
     params.require(:container_registry).permit(:label, :user_id)
   end
-
 end

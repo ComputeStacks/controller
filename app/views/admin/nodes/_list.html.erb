@@ -16,10 +16,50 @@
           Public IP
           <b class="pull-right"><%= node.public_ip %></b>
         </li>
+        <li>
+          Agent Host
+          <b class="pull-right">
+            <% if node.agent_host.present? %>
+              <%= node.agent_host %>
+            <% else %>
+              <span class="text-muted"><%= node.primary_ip %> <small>(default)</small></span>
+            <% end %>
+          </b>
+        </li>
+        <%#
+          Capacity is a stored node FACT (columns on nodes), refreshed once a minute by
+          NodeWorkers::HeartbeatWorker from Docker.info -- not a Prometheus read, so it
+          costs nothing to render here and does not belong in the metrics batch below.
+
+          The timestamp is shown deliberately. Unknown capacity now fails OPEN at
+          placement time, so a node whose Docker.info quietly never succeeds behaves
+          exactly like a healthy one; a stale or absent timestamp here is the only
+          signal an operator gets.
+        %>
+        <li>
+          Capacity
+          <b class="pull-right">
+            <% if node.cpu_cores.to_i.positive? && node.memory_mb.to_i.positive? %>
+              <%= node.cpu_cores %> cores / <%= number_to_human_size node.memory_mb.megabytes %>
+            <% else %>
+              <span class="text-muted">unknown</span>
+            <% end %>
+          </b>
+        </li>
+        <li>
+          Capacity Updated
+          <b class="pull-right">
+            <% if node.capacity_updated_at %>
+              <%= time_ago_in_words node.capacity_updated_at %> ago
+            <% else %>
+              <span class="text-muted">never</span>
+            <% end %>
+          </b>
+        </li>
       </ul>
       <hr />
       <ul class="list-unstyled">
-        <%= render partial: "admin/nodes/index/metrics_overview", locals: { node: node } %>
+        <%= render partial: "admin/nodes/index/metrics_overview", locals: { node: node, metrics: metrics[node.id] } %>
       </ul>
       <div>
         <hr>

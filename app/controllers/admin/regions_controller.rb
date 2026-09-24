@@ -1,16 +1,14 @@
 class Admin::RegionsController < Admin::ApplicationController
-
-  before_action :load_region, except: %w(index new create)
+  before_action :load_region, except: %w[index new create]
 
   def index
     @regions = Region.sorted
   end
 
   def show
-    @nodes = @region.nodes.sorted
     if request.xhr?
       @resources = @region.resource_usage
-      render template: 'admin/regions/index/resources', layout: false
+      render template: "admin/regions/index/resources", layout: false
     end
   end
 
@@ -18,7 +16,8 @@ class Admin::RegionsController < Admin::ApplicationController
     @region = Region.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if @region.update(region_update_params)
@@ -42,7 +41,7 @@ class Admin::RegionsController < Admin::ApplicationController
     if @region.destroy
       redirect_to "/admin/locations", notice: "#{@region.name} successfully deleted."
     else
-      redirect_to "/admin/locations", alert: "#{@region.errors.full_messages.join(', ')}"
+      redirect_to "/admin/locations", alert: "#{@region.errors.full_messages.join(", ")}"
     end
   end
 
@@ -52,7 +51,8 @@ class Admin::RegionsController < Admin::ApplicationController
     params.require(:region).permit(
       :name, :active, :fill_to, :metric_client_id, :loki_endpoint, :log_client_id, :loki_retries, :loki_batch_size,
       :volume_backend, :nfs_remote_host, :nfs_remote_path, :offline_window, :failure_count, :nfs_controller_ip,
-      :disable_oom, :pid_limit, :ulimit_nofile_hard, :ulimit_nofile_soft, :location_id, :p_net_size, :network_driver, :acme_server
+      :disable_oom, :pid_limit, :ulimit_nofile_hard, :ulimit_nofile_soft, :location_id, :p_net_size, :network_driver, :acme_server,
+      :guac_url, :guac_key, :ipv6_egress
     )
   end
 
@@ -60,7 +60,8 @@ class Admin::RegionsController < Admin::ApplicationController
     params.require(:region).permit(
       :active, :fill_to, :metric_client_id, :loki_endpoint, :log_client_id, :loki_retries, :loki_batch_size,
       :volume_backend, :nfs_remote_host, :nfs_remote_path, :offline_window, :failure_count, :nfs_controller_ip,
-      :disable_oom, :pid_limit, :ulimit_nofile_hard, :ulimit_nofile_soft, :p_net_size, :network_driver, :acme_server
+      :disable_oom, :pid_limit, :ulimit_nofile_hard, :ulimit_nofile_soft, :p_net_size, :network_driver, :acme_server,
+      :guac_url, :guac_key, :ipv6_egress
     )
   end
 
@@ -72,5 +73,4 @@ class Admin::RegionsController < Admin::ApplicationController
     end
     @region.current_user = current_user
   end
-
 end

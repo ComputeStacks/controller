@@ -1,5 +1,4 @@
 class DeploymentsController < AuthController
-
   before_action :find_deployment, only: [:show, :update, :destroy]
   before_action :require_administer, only: :destroy
 
@@ -11,42 +10,43 @@ class DeploymentsController < AuthController
     end
   end
 
-  def show; end
+  def show
+  end
 
   def update
     @deployment.name = params[:name]
     if @deployment.save
-      flash[:notice] = I18n.t('crud.updated', resource: I18n.t('obj.deployment'))
+      flash[:notice] = I18n.t("crud.updated", resource: I18n.t("obj.deployment"))
     else
-      flash[:alert] = I18n.t('common.general_error')
+      flash[:alert] = I18n.t("common.general_error")
     end
     redirect_to "/deployments/#{@deployment.token}"
   end
 
   def destroy
-    audit = Audit.create_from_object!(@deployment, 'deleted', request.remote_ip, current_user)
+    audit = Audit.create_from_object!(@deployment, "deleted", request.remote_ip, current_user)
     event = EventLog.create!(
-      locale: 'deployment.trash',
-      locale_keys: { project: @deployment.name },
-      event_code: '20cd984da4da8963',
+      locale: "deployment.trash",
+      locale_keys: {project: @deployment.name},
+      event_code: "20cd984da4da8963",
       audit: audit,
-      status: 'pending'
+      status: "pending"
     )
     @deployment.mark_trashed!
     event.deployments << @deployment
     ProjectWorkers::TrashProjectWorker.perform_async @deployment.global_id, event.global_id
-    redirect_to '/deployments', notice: 'Project queued for deletion'
+    redirect_to "/deployments", notice: "Project queued for deletion"
   end
 
   private
 
   def find_deployment
-    @deployment = Deployment.find_for current_user, { token: params[:id] }
+    @deployment = Deployment.find_for current_user, {token: params[:id]}
     if @deployment.nil?
       if request.xhr?
-        render plain: I18n.t('crud.unknown', resource: I18n.t('obj.deployment')), layout: false
+        render plain: I18n.t("crud.unknown", resource: I18n.t("obj.deployment")), layout: false
       else
-        redirect_to "/deployments", alert: I18n.t('crud.unknown', resource: I18n.t('obj.deployment'))
+        redirect_to "/deployments", alert: I18n.t("crud.unknown", resource: I18n.t("obj.deployment"))
       end
       return false
     end
@@ -62,5 +62,4 @@ class DeploymentsController < AuthController
       redirect_to "/deployments/#{@deployment.token}", alert: "Permission denied"
     end
   end
-
 end

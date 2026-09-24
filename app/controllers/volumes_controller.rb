@@ -1,21 +1,22 @@
 class VolumesController < AuthController
-
-  before_action :find_volume, only: %w(show edit update destroy)
+  before_action :find_volume, only: %w[show edit update destroy]
 
   def index
     @volumes = Volume.find_all_for(current_user).where(to_trash: false)
   end
 
-  def show; end
+  def show
+  end
 
   def new
     redirect_to("/deployments")
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
-    audit = Audit.create_from_object!(@volume, 'updated', request.remote_ip, current_user)
+    audit = Audit.create_from_object!(@volume, "updated", request.remote_ip, current_user)
     @volume.current_audit = audit
     # @volume.force_rebuild = true <-- previous behavior, but we're not doing that now.
     if @volume.update(volume_params)
@@ -27,11 +28,11 @@ class VolumesController < AuthController
   end
 
   def destroy
-    audit = Audit.create_from_object!(@volume, 'deleted', request.remote_ip, current_user)
+    audit = Audit.create_from_object!(@volume, "deleted", request.remote_ip, current_user)
     if @volume.update(to_trash: true, trashed_by: audit)
       flash[:notice] = "Volume will be deleted shortly."
     else
-      flash[:alert] = "Error: #{@volume.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error: #{@volume.errors.full_messages.join(" ")}"
     end
     redirect_to @base_url
   end
@@ -48,10 +49,9 @@ class VolumesController < AuthController
   end
 
   def find_volume
-    @volume = Volume.find_for current_user, { id: params[:id] }
+    @volume = Volume.find_for current_user, {id: params[:id]}
     return(redirect_to("/volumes", alert: "Unknown Volume")) if @volume.nil?
     @deployment = @volume.deployment
     @base_url = @deployment.nil? ? "/volumes/#{@volume.id}" : "/deployments/#{@deployment.token}"
   end
-
 end

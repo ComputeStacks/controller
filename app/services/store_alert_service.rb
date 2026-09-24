@@ -1,5 +1,4 @@
 class StoreAlertService
-
   attr_accessor :data
 
   # @param [Hash] data
@@ -11,7 +10,7 @@ class StoreAlertService
     data[:alerts].each do |d|
       existing_alert = AlertNotification.find_by(fingerprint: d[:fingerprint])
       if existing_alert
-        if data[:status] == 'firing' && !existing_alert.active?
+        if data[:status] == "firing" && !existing_alert.active?
           trigger_alert = existing_alert.last_event < 10.minutes.ago # Don't trigger on alerts that were triggered less than 10 min ago.
           existing_alert.update(
             status: data[:status],
@@ -22,14 +21,19 @@ class StoreAlertService
           ProcessAlertWorker.perform_async(existing_alert.id) if trigger_alert
         else
           existing_alert.update_attribute :status, data[:status]
-          if existing_alert.name == 'NodeUp' && existing_alert.node
+          if existing_alert.name == "NodeUp" && existing_alert.node
             NodeWorkers::HeartbeatWorker.perform_async existing_alert.node.global_id
           end
         end
         next
       end
 
-      next if d.dig(:labels, :name) =~ /backup/
+      next if /backup/.match?(d.dig(:labels, :name))
+
+      # Temporarily disabling cpu usage alerts.
+      if d.dig(:labels, :alertname) == "ContainerCpuUsage"
+        next
+      end
 
       alert = AlertNotification.new fingerprint: d[:fingerprint], status: data[:status], last_event: Time.now
 
@@ -85,7 +89,7 @@ class StoreAlertService
   # @return [String]
   def sanitize_description(description)
     description = description.split("LABELS")[0].split("VALUE")[0].strip
-    description.gsub("\n","")
+    description.delete("\n")
   end
 
   # Find the value from the description
@@ -94,6 +98,4 @@ class StoreAlertService
     val = description.split("VALUE = ")
     val[1].nil? ? nil : val[1].split("\n")[0].to_f.round(4)
   end
-
-
 end

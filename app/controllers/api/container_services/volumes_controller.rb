@@ -1,17 +1,16 @@
 ##
 # Container Service Volumes
 class Api::ContainerServices::VolumesController < Api::ContainerServices::BaseController
+  api_scope read: :project_read
 
-  before_action -> { doorkeeper_authorize! :projects_read }, unless: :current_user
-
-  before_action :load_volume, except: %i[ index ]
+  before_action :load_volume, except: %i[index]
 
   ##
   # List all volumes
   #
   # `GET /api/container_services/{container-service-id}/volumes`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `volumes`: Array
   #     * `id`: Integer
@@ -27,6 +26,7 @@ class Api::ContainerServices::VolumesController < Api::ContainerServices::BaseCo
   #     * `detached_at`: DateTime
   #     * `subscription_id`: Integer
   #     * `enable_sftp`: Boolean
+  #     * `awaiting_mount`: Boolean - true while the volume exists but no container has mounted it yet (it mounts at the service's next rebuild; backups are suppressed until then)
   #     * `borg_enabled`: Boolean
   #     * `borg_freq`: String
   #     * `borg_strategy`: `String<file,mysql>`
@@ -61,7 +61,7 @@ class Api::ContainerServices::VolumesController < Api::ContainerServices::BaseCo
   #
   def index
     @volumes = paginate @service.volumes.active
-    render template: 'api/volumes/index'
+    render template: "api/volumes/index"
   end
 
   ##
@@ -69,7 +69,7 @@ class Api::ContainerServices::VolumesController < Api::ContainerServices::BaseCo
   #
   # `GET /api/projects/{project-id}/volumes/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `volume`: Object
   #     * `id`: Integer
@@ -85,6 +85,7 @@ class Api::ContainerServices::VolumesController < Api::ContainerServices::BaseCo
   #     * `detached_at`: DateTime
   #     * `subscription_id`: Integer
   #     * `enable_sftp`: Boolean
+  #     * `awaiting_mount`: Boolean - true while the volume exists but no container has mounted it yet (it mounts at the service's next rebuild; backups are suppressed until then)
   #     * `borg_enabled`: Boolean
   #     * `borg_freq`: String
   #     * `borg_strategy`: `String<file,mysql>`
@@ -118,15 +119,13 @@ class Api::ContainerServices::VolumesController < Api::ContainerServices::BaseCo
   #             * `label`: String
   #
   def show
-    render template: 'api/volumes/show'
+    render template: "api/volumes/show"
   end
 
   private
 
   def load_volume
     @volume = @service.volumes.find_by id: params[:id]
-    return api_obj_missing if @volume.nil? || !@volume.can_view?(current_user)
+    api_obj_missing if @volume.nil? || !@volume.can_view?(current_user)
   end
-
-
 end

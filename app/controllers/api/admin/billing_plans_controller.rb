@@ -1,8 +1,7 @@
 ##
 # Billing Plan
 class Api::Admin::BillingPlansController < Api::Admin::ApplicationController
-
-  before_action :load_billing_plan, except: %i[ index create ]
+  before_action :load_billing_plan, except: %i[index create]
 
   ##
   # List All Billing Plans
@@ -153,5 +152,4 @@ class Api::Admin::BillingPlansController < Api::Admin::ApplicationController
     return api_obj_missing if @billing_plan.nil?
     @billing_plan.current_user = current_user
   end
-
 end

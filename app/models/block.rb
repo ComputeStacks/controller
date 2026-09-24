@@ -13,7 +13,6 @@
 #   @return [String]
 #
 class Block < ApplicationRecord
-
   has_many :block_contents, dependent: :destroy, inverse_of: :block
 
   before_destroy :safe_to_delete?, prepend: true
@@ -25,8 +24,8 @@ class Block < ApplicationRecord
 
   def find_content_by_locale(locale)
     c = block_contents.find_by(locale: locale)
-    c = block_contents.find_by(locale: ENV['LOCALE']) if c.nil?
-    c = block_contents.find_by(locale: 'en') if c.nil? && ENV['LOCALE'] != 'en'
+    c = block_contents.find_by(locale: ENV["LOCALE"]) if c.nil?
+    c = block_contents.find_by(locale: "en") if c.nil? && ENV["LOCALE"] != "en"
     c
   end
 
@@ -35,5 +34,4 @@ class Block < ApplicationRecord
   def safe_to_delete?
     throw(:abort) unless content_key.blank?
   end
-
 end

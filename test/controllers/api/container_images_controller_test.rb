@@ -1,7 +1,6 @@
-require 'test_helper'
+require "test_helper"
 
 class Api::ContainerImagesControllerTest < ActionDispatch::IntegrationTest
-
   include ApiTestControllerBase
 
   test "list container images" do
@@ -10,12 +9,11 @@ class Api::ContainerImagesControllerTest < ActionDispatch::IntegrationTest
       headers: @basic_auth_headers
     assert_response :success
     data = JSON.parse(response.body)
-    assert_equal data['container_images'].count, ContainerImage.count
-    assert_includes data['container_images'].map { |i| i['label'].downcase }, 'wordpress'
+    assert_equal data["container_images"].count, ContainerImage.count
+    assert_includes data["container_images"].map { |i| i["label"].downcase }, "wordpress"
   end
 
   test "view a container image" do
-
     image = ContainerImage.first
 
     get "/api/container_images/#{image.id}", as: :json, headers: @basic_auth_headers
@@ -23,13 +21,11 @@ class Api::ContainerImagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     data = JSON.parse(response.body)
 
-    assert_equal image.id, data['container_image']['id']
-
+    assert_equal image.id, data["container_image"]["id"]
   end
 
   test "update an image" do
-
-    image = ContainerImage.find_by(name: 'custom')
+    image = ContainerImage.find_by(name: "custom")
 
     assert_not_nil image
 
@@ -42,12 +38,10 @@ class Api::ContainerImagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     data = JSON.parse(response.body)
 
-    assert_equal "Wordpress Update", data['container_image']['label']
-
+    assert_equal "Wordpress Update", data["container_image"]["label"]
   end
 
   test "create an image" do
-
     provider = ContainerImageProvider.first
 
     assert_not_nil provider
@@ -67,7 +61,7 @@ class Api::ContainerImagesControllerTest < ActionDispatch::IntegrationTest
         category: "web",
         ingress_params_attributes: [{
           port: 80,
-          proto: 'http',
+          proto: "http",
           external_access: true
         }],
         setting_params_attributes: [{
@@ -92,20 +86,16 @@ class Api::ContainerImagesControllerTest < ActionDispatch::IntegrationTest
 
     data = JSON.parse(response.body)
 
-    assert_equal "My Image", data['container_image']['label']
-
+    assert_equal "My Image", data["container_image"]["label"]
   end
 
   test "delete a container image" do
-
-    image = ContainerImage.find_by(name: 'deleteme')
+    image = ContainerImage.find_by(name: "deleteme")
 
     delete "/api/container_images/#{image.id}", as: :json, headers: @basic_auth_headers
 
     assert_response :success
 
-    assert_nil ContainerImage.find_by(name: 'deleteme')
-
+    assert_nil ContainerImage.find_by(name: "deleteme")
   end
-
 end

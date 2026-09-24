@@ -5,6 +5,12 @@ de:
       restore:
         title_html: '<i class="fa-solid fa-rotate"></i> Wiederherstellen'
         confirm: Sind Sie sicher? Dadurch wird der aktuelle Datensatz gelöscht und die zugehörigen Container werden neu gestartet.
+      download:
+        ready_html: '<i class="fa-solid fa-download"></i> Herunterladen'
+        preparing_html: '<i class="fa-solid fa-rotate fa-spin"></i> Wird vorbereitet…'
+        request_html: '<i class="fa-solid fa-download"></i> Download anfordern'
+        expires: Link läuft ab
+        failed: Vorheriger Download fehlgeschlagen — erneut versuchen
       name: Backup Name
       title: Backups
       size:

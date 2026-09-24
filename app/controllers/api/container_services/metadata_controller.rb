@@ -1,13 +1,12 @@
 ##
 # Container Service MetaData
 class Api::ContainerServices::MetadataController < Api::ContainerServices::BaseController
-
   ##
   # List Container Service Metadata
   #
   # `GET /api/container_services/{container-service-id}/metadata`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `metadata`: Array
   #     * `id`: Integer
@@ -27,7 +26,7 @@ class Api::ContainerServices::MetadataController < Api::ContainerServices::BaseC
   #
   # `GET /api/container_services/{container-service-id}/metadata/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `metadata`: Object
   #     * `id`: Integer
@@ -43,5 +42,4 @@ class Api::ContainerServices::MetadataController < Api::ContainerServices::BaseC
     # This is to allow easy viewing of custom load balancer params.
     @setting = @service.deployment.setting_params.find(params[:id])
   end
-
 end

@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
-
   include ApplicationErrors
   include BelcoWidget
+  include DixaWidget
   include EnforceSecondFactor
   include LogPayload
   include SentrySetup
@@ -17,7 +17,6 @@ class ApplicationController < ActionController::Base
 
   before_action :check_suspended, if: :current_user
 
-
   around_action :set_time_zone
 
   before_action :check_route, unless: :current_user
@@ -28,9 +27,8 @@ class ApplicationController < ActionController::Base
 
   add_flash_types :success
 
-
   def after_sign_in_path_for(resource)
-    if session["user_return_to"].blank? || %w(/ /login /users/login).include?(session["user_return_to"])
+    if session["user_return_to"].blank? || %w[/ /login /users/login].include?(session["user_return_to"])
       "/deployments"
     else
       session["user_return_to"]
@@ -46,22 +44,22 @@ class ApplicationController < ActionController::Base
   end
 
   def set_time_zone(&block)
-    if cookies['browser.timezone'] && cookies['browser.timezone'] != 'undefined'
-      Time.use_zone(cookies['browser.timezone'], &block)
+    if cookies["browser.timezone"] && cookies["browser.timezone"] != "undefined"
+      Time.use_zone(cookies["browser.timezone"], &block)
       if current_user
-        current_user.update_attribute :timezone, cookies['browser.timezone'] unless current_user.timezone == cookies['browser.timezone']
+        current_user.update_attribute :timezone, cookies["browser.timezone"] unless current_user.timezone == cookies["browser.timezone"]
       end
     else
-      Time.use_zone('UTC', &block)
+      Time.use_zone("UTC", &block)
     end
   rescue
-    Time.use_zone('UTC', &block)
+    Time.use_zone("UTC", &block)
   end
 
   private
 
   def catch_sso!
-    flash[:alert] = I18n.t('devise.failure.sso_secondfactor') if params[:from_sso]
+    flash[:alert] = I18n.t("devise.failure.sso_secondfactor") if params[:from_sso]
   end
 
   ##
@@ -77,15 +75,15 @@ class ApplicationController < ActionController::Base
         sign_in(:user, user, bypass: true)
         # TODO: Add session noting that this is from an admin, and lets put a big red bar at the top.
         login_path = if params[:from_admin]
-          '/deployments'
+          "/deployments"
         else
           user.subscriptions.empty? ? "/deployments/orders" : "/deployments"
         end
         redirect_to login_path
-        return false
+        false
       else
-        redirect_to "/login", alert: t('devise.failure.invalid')
-        return false
+        redirect_to "/login", alert: t("devise.failure.invalid")
+        false
       end
     end
   rescue
@@ -115,26 +113,25 @@ class ApplicationController < ActionController::Base
   def check_suspended
     if !current_user.active && request.fullpath != "/logout"
       if request.xhr?
-        render plain: '', layout: false
+        render plain: "", layout: false
       else
         render template: "layouts/shared/suspended", layout: "layouts/devise"
       end
-      return false
+      false
     end
   end
 
   def audit_log
     current_user.update_columns(
-        last_request_at: Time.now,
-        last_request_ip: request.remote_ip.gsub("::ffff:","")
+      last_request_at: Time.now,
+      last_request_ip: request.remote_ip.gsub("::ffff:", "")
     )
   end
 
   def check_route
     if !current_user && request.fullpath == "/" && request.get?
       redirect_to "/login"
-      return false
+      false
     end
   end
-
 end

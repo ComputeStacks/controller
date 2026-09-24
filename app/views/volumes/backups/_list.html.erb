@@ -1,6 +1,11 @@
+<%
+  archives = volume.list_archives
+  exports = volume.export_status_map
+  any_export_in_progress = exports.values.any? { |s| s[:status] == "in_progress" }
+%>
 <table class="table">
   <tbody>
-  <% if volume.list_archives.empty? %>
+  <% if archives.empty? %>
     <tr>
       <td colspan="2" class="text-center">
         <a href="#" data-toggle="modal" data-target="#volumeCreateBackup" <% if volume.operation_in_progress? %>disabled="disabled"<% end %>>
@@ -9,10 +14,25 @@
       </td>
     </tr>
   <% end %>
-  <% volume.list_archives.each do |i| %>
+  <% archives.each do |i| %>
+    <%
+      archive_name = (Base64.urlsafe_decode64(i[:id]) rescue nil)
+      export = (archive_name && exports[archive_name]) || {status: "none"}
+    %>
     <tr>
       <td class="code-font" style="vertical-align:middle; font-size:12px;"><%= volume_borg_backup_name(i) %></td>
       <td class="text-right">
+        <span class="btn-group" style="margin-right:5px;">
+          <% if export[:status] == "ready" %>
+            <%= link_to t('volumes.backups.download.ready_html'), export[:url], target: '_blank', rel: 'noopener', title: "#{t('volumes.backups.download.expires')} #{Time.at(export[:expires_at]).utc}", class: 'btn btn-sm btn-success' %>
+          <% elsif export[:status] == "in_progress" %>
+            <%= link_to t('volumes.backups.download.preparing_html'), '#', disabled: 'disabled', class: 'btn btn-sm btn-default' %>
+          <% elsif any_export_in_progress %>
+            <%= link_to t('volumes.backups.download.request_html'), '#', disabled: 'disabled', title: 'Another download is being prepared', class: 'btn btn-sm btn-default' %>
+          <% else %>
+            <%= link_to t('volumes.backups.download.request_html'), "#{volume_path(volume)}/exports/#{i[:id]}", method: :put, title: (export[:status] == 'failed' ? t('volumes.backups.download.failed') : nil), class: 'btn btn-sm btn-default' %>
+          <% end %>
+        </span>
         <div class="btn-group">
           <% if volume.operation_in_progress? %>
             <%= link_to t('volumes.backups.restore.title_html'), '#', disabled: 'disabled', title: 'Operation In Progress', class: 'btn btn-sm btn-success' %>

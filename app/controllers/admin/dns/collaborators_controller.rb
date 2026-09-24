@@ -1,12 +1,11 @@
 class Admin::Dns::CollaboratorsController < Admin::Dns::BaseController
-
   before_action :check_permission
   before_action :find_collaborator, only: %i[destroy]
 
   def index
     @collaborators = @zone.dns_zone_collaborators
     if request.xhr?
-      render template: 'admin/dns/collaborators/index', layout: false
+      render template: "admin/dns/collaborators/index", layout: false
     end
   end
 
@@ -18,14 +17,14 @@ class Admin::Dns::CollaboratorsController < Admin::Dns::BaseController
     @collab = @zone.dns_zone_collaborators.new collaborator_params
     @collab.current_user = current_user
     unless @collab.save
-      flash[:alert] = @collab.errors.full_messages.join(' ')
+      flash[:alert] = @collab.errors.full_messages.join(" ")
     end
     redirect_to "/admin/dns/#{@zone.id}/collaborators"
   end
 
   def destroy
     unless @collab.destroy
-      flash[:alert] = "Error: #{@collab.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error: #{@collab.errors.full_messages.join(" ")}"
     end
     redirect_to "/admin/dns/#{@zone.id}/collaborators"
   end
@@ -44,5 +43,4 @@ class Admin::Dns::CollaboratorsController < Admin::Dns::BaseController
   def collaborator_params
     params.require(:dns_zone_collaborator).permit(:user_email, :skip_confirmation)
   end
-
 end

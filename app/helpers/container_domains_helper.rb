@@ -1,5 +1,4 @@
 module ContainerDomainsHelper
-
   def new_container_domain_path(deployment)
     return admin_new_container_domain_path(deployment) if current_user.is_admin && deployment.user != current_user
     "/container_domains/new?deployment_id=#{deployment.token}"
@@ -22,5 +21,4 @@ module ContainerDomainsHelper
       Deployment.find_all_for(current_user)
     end
   end
-
 end

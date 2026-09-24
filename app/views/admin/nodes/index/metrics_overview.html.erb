@@ -1,1 +1,1 @@
-<%= render partial: 'admin/nodes/index/metrics_overview', locals: { node: @node } %>
+<%= render partial: 'admin/nodes/index/metrics_overview', locals: { node: @node, metrics: @metrics[@node.id] } %>

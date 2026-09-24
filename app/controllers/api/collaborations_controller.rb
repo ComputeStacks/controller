@@ -1,8 +1,6 @@
 # User Collaborations
 class Api::CollaborationsController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :profile_read }, only: %i[index show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :profile_update }, only: %i[update destroy], unless: :current_user
+  api_scope read: :profile_read, write: :profile_update
 
   before_action :find_collab, except: :index
 
@@ -70,7 +68,8 @@ class Api::CollaborationsController < Api::ApplicationController
   #     * `email`: String
   #     * `full_name`: String
   #
-  def show; end
+  def show
+  end
 
   ##
   # Activate Collaboration
@@ -107,30 +106,25 @@ class Api::CollaborationsController < Api::ApplicationController
 
   def find_collab
     # params[:id] = ID-model
-    id = params[:id].split('-')[0].to_i
-    collab_model = params[:id].split('-')[1]
-    allowed_models = %w(project image registry zone)
+    id = params[:id].split("-")[0].to_i
+    collab_model = params[:id].split("-")[1]
+    allowed_models = %w[project image registry zone]
     @collab = if allowed_models.include?(collab_model) && id > 0
-                case collab_model
-                when 'project'
-                  DeploymentCollaborator.find_for_user current_user, id: id
-                when 'image'
-                  ContainerImageCollaborator.find_for_user current_user, id: id
-                when 'registry'
-                  ContainerRegistryCollaborator.find_for_user current_user, id: id
-                when 'zone'
-                  Dns::ZoneCollaborator.find_for_user current_user, id: id
-                else
-                  nil
-                end
-              else
-                nil
-              end
+      case collab_model
+      when "project"
+        DeploymentCollaborator.find_for_user current_user, id: id
+      when "image"
+        ContainerImageCollaborator.find_for_user current_user, id: id
+      when "registry"
+        ContainerRegistryCollaborator.find_for_user current_user, id: id
+      when "zone"
+        Dns::ZoneCollaborator.find_for_user current_user, id: id
+      end
+    end
     api_obj_missing if @collab.nil?
   end
 
   def collab_params
     params.require(:collaboration).permit(:active)
   end
-
 end

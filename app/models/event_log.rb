@@ -21,10 +21,15 @@
 #   @return [Hash]
 #
 class EventLog < ApplicationRecord
-
   include Events::CodeState
   include Events::EventPurger
   include Events::StateManager
+
+  # Pre-created event code for a backup export / download job. The cs-agent matches
+  # the pre-created event by audit_id + this code and flips its status. Referenced by
+  # the export controllers, `non_blocking_codes`, and `Volume#export_status_map`.
+  # MUST match cs-agent's `exportEventCode`.
+  BACKUP_EXPORT_EVENT_CODE = "agent-e7c1a9d4b6f20835"
 
   # @!scope class
   # @return [Array<EventLog>]
@@ -32,22 +37,25 @@ class EventLog < ApplicationRecord
 
   # @!scope class
   # @return [Array<EventLog>]
-  scope :recent, -> { where %Q( event_logs.updated_at > '#{1.day.ago.iso8601}' ) }
+  scope :recent, -> { where %( event_logs.updated_at > '#{1.day.ago.iso8601}' ) }
 
   # @return [Array<AlertNotification>]
   has_and_belongs_to_many :alert_notifications
 
   # @return [Array<Deployment::Container>]
-  has_and_belongs_to_many :containers, class_name: 'Deployment::Container', association_foreign_key: 'deployment_container_id'
+  has_and_belongs_to_many :containers, class_name: "Deployment::Container", association_foreign_key: "deployment_container_id"
 
   # @return [Array<Deployment::ContainerDomain>]
-  has_and_belongs_to_many :container_domains, class_name: 'Deployment::ContainerDomain', association_foreign_key: 'deployment_container_domain_id'
+  has_and_belongs_to_many :container_domains, class_name: "Deployment::ContainerDomain", association_foreign_key: "deployment_container_domain_id"
+
+  # @return [Array<ContainerImage>]
+  has_and_belongs_to_many :container_images
 
   # @return [Array<ContainerRegistry>]
   has_and_belongs_to_many :container_registries
 
   # @return [Array<Deployment::ContainerService>]
-  has_and_belongs_to_many :container_services, class_name: 'Deployment::ContainerService', association_foreign_key: 'deployment_container_service_id'
+  has_and_belongs_to_many :container_services, class_name: "Deployment::ContainerService", association_foreign_key: "deployment_container_service_id"
 
   # @return [Array<Deployment>]
   has_and_belongs_to_many :deployments
@@ -62,7 +70,7 @@ class EventLog < ApplicationRecord
   has_and_belongs_to_many :nodes
 
   # @return [Array<Deployment::Sftp>]
-  has_and_belongs_to_many :sftp_containers, class_name: 'Deployment::Sftp', association_foreign_key: 'deployment_sftp_id'
+  has_and_belongs_to_many :sftp_containers, class_name: "Deployment::Sftp", association_foreign_key: "deployment_sftp_id"
 
   # @return [Array<User>]
   has_and_belongs_to_many :users
@@ -77,7 +85,7 @@ class EventLog < ApplicationRecord
   has_many :system_events, through: :audit
 
   # @return [Array<EventLogDatum>]
-  has_many :event_details, class_name: 'EventLogDatum', dependent: :destroy
+  has_many :event_details, class_name: "EventLogDatum", dependent: :destroy
 
   accepts_nested_attributes_for :event_details
 
@@ -120,12 +128,12 @@ class EventLog < ApplicationRecord
   def table_class
     if notice
       case status
-      when 'warning'
-        'warning'
-      when 'alert'
-        'danger'
+      when "warning"
+        "warning"
+      when "alert"
+        "danger"
       else
-        ''
+        ""
       end
     end
   end
@@ -136,5 +144,4 @@ class EventLog < ApplicationRecord
   rescue
     "#{locale} #{locale_keys}"
   end
-
 end

@@ -33,12 +33,12 @@ region.nodes.each do |node|
       puts "...selected #{container.name} for migration (DRY RUN)."
     else
       puts "...scheduling #{container.name} for migration."
-      audit = Audit.create_from_object!(container, 'updated', '127.0.0.1')
+      audit = Audit.create_from_object!(container, "updated", "127.0.0.1")
       event = EventLog.create!(
-        locale: 'container.migrating',
-        locale_keys: { 'container' => container.name },
-        event_code: '4c7a96039fac57d9',
-        status: 'pending',
+        locale: "container.migrating",
+        locale_keys: {"container" => container.name},
+        event_code: "4c7a96039fac57d9",
+        status: "pending",
         audit: audit
       )
       event.containers << container
@@ -47,5 +47,5 @@ region.nodes.each do |node|
       ContainerWorkers::MigrateContainerWorker.perform_async container.global_id, event.global_id
     end
   end
-end; 0
-
+end
+0

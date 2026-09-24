@@ -1,11 +1,10 @@
 class Admin::BillingPlans::BillingPhases::BillingResourcePricesController < Admin::BillingPlans::ApplicationController
-
   before_action :load_phase
   before_action :load_price, only: [:show, :edit, :update, :destroy]
 
   def show
     redirect_to "#{@base_price_url}/edit"
-    return false
+    false
   end
 
   def edit
@@ -26,12 +25,12 @@ class Admin::BillingPlans::BillingPhases::BillingResourcePricesController < Admi
       @price.max_qty = nil
     end
     if @price.update(price_params)
-      flash[:notice] = 'Successfully updated price'
+      flash[:notice] = "Successfully updated price"
       redirect_to @base_url
     else
       @regions = Region.all.order(name: :asc)
-      flash[:alert] = "Error! #{@price.errors.full_messages.join(' ')}"
-      render template: 'admin/billing_plans/billing_phases/billing_resource_prices/edit'
+      flash[:alert] = "Error! #{@price.errors.full_messages.join(" ")}"
+      render template: "admin/billing_plans/billing_phases/billing_resource_prices/edit"
     end
   end
 
@@ -43,18 +42,18 @@ class Admin::BillingPlans::BillingPhases::BillingResourcePricesController < Admi
     @price.current_user = current_user
     @price.billing_resource = @phase.billing_resource
     if @price.save
-      redirect_to @base_url, notice: 'Success!'
+      redirect_to @base_url, notice: "Success!"
     else
       @regions = Region.all.order(name: :asc)
-      render template: 'admin/billing_plans/billing_phases/billing_resource_prices/new'
+      render template: "admin/billing_plans/billing_phases/billing_resource_prices/new"
     end
   end
 
   def destroy
     if @price.destroy
-      flash[:notice] = 'Price deleted.'
+      flash[:notice] = "Price deleted."
     else
-      flash[:error] = "Error! #{@price.errors.full_messages.join(' ')}"
+      flash[:error] = "Error! #{@price.errors.full_messages.join(" ")}"
     end
     redirect_to @base_url
   end
@@ -68,7 +67,7 @@ class Admin::BillingPlans::BillingPhases::BillingResourcePricesController < Admi
   def load_phase
     @phase = @billing_plan.billing_phases.find_by(id: params[:billing_phase_id])
     if @phase.nil?
-      redirect_to "/admin/billing_plans/#{@billing_plan.id}/billing_phases", alert: 'Unknown Phase'
+      redirect_to "/admin/billing_plans/#{@billing_plan.id}/billing_phases", alert: "Unknown Phase"
       return false
     end
     @base_url = "/admin/billing_plans/#{@billing_plan.id}/billing_phases/#{@phase.id}"
@@ -77,11 +76,10 @@ class Admin::BillingPlans::BillingPhases::BillingResourcePricesController < Admi
   def load_price
     @price = @phase.prices.find_by(id: params[:id])
     if @price.nil?
-      redirect_to @base_url, alert: 'Unknown Phase'
+      redirect_to @base_url, alert: "Unknown Phase"
       return false
     end
     @price.current_user = current_user
     @base_price_url = "#{@base_url}/billing_resource_prices/#{@price.id}"
   end
-
 end

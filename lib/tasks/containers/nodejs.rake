@@ -1,16 +1,16 @@
 namespace :containers do
   desc "Install NodeJS"
   task nodejs: :environment do
-    if ContainerImage.find_by(name: 'node').nil?
+    if ContainerImage.find_by(name: "node").nil?
       dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
-      nodejs     = ContainerImage.create!(
-        name:                     "node",
-        label:                    "Node",
-        role:                     "node",
-        category:               "web",
-        can_scale:                true,
+      nodejs = ContainerImage.create!(
+        name: "node",
+        label: "Node",
+        role: "node",
+        category: "web",
+        can_scale: true,
         container_image_provider: dhprovider,
-        registry_image_path:      "cmptstks/node",
+        registry_image_path: "cmptstks/node",
         skip_variant_setup: true
       )
 
@@ -25,23 +25,22 @@ namespace :containers do
       )
 
       nodejs.ingress_params.create!(
-        port:            3000,
-        proto:           'http',
+        port: 3000,
+        proto: "http",
         external_access: true
       )
       nodejs.volumes.create!(
-        label:             'nodeapp',
-        mount_path:        '/usr/src/app',
-        enable_sftp:       true,
-        borg_enabled:      true,
-        borg_freq:         '@daily',
-        borg_strategy:     'file',
-        borg_keep_hourly:  1,
-        borg_keep_daily:   7,
-        borg_keep_weekly:  4,
+        label: "nodeapp",
+        mount_path: "/usr/src/app",
+        enable_sftp: true,
+        borg_enabled: true,
+        borg_freq: "@daily",
+        borg_strategy: "file",
+        borg_keep_hourly: 1,
+        borg_keep_daily: 7,
+        borg_keep_weekly: 4,
         borg_keep_monthly: 0
       )
     end
-
   end
 end

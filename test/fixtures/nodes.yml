@@ -2,9 +2,13 @@ testone:
   label: 'test01'
   hostname: 'test01'
   public_ip: '127.0.0.1'
-  primary_ip: <%= ENV['VAGRANT_VM_IP'] %>
+  primary_ip: <%= ENV['DEV_VM_IP'] %>
   region: regionone
   active: true
+  # Fixtures bypass the before_save mint_agent_token callback, so a real node
+  # always has an admin Bearer but a fixture node would not — and Agent::Client
+  # refuses to resolve a node without one.
+  agent_token_encrypted: "<%= Secret.encrypt!('test-node-admin-bearer') %>"
 
 #testtwo:
 #  label: 'test02'

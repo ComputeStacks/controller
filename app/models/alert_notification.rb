@@ -41,24 +41,23 @@
 #   @return [DateTime]
 #
 class AlertNotification < ApplicationRecord
-
   include Authorization::Alert
 
   scope :sorted, -> { order created_at: :desc }
-  scope :active, -> { where status: 'firing' }
-  scope :resolved, -> { where status: 'resolved' }
-  scope :recent, -> { where Arel.sql %Q( alert_notifications.updated_at > '#{1.month.ago.iso8601}' ) }
-  scope :admin_only, -> { where Arel.sql(%Q(name != 'ContainerMemoryUsage' AND name != 'ContainerCpuUsage')) }
+  scope :active, -> { where status: "firing" }
+  scope :resolved, -> { where status: "resolved" }
+  scope :recent, -> { where Arel.sql %( alert_notifications.updated_at > '#{1.month.ago.iso8601}' ) }
+  scope :admin_only, -> { where Arel.sql(%(name != 'ContainerMemoryUsage' AND name != 'ContainerCpuUsage')) }
 
   belongs_to :container,
-             class_name: 'Deployment::Container',
-             foreign_key: 'container_id',
-             optional: true
+    class_name: "Deployment::Container",
+    foreign_key: "container_id",
+    optional: true
 
   belongs_to :sftp_container,
-             class_name: 'Deployment::Sftp',
-             foreign_key: 'sftp_container_id',
-             optional: true
+    class_name: "Deployment::Sftp",
+    foreign_key: "sftp_container_id",
+    optional: true
 
   belongs_to :node, optional: true
 
@@ -72,12 +71,12 @@ class AlertNotification < ApplicationRecord
 
   # @return [Boolean]
   def active?
-    status == 'firing'
+    status == "firing"
   end
 
   # @return [Boolean]
   def resolved?
-    status == 'resolved'
+    status == "resolved"
   end
 
   # @!endgroup
@@ -85,7 +84,7 @@ class AlertNotification < ApplicationRecord
   # Do we have notifications that will get sent out?
   # @return [Boolean]
   def has_notifications?
-    ProjectNotification.where( Arel.sql %Q('#{name}' = ANY (rules)) ).exists? || UserNotification.where( Arel.sql %Q('#{name}' = ANY (rules)) ).exists? ||SystemNotification.where( Arel.sql %Q('#{name}' = ANY (rules)) ).exists?
+    ProjectNotification.where(Arel.sql(%('#{name}' = ANY (rules)))).exists? || UserNotification.where(Arel.sql(%('#{name}' = ANY (rules)))).exists? || SystemNotification.where(Arel.sql(%('#{name}' = ANY (rules)))).exists?
   end
 
   # @return [String]
@@ -96,7 +95,6 @@ class AlertNotification < ApplicationRecord
   private
 
   def set_status
-    self.status = 'resolved' if resolve
+    self.status = "resolved" if resolve
   end
-
 end

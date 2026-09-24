@@ -1,5 +1,4 @@
 class Admin::ContainerRegistry::BaseController < Admin::ApplicationController
-
   before_action :find_registry
 
   private
@@ -16,5 +15,4 @@ class Admin::ContainerRegistry::BaseController < Admin::ApplicationController
     end
     @registry.current_user = current_user
   end
-
 end

@@ -2,7 +2,6 @@ module SshPublicKey
   extend ActiveSupport::Concern
 
   included do
-
     validates :pubkey, presence: true
     validate :validate_cert
 
@@ -29,5 +28,4 @@ module SshPublicKey
     return if pubkey.blank?
     self.label = pubkey.split(" ")[2].nil? ? nil : pubkey.split(" ")[2]
   end
-
 end

@@ -1,7 +1,6 @@
-require 'test_helper'
+require "test_helper"
 
 class Api::Zones::CollaboratorsControllerTest < ActionDispatch::IntegrationTest
-
   include ApiTestControllerBase
 
   ##
@@ -41,5 +40,4 @@ class Api::Zones::CollaboratorsControllerTest < ActionDispatch::IntegrationTest
   #   item.dns_zone_collaborators.delete_all
   #
   # end
-
 end

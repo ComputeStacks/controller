@@ -1,5 +1,4 @@
 class Containers::BaseController < AuthController
-
   include RescueResponder
 
   before_action :find_container
@@ -22,5 +21,4 @@ class Containers::BaseController < AuthController
   def not_found_responder
     redirect_to "/deployments", alert: "Unknown Container"
   end
-
 end

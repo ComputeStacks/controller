@@ -1,7 +1,6 @@
 class Api::System::IngressRulesController < Api::System::BaseController
-
   def index
-    remote_ip = request.remote_ip.gsub("::ffff:","")
+    remote_ip = request.remote_ip.gsub("::ffff:", "")
     if Rails.env.development?
       node = Node.first
     else
@@ -9,7 +8,7 @@ class Api::System::IngressRulesController < Api::System::BaseController
       return api_obj_missing if node.nil?
     end
 
-    data = { rules: [] }
+    data = {rules: []}
     node.iptable_rules.each do |i|
       if i.sftp_container # should never hit this...
         data[:rules] << {
@@ -31,5 +30,4 @@ class Api::System::IngressRulesController < Api::System::BaseController
     end
     render json: data.to_json
   end
-
 end

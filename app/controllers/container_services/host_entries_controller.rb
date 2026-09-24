@@ -1,5 +1,4 @@
 class ContainerServices::HostEntriesController < ContainerServices::BaseController
-
   include RescueResponder
 
   before_action :find_entry, except: %i[index new create]
@@ -13,7 +12,8 @@ class ContainerServices::HostEntriesController < ContainerServices::BaseControll
     @entry = @service.host_entries.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def create
     @entry = @service.host_entries.new entry_params
@@ -37,7 +37,7 @@ class ContainerServices::HostEntriesController < ContainerServices::BaseControll
     if @entry.destroy
       flash[:success] = "Entry Destroyed"
     else
-      flash[:alert] = "Error deleting entry: #{@entry.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error deleting entry: #{@entry.errors.full_messages.join(" ")}"
     end
     redirect_to "/container_services/#{@service.id}/host_entries"
   end
@@ -61,5 +61,4 @@ class ContainerServices::HostEntriesController < ContainerServices::BaseControll
   def set_has_template
     @has_template = false
   end
-
 end

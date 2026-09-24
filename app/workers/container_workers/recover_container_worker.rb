@@ -15,23 +15,21 @@ module ContainerWorkers
 
       return unless container.node.online? # Ignore containers that are on disconnected nodes
 
-      audit = Audit.create_from_object!(container, 'updated', '127.0.0.1')
+      audit = Audit.create_from_object!(container, "updated", "127.0.0.1")
 
       # TODO: Check if network interface is missing.
       #       see: `Containers::ContainerNetworking.has_network_interface?`
       #       Currently being handled by the node health check job.
 
       if container.docker_client
-        PowerCycleContainerService.new(container, 'start', audit).perform
+        PowerCycleContainerService.new(container, "start", audit).perform
       else
-        PowerCycleContainerService.new(container, 'rebuild', audit).perform
+        PowerCycleContainerService.new(container, "rebuild", audit).perform
       end
     rescue ActiveRecord::RecordNotFound
-      return # Silently fail
+      nil # Silently fail
     rescue => e
-      ExceptionAlertService.new(e, 'fef9a051642bb924').perform
+      ExceptionAlertService.new(e, "fef9a051642bb924").perform
     end
-
   end
 end
-

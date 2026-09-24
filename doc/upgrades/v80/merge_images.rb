@@ -11,7 +11,7 @@
 
 dry_run = false # If true, will not perform any database changes and just output what it would do.
 errors = [] # Check this for possible issues after running
-old_images = [324,313] # Id of old images
+old_images = [324, 313] # Id of old images
 new_image = ContainerImage.find(170) # the NEW image you're merging into
 
 # The default variant for existing images tied to this new image.
@@ -93,4 +93,5 @@ old_images.each do |oid|
       end
     end
   end
-end; 0
+end
+0

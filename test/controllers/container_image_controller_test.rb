@@ -1,25 +1,24 @@
-require 'test_helper'
+require "test_helper"
 
 class ContainerImageControllerTest < ActionDispatch::IntegrationTest
-
   include StandardTestControllerBase
   include Devise::Test::IntegrationHelpers
 
   test "create container image with custom auth" do
     sign_in users(:admin)
-    reg_url = 'cr.csdevserver.local'
-    reg_pw = 'WYF6A6jy2vxZjALQbFos'
-    reg_user = 'gitlab+deploy-token-2'
+    reg_url = "cr.csdevserver.local"
+    reg_pw = "WYF6A6jy2vxZjALQbFos"
+    reg_user = "gitlab+deploy-token-2"
 
     post "/container_images", params: {
       container_image: {
-        label: 'redis-dev',
+        label: "redis-dev",
         active: true,
-        role: 'redis',
-        category: 'cache',
-        registry_image_path: 'cs/portal/redis',
+        role: "redis",
+        category: "cache",
+        registry_image_path: "cs/portal/redis",
         registry_custom: reg_url,
-        registry_image_tag: 'alpine',
+        registry_image_tag: "alpine",
         registry_auth: true,
         registry_username: reg_user,
         registry_password: reg_pw
@@ -29,18 +28,17 @@ class ContainerImageControllerTest < ActionDispatch::IntegrationTest
     assert_response :redirect
 
     # find created image and ensure password was saved
-    image = ContainerImage.find_by(registry_username: 'gitlab+deploy-token-2')
+    image = ContainerImage.find_by(registry_username: "gitlab+deploy-token-2")
     assert_equal reg_pw, image.registry_password
 
     # Verify image auth is correct
     auth = image.image_auth
 
-    assert_equal reg_user, auth['username']
-    assert_equal reg_pw, auth['password']
-
+    assert_equal reg_user, auth["username"]
+    assert_equal reg_pw, auth["password"]
   end
 
-  test 'can view collaborated image' do
+  test "can view collaborated image" do
     sign_in users(:user)
 
     image = container_images(:custom)
@@ -59,10 +57,9 @@ class ContainerImageControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     image.container_image_collaborators.delete_all
-
   end
 
-  test 'can view project image collaboration' do
+  test "can view project image collaboration" do
     sign_in users(:user)
 
     d = deployments :project_test
@@ -82,7 +79,5 @@ class ContainerImageControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     d.deployment_collaborators.delete_all
-
   end
-
 end

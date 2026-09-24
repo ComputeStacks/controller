@@ -1,11 +1,10 @@
 module NodeServices
   class PullImageService
-
     attr_accessor :node,
-                  :container_image,
-                  :image_variant,
-                  :errors,
-                  :raw_image # Useful for pulling system images
+      :container_image,
+      :image_variant,
+      :errors,
+      :raw_image # Useful for pulling system images
 
     # @param [Node] node
     # @param [ContainerImage::ImageVariant] image_variant
@@ -20,8 +19,8 @@ module NodeServices
     # @return [Boolean]
     def perform
       return false unless valid?
-      result = Timeout::timeout(300) do
-        Docker::Image.create({'fromImage' => image_path}, image_auth, node.client(5))
+      result = Timeout.timeout(300) do
+        Docker::Image.create({"fromImage" => image_path}, image_auth, node.client(5))
       end
       result.is_a? Docker::Image
     rescue Timeout::Error
@@ -30,47 +29,67 @@ module NodeServices
     rescue Docker::Error::NotFoundError => e
       SystemEvent.create!(
         message: "ContainerImage Error: NotFoundError",
-        log_level: 'warn',
+        log_level: "warn",
         data: {
-          'image' => {
-            'id' => container_image&.id,
-            'name' => container_image&.name
+          "image" => {
+            "id" => container_image&.id,
+            "name" => container_image&.name
           },
-          'error' => e.message
+          "error" => e.message
         },
-        event_code: 'f20fa0bfb26e6397'
+        event_code: "f20fa0bfb26e6397"
       )
       errors << e.message
       false
     rescue Docker::Error::ServerError => e
       SystemEvent.create!(
         message: "Registry Error: Unable to connect",
-        log_level: 'warn',
+        log_level: "warn",
         data: {
-          'message' => 'We were unable to connect to the container registry to pull this image. It could be temporary, or indicates an issue with the registry provider.',
-          'image' => {
-            'id' => container_image&.id,
-            'name' => container_image&.name
+          "message" => "We were unable to connect to the container registry to pull this image. It could be temporary, or indicates an issue with the registry provider.",
+          "image" => {
+            "id" => container_image&.id,
+            "name" => container_image&.name
           },
-          'error' => e.message
+          "error" => e.message
         },
-        event_code: '1fca3e3e13408e13'
+        event_code: "1fca3e3e13408e13"
+      )
+      errors << e.message
+      false
+    rescue Excon::Error::Forbidden, Excon::Error::Unauthorized, Docker::Error::UnauthorizedError => e
+      # The registry rejected our credentials (401/403): an operational/config problem
+      # (expired/insufficient registry auth, or an image gone private), not a code bug.
+      # Log it for operators — the image id/name below identifies the culprit, or is nil
+      # for the hardcoded system images — without paging Sentry.
+      SystemEvent.create!(
+        message: "Registry Error: Access denied",
+        log_level: "warn",
+        data: {
+          "message" => "The container registry denied access (401/403) when pulling this image. Verify the image's registry credentials, or whether the image still exists and is accessible.",
+          "image" => {
+            "id" => container_image&.id,
+            "name" => container_image&.name
+          },
+          "error" => e.message
+        },
+        event_code: "ecc2e472fa02baae"
       )
       errors << e.message
       false
     rescue => e
-      ExceptionAlertService.new(e, 'd88036886500af68').perform unless e.message =~ /auth/
+      ExceptionAlertService.new(e, "d88036886500af68").perform
       SystemEvent.create!(
         message: "ContainerImage Error: Fatal",
-        log_level: 'warn',
+        log_level: "warn",
         data: {
-          'image' => {
-            'id' => container_image&.id,
-            'name' => container_image&.name
+          "image" => {
+            "id" => container_image&.id,
+            "name" => container_image&.name
           },
-          'error' => e.message
+          "error" => e.message
         },
-        event_code: '811590dcbd5da281'
+        event_code: "811590dcbd5da281"
       )
       errors << e.message
       false
@@ -102,6 +121,5 @@ module NodeServices
     def image_auth
       container_image.nil? ? nil : container_image.image_auth
     end
-
   end
 end

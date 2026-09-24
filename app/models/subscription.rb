@@ -33,7 +33,6 @@
 #   @return [Volume]
 #
 class Subscription < ApplicationRecord
-
   # user_id:integer
   # label:string
   # external_id:string # For tracking in external billing systems.
@@ -58,7 +57,7 @@ class Subscription < ApplicationRecord
 
   has_many :billing_events
 
-  has_one :container, class_name: 'Deployment::Container', dependent: :nullify
+  has_one :container, class_name: "Deployment::Container", dependent: :nullify
 
   has_one :volume, dependent: :nullify
 
@@ -78,17 +77,17 @@ class Subscription < ApplicationRecord
   def resource_name
     return "null" if label.blank?
 
-    label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+    label.strip.downcase.gsub(/[^a-z0-9\s]/i, "").tr(" ", "_")[0..10]
   end
 
   # Public run rate, returns it in monthly!
   def run_rate
     total = 0e0
-    self.subscription_products.each do |i|
+    subscription_products.each do |i|
       next if i.product.nil?
 
       case i.product.kind
-      when 'resource'
+      when "resource"
         bu = i.billing_usages.first
         next if bu.nil?
 
@@ -118,11 +117,11 @@ class Subscription < ApplicationRecord
   end
 
   def package_subscription
-    subscription_products.where(products: { kind: 'package' }).joins(:product).first
+    subscription_products.where(products: {kind: "package"}).joins(:product).first
   end
 
   def image_subscription
-    subscription_products.where(products: { kind: 'image' }).joins(:product).first
+    subscription_products.where(products: {kind: "image"}).joins(:product).first
   end
 
   # stops billing (except monthly!)
@@ -132,6 +131,7 @@ class Subscription < ApplicationRecord
     end
     update active: false
   end
+
   def unpause!
     subscription_products.each do |i|
       i.unpause!
@@ -194,26 +194,26 @@ class Subscription < ApplicationRecord
   def new_resource_qty!(resources)
     return false if package # Not allowed for packages.
 
-    cpu_product = Product.lookup(user.billing_plan, 'cpu')
+    cpu_product = Product.lookup(user.billing_plan, "cpu")
     cpu = subscription_products.find_by(product: cpu_product)
-    mem_product = Product.lookup(user.billing_plan, 'memory')
+    mem_product = Product.lookup(user.billing_plan, "memory")
     mem = subscription_products.find_by(product: mem_product)
     events = []
     if cpu.nil?
-      cpu = subscription_products.create!(product: cpu_product, phase_type: 'final')
+      cpu = subscription_products.create!(product: cpu_product, phase_type: "final")
       cpu.reload
     end
     if mem.nil?
-      mem = subscription_products.create!(product: mem_product, phase_type: 'final')
+      mem = subscription_products.create!(product: mem_product, phase_type: "final")
       mem.reload
     end
     events << cpu.billing_events.create!(
-      from_resource_qty: resources['cpu']['from'],
-      to_resource_qty: resources['cpu']['to']
+      from_resource_qty: resources["cpu"]["from"],
+      to_resource_qty: resources["cpu"]["to"]
     )
     events << mem.billing_events.create!(
-      from_resource_qty: resources['memory']['from'],
-      to_resource_qty: resources['memory']['to']
+      from_resource_qty: resources["memory"]["from"],
+      to_resource_qty: resources["memory"]["to"]
     )
     unless linked_obj.nil?
       events.each do |e|
@@ -257,7 +257,7 @@ class Subscription < ApplicationRecord
   def trigger_create_event
     return unless active # Only if we're active now.
 
-    be = billing_events.new( from_status: false, to_status: true )
+    be = billing_events.new(from_status: false, to_status: true)
     be.audit = current_audit if current_audit
     be.save
   end
@@ -266,15 +266,14 @@ class Subscription < ApplicationRecord
   def toggle_active_event
     if saved_change_to_attribute?("active")
       if active # Means we came from inactive, so now we're active.
-        be = billing_events.new( from_status: false, to_status: true )
+        be = billing_events.new(from_status: false, to_status: true)
         # Ensure user's `phase_started` is set.
         user.update(phase_started: Time.now) if user && user.phase_started.nil?
       else
-        be = billing_events.new( from_status: true, to_status: false )
+        be = billing_events.new(from_status: true, to_status: false)
       end
       be.audit = current_audit if current_audit
       be.save
     end
   end
-
 end

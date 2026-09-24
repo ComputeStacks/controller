@@ -12,13 +12,11 @@
 # @!attribute template
 #   @return [ContainerImage::CustomHostEntry]
 class ContainerService::HostEntry < ApplicationRecord
-
   include Auditable
 
-  belongs_to :container_service, class_name: 'Deployment::ContainerService'
+  belongs_to :container_service, class_name: "Deployment::ContainerService"
   belongs_to :template,
-             class_name: 'ContainerImage::CustomHostEntry',
-             inverse_of: :children,
-             optional: true
-
+    class_name: "ContainerImage::CustomHostEntry",
+    inverse_of: :children,
+    optional: true
 end

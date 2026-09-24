@@ -1,3 +1,2 @@
 object @volume
-extends 'api/admin/volumes/vol'
-
+extends "api/admin/volumes/vol"

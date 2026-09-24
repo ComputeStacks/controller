@@ -1,27 +1,2 @@
-Metrics/AbcSize:
-  Enabled: False
-Metrics/ClassLength:
+Lint/UselessAssignment:
   Enabled: false
-Metrics/CyclomaticComplexity:
-  Enabled: false
-Metrics/LineLength:
-  Max: 100
-Metrics/MethodLength:
-  Max: 100
-Metrics/PerceivedComplexity:
-  Enabled: false
-Style/TernaryParentheses:
-  Enabled: false
-Layout/FirstParameterIndentation:
-  Enabled: false
-Style/StringLiterals:
-  Enabled: false
-Layout/TrailingWhitespace:
-  Enabled: false
-Style/RescueStandardError:
-  Enabled: false
-Layout/SpaceInsideParens:
-  Enabled: false
-Layout/SpaceInsideArrayLiteralBrackets:
-  Enabled: false
-

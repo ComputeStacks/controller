@@ -1,7 +1,7 @@
 attributes :id, :name, :label, :default_domain, :public_ip, :command,
-           :is_load_balancer, :has_domain_management,
-           :current_state, :auto_scale, :auto_scale_horizontal, :auto_scale_max,
-           :labels, :created_at, :updated_at
+  :is_load_balancer, :has_domain_management,
+  :current_state, :auto_scale, :auto_scale_horizontal, :auto_scale_max,
+  :labels, :shm_size, :created_at, :updated_at
 
 child location: :region do
   attributes :id, :name
@@ -16,7 +16,6 @@ child deployment: :project do
 end
 
 node :image do |i|
-
   {
     id: i.container_image.id,
     name: i.container_image.name,
@@ -31,7 +30,6 @@ node :image do |i|
       sort: i.image_variant.version
     }
   }
-
 end
 
 node :package do |i|

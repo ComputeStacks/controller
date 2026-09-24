@@ -20,7 +20,6 @@
 #   @return [Deployment]
 #
 class Deployment::SshKey < ApplicationRecord
-
   include Auditable
   include SshPublicKey
 
@@ -35,5 +34,4 @@ class Deployment::SshKey < ApplicationRecord
     return unless current_audit
     ProjectWorkers::RefreshMetadataSshWorker.perform_async deployment.id, current_audit.id
   end
-
 end

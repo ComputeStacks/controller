@@ -1,11 +1,24 @@
-require 'test_helper'
+require "test_helper"
 
 class AggregateUsageTest < ActionDispatch::IntegrationTest
+  setup do
+    requires_external_infra!
+    # Seed predictable-but-fake volume + backup usage. Backup-repo state used to live in
+    # Consul (borg/repository/<name>); it now comes from the projected AgentRepository row
+    # that backs Volume#repo_info. Rows are rolled back by transactional fixtures.
+    Volume.all.each do |vol|
+      vol.update_attribute :usage, vol.id
+      vol.update_consul!
+      AgentRepository.create!(
+        name: vol.name,
+        size_on_disk: vol.id * 1024,
+        total_size: vol.id * 4096,
+        archives: []
+      )
+    end
+  end
 
-  include ConsulTestContainerConcern
-
-  test 'can aggregate usage' do
-
+  test "can aggregate usage" do
     # Clean up and refresh
     BillingUsage.delete_all
     BillingUsageServices::CollectUsageService.new.perform
@@ -16,7 +29,6 @@ class AggregateUsageTest < ActionDispatch::IntegrationTest
     refute_empty ag_service.result
 
     ag_service.result.each do |group|
-
       ##
       # Basic sanity checking
       expected_keys = %w[
@@ -73,7 +85,5 @@ class AggregateUsageTest < ActionDispatch::IntegrationTest
       # Match up our user
       assert_equal Subscription.find(group[:subscription_id]).user, User.find(group[:user][:id])
     end
-
   end
-
 end

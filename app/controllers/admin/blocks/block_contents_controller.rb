@@ -1,13 +1,13 @@
 class Admin::Blocks::BlockContentsController < Admin::ApplicationController
-
   before_action :find_block
-  before_action :find_content, only: %w(show edit update destroy)
+  before_action :find_content, only: %w[show edit update destroy]
 
   def index
     @block_contents = @block.block_contents.order(:locale).paginate page: params[:page], per_page: 30
   end
 
-  def show; end
+  def show
+  end
 
   def new
     @block_content = @block.block_contents.build
@@ -18,7 +18,8 @@ class Admin::Blocks::BlockContentsController < Admin::ApplicationController
     @existing_locale = @block.block_contents.pluck(:locale)
   end
 
-  def edit; end
+  def edit
+  end
 
   def create
     @block_content = @block.block_contents.build(block_content_params)
@@ -40,7 +41,7 @@ class Admin::Blocks::BlockContentsController < Admin::ApplicationController
     if @block_content.destroy
       redirect_to @base_url, notice: "Section deleted."
     else
-      redirect_to @section_url, alert: "Error! #{@block_content.errors.full_messages.join(' ')}"
+      redirect_to @section_url, alert: "Error! #{@block_content.errors.full_messages.join(" ")}"
     end
   end
 
@@ -62,6 +63,4 @@ class Admin::Blocks::BlockContentsController < Admin::ApplicationController
     @section_url = "#{@base_url}/block_contents/#{@block_content.id}"
     @existing_locale = @block.block_contents.where.not(id: @block_content.id).pluck(:locale)
   end
-
-
 end

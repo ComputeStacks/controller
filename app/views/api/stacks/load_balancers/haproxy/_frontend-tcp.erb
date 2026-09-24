@@ -10,8 +10,12 @@ frontend TCP_<%= ingress.port_nat %>
   timeout client 5m
   timeout server 5m
   <% if ingress.restrict_cf && !load_balancer.cloudflare_ipaddrs.empty? %>
-  acl cloudflare_only src <%= load_balancer.cloudflare_ipaddrs.map { |i| "#{i.to_s}/#{i.prefix}" }.join(' ') %>
-  http-request deny if !cloudflare_only
+  acl cloudflare_only src -f <%= load_balancer.ext_dir %>/acl_cloudflare.lst
+  tcp-request content reject if !cloudflare_only
+  <% end %>
+  <% if ingress.restrict_bunny && !load_balancer.bunny_ipaddrs.empty? %>
+  acl bunny_only src -f <%= load_balancer.ext_dir %>/acl_bunny.lst
+  tcp-request content reject if !bunny_only
   <% end %>
   default_backend <%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %>
   <% end %>
@@ -27,8 +31,12 @@ frontend TLS_<%= ingress.port_nat %>
   timeout client 5m
   timeout server 5m
   <% if ingress.restrict_cf && !load_balancer.cloudflare_ipaddrs.empty? %>
-  acl cloudflare_only src <%= load_balancer.cloudflare_ipaddrs.map { |i| "#{i.to_s}/#{i.prefix}" }.join(' ') %>
-  http-request deny if !cloudflare_only
+  acl cloudflare_only src -f <%= load_balancer.ext_dir %>/acl_cloudflare.lst
+  tcp-request content reject if !cloudflare_only
+  <% end %>
+  <% if ingress.restrict_bunny && !load_balancer.bunny_ipaddrs.empty? %>
+  acl bunny_only src -f <%= load_balancer.ext_dir %>/acl_bunny.lst
+  tcp-request content reject if !bunny_only
   <% end %>
   default_backend <%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %>
   <% end %>

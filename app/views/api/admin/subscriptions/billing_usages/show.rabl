@@ -3,9 +3,9 @@ attributes :id, :period_start, :period_end, :external_id, :rate, :rate_period, :
 child :subscription_product do
   attributes :id, :external_id, :start_on, :active, :phase_type, :created_at, :updated_at
   child :product do
-    extends 'api/admin/products/product'
+    extends "api/admin/products/product"
   end
 end
 child :user do
-  extends 'api/admin/users/short'
+  extends "api/admin/users/short"
 end

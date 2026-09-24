@@ -1,5 +1,4 @@
 class Api::Admin::Zones::BaseController < Api::Admin::ApplicationController
-
   before_action :find_zone
 
   private
@@ -9,5 +8,4 @@ class Api::Admin::Zones::BaseController < Api::Admin::ApplicationController
     return api_obj_missing if @dns_zone.nil?
     @dns_zone.current_user = current_user
   end
-
 end

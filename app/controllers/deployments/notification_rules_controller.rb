@@ -1,5 +1,4 @@
 class Deployments::NotificationRulesController < Deployments::BaseController
-
   include RescueResponder
 
   before_action :find_notification, except: %i[index new create]
@@ -12,7 +11,8 @@ class Deployments::NotificationRulesController < Deployments::BaseController
     @notification = @deployment.project_notifiers.new deployment: @deployment
   end
 
-  def edit; end
+  def edit
+  end
 
   def show
     redirect_to action: :edit
@@ -22,25 +22,25 @@ class Deployments::NotificationRulesController < Deployments::BaseController
     @notification = @deployment.project_notifiers.new notification_params
     @notification.deployment = @deployment
     if @notification.save
-      redirect_to deployment_notification_rules_path(@deployment), success: 'Notification created'
+      redirect_to deployment_notification_rules_path(@deployment), success: "Notification created"
     else
-      render template: 'deployments/notification_rules/new'
+      render template: "deployments/notification_rules/new"
     end
   end
 
   def update
     if @notification.update(notification_params)
-      redirect_to deployment_notification_rules_path(@deployment), success: 'Notification updated'
+      redirect_to deployment_notification_rules_path(@deployment), success: "Notification updated"
     else
-      render template: 'deployments/notification_rules/edit'
+      render template: "deployments/notification_rules/edit"
     end
   end
 
   def destroy
     if @notification.destroy
-      redirect_to deployment_notification_rules_path(@deployment), success: 'Notification destroyed'
+      redirect_to deployment_notification_rules_path(@deployment), success: "Notification destroyed"
     else
-      redirect_to deployment_notification_rules_path(@deployment), alert: @notification.errors.full_messages.join(' ')
+      redirect_to deployment_notification_rules_path(@deployment), alert: @notification.errors.full_messages.join(" ")
     end
   end
 
@@ -57,5 +57,4 @@ class Deployments::NotificationRulesController < Deployments::BaseController
   def not_found_responder
     redirect_to deployment_notification_rules_path(@deployment), alert: "Unknown alert"
   end
-
 end

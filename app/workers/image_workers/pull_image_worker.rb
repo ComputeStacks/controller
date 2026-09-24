@@ -2,7 +2,7 @@ module ImageWorkers
   class PullImageWorker
     include Sidekiq::Worker
 
-    sidekiq_options retry: 2, queue: 'dep_critical'
+    sidekiq_options retry: 2, queue: "dep_critical"
 
     def perform(node_id, image_or_variant)
       obj = GlobalID::Locator.locate image_or_variant
@@ -16,7 +16,7 @@ module ImageWorkers
         perform_pull node_id, obj
       end
     rescue ActiveRecord::RecordNotFound
-      return
+      nil
     end
 
     private
@@ -56,6 +56,5 @@ module ImageWorkers
       return if node.nil?
       NodeServices::PullImageService.new(node, variant).perform
     end
-
   end
 end

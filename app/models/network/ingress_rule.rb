@@ -6,6 +6,9 @@
 #
 # @!attribute restrict_cf
 #   @return [Boolean] Only allow CF to access this ingress rule.
+# 
+# @!attribute restrict_bunny
+#   @return [Boolean] Only allow bunny to access this ingress rule.
 #
 # @!attribute backend_ssl
 #   @return [Boolean] If true, HAProxy will connect to your container via SSL.
@@ -37,7 +40,6 @@
 #   @return [Deployment::ContainerService]
 #
 class Network::IngressRule < ApplicationRecord
-
   include Auditable
   include IngressRules::LoadBalancerMetrics
   include IngressValidator
@@ -53,54 +55,55 @@ class Network::IngressRule < ApplicationRecord
   scope :lb, -> { where(external_access: true) }
 
   belongs_to :container_service,
-             class_name: 'Deployment::ContainerService',
-             optional: true # It may be an sftp container
+    class_name: "Deployment::ContainerService",
+    optional: true # It may be an sftp container
 
   has_one :global_load_balancer, through: :container_service, source: :load_balancer
 
   belongs_to :load_balancer_rule,
-             foreign_key: 'load_balancer_rule_id',
-             class_name: 'Network::IngressRule',
-             optional: true
+    foreign_key: "load_balancer_rule_id",
+    class_name: "Network::IngressRule",
+    optional: true
 
   has_one :internal_load_balancer, through: :load_balancer_rule, source: :container_service
 
   belongs_to :sftp_container,
-             class_name: 'Deployment::Sftp',
-             optional: true
+    class_name: "Deployment::Sftp",
+    optional: true
 
   belongs_to :parent_param,
-             class_name: "ContainerImage::IngressParam",
-             foreign_key: "ingress_param_id",
-             optional: true
+    class_name: "ContainerImage::IngressParam",
+    foreign_key: "ingress_param_id",
+    optional: true
 
   belongs_to :region
 
-  has_many :container_domains, class_name: 'Deployment::ContainerDomain', dependent: :destroy
+  has_many :container_domains, class_name: "Deployment::ContainerDomain", dependent: :destroy
 
   # If this is the load balancer, find our backend rules
-  has_many :load_balanced_rules, class_name: 'Network::IngressRule', foreign_key: 'load_balancer_rule_id', dependent: :nullify
+  has_many :load_balanced_rules, class_name: "Network::IngressRule", foreign_key: "load_balancer_rule_id", dependent: :nullify
   has_many :load_balanced_domains, through: :load_balanced_rules, source: :container_domains
 
   # validate :has_valid_port
 
-  validates :port_nat, uniqueness: { scope: [:region_id, :proto] }, unless: -> { port_nat.zero? }
-  validates :port, uniqueness: { scope: [:container_service_id, :proto] }, if: -> { container_service }
-  validates :port, uniqueness: { scope: [:sftp_container_id, :proto] }, if: -> { sftp_container }
+  validates :port_nat, uniqueness: {scope: [:region_id, :proto]}, unless: -> { port_nat.zero? }
+  validates :port, uniqueness: {scope: [:container_service_id, :proto]}, if: -> { container_service }
+  validates :port, uniqueness: {scope: [:sftp_container_id, :proto]}, if: -> { sftp_container }
+  validate :single_cdn_restriction
 
   before_save :set_nat_port
   before_destroy :update_node_rules!
 
   attr_accessor :sys_no_reload,
-                :no_provision_domain,
-                :skip_metadata_refresh,
-                :skip_policy_updates
+    :no_provision_domain,
+    :skip_metadata_refresh,
+    :skip_policy_updates
 
   after_save :update_global_load_balancer!
-  after_commit :reload_load_balancer!, unless: Proc.new { |i| i.sys_no_reload }
-  after_destroy :reload_load_balancer!, unless: Proc.new { |i| i.sys_no_reload }
-  after_save :provision_domain, unless: Proc.new { |i| i.no_provision_domain }
-  after_save :refresh_metadata, unless: Proc.new { |i| i.skip_metadata_refresh }
+  after_commit :reload_load_balancer!, unless: proc { |i| i.sys_no_reload }
+  after_destroy :reload_load_balancer!, unless: proc { |i| i.sys_no_reload }
+  after_save :provision_domain, unless: proc { |i| i.no_provision_domain }
+  after_save :refresh_metadata, unless: proc { |i| i.skip_metadata_refresh }
 
   def csrn
     "csrn:caas:project:ingress:#{resource_name}:#{id}"
@@ -134,15 +137,15 @@ class Network::IngressRule < ApplicationRecord
   def toggle_nat!
     if load_balancer_rule
       load_balancer_rule.toggle_nat!
-    elsif proto == 'http'
-      errors.add(:proto, 'Unable to create nat port for HTTP service. Please change to TCP.')
+    elsif proto == "http"
+      errors.add(:proto, "Unable to create nat port for HTTP service. Please change to TCP.")
       false
     elsif port_nat.zero?
       update external_access: true
     elsif port_nat > 0
       update external_access: false
     else
-      errors.add(:base, 'unknown state')
+      errors.add(:base, "unknown state")
       false
     end
   end
@@ -176,17 +179,25 @@ class Network::IngressRule < ApplicationRecord
 
   private
 
+  # An ingress rule may restrict to at most one CDN provider. Restricting to both
+  # Cloudflare and Bunny would deny all traffic (a src cannot be in both lists).
+  def single_cdn_restriction
+    if restrict_cf && restrict_bunny
+      errors.add(:base, "cannot restrict to both Cloudflare and Bunny; choose one")
+    end
+  end
+
   # Set Nat Port
   #
   def set_nat_port
-    if external_access && port_nat.zero? && %w(tcp tls udp).include?(proto)
+    if external_access && port_nat.zero? && %w[tcp tls udp].include?(proto)
       unless load_balancer_rule # Only for ingress rules attached to our global LB.
         ActiveRecord::Base.uncached do
           # If tcp or udp exists, share the port with each other.
-          if %w(tcp udp).include? proto
+          if %w[tcp udp].include? proto
             port_pair = nil
-            port_pair = container_service.ingress_rules.find_by(proto: (proto == 'tcp' ? 'udp' : 'tcp'), port: port) if container_service
-            port_pair = sftp_container.ingress_rules.find_by(proto: (proto == 'tcp' ? 'udp' : 'tcp'), port: port) if sftp_container
+            port_pair = container_service.ingress_rules.find_by(proto: ((proto == "tcp") ? "udp" : "tcp"), port: port) if container_service
+            port_pair = sftp_container.ingress_rules.find_by(proto: ((proto == "tcp") ? "udp" : "tcp"), port: port) if sftp_container
             if port_pair && !Network::IngressRule.where(proto: proto, port: port, region: region).exists?
               self.port_nat = port_pair.port_nat
             end
@@ -214,7 +225,7 @@ class Network::IngressRule < ApplicationRecord
   def update_node_rules!
     if internal_load_balancer
       internal_load_balancer.containers.each do |container|
-        PowerCycleContainerService.new(container, 'restart', current_audit).perform
+        PowerCycleContainerService.new(container, "restart", current_audit).perform
       end
     elsif global_load_balancer
       LoadBalancerServices::DeployConfigService.new(global_load_balancer).perform
@@ -273,5 +284,4 @@ class Network::IngressRule < ApplicationRecord
     return if deployment.nil?
     ProjectWorkers::RefreshMetadataWorker.perform_async deployment.id
   end
-
 end

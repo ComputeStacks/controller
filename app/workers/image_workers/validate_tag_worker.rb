@@ -2,7 +2,7 @@ module ImageWorkers
   class ValidateTagWorker
     include Sidekiq::Worker
 
-    sidekiq_options retry: 4, queue: 'default'
+    sidekiq_options retry: 4, queue: "default"
 
     def perform(image_or_variant_id)
       obj = GlobalID::Locator.locate image_or_variant_id
@@ -23,8 +23,7 @@ module ImageWorkers
         obj.save
       end
     rescue ActiveRecord::RecordNotFound
-      return
+      nil
     end
-
   end
 end

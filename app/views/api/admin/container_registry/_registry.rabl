@@ -3,7 +3,7 @@ node :endpoint do |i|
   "#{Setting.registry_base_url}:#{i.port}"
 end
 node :username do |i|
-  'admin'
+  "admin"
 end
 node :password do |i|
   i.registry_password
@@ -12,5 +12,5 @@ node :images do |i|
   i.repositories
 end
 child :user do
-  extends 'api/admin/users/short'
+  extends "api/admin/users/short"
 end

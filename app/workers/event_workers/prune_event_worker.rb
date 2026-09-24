@@ -17,7 +17,7 @@ module EventWorkers
       Audit.where("created_at < ?", 12.months.ago).delete_all
       SystemEvent.where("created_at < ?", 12.months.ago).delete_all
     rescue => e
-      ExceptionAlertService.new(e, '6b87e296c4f50ff0').perform
+      ExceptionAlertService.new(e, "6b87e296c4f50ff0").perform
     end
 
     ##
@@ -26,7 +26,7 @@ module EventWorkers
       EventLog.where("event_code = 'af5dbfa43bebd5f5' AND status = 'completed' AND created_at < ?", 3.months.ago).delete_all
       EventLog.where("event_code = 'af5dbfa43bebd5f5' AND created_at < ?", 6.months.ago).delete_all
     rescue => e
-      ExceptionAlertService.new(e, '026c5e0acee33b22').perform
+      ExceptionAlertService.new(e, "026c5e0acee33b22").perform
     end
 
     ##
@@ -56,8 +56,7 @@ module EventWorkers
         ", 12.hours.ago
       ).delete_all
     rescue => e
-      ExceptionAlertService.new(e, '8936c4fd322428d6').perform
+      ExceptionAlertService.new(e, "8936c4fd322428d6").perform
     end
-
   end
 end

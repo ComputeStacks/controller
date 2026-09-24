@@ -1,10 +1,9 @@
 ##
 # Subscriptions API
 class Api::SubscriptionsController < Api::ApplicationController
+  api_scope read: :profile_read
 
-  before_action -> { doorkeeper_authorize! :profile_read }, unless: :current_user
-
-  before_action :load_subscription, only: %w(show)
+  before_action :load_subscription, only: %w[show]
 
   ##
   # List all your subscriptions
@@ -94,11 +93,11 @@ class Api::SubscriptionsController < Api::ApplicationController
   #             * `external_id`: String
 
   def index
-    @subscriptions = if %w(active inactive).include? params[:filter]
-                       paginate current_user.subscriptions.where(active: params[:filter] == 'active').sorted
-                     else
-                       paginate current_user.subscriptions.sorted
-                     end
+    @subscriptions = if %w[active inactive].include? params[:filter]
+      paginate current_user.subscriptions.where(active: params[:filter] == "active").sorted
+    else
+      paginate current_user.subscriptions.sorted
+    end
   end
 
   ##
@@ -110,17 +109,17 @@ class Api::SubscriptionsController < Api::ApplicationController
   #
   # @see Api::SubscriptionsController#index
 
-  def show; end
+  def show
+  end
 
   private
 
   def load_subscription
-    if params[:find_by_external_id]
-      @subscription = current_user.subscriptions.find_by(external_id: params[:id])
+    @subscription = if params[:find_by_external_id]
+      current_user.subscriptions.find_by(external_id: params[:id])
     else
-      @subscription = current_user.subscriptions.find_by(id: params[:id])
+      current_user.subscriptions.find_by(id: params[:id])
     end
-    return api_obj_missing if @subscription.nil?
+    api_obj_missing if @subscription.nil?
   end
-
 end

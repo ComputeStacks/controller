@@ -11,7 +11,7 @@ module ProjectWorkers
   class ProjectCacheWorker
     include Sidekiq::Worker
 
-    sidekiq_options retry: false, queue: 'low'
+    sidekiq_options retry: false, queue: "low"
 
     def perform(project_id = nil)
       if project_id.blank?
@@ -32,6 +32,5 @@ module ProjectWorkers
       project.current_storage true
       project.image_icons true
     end
-
   end
 end

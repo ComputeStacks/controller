@@ -8,9 +8,8 @@ module ContainerServices
   #   @return [Deployment::ContainerService]
   #
   class TrashService
-
     attr_accessor :service,
-                  :event
+      :event
 
     # @param [Deployment::ContainerService] service
     # @param [EventLog] event
@@ -34,8 +33,8 @@ module ContainerServices
       return false unless delete_containers
       return true if service.destroy
       event.event_details.create!(
-        data: "Error removing service\n\n#{service.errors.full_messages.join(' ')}",
-        event_code: 'b12c483efb174c42'
+        data: "Error removing service\n\n#{service.errors.full_messages.join(" ")}",
+        event_code: "b12c483efb174c42"
       )
       false
     end
@@ -94,6 +93,5 @@ module ContainerServices
       end
       success
     end
-
   end
 end

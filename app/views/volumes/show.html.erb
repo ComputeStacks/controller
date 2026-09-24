@@ -37,10 +37,19 @@
       <%= t 'events.plural' %>
     </a>
     <% if Feature.check('backups', current_user) %>
-      <a href="#" class="btn btn-sm btn-success" data-toggle="modal" data-target="#volumeCreateBackup">
-        <%= icon('fa-solid', 'copy') %>
-        <%= t 'volumes.backups.new' %>
-      </a>
+      <%# A pending volume is empty and unmounted, and the backups controller refuses the
+          request. Say why here instead of opening a modal that ends in a bare alert. %>
+      <% if @volume.awaiting_mount? %>
+        <span class="btn btn-sm btn-success disabled" title="<%= t 'volumes.awaiting_mount.backups_help' %>">
+          <%= icon('fa-solid', 'copy') %>
+          <%= t 'volumes.backups.new' %>
+        </span>
+      <% else %>
+        <a href="#" class="btn btn-sm btn-success" data-toggle="modal" data-target="#volumeCreateBackup">
+          <%= icon('fa-solid', 'copy') %>
+          <%= t 'volumes.backups.new' %>
+        </a>
+      <% end %>
     <% end %>
   </div>
 </div>

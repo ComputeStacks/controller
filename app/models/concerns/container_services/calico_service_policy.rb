@@ -1,5 +1,4 @@
 module ContainerServices
-
   ##
   # Manage Calico Policy for this service
   #
@@ -15,47 +14,53 @@ module ContainerServices
       ).pluck(:port)
 
       policy = {
-        apiVersion: 'v1',
-        kind: 'policy',
+        apiVersion: "v1",
+        kind: "policy",
         metadata: {
           name: name
         },
         spec: {
           order: 10,
-          selector: %Q(service == "#{name}"),
+          selector: %(service == "#{name}"),
           ingress: []
         }
       }
-      policy[:spec][:ingress] << {
-        action: 'allow',
-        protocol: 'tcp',
-        destination: {
-          ports: tcp_lb_ports
-        },
-        source: {
-          nets: lb_ip_list
+      unless tcp_lb_ports.empty? || lb_ip_list.empty?
+        policy[:spec][:ingress] << {
+          action: "allow",
+          protocol: "tcp",
+          destination: {
+            ports: tcp_lb_ports
+          },
+          source: {
+            nets: lb_ip_list
+          }
         }
-      } unless tcp_lb_ports.empty? || lb_ip_list.empty?
-      policy[:spec][:ingress] << {
-        action: 'allow',
-        protocol: 'tcp',
-        destination: {
-          ports: tcp_ip_ports
-        },
-        source: {
-          nets: ["0.0.0.0/0"]
+      end
+      unless tcp_ip_ports.empty?
+        policy[:spec][:ingress] << {
+          action: "allow",
+          protocol: "tcp",
+          destination: {
+            ports: tcp_ip_ports
+          },
+          source: {
+            nets: ["0.0.0.0/0"]
+          }
         }
-      } unless tcp_ip_ports.empty?
-      policy[:spec][:ingress] << {
-        action: 'allow',
-        protocol: 'udp',
-        destination: {
-          ports: udp_ports
-        },
-        source: {
-          nets: ["0.0.0.0/0"]
+      end
+      unless udp_ports.empty?
+        policy[:spec][:ingress] << {
+          action: "allow",
+          protocol: "udp",
+          destination: {
+            ports: udp_ports
+          },
+          source: {
+            nets: ["0.0.0.0/0"]
+          }
         }
-      } unless udp_ports.empty?
+      end
       policy
     end
 
@@ -73,7 +78,5 @@ module ContainerServices
       end
       ips
     end
-
   end
-
 end

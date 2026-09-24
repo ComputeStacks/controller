@@ -3,26 +3,25 @@ module Users
     extend ActiveSupport::Concern
 
     included do
-
       # Include default devise modules. Others available are:
       # :confirmable, :lockable, :timeoutable and :omniauthable
       devise :database_authenticatable, :registerable,
-            :confirmable, :recoverable, :trackable,
-            :validatable, :lockable, :timeoutable
+        :confirmable, :recoverable, :trackable,
+        :validatable, :lockable, :timeoutable
 
-      has_many :api_credentials, class_name: 'User::ApiCredential' #, dependent: :destroy  ## Using foreign key and cascade delete on the DB side.
+      has_many :api_credentials, class_name: "User::ApiCredential" # , dependent: :destroy  ## Using foreign key and cascade delete on the DB side.
 
       has_many :access_grants,
-              class_name: 'Doorkeeper::AccessGrant',
-              foreign_key: :resource_owner_id,
-              dependent: :delete_all # or :destroy if you need callbacks
+        class_name: "Doorkeeper::AccessGrant",
+        foreign_key: :resource_owner_id,
+        dependent: :delete_all # or :destroy if you need callbacks
 
       has_many :access_tokens,
-              class_name: 'Doorkeeper::AccessToken',
-              foreign_key: :resource_owner_id,
-              dependent: :delete_all # or :destroy if you need callbacks
+        class_name: "Doorkeeper::AccessToken",
+        foreign_key: :resource_owner_id,
+        dependent: :delete_all # or :destroy if you need callbacks
 
-      has_many :oauth_applications, class_name: 'Doorkeeper::Application', as: :owner
+      has_many :oauth_applications, class_name: "Doorkeeper::Application", as: :owner
 
       before_destroy :clear_api_credentials!
       after_update :toggle_user_state
@@ -43,14 +42,13 @@ module Users
     private
 
     def toggle_user_state
-      if self.saved_change_to_attribute?("active")
+      if saved_change_to_attribute?("active")
         UserServices::ToggleActiveService.new(self, current_audit).perform
       end
     end
 
     def clear_api_credentials!
-      api_credentials.each {|i| i.destroy}
+      api_credentials.each { |i| i.destroy }
     end
-
   end
 end

@@ -1,5 +1,4 @@
 module Admin::NetworksHelper
-
   def cidr_obj(cidr)
     if cidr.container
       if cidr.container.deployment
@@ -14,7 +13,7 @@ module Admin::NetworksHelper
         "SFTP #{cidr.sftp_container.name} (#{cidr.sftp_container.deployment.name})"
       end
     else
-      'Not Found'
+      "Not Found"
     end
   end
 
@@ -26,5 +25,4 @@ module Admin::NetworksHelper
       "#{network.child_networks.active.count} Subnets"
     end
   end
-
 end

@@ -14,32 +14,32 @@ module Nodes
     end
 
     def toggle_evacuation!
-      under_evacuation? ? update(job_status: 'idle') : update(job_status: 'evacuating', job_performed: Time.now)
+      under_evacuation? ? update(job_status: "idle") : update(job_status: "evacuating", job_performed: Time.now)
     end
 
     def toggle_checkup!
-      performing_checkup? ? update(job_status: 'idle') : update(job_status: 'checkup', job_performed: Time.now)
+      performing_checkup? ? update(job_status: "idle") : update(job_status: "checkup", job_performed: Time.now)
     end
 
     def toggle_maintenance!
-      update maintenance: maintenance ? false : true, maintenance_updated: Time.now, job_status: 'idle'
+      update maintenance: maintenance ? false : true, maintenance_updated: Time.now, job_status: "idle"
     end
 
     def under_evacuation?
-      if job_status == 'evacuating' && (Time.now - job_performed) > 30.minutes
-        update_attribute :job_status, 'idle'
+      if job_status == "evacuating" && (Time.now - job_performed) > 30.minutes
+        update_attribute :job_status, "idle"
         false
       else
-        job_status == 'evacuating'
+        job_status == "evacuating"
       end
     end
 
     def performing_checkup?
-      if job_status == 'checkup' && (Time.now - job_performed) > 30.minutes
-        update_attribute :job_status, 'idle'
+      if job_status == "checkup" && (Time.now - job_performed) > 30.minutes
+        update_attribute :job_status, "idle"
         false
       else
-        job_status == 'checkup'
+        job_status == "checkup"
       end
     end
 
@@ -65,6 +65,5 @@ module Nodes
         LoadBalancerWorkers::DeployConfigWorker.perform_async region.load_balancer.global_id
       end
     end
-
   end
 end

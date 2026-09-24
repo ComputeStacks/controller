@@ -15,18 +15,17 @@
 #   @return [ContainerImage::ImageVariant]
 #
 class ContainerImage::ImageRel < ApplicationRecord
-
   include Auditable
 
   belongs_to :container_image,
-             class_name: 'ContainerImage',
-             foreign_key: 'container_image_id'
+    class_name: "ContainerImage",
+    foreign_key: "container_image_id"
 
   belongs_to :dependency,
-             class_name: "ContainerImage",
-             foreign_key: "requires_container_id"
+    class_name: "ContainerImage",
+    foreign_key: "requires_container_id"
 
-  belongs_to :default_variant, class_name: 'ContainerImage::ImageVariant', optional: true
+  belongs_to :default_variant, class_name: "ContainerImage::ImageVariant", optional: true
 
   validate :valid_variant
 
@@ -66,6 +65,4 @@ class ContainerImage::ImageRel < ApplicationRecord
       end
     end
   end
-
-
 end

@@ -1,11 +1,9 @@
-require 'test_helper'
+require "test_helper"
 
 class Api::Admin::Users::SuspensionControllerTest < ActionDispatch::IntegrationTest
-
   include ApiTestControllerBase
 
-  test 'can suspend and unsuspend user' do
-
+  test "can suspend and unsuspend user" do
     user = users(:suspendable_user)
 
     post "/api/admin/users/#{user.id}/suspension", as: :json, headers: @basic_auth_headers
@@ -23,7 +21,5 @@ class Api::Admin::Users::SuspensionControllerTest < ActionDispatch::IntegrationT
     user.reload
 
     assert user.active
-
   end
-
 end

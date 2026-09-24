@@ -1,7 +1,6 @@
 ##
 # Display Resource Allocation by Region (Location)
 class Api::Admin::Locations::AllocatedResourcesController < Api::Admin::Locations::BaseController
-
   ##
   # Show Allocation
   #
@@ -30,5 +29,4 @@ class Api::Admin::Locations::AllocatedResourcesController < Api::Admin::Location
       format.xml { render xml: @location.allocated_resources }
     end
   end
-
 end

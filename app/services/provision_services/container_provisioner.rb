@@ -11,11 +11,10 @@ module ProvisionServices
   # @!attribute errors
   #   @return [Array]
   class ContainerProvisioner
-
     attr_accessor :service,
-                  :container,
-                  :node,
-                  :errors
+      :container,
+      :node,
+      :errors
 
     # @param [Deployment::ContainerService] service
     def initialize(service)
@@ -51,15 +50,15 @@ module ProvisionServices
       if service.initial_subscription
         container.subscription = service.initial_subscription
         unless container.save
-          errors << "Error saving subscription: #{container.errors.full_messages.join(' ')}"
+          errors << "Error saving subscription: #{container.errors.full_messages.join(" ")}"
           return false
         end
         unless service.update_attribute(:initial_subscription, nil)
-          errors << "Error saving service subscription: #{service.errors.full_messages.join(' ')}"
+          errors << "Error saving service subscription: #{service.errors.full_messages.join(" ")}"
         end
         s = container.subscription
         unless s.update_attribute(:label, container.name)
-          errors << "Error updating subscription: #{s.errors.full_messages.join(' ')}"
+          errors << "Error updating subscription: #{s.errors.full_messages.join(" ")}"
         end
       else
         example_container = service.containers.where.not(subscription: nil).first
@@ -72,14 +71,14 @@ module ProvisionServices
         s.label = container.name
         unless s.save
           errors << "Error creating subscription"
-          errors << s.errors.full_messages.join(' ')
+          errors << s.errors.full_messages.join(" ")
           return false
         end
         example_container.subscription.subscription_products.each do |sp|
           s.subscription_products.create!(product: sp.product, allow_nil_phase: true)
         end
         unless container.update_attribute(:subscription, s)
-          errors << "Error saving container #{container.name} subscription: #{container.errors.full_messages.join(' ')}"
+          errors << "Error saving container #{container.name} subscription: #{container.errors.full_messages.join(" ")}"
         end
       end
       errors.empty?
@@ -88,16 +87,16 @@ module ProvisionServices
     def set_node!
       return unless node.nil?
       # For clustered storage, or no volumes, pick any node past on normal logic
-      if service.volumes.empty? || service.region.has_clustered_storage?
-        self.node = service.region.find_node service.package_for_node
+      self.node = if service.volumes.empty? || service.region.has_clustered_storage?
+        service.region.find_node service.package_for_node
       elsif service.volumes.first.nodes.empty? # check that our volumes are assigned a node.
         if service.nodes.empty? # finally, fall back to normal node assignment if we have no nodes linked to this service.
-          self.node = service.region.find_node service.package_for_node
+          service.region.find_node service.package_for_node
         else # with no volumes having nodes, then use an existing node for this service
-          self.node = service.nodes.first
+          service.nodes.first
         end
       else # no clustered storage and has volumes, pick the node that has the volume
-        self.node = service.volumes.first.nodes.first
+        service.volumes.first.nodes.first
       end
     end
 
@@ -107,7 +106,13 @@ module ProvisionServices
         errors << "missing service package, unable to find node."
         return false
       end
-      self.container = service.containers.create! # Create to grab the ID
+      # cpu/memory are set HERE, not only in the assignment below, because nothing wraps
+      # provisioning in a transaction: a row created blank is committed and visible to
+      # any concurrent order's capacity sum until the save at the end of this method, and
+      # permanently if that save fails (rollback! only destroys containers recorded after
+      # a successful build). Those columns are what the node enforces and what capacity is
+      # summed from, so a blank one is a container that counts as nothing.
+      self.container = service.containers.create!(cpu: service.cpu, memory: service.memory) # Create to grab the ID
       unless container
         errors << "Failed to generate init container."
         return false
@@ -117,7 +122,7 @@ module ProvisionServices
       container.cpu = service.cpu
       container.memory = service.memory
       unless container.save
-        errors << "Failed to generate container: #{container.errors.full_messages.join(' ')}"
+        errors << "Failed to generate container: #{container.errors.full_messages.join(" ")}"
         return false
       end
       true
@@ -133,6 +138,5 @@ module ProvisionServices
       end
       errors.empty?
     end
-
   end
 end

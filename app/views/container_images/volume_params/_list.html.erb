@@ -49,6 +49,9 @@
         <td class="text-right">
           <% if @container.can_edit?(current_user) %>
             <div class="btn-group">
+              <%# Admin only: this writes a volume into other tenants' running services.
+                  Reference (mounted) params are excluded above — they are not cascadable. %>
+              <%= link_to icon('fa-solid', 'layer-group'), cascade_container_image_volume_path(i), method: :post, data: { confirm: t('volumes.list.cascade_confirm') }, class: 'btn btn-xs btn-primary', title: t('volumes.list.cascade') if current_user.is_admin? %>
               <%= link_to icon('fa-solid', 'wrench'), edit_container_image_volume_path(i), class: 'btn btn-xs btn-default' %>
               <%= link_to icon('fa-solid', 'trash'), container_image_volume_path(i), method: :delete, data: { confirm: t('confirm_prompt') }, class: 'btn btn-xs btn-danger' if current_user.is_admin? || i.container_image.user == current_user %>
             </div>

@@ -1,0 +1,105 @@
+// Volume clone progress panel (app/views/deployments/volumes/_clone_banner.html.erb).
+//
+// Deliberately NOT built on .alert. This app overrides Bootstrap's alert to a full-bleed
+// saturated block with centred white text (`.alert { border:none; color:#fff;
+// text-align:center }`) — the right vocabulary for a transient "Settings saved" flash, the
+// wrong one for status that sits on a customer's project page for the length of a restore.
+// Centring also breaks any list: the markers stay at the list's left edge while the text
+// centres away from them.
+//
+// In-progress is quiet and scannable; a failure keeps real prominence, because that is the
+// one a customer has to act on.
+
+.clone-status {
+  border: 1px solid #e4e6e6;
+  border-left: 3px solid #198fce;
+  border-radius: 3px;
+  background-color: #fbfcfc;
+  // Sits between the overview strip (which has its own border-bottom) and the tab content.
+  margin: 15px 0 5px;
+  text-align: left;
+}
+
+.clone-status--failed {
+  border-left-color: #be4230;
+  background-color: #fdf7f6;
+}
+
+.clone-status-head {
+  padding: 12px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+
+  .fa-rotate {
+    color: #198fce;
+    margin-right: 6px;
+  }
+
+  .fa-triangle-exclamation {
+    color: #be4230;
+    margin-right: 6px;
+  }
+}
+
+.clone-status-note {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 300;
+  color: #777;
+}
+
+// One row per volume: label left, current step right. Reads the same at one volume or eight.
+.clone-status-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid #eceeee;
+}
+
+.clone-status-item {
+  padding: 8px 15px;
+  font-size: 13px;
+  line-height: 1.5;
+
+  & + & {
+    border-top: 1px solid #f2f4f4;
+  }
+
+  &::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+.clone-status-volume {
+  float: left;
+  font-weight: 500;
+  color: #555;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clone-status-step {
+  float: right;
+  font-weight: 300;
+  color: #777;
+}
+
+.clone-status-step--failed {
+  color: #be4230;
+}
+
+// Below ~480px the two halves would collide; stack them instead.
+@media (max-width: 480px) {
+  .clone-status-volume,
+  .clone-status-step {
+    float: none;
+    display: block;
+    max-width: 100%;
+  }
+}

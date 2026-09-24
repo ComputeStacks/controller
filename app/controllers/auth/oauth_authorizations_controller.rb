@@ -1,5 +1,4 @@
 class Auth::OauthAuthorizationsController < Doorkeeper::AuthorizationsController
-
   include BelcoWidget
   include EnforceSecondFactor
   include LogPayload
@@ -15,13 +14,13 @@ class Auth::OauthAuthorizationsController < Doorkeeper::AuthorizationsController
   def redirect_or_render(auth)
     if auth.redirectable?
       redirect_path = if cookies.encrypted[:uri_token_replace].blank?
-                        auth.redirect_uri
-                      else
-                        auth.redirect_uri.gsub(":token", cookies.encrypted[:uri_token_replace])
-                      end
+        auth.redirect_uri
+      else
+        auth.redirect_uri.gsub(":token", cookies.encrypted[:uri_token_replace])
+      end
       if Doorkeeper.configuration.api_only
         render(
-          json: { status: :redirect, redirect_uri: redirect_path },
+          json: {status: :redirect, redirect_uri: redirect_path},
           status: auth.status
         )
       else
@@ -35,23 +34,24 @@ class Auth::OauthAuthorizationsController < Doorkeeper::AuthorizationsController
   end
 
   def set_token_replace!
-    cookies.encrypted[:uri_token_replace] = {
-      value: params[:token_replace],
-      expires: 5.minutes.from_now
-    } unless params[:token_replace].blank?
+    unless params[:token_replace].blank?
+      cookies.encrypted[:uri_token_replace] = {
+        value: params[:token_replace],
+        expires: 5.minutes.from_now
+      }
+    end
   end
 
   def validate_user_scope!
     if pre_auth.authorizable?
-      if pre_auth.scopes.all.include?('admin') && !current_resource_owner.is_admin
+      if pre_auth.scopes.all.include?("admin") && !current_resource_owner.is_admin
         @msg = "You do not have access to the admin scope"
-        return respond_to do |format|
-          format.html { render template: 'doorkeeper/authorizations/general_error', layout: 'devise', status: :bad_request }
-          format.json { render json: { errors: [@msg], status: :bad_request } }
-          format.xml { render xml: { errors: [@msg], status: :bad_request } }
+        respond_to do |format|
+          format.html { render template: "doorkeeper/authorizations/general_error", layout: "devise", status: :bad_request }
+          format.json { render json: {errors: [@msg], status: :bad_request} }
+          format.xml { render xml: {errors: [@msg], status: :bad_request} }
         end
       end
     end
   end
-
 end

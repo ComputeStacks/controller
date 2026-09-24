@@ -1,10 +1,9 @@
-require 'test_helper'
+require "test_helper"
 
 class BuildOrderServiceTest < ActiveSupport::TestCase
-
-  test 'can generate an order' do
+  test "can generate an order" do
     order_session = OrderSession.new users(:admin)
-    order_session.project.name = 'Test'
+    order_session.project.name = "Test"
     order_session.add_image container_image_image_variants(:wordpress_default)
     order_session.images.each do |i|
       i[:package_id] = products(:containersmall).id
@@ -23,8 +22,8 @@ class BuildOrderServiceTest < ActiveSupport::TestCase
     order_builder = BuildOrderService.new(
       Audit.create!(
         user: users(:admin),
-        ip_addr: '127.0.0.1',
-        event: 'created'
+        ip_addr: "127.0.0.1",
+        event: "created"
       ),
       order_session.to_order
     )
@@ -32,7 +31,5 @@ class BuildOrderServiceTest < ActiveSupport::TestCase
     assert order_builder.perform
     refute_nil order_builder.order
     refute_nil order_builder.region
-
   end
-
 end

@@ -16,9 +16,8 @@
 # * subscription => billing events, usage items, ...
 #
 class Csrn
-
   attr_accessor :id,
-                :obj
+    :obj
 
   def initialize(obj)
     self.obj = obj
@@ -26,9 +25,7 @@ class Csrn
   end
 
   class << self
-
     def locate(rn)
-
       id = rn.split(":")
       return nil unless id[0] == "csrn"
 
@@ -86,12 +83,7 @@ class Csrn
             User.find_by id: id[5]
           end
         end
-      else
-        nil
       end
-
     end
-
   end
-
 end

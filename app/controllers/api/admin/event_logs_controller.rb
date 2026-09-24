@@ -1,5 +1,4 @@
 class Api::Admin::EventLogsController < Api::Admin::ApplicationController
-
   before_action :find_event, only: :show
 
   def index
@@ -15,7 +14,6 @@ class Api::Admin::EventLogsController < Api::Admin::ApplicationController
 
   def find_event
     @event = EventLog.find_by(id: params[:id])
-    return api_obj_missing if @event.nil?
+    api_obj_missing if @event.nil?
   end
-
 end

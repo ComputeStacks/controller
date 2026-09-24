@@ -1,7 +1,6 @@
-require 'test_helper'
+require "test_helper"
 
 class Api::Admin::Subscriptions::BillingEventsControllerTest < ActionDispatch::IntegrationTest
-
   include ApiTestControllerBase
 
   # test 'can list all' do

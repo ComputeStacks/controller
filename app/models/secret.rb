@@ -1,5 +1,4 @@
 class Secret < ApplicationRecord
-
   attr_accessor :data
 
   before_save :encrypt_data
@@ -19,18 +18,15 @@ class Secret < ApplicationRecord
 
   ## CLASS METHODS #####
   class << self
-
     # Generic Encrypt / Decrypt
     def encrypt!(params)
       crypt_key.encrypt_and_sign(params)
     end
 
     def decrypt!(params)
-      begin
-        crypt_key.decrypt_and_verify(params)
-      rescue
-        nil
-      end
+      crypt_key.decrypt_and_verify(params)
+    rescue
+      nil
     end
 
     protected
@@ -49,10 +45,10 @@ class Secret < ApplicationRecord
         raise "Missing SECRET_KEY_BASE environmental variable"
       end
       ActiveSupport::MessageEncryptor.new(
-        ENV["SECRET_KEY_BASE"].byteslice(0,32),
+        ENV["SECRET_KEY_BASE"].byteslice(0, 32),
         ENV["SECRET_KEY_BASE"],
         cipher: "aes-256-cbc",
-        digest: 'SHA256'
+        digest: "SHA256"
       )
     end
   end
@@ -61,7 +57,6 @@ class Secret < ApplicationRecord
   private
 
   def encrypt_data
-    self.encrypted_data = Secret.encrypt!(self.data) unless self.data.blank?
+    self.encrypted_data = Secret.encrypt!(data) unless data.blank?
   end
-
 end

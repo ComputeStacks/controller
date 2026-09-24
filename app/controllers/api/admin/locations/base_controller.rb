@@ -1,5 +1,4 @@
 class Api::Admin::Locations::BaseController < Api::Admin::ApplicationController
-
   before_action :find_location
 
   private
@@ -9,5 +8,4 @@ class Api::Admin::Locations::BaseController < Api::Admin::ApplicationController
     return api_obj_missing if @location.nil?
     @location.current_user = current_user
   end
-
 end

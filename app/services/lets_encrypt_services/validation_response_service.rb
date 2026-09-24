@@ -24,12 +24,11 @@ module LetsEncryptServices
   # @!attribute detail
   #   @return [String] details of error
   class ValidationResponseService
-
     attr_accessor :container_domain,
-                  :domain,
-                  :event,
-                  :type,
-                  :detail
+      :domain,
+      :event,
+      :type,
+      :detail
 
     # @param container_domain [Deployment::ContainerDomain]
     # @param raw_domain [String] raw domain
@@ -39,9 +38,9 @@ module LetsEncryptServices
       self.container_domain = container_domain
       self.domain = raw_domain
       self.event = event
-      if data.kind_of? Hash
-        self.type = data['type'].gsub('urn:ietf:params:acme:error:','').strip
-        self.detail = data['detail']
+      if data.is_a? Hash
+        self.type = data["type"].gsub("urn:ietf:params:acme:error:", "").strip
+        self.detail = data["detail"]
       else
         self.type = nil
         self.detail = nil
@@ -53,41 +52,41 @@ module LetsEncryptServices
     def perform
       return unless valid?
       case type
-      when 'caa'
+      when "caa"
         event.event_details.create!(
           data: "Error! You have a CAA record on your domain that is preventing us from ",
-          event_code: '57893ea2173caee1'
+          event_code: "57893ea2173caee1"
         )
         cancel_domain_validation!
-      when 'connection', 'malformed', 'incorrectResponse', 'serverInternal', 'tls'
+      when "connection", "malformed", "incorrectResponse", "serverInternal", "tls"
         event.event_details.create!(
-          data: "There was a problem with LetsEncrypt connecting to our system, we will retry your certificate.\n\nError: #{detail}",
-          event_code: 'c920c292f048dccd'
+          data: "There was a problem with ACME connecting to our system, we will retry your certificate.\n\nError: #{detail}",
+          event_code: "c920c292f048dccd"
         )
         cancel_domain_validation!
         schedule_new_validation!
-      when 'dns'
+      when "dns"
         event.event_details.create!(
           data: "There was a problem connecting to your DNS server, please verify your NS records are correct.",
-          event_code: 'f8e636b30384111b'
+          event_code: "f8e636b30384111b"
         )
         schedule_new_validation!
-      when 'rateLimited'
+      when "rateLimited"
         event.event_details.create!(
-          data: "We are temporarily rate limited by LetsEncrypt, we will attempt to renew your certificate later",
-          event_code: '972b196893bfdf09'
+          data: "We are temporarily rate limited by ACME, we will attempt to renew your certificate later",
+          event_code: "972b196893bfdf09"
         )
         false
-      when 'rejectedIdentifier'
+      when "rejectedIdentifier"
         event.event_details.create!(
-          data: "LetsEncrypt has rejected this domain for issuance.\n\nError: #{detail}",
-          event_code: '5e772aabba86d0c1'
+          data: "ACME has rejected this domain for issuance.\n\nError: #{detail}",
+          event_code: "5e772aabba86d0c1"
         )
         cancel_domain_validation!
       else
         event.event_details.create!(
           data: "Validation Failed for #{domain}.\n\ntype: #{type}\ndetail: #{detail}",
-          event_code: '9dec84a9854b0932'
+          event_code: "9dec84a9854b0932"
         )
         cancel_domain_validation!
       end
@@ -116,9 +115,8 @@ module LetsEncryptServices
     def process_raw_event!
       event.event_details.create!(
         data: "Validation Failed for #{domain}.\n\ntype: #{type}\ndetail: #{detail}",
-        event_code: '307dac0a2815fe1c'
+        event_code: "307dac0a2815fe1c"
       )
     end
-
   end
 end

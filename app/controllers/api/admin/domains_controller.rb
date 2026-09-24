@@ -1,7 +1,6 @@
 ##
 # # Domains Controller
 class Api::Admin::DomainsController < Api::Admin::ApplicationController
-
   ##
   # List all ingress rules
   #
@@ -12,5 +11,4 @@ class Api::Admin::DomainsController < Api::Admin::ApplicationController
   def index
     @domains = paginate Deployment::ContainerDomain.all.order(:id)
   end
-
 end

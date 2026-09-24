@@ -2,7 +2,7 @@ module ImageWorkers
   class RemoveImagePluginWorker
     include Sidekiq::Worker
 
-    sidekiq_options retry: false, queue: 'dep'
+    sidekiq_options retry: false, queue: "dep"
 
     def perform(current_user_id, image_id, plugin_id)
       user = User.find current_user_id
@@ -22,10 +22,8 @@ module ImageWorkers
           event_code: "8826d365c5259ec1"
         )
       end
-
     rescue ActiveRecord::RecordNotFound
-      return
+      nil
     end
-
   end
 end

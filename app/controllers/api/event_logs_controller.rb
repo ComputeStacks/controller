@@ -1,8 +1,7 @@
 ##
 # EventLogs API
 class Api::EventLogsController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :projects_read }, only: %i[show], unless: :current_user
+  api_scope show: :project_read
 
   before_action :load_event, only: :show
 
@@ -11,7 +10,7 @@ class Api::EventLogsController < Api::ApplicationController
   #
   # `GET /api/event_logs/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `event_log`: Object
   #     * `id`: Integer
@@ -40,7 +39,8 @@ class Api::EventLogsController < Api::ApplicationController
   #         * `created_at`: DateTime
   #         * `updated_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   private
 
@@ -48,5 +48,4 @@ class Api::EventLogsController < Api::ApplicationController
     @event = EventLog.find_for_user params[:id], current_user
     api_obj_missing if @event.nil?
   end
-
 end

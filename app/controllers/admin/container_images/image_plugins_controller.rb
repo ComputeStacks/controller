@@ -1,6 +1,5 @@
 # Add and Remove plugins from an image
 class Admin::ContainerImages::ImagePluginsController < Admin::ContainerImages::BaseController
-
   before_action :find_available_plugins, only: %i[new create]
   before_action :ensure_available_plugins, only: :new
 
@@ -37,5 +36,4 @@ class Admin::ContainerImages::ImagePluginsController < Admin::ContainerImages::B
       redirect_to "/admin/container_images/#{@image.id}", alert: "There are no available plugins."
     end
   end
-
 end

@@ -1,6 +1,5 @@
 # Container Image Collaborators
 class Api::ContainerImages::CollaboratorsController < Api::ContainerImages::BaseController
-
   before_action :verify_admin
   before_action :find_collab, only: %i[show destroy]
 
@@ -21,7 +20,7 @@ class Api::ContainerImages::CollaboratorsController < Api::ContainerImages::Base
   def index
     @collaborators = @image.container_image_collaborators.sorted
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/index_type' }
+      format.any(:json, :xml) { render template: "api/collaborations/index_type" }
     end
   end
 
@@ -48,7 +47,7 @@ class Api::ContainerImages::CollaboratorsController < Api::ContainerImages::Base
   #
   def show
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/show' }
+      format.any(:json, :xml) { render template: "api/collaborations/show" }
     end
   end
 
@@ -66,7 +65,7 @@ class Api::ContainerImages::CollaboratorsController < Api::ContainerImages::Base
     @collab = @image.container_image_collaborators.new user_email: collaborator_params[:user_email], current_user: current_user
     return api_obj_error(@collab.errors.full_messages) unless @collab.save
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/show', status: :created }
+      format.any(:json, :xml) { render template: "api/collaborations/show", status: :created }
     end
   end
 
@@ -100,5 +99,4 @@ class Api::ContainerImages::CollaboratorsController < Api::ContainerImages::Base
   def collaborator_params
     params.require(:collaborator).permit(:user_email)
   end
-
 end

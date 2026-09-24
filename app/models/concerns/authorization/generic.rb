@@ -6,7 +6,6 @@ module Authorization
     extend ActiveSupport::Concern
 
     class_methods do
-
       def find_for(current_user, arg, *args)
         return nil if current_user.nil?
         resource = find_by arg, args
@@ -33,7 +32,6 @@ module Authorization
         return false if current_user.nil?
         current_user.is_admin || current_user.active
       end
-
     end
 
     def is_resource_owner?(current_user)
@@ -57,6 +55,5 @@ module Authorization
     def can_administer?(current_user)
       current_user.is_admin || user == current_user
     end
-
   end
 end

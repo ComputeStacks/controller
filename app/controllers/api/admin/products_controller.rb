@@ -1,8 +1,7 @@
 ##
 # # Product
 class Api::Admin::ProductsController < Api::Admin::ApplicationController
-
-  before_action :load_product, except: %i[ index create ]
+  before_action :load_product, except: %i[index create]
 
   ##
   # List Products
@@ -157,5 +156,4 @@ class Api::Admin::ProductsController < Api::Admin::ApplicationController
       ]
     )
   end
-
 end

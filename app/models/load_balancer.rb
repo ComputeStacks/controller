@@ -49,6 +49,8 @@
 #   @return [Array]
 # @!attribute proxy_cloudflare
 #   @return [Boolean] (default: true)
+# @!attribute proxy_bunny
+#   @return [Boolean] (default: true)
 # @!attribute g_timeout_connect
 #   @return [String] (Default: 5s)
 # @!attribute g_timeout_client
@@ -71,22 +73,22 @@
 #   @return [Boolean] (default: false)
 #
 class LoadBalancer < ApplicationRecord
-
   include Auditable
+  include LoadBalancers::BunnyProxyAddresses
   include LoadBalancers::CloudflareProxyAddresses
 
   # @!scope class
   # @return [Array<LoadBalancer>]
-  scope :sorted, -> { order( Arel.sql("lower(name) DESC, lower(label) DESC")) }
+  scope :sorted, -> { order(Arel.sql("lower(name) DESC, lower(label) DESC")) }
 
   # @return [Region]
   belongs_to :region
 
   # @return [Array<Deployment::ContainerService>]
-  has_many :container_services, class_name: 'Deployment::ContainerService', dependent: :restrict_with_exception
+  has_many :container_services, class_name: "Deployment::ContainerService", dependent: :restrict_with_exception
 
   # @return [Array<Deployment::Sftp>]
-  has_many :sftp_containers, class_name: 'Deployment::Sftp', dependent: :restrict_with_exception
+  has_many :sftp_containers, class_name: "Deployment::Sftp", dependent: :restrict_with_exception
 
   # @return [Array<Deployment::Container>]
   has_many :containers, -> { distinct }, through: :container_services
@@ -108,16 +110,15 @@ class LoadBalancer < ApplicationRecord
 
   # TODO: Migrate public_ip, ext_ip, internal_ip to ipaddrs.
   # @return [Array<LoadBalancerAddr>]
-  has_many :ipaddrs, class_name: 'LoadBalancerAddr', foreign_key: 'load_balancer_id', dependent: :destroy
-
+  has_many :ipaddrs, class_name: "LoadBalancerAddr", foreign_key: "load_balancer_id", dependent: :destroy
 
   validates :public_ip, presence: true
   validates :domain, presence: true
   validates :ext_ip, presence: true
-  validates :cpus, numericality: { only_integer: true }
-  validates :maxconn, numericality: { only_integer: true }
-  validates :maxconn_c, numericality: { only_integer: true }
-  validates :ssl_cache, numericality: { only_integer: true }
+  validates :cpus, numericality: {only_integer: true}
+  validates :maxconn, numericality: {only_integer: true}
+  validates :maxconn_c, numericality: {only_integer: true}
+  validates :ssl_cache, numericality: {only_integer: true}
 
   validate :valid_custom_cert?
 
@@ -163,7 +164,7 @@ class LoadBalancer < ApplicationRecord
     return nil if cert_encrypted.blank?
     Secret.decrypt!(cert_encrypted)
   rescue => e
-    ExceptionAlertService.new(e, '5c64a85fcdce6202').perform
+    ExceptionAlertService.new(e, "5c64a85fcdce6202").perform
     nil
   end
 
@@ -177,7 +178,7 @@ class LoadBalancer < ApplicationRecord
 
   # @return [Boolean]
   def has_custom_ssl?
-    self.container_services.each do |i|
+    container_services.each do |i|
       return true unless i.ssl_certificates.empty?
     end
     false
@@ -189,9 +190,9 @@ class LoadBalancer < ApplicationRecord
   def haproxy_http_proto
     # example: alpn h2,http/1.1
     ar = []
-    ar << 'h2' if proto_20
-    ar << 'http/1.1' if proto_11
-    proto_alpn ? "alpn #{ar.join(',')}" : ar.join(',')
+    ar << "h2" if proto_20
+    ar << "http/1.1" if proto_11
+    proto_alpn ? "alpn #{ar.join(",")}" : ar.join(",")
   end
 
   # Find a LB for a given node
@@ -239,20 +240,19 @@ class LoadBalancer < ApplicationRecord
       allowed << legacy_public_ip
     end
 
-    ipaddrs.where(role: 'proxy').each do |i|
-      allowed << i.ip_addr unless i.ip_addr.private? || allowed.include?(i.ip_addr)
+    # Manually-added proxy addrs; CF/Bunny now come from the global files below.
+    (manual_proxy_ipaddrs + cloudflare_ipaddrs + bunny_ipaddrs).each do |ip|
+      allowed << ip unless ip.private? || allowed.include?(ip)
     end
-    ipaddrs.where(role: 'public').each do |i|
+    ipaddrs.where(role: "public").each do |i|
       allowed << i.ip_addr unless i.ip_addr.private? || allowed.include?(i.ip_addr)
     end
     region.nodes.pluck(:public_ip).each do |i|
-      begin
-        ii = IPAddr.new(i)
-        allowed << ii unless ii.private? || allowed.include?(ii)
-      rescue => e
-        ExceptionAlertService.new(e, 'd665c51f31b2e1ed').perform
-        next
-      end
+      ii = IPAddr.new(i)
+      allowed << ii unless ii.private? || allowed.include?(ii)
+    rescue => e
+      ExceptionAlertService.new(e, "d665c51f31b2e1ed").perform
+      next
     end
     allowed
   end
@@ -273,21 +273,41 @@ class LoadBalancer < ApplicationRecord
         ips << ip unless ips.include?(ip)
       end
     end
-    ipaddrs.where(role: 'proxy').each do |i|
-      next if i.is_ipv6? # Temporary until we can support ipv6 on the nodes.
-      ips << i.ip_addr unless ips.include?(i.ip_addr)
+    # CF/Bunny come from the global files (flag-gated); keep manually-added proxy rows.
+    (manual_proxy_ipaddrs + cloudflare_ipaddrs + bunny_ipaddrs).each do |ip|
+      ips << ip unless ips.include?(ip)
     end
     ips
   end
 
-  # @return [Array]
+  # Cloudflare proxy CIDRs, sourced from the account-global ProxyIpList file.
+  # @return [Array<IPAddr>]
   def cloudflare_ipaddrs
-    ips = []
-    ipaddrs.cloudflare.each do |i|
-      next if i.is_ipv6? # Temporary until we can support ipv6 on the nodes.
-      ips << i.ip_addr unless ips.include?(i.ip_addr)
-    end
-    ips
+    @cloudflare_ipaddrs ||= (proxy_cloudflare ? ProxyIpList.read(:cloudflare) : [])
+  end
+
+  # Bunny proxy IPs, sourced from the account-global ProxyIpList file.
+  # @return [Array<IPAddr>]
+  def bunny_ipaddrs
+    @bunny_ipaddrs ||= (proxy_bunny ? ProxyIpList.read(:bunny) : [])
+  end
+
+  # Proxy addresses added manually (not sourced from a CDN provider file).
+  # @return [Array<IPAddr>]
+  def manual_proxy_ipaddrs
+    ipaddrs.where(role: "proxy").tagged_with(%w[cloudflare bunny_cdn], exclude: true).map(&:ip_addr)
+  end
+
+  # CDN providers that have a live restrict rule but an empty allowlist file.
+  # Under fail-open enforcement this means those restricted endpoints are NOT
+  # locked down; surfaced by UpdateBalancerService so the lapse isn't silent.
+  # @return [Array<Symbol>]
+  def restricted_providers_missing_list
+    missing = []
+    rules = container_services.includes(:ingress_rules).flat_map(&:ingress_rules)
+    missing << :cloudflare if cloudflare_ipaddrs.empty? && rules.any?(&:restrict_cf)
+    missing << :bunny if bunny_ipaddrs.empty? && rules.any?(&:restrict_bunny)
+    missing
   end
 
   # List of domains required for this shared url.
@@ -295,31 +315,31 @@ class LoadBalancer < ApplicationRecord
   #
   # @return [Array]
   def dns_domains
-    %W(#{domain} *.#{domain})
+    %W[#{domain} *.#{domain}]
   end
 
   private
 
   def set_ext_ip
-    unless self.external_ips.blank?
-      self.ext_ip = self.external_ips.split(',').map {|i| i.strip}
+    unless external_ips.blank?
+      self.ext_ip = external_ips.split(",").map { |i| i.strip }
     end
-    unless self.internal_ips.blank?
-      self.internal_ip = self.internal_ips.split(',').map {|i| i.strip}
+    unless internal_ips.blank?
+      self.internal_ip = internal_ips.split(",").map { |i| i.strip }
     end
   end
 
   def set_defaults
     generated_name = NamesGenerator.name(0)
     self.name = generated_name
-    self.label = generated_name if self.label.blank?
-    self.ext_ip = [] if self.ext_ip.blank?
+    self.label = generated_name if label.blank?
+    self.ext_ip = [] if ext_ip.blank?
   end
 
   # Very basic validation...
   def valid_custom_cert?
     unless shared_certificate.blank?
-      errors.add(:shared_certificate, "is an invalid certificate") unless OpenSSL::X509::Certificate.new(shared_certificate).serial.kind_of?(OpenSSL::BN)
+      errors.add(:shared_certificate, "is an invalid certificate") unless OpenSSL::X509::Certificate.new(shared_certificate).serial.is_a?(OpenSSL::BN)
     end
   rescue
     errors.add(:shared_certificate, "is an invalid certificate")
@@ -338,5 +358,4 @@ class LoadBalancer < ApplicationRecord
       LoadBalancerServices::LetsEncryptService.new(self, current_audit).perform
     end
   end
-
 end

@@ -2,9 +2,8 @@ module UtilityServices
   ##
   # Export FileZilla File
   class FilezillaExporterService
-
     attr_accessor :user,
-                  :deployment
+      :deployment
 
     def intialize
       self.user = nil
@@ -29,8 +28,8 @@ module UtilityServices
     private
 
     def generate_config(services)
-      header = %Q(<?xml version="1.0" encoding="UTF-8"?><FileZilla3 version="3.56.2" platform="mac"><Servers><Folder expanded="1">#{Setting.app_name})
-      footer = %Q(</Folder></Servers></FileZilla3>)
+      header = %(<?xml version="1.0" encoding="UTF-8"?><FileZilla3 version="3.56.2" platform="mac"><Servers><Folder expanded="1">#{Setting.app_name})
+      footer = %(</Folder></Servers></FileZilla3>)
       projects = {}
       services.each do |service|
         next unless service.requires_sftp_containers?
@@ -58,13 +57,12 @@ module UtilityServices
         projects[service.deployment.name] << server.join("")
       end
       projects.each_key do |p|
-        header += %Q(<Folder expanded="0">)
+        header += %(<Folder expanded="0">)
         header += p
         header += projects[p].join("")
         header += "</Folder>"
       end
       header + footer
     end
-
   end
 end

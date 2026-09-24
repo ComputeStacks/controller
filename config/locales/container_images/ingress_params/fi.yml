@@ -39,6 +39,9 @@ fi:
         restrict_cf: "Restrict external connections to CloudFlare only?"
         restrict_cf_help_html: "This will block all traffic that does not originate from Cloudflare. This only applies to the global load balancer (public traffic)."
 
+        restrict_bunny: "Restrict external connections to Bunny CDN only?"
+        restrict_bunny_help_html: "This will block all traffic that does not originate from Bunny CDN. This only applies to the global load balancer (public traffic). Cannot be combined with the Cloudflare restriction."
+
         # Use iptables or HAProxy to manage external access to a tcp service
         # if disabled, we create an iptable nat rule
         tcp_lb: "Enable TCP Load Balancing"

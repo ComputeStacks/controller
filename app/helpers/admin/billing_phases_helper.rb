@@ -1,12 +1,11 @@
 module Admin::BillingPhasesHelper
-
   def selectable_phases(resource, current_phase = nil)
     master_phases = [
-        ['Trial', 'trial'],
-        ['Discount', 'discount'],
-        ['Final', 'final']
+      ["Trial", "trial"],
+      ["Discount", "discount"],
+      ["Final", "final"]
     ]
-    current_phases = resource.available_phases.map {|i| i.phase_type}
+    current_phases = resource.available_phases.map { |i| i.phase_type }
     phases = []
     master_phases.each do |label, value|
       if current_phase
@@ -20,19 +19,18 @@ module Admin::BillingPhasesHelper
 
   def phase_durations
     [
-        ['Hours', 'hours'],
-        ['Days', 'days'],
-        ['Months', 'months'],
-        ['Years', 'years']
+      ["Hours", "hours"],
+      ["Days", "days"],
+      ["Months", "months"],
+      ["Years", "years"]
     ]
   end
 
   def price_terms
     [
-        [I18n.t("billing.hour"), 'hour'],
-        [I18n.t("billing.month"), 'month'],
-        [I18n.t("billing.year"), 'year']
+      [I18n.t("billing.hour"), "hour"],
+      [I18n.t("billing.month"), "month"],
+      [I18n.t("billing.year"), "year"]
     ]
   end
-
 end

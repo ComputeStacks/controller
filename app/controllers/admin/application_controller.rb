@@ -1,7 +1,5 @@
 class Admin::ApplicationController < AuthController
+  include AdminAuthable
 
-  include AdminAuthable  
-
-  layout 'admin/layouts/application'
-
+  layout "admin/layouts/application"
 end

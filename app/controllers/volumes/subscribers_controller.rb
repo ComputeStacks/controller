@@ -1,11 +1,9 @@
 class Volumes::SubscribersController < Volumes::BaseController
-
   def index
     if request.xhr?
       @subscribers = @volume.attached_services
-      render template: 'volumes/subscribers/list', layout: false
-      return false
+      render template: "volumes/subscribers/list", layout: false
+      false
     end
   end
-
 end

@@ -3,7 +3,7 @@ module ImagePlugins
     extend ActiveSupport::Concern
 
     included do
-      scope :monarx, -> { where name: 'monarx' }
+      scope :monarx, -> { where name: "monarx" }
     end
 
     def monarx_base_url
@@ -16,7 +16,7 @@ module ImagePlugins
 
     def monarx_api_headers
       {
-        "accept" =>  "application/json",
+        "accept" => "application/json",
         "x-api-id" => Setting.monarx_api_key,
         "x-api-key" => Setting.monarx_api_secret
       }
@@ -38,6 +38,5 @@ module ImagePlugins
     def monarx_can_enable?(user)
       user.is_admin
     end
-
   end
 end

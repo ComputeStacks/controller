@@ -1,6 +1,5 @@
 class Deployments::CertificatesController < Deployments::BaseController
-
-  before_action :find_certificate, only: %w(show edit update destroy)
+  before_action :find_certificate, only: %w[show edit update destroy]
 
   def index
     @certs = @deployment.ssl_certificates
@@ -18,7 +17,8 @@ class Deployments::CertificatesController < Deployments::BaseController
     @cert = Deployment::Ssl.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if @cert.update(cert_params)
@@ -45,7 +45,7 @@ class Deployments::CertificatesController < Deployments::BaseController
       end
       flash[:notice] = "Certificate removed"
     else
-      flash[:alert] = "Error: #{@cert.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error: #{@cert.errors.full_messages.join(" ")}"
     end
     redirect_to "/deployments/#{@deployment.token}#ssl"
   end
@@ -61,6 +61,4 @@ class Deployments::CertificatesController < Deployments::BaseController
     return(redirect_to("/deployments/#{@deployment.token}#ssl", alert: "Unknown certificate")) if @cert.nil?
     @cert.current_user = current_user
   end
-
-
 end

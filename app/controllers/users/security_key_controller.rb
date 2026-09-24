@@ -1,10 +1,10 @@
 class Users::SecurityKeyController < AuthController
-
-  def index; end
+  def index
+  end
 
   def new
     create_challenge = WebAuthn::Credential.options_for_create(
-      user: { id: current_user.webauthn_id, name: current_user.email },
+      user: {id: current_user.webauthn_id, name: current_user.email},
       exclude: current_user.security_keys.map { |i| Base64.strict_decode64(i.webauthn_id) }
     )
     cookies.encrypted[:creation_challenge] = {
@@ -13,7 +13,7 @@ class Users::SecurityKeyController < AuthController
     }
     @request_data = create_challenge.to_json
     @key = current_user.security_keys.new
-    render layout: 'devise'
+    render layout: "devise"
   end
 
   def create
@@ -29,7 +29,7 @@ class Users::SecurityKeyController < AuthController
       public_key: webauthn_credential.public_key,
       counter: webauthn_credential.sign_count
     )
-    redirect_to "/users/security_key", notice: I18n.t('users.security_key.controller.u2f.added')
+    redirect_to "/users/security_key", notice: I18n.t("users.security_key.controller.u2f.added")
   rescue => e
     redirect_to "/users/security_key/new", alert: "Error! #{e.message}"
   ensure
@@ -43,12 +43,12 @@ class Users::SecurityKeyController < AuthController
       return false
     end
     if @seckey.destroy
-      audit = Audit.create_from_object!(current_user, 'updated', request.remote_ip, current_user)
+      audit = Audit.create_from_object!(current_user, "updated", request.remote_ip, current_user)
       audit.update_attribute :raw_data, "Removed key: #{@seckey.label}"
-      flash[:notice] = I18n.t('users.security_key.controller.removed')
+      flash[:notice] = I18n.t("users.security_key.controller.removed")
     else
       # "Error removing Security Key: #{}"
-      flash[:alert] = I18n.t('users.security_key.controller.errors.removed', { error: @seckey.errors.full_messages.join(' ') })
+      flash[:alert] = I18n.t("users.security_key.controller.errors.removed", {error: @seckey.errors.full_messages.join(" ")})
     end
     redirect_to action: :index
   end
@@ -58,5 +58,4 @@ class Users::SecurityKeyController < AuthController
   def security_params
     params.require(:user_security_key).permit(:label)
   end
-
 end

@@ -1,6 +1,5 @@
 module ContainerImages
   module SettingParamsHelper
-
     # @param [ContainerImage] image
     def container_image_settings_path(image)
       return container_images_path if image.nil?
@@ -24,6 +23,5 @@ module ContainerImages
       return container_images_path if setting.nil?
       "#{container_image_setting_path(setting)}/edit"
     end
-
   end
 end

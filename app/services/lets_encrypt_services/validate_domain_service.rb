@@ -2,11 +2,10 @@ module LetsEncryptServices
   ##
   # Validate Domain Name for Lets Encrypt
   class ValidateDomainService
-
     attr_accessor :domain,
-                  :event,
-                  :load_balancer,
-                  :container_domain
+      :event,
+      :load_balancer,
+      :container_domain
 
     def initialize(obj, event)
       if obj.is_a?(Deployment::ContainerDomain)
@@ -23,36 +22,38 @@ module LetsEncryptServices
         self.container_domain = nil
       end
       self.event = event
-      @dns = Dnsruby::Resolver.new( {
-                                      nameserver: NS_LIST,
-                                      port: NS_PORT,
-                                      do_caching: false,
-                                      retry_delay: 1,
-                                      retry_times: 3
-                                    } )
+      @dns = Dnsruby::Resolver.new({
+        nameserver: NS_LIST,
+        port: NS_PORT,
+        do_caching: false,
+        retry_delay: 1,
+        retry_times: 3
+      })
     end
 
     # @return [Boolean]
     def perform
       is_valid = valid_ip?
-      is_valid = false unless valid_caa?
+
+      # is_valid = false unless valid_caa?
+
       is_valid = false unless valid_http?
       is_valid ? event.done! : event.fail!("Invalid Domain Configuration")
       is_valid
     rescue SocketError => e
       event.event_details.create!(
         data: "Domain Error: #{e.message}",
-        event_code: 'c7fb07ab86991059'
+        event_code: "c7fb07ab86991059"
       )
-      event.fail! 'Domain Error'
+      event.fail! "Domain Error"
       false
     rescue => e
-      ExceptionAlertService.new(e, '77fd80bc5d8a29a1').perform
+      ExceptionAlertService.new(e, "77fd80bc5d8a29a1").perform
       event.event_details.create!(
         data: "Fatal Error: #{e.message}",
-        event_code: 'a1d62edbd48dc8f1'
+        event_code: "a1d62edbd48dc8f1"
       )
-      event.fail! 'Fatal Error'
+      event.fail! "Fatal Error"
       false
     end
 
@@ -72,7 +73,7 @@ module LetsEncryptServices
       unless response.code == 200
         event.event_details.create!(
           data: "Invalid domain configuration: Unable to connect to validation url. Please ensure there are no redirect rules on '/.well-known/acme-challenge/' URLs.",
-          event_code: '259530068a4122cc'
+          event_code: "259530068a4122cc"
         )
         return false
       end
@@ -80,9 +81,9 @@ module LetsEncryptServices
     rescue => e
       event.event_details.create!(
         data: "Fatal Error: #{e.message}",
-        event_code: '0962b58462491cb2'
+        event_code: "0962b58462491cb2"
       )
-      event.fail! 'Fatal Error'
+      event.fail! "Fatal Error"
       false
     end
 
@@ -92,7 +93,7 @@ module LetsEncryptServices
       if (dns_resource + dns_resource_six).empty?
         event.event_details.create!(
           data: "Missing DNS records for #{domain}.",
-          event_code: 'afda9ae32934c1d8'
+          event_code: "afda9ae32934c1d8"
         )
         return false
       end
@@ -102,13 +103,13 @@ module LetsEncryptServices
         break unless is_valid
 
         is_valid = if load_balancer
-                     load_balancer.ip_allowed? resource
-                   else
-                     container_domain.le_dns_allowed? resource
-                   end
+          load_balancer.ip_allowed? resource
+        else
+          container_domain.le_dns_allowed? resource
+        end
         unless is_valid
           event.event_details.create!(data: "Invalid DNS resource found: #{resource}",
-                                      event_code: '510806d5621c97d5')
+            event_code: "510806d5621c97d5")
         end
       end
 
@@ -117,13 +118,13 @@ module LetsEncryptServices
         if dns_resource_wildcard.nil?
           event.event_details.create!(
             data: "Missing CNAME record. Expected *.#{domain} to point to #{domain}.",
-            event_code: '2721edc59787a807'
+            event_code: "2721edc59787a807"
           )
           is_valid = false
         elsif dns_resource_wildcard != domain
           event.event_details.create!(
             data: "Invalid CNAME record. Expected *.#{domain} to point to #{domain}, instead we found #{dns_resource_wildcard}.",
-            event_code: '635285f7f2889009'
+            event_code: "635285f7f2889009"
           )
           is_valid = false
         end
@@ -133,6 +134,8 @@ module LetsEncryptServices
     end
 
     ##
+    # DISABLED 2025-june-9 due to support for any ACME provider. We need to eventually allow for defining what the CAA records should be so we can check for them.
+    ##
     # Determine if the CAA records for this domain will permit a LetsEncrypt certificate to be issued
     #
     # Resources:
@@ -140,157 +143,156 @@ module LetsEncryptServices
     # - [LetsEncrypt CAA](https://letsencrypt.org/docs/caa/)
     #
     # @return [Boolean]
-    def valid_caa?
-      full_domain = domain
+    # def valid_caa?
+    #   full_domain = domain
 
-      root_tld = if Rails.env.production?
-                   DomainPrefix.registered_domain full_domain
-                 elsif full_domain.split('.').last == "local"
-                   # In testing, `.local` will fail, so lets find the root domain
-                   # given our known set of test domains in use.
-                   "#{full_domain.split(".")[-2]}.#{full_domain.split(".")[-1]}"
-                 else
-                   nil
-                 end
+    #   root_tld = if Rails.env.production?
+    #     DomainPrefix.registered_domain full_domain
+    #   elsif full_domain.split(".").last == "local"
+    #     # In testing, `.local` will fail, so lets find the root domain
+    #     # given our known set of test domains in use.
+    #     "#{full_domain.split(".")[-2]}.#{full_domain.split(".")[-1]}"
+    #   else
+    #     nil
+    #   end
 
-      if root_tld.nil? # We should always have a valid TLD!
-        event.event_details.create!( data: "Invalid TLD: #{full_domain}.",
-                                     event_code: '1a6505df079a9b3c' )
-        return false
-      end
+    #   if root_tld.nil? # We should always have a valid TLD!
+    #     event.event_details.create!(data: "Invalid TLD: #{full_domain}.",
+    #       event_code: "1a6505df079a9b3c")
+    #     return false
+    #   end
 
-      # loop through each subdomain moving up towards the TLD. Start with the original domain and work up.
-      # When the first CAA record is found, that is the one we will use as it will have priority over the higher ones.
-      domains = []
-      full_domain.gsub(".#{root_tld}",'').split('.').each do |i|
-        break if full_domain == root_tld # Stop when we hit the root domain.
+    #   # loop through each subdomain moving up towards the TLD. Start with the original domain and work up.
+    #   # When the first CAA record is found, that is the one we will use as it will have priority over the higher ones.
+    #   domains = []
+    #   full_domain.gsub(".#{root_tld}", "").split(".").each do |i|
+    #     break if full_domain == root_tld # Stop when we hit the root domain.
 
-        domains << full_domain
-        full_domain = full_domain.split("#{i}.")[1] # Remove subdomain from `full_domain` and continue loop.
-      end
-      domains << root_tld
+    #     domains << full_domain
+    #     full_domain = full_domain.split("#{i}.")[1] # Remove subdomain from `full_domain` and continue loop.
+    #   end
+    #   domains << root_tld
 
-      # user domain domains:
-      # - should have an empty set, or
-      # - should have an `issue "letsencrypt.org"` record
-      # - In prep for `cansignhttpexchanges` also allow: `issue "letsencrypt.org; cansignhttpexchanges=yes"`
-      is_valid = true
-      domains.each do |d|
-        # PowerDNS will return a CNAME if one exists, so we need to filter that out.
-        begin
-          response = @dns.query(d, 'CAA').answer.select { |i| i.is_a?(Dnsruby::RR::IN::CAA) }
-        rescue Dnsruby::NXDomain
-          if d == full_domain
-            event.event_details.create!(
-              data: "Error! #{d} does not exist!",
-              event_code: 'c818dccc04f6889b'
-            )
-            is_valid = false
-            break
-          end
-          next
-        rescue Dnsruby::Refused => e
-          ExceptionAlertService.new(e, 'afb5d727910b5954').perform
-          if d == full_domain
-            event.event_details.create!(
-              data: "Error! #{d} does not exist!",
-              event_code: 'afb5d727910b5954'
-            )
-            is_valid = false
-            break
-          end
-          next
-        end
-        next if response.empty?
+    #   # user domain domains:
+    #   # - should have an empty set, or
+    #   # - should have an `issue "letsencrypt.org"` record
+    #   # - In prep for `cansignhttpexchanges` also allow: `issue "letsencrypt.org; cansignhttpexchanges=yes"`
+    #   is_valid = true
+    #   domains.each do |d|
+    #     # PowerDNS will return a CNAME if one exists, so we need to filter that out.
+    #     begin
+    #       response = @dns.query(d, "CAA").answer.select { |i| i.is_a?(Dnsruby::RR::IN::CAA) }
+    #     rescue Dnsruby::NXDomain
+    #       if d == full_domain
+    #         event.event_details.create!(
+    #           data: "Error! #{d} does not exist!",
+    #           event_code: "c818dccc04f6889b"
+    #         )
+    #         is_valid = false
+    #         break
+    #       end
+    #       next
+    #     rescue Dnsruby::Refused => e
+    #       ExceptionAlertService.new(e, "afb5d727910b5954").perform
+    #       if d == full_domain
+    #         event.event_details.create!(
+    #           data: "Error! #{d} does not exist!",
+    #           event_code: "afb5d727910b5954"
+    #         )
+    #         is_valid = false
+    #         break
+    #       end
+    #       next
+    #     end
+    #     next if response.empty?
 
-        invalid_records = []
-        invalid_wild_records = []
-        le_caa_exists = false
-        le_wildcard_caa_exists = false
-        response.each do |i|
-          val_check = i.property_value.split(';')[0]&.strip
-          if i.property_tag == 'issue' && val_check == 'letsencrypt.org'
-            le_caa_exists = true
-          elsif i.property_tag == 'issuewild' && val_check == 'letsencrypt.org'
-            le_wildcard_caa_exists = true
-          elsif i.property_tag == 'issue'
-            invalid_records << "#{i.property_tag} #{i.property_value}"
-          elsif i.property_tag == 'issuewild'
-            invalid_wild_records << "#{i.property_tag} #{i.property_value}"
-          end
-        end
-        # We're checking from left-to-right, and so the first valid CAA record we find will work.
-        if load_balancer && (le_caa_exists && le_wildcard_caa_exists)
-          is_valid = true
-          break
-        elsif !load_balancer && le_caa_exists
-          is_valid = true
-          break
-        end
+    #     invalid_records = []
+    #     invalid_wild_records = []
+    #     le_caa_exists = false
+    #     le_wildcard_caa_exists = false
+    #     response.each do |i|
+    #       val_check = i.property_value.split(";")[0]&.strip
+    #       if i.property_tag == "issue" && val_check == "letsencrypt.org"
+    #         le_caa_exists = true
+    #       elsif i.property_tag == "issuewild" && val_check == "letsencrypt.org"
+    #         le_wildcard_caa_exists = true
+    #       elsif i.property_tag == "issue"
+    #         invalid_records << "#{i.property_tag} #{i.property_value}"
+    #       elsif i.property_tag == "issuewild"
+    #         invalid_wild_records << "#{i.property_tag} #{i.property_value}"
+    #       end
+    #     end
+    #     # We're checking from left-to-right, and so the first valid CAA record we find will work.
+    #     if load_balancer && le_caa_exists && le_wildcard_caa_exists
+    #       is_valid = true
+    #       break
+    #     elsif !load_balancer && le_caa_exists
+    #       is_valid = true
+    #       break
+    #     end
 
-        ##
-        # If we made it this far, then we know we had CAA records. Therefore, this must exist.
-        if !le_caa_exists && invalid_records.empty?
-          event.event_details.create!(
-            data: "CAA record found on #{d}, but missing LetsEncrypt. Please add: 0 issue \"letsencrypt.org\".\nLearn more about CAA records and LetsEncrypt: https://letsencrypt.org/docs/caa/.",
-            event_code: '87744f149e2ed5ad'
-          )
-        elsif !le_caa_exists
-          event.event_details.create!(
-            data: "CAA record found on #{d}, but missing LetsEncrypt. Please add: 0 issue \"letsencrypt.org\".\nLearn more about CAA records and LetsEncrypt: https://letsencrypt.org/docs/caa/.\n\n\nInvalid Records:\n\n#{invalid_records.join("\n")}",
-            event_code: '87744f149e2ed5ad'
-          )
-        end
+    #     ##
+    #     # If we made it this far, then we know we had CAA records. Therefore, this must exist.
+    #     if !le_caa_exists && invalid_records.empty?
+    #       event.event_details.create!(
+    #         data: "CAA record found on #{d}, but missing LetsEncrypt. Please add: 0 issue \"letsencrypt.org\".\nLearn more about CAA records and LetsEncrypt: https://letsencrypt.org/docs/caa/.",
+    #         event_code: "87744f149e2ed5ad"
+    #       )
+    #     elsif !le_caa_exists
+    #       event.event_details.create!(
+    #         data: "CAA record found on #{d}, but missing LetsEncrypt. Please add: 0 issue \"letsencrypt.org\".\nLearn more about CAA records and LetsEncrypt: https://letsencrypt.org/docs/caa/.\n\n\nInvalid Records:\n\n#{invalid_records.join("\n")}",
+    #         event_code: "87744f149e2ed5ad"
+    #       )
+    #     end
 
-        # if we have ANY CAA records, we MUST also have a wildcard record.
-        if load_balancer && !le_wildcard_caa_exists
-          if invalid_wild_records.empty?
-            event.event_details.create!(
-              data: "CAA record found on #{d}, but missing LetsEncrypt. Please add: 0 issuewild \"letsencrypt.org\".\nLearn more about CAA records and LetsEncrypt: https://letsencrypt.org/docs/caa/.",
-              event_code: '47f76d011a0cc587'
-            )
-          else
-            event.event_details.create!(
-              data: "CAA record found on #{d}, but missing LetsEncrypt. Please add: 0 issuewild \"letsencrypt.org\".\nLearn more about CAA records and LetsEncrypt: https://letsencrypt.org/docs/caa/.\n\nInvalid Records:\n\n#{invalid_wild_records.join("\n")}",
-              event_code: '47f76d011a0cc587'
-            )
-          end
-        end
+    #     # if we have ANY CAA records, we MUST also have a wildcard record.
+    #     if load_balancer && !le_wildcard_caa_exists
+    #       if invalid_wild_records.empty?
+    #         event.event_details.create!(
+    #           data: "CAA record found on #{d}, but missing LetsEncrypt. Please add: 0 issuewild \"letsencrypt.org\".\nLearn more about CAA records and LetsEncrypt: https://letsencrypt.org/docs/caa/.",
+    #           event_code: "47f76d011a0cc587"
+    #         )
+    #       else
+    #         event.event_details.create!(
+    #           data: "CAA record found on #{d}, but missing LetsEncrypt. Please add: 0 issuewild \"letsencrypt.org\".\nLearn more about CAA records and LetsEncrypt: https://letsencrypt.org/docs/caa/.\n\nInvalid Records:\n\n#{invalid_wild_records.join("\n")}",
+    #           event_code: "47f76d011a0cc587"
+    #         )
+    #       end
+    #     end
 
-        ##
-        # If we made it this far, then we have a subdomain with an invalid CAA record. Halt!
-        is_valid = false
-        break
-      end
-      is_valid
-    end
+    #     ##
+    #     # If we made it this far, then we have a subdomain with an invalid CAA record. Halt!
+    #     is_valid = false
+    #     break
+    #   end
+    #   is_valid
+    # end
 
     def load_a_records!
-      dns_resource = @dns.query(domain, 'A').answer.select { |i| i.is_a?(Dnsruby::RR::IN::A) }.map { |i| IPAddr.new(i.address.to_s) }
-      dns_resource_six = @dns.query(domain, 'AAAA').answer.select { |i| i.is_a?(Dnsruby::RR::IN::AAAA) }.map { |i| IPAddr.new(i.address.to_s) }
-      return dns_resource, dns_resource_six
+      dns_resource = @dns.query(domain, "A").answer.select { |i| i.is_a?(Dnsruby::RR::IN::A) }.map { |i| IPAddr.new(i.address.to_s) }
+      dns_resource_six = @dns.query(domain, "AAAA").answer.select { |i| i.is_a?(Dnsruby::RR::IN::AAAA) }.map { |i| IPAddr.new(i.address.to_s) }
+      [dns_resource, dns_resource_six]
     rescue Dnsruby::NXDomain
-      return [],[]
+      [[], []]
     rescue Dnsruby::Refused
       event.event_details.create!(
         data: "Error! #{domain} does not exist!",
-        event_code: 'afb5d727910b5954'
+        event_code: "afb5d727910b5954"
       )
-      return [],[]
+      [[], []]
     end
 
     def load_wildcard_cname!
-      dns_resource = @dns.query("#{SecureRandom.hex(8)}.#{domain}", 'CNAME').answer.select { |i| i.is_a?(Dnsruby::RR::IN::CNAME) }.map { |i| i.rdata.to_s }
+      dns_resource = @dns.query("#{SecureRandom.hex(8)}.#{domain}", "CNAME").answer.select { |i| i.is_a?(Dnsruby::RR::IN::CNAME) }.map { |i| i.rdata.to_s }
       dns_resource.first
     rescue Dnsruby::NXDomain
-      return nil
+      nil
     rescue Dnsruby::Refused
       event.event_details.create!(
         data: "Error! #{SecureRandom.hex(8)}.#{domain} does not exist!",
-        event_code: '17e94a61f01a2799'
+        event_code: "17e94a61f01a2799"
       )
-      return
+      nil
     end
-
   end
 end

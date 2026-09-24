@@ -1,8 +1,7 @@
-require 'test_helper'
+require "test_helper"
 
 class ContainerImageProviderTest < ActiveSupport::TestCase
-  
-  test 'can create provider' do
+  test "can create provider" do
     @provider = ContainerImageProvider.new(
       name: "My Test Repo",
       is_default: false,
@@ -10,5 +9,4 @@ class ContainerImageProviderTest < ActiveSupport::TestCase
     )
     assert @provider.valid?
   end
-
 end

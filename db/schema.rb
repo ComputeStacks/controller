@@ -10,10 +10,43 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_04_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
+
+  create_table "agent_repositories", force: :cascade do |t|
+    t.string "name", null: false
+    t.bigint "size_on_disk"
+    t.bigint "total_size"
+    t.jsonb "archives", default: [], null: false
+    t.bigint "node_id"
+    t.bigint "changelog_seq"
+    t.datetime "agent_updated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_agent_repositories_on_name", unique: true
+  end
+
+  create_table "agent_tasks", id: :string, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "status", null: false
+    t.jsonb "result"
+    t.bigint "audit_id"
+    t.string "volume"
+    t.bigint "node_id"
+    t.string "project_id"
+    t.bigint "changelog_seq"
+    t.string "reconciled_status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "reissue_count", default: 0, null: false
+    t.index ["audit_id"], name: "index_agent_tasks_on_audit_id"
+    t.index ["node_id"], name: "index_agent_tasks_on_node_id"
+    t.index ["reconciled_status"], name: "index_agent_tasks_on_reconciled_status"
+    t.index ["status"], name: "index_agent_tasks_on_status"
+    t.index ["volume"], name: "index_agent_tasks_on_volume"
+  end
 
   create_table "alert_notifications", force: :cascade do |t|
     t.string "status"
@@ -187,6 +220,29 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.string "content_key"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+  end
+
+  create_table "container_action_requests", force: :cascade do |t|
+    t.string "action_id", null: false
+    t.bigint "node_id"
+    t.string "project_id"
+    t.bigint "deployment_id"
+    t.string "action_type", null: false
+    t.jsonb "params", default: {}, null: false
+    t.string "status", default: "received", null: false
+    t.string "state_reason"
+    t.integer "attempts", default: 0, null: false
+    t.datetime "next_attempt_at"
+    t.bigint "changelog_seq"
+    t.jsonb "result"
+    t.datetime "dispatched_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["action_id"], name: "index_container_action_requests_on_action_id", unique: true
+    t.index ["deployment_id", "action_type"], name: "idx_on_deployment_id_action_type_c58283e50e"
+    t.index ["next_attempt_at"], name: "index_container_action_requests_on_next_attempt_at"
+    t.index ["node_id"], name: "index_container_action_requests_on_node_id"
+    t.index ["status"], name: "index_container_action_requests_on_status"
   end
 
   create_table "container_image_collaborators", force: :cascade do |t|
@@ -399,6 +455,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.index ["product_id"], name: "index_container_images_on_product_id"
   end
 
+  create_table "container_images_event_logs", id: false, force: :cascade do |t|
+    t.bigint "container_image_id", null: false
+    t.bigint "event_log_id", null: false
+    t.index ["container_image_id", "event_log_id"], name: "idx_on_container_image_id_event_log_id_e92a6bfc14", unique: true
+    t.index ["event_log_id", "container_image_id"], name: "idx_on_event_log_id_container_image_id_a77bf3e2d0", unique: true
+  end
+
   create_table "container_registries", id: :serial, force: :cascade do |t|
     t.string "name"
     t.string "label"
@@ -490,6 +553,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.boolean "header_hsts", default: false
     t.bigint "lets_encrypt_id"
     t.boolean "force_https", default: false, null: false
+    t.boolean "hsts_include_subdomains", default: false, null: false
+    t.boolean "hsts_preload", default: false, null: false
+    t.boolean "header_frame_options", default: false, null: false
     t.index ["enabled"], name: "index_deployment_container_domains_on_enabled"
     t.index ["ingress_rule_id"], name: "index_deployment_container_domains_on_ingress_rule_id"
     t.index ["le_enabled"], name: "index_deployment_container_domains_on_le_enabled"
@@ -719,6 +785,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.string "state_reason"
     t.string "event_code"
     t.jsonb "labels", default: {}, null: false
+    t.index "((labels ->> 'task_id'::text))", name: "index_event_logs_on_task_id_label"
     t.index ["audit_id"], name: "index_event_logs_on_audit_id"
     t.index ["event_code"], name: "index_event_logs_on_event_code"
     t.index ["locale"], name: "index_event_logs_on_locale"
@@ -782,6 +849,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.text "pkey_encrypted"
+    t.string "acme_directory", default: "https://acme-v02.api.letsencrypt.org/directory"
   end
 
   create_table "lets_encrypt_auths", force: :cascade do |t|
@@ -868,6 +936,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.boolean "proto_11", default: true, null: false
     t.boolean "proto_20", default: true, null: false
     t.boolean "proto_23", default: false, null: false
+    t.boolean "proxy_bunny", default: true, null: false
   end
 
   create_table "locations", force: :cascade do |t|
@@ -928,6 +997,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.boolean "restrict_cf", default: false, null: false
     t.boolean "tcp_lb", default: true, null: false
     t.bigint "region_id"
+    t.boolean "restrict_bunny", default: false, null: false
     t.index ["container_service_id"], name: "index_network_ingress_rules_on_container_service_id"
     t.index ["external_access", "load_balancer_rule_id", "proto"], name: "nir_by_external_access_lb_proto"
     t.index ["ingress_param_id"], name: "index_network_ingress_rules_on_ingress_param_id"
@@ -981,6 +1051,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.integer "block_read_bps", default: 0
     t.integer "block_write_iops", default: 0, null: false
     t.integer "block_read_iops", default: 0, null: false
+    t.text "agent_token_encrypted"
+    t.bigint "changelog_cursor", default: 0, null: false
+    t.bigint "changelog_acked", default: 0, null: false
+    t.datetime "datachannel_backfilled_at"
+    t.string "agent_host"
+    t.integer "cpu_cores"
+    t.bigint "memory_mb"
+    t.datetime "capacity_updated_at"
   end
 
   create_table "nodes_volumes", id: false, force: :cascade do |t|
@@ -1145,6 +1223,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.integer "p_net_size", default: 27, null: false
     t.string "network_driver", default: "bridge", null: false
     t.string "acme_server", default: "127.0.0.1:3000", null: false
+    t.string "guac_url"
+    t.text "guac_key_enc"
     t.index ["location_id"], name: "index_regions_on_location_id"
   end
 
@@ -1393,6 +1473,50 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.index ["user_group_id"], name: "index_users_on_user_group_id"
   end
 
+  create_table "volume_clone_jobs", force: :cascade do |t|
+    t.bigint "volume_id"
+    t.bigint "source_volume_id"
+    t.bigint "audit_id"
+    t.bigint "deployment_id"
+    t.uuid "order_id"
+    t.bigint "node_id"
+    t.bigint "event_log_id"
+    t.string "state", default: "pending", null: false
+    t.datetime "entered_state_at"
+    t.datetime "next_poll_at", null: false
+    t.datetime "state_deadline_at"
+    t.datetime "gate_blocked_since"
+    t.string "gate_reason"
+    t.string "requested_archive"
+    t.string "clone_label"
+    t.string "archive_name"
+    t.boolean "owns_snapshot", default: false, null: false
+    t.datetime "snapshot_trashed_at"
+    t.integer "cleanup_attempts", default: 0, null: false
+    t.datetime "next_cleanup_at"
+    t.string "backup_task_id"
+    t.datetime "backup_dispatched_at"
+    t.string "restore_task_id"
+    t.datetime "restore_dispatched_at"
+    t.integer "attempts", default: 0, null: false
+    t.integer "dispatch_attempts", default: 0, null: false
+    t.integer "consecutive_errors", default: 0, null: false
+    t.text "last_error"
+    t.datetime "polled_at"
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["backup_task_id"], name: "index_volume_clone_jobs_on_backup_task_id"
+    t.index ["deployment_id"], name: "index_volume_clone_jobs_on_deployment_id"
+    t.index ["order_id"], name: "index_volume_clone_jobs_on_order_id"
+    t.index ["owns_snapshot", "snapshot_trashed_at", "next_cleanup_at"], name: "index_volume_clone_jobs_on_snapshot_reap"
+    t.index ["restore_task_id"], name: "index_volume_clone_jobs_on_restore_task_id"
+    t.index ["source_volume_id", "state"], name: "index_volume_clone_jobs_on_source_volume_id_and_state"
+    t.index ["state", "next_poll_at"], name: "index_volume_clone_jobs_on_state_and_next_poll_at"
+    t.index ["volume_id"], name: "index_volume_clone_jobs_on_volume_id", unique: true
+  end
+
   create_table "volume_maps", force: :cascade do |t|
     t.bigint "volume_id"
     t.bigint "container_service_id"
@@ -1401,6 +1525,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "is_owner", default: false, null: false
+    t.index ["container_service_id", "mount_path"], name: "index_volume_maps_on_service_and_path", unique: true
     t.index ["container_service_id"], name: "index_volume_maps_on_container_service_id"
     t.index ["is_owner"], name: "index_volume_maps_on_is_owner"
     t.index ["volume_id"], name: "index_volume_maps_on_volume_id"
@@ -1439,6 +1564,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_174702) do
     t.string "volume_backend", default: "local", null: false
     t.bigint "template_id"
     t.bigint "deployment_id"
+    t.boolean "awaiting_mount", default: false, null: false
+    t.index ["awaiting_mount"], name: "index_volumes_on_awaiting_mount", where: "awaiting_mount"
     t.index ["borg_enabled"], name: "index_volumes_on_borg_enabled"
     t.index ["deployment_id"], name: "index_volumes_on_deployment_id"
     t.index ["enable_sftp"], name: "index_volumes_on_enable_sftp"

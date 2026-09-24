@@ -36,6 +36,23 @@
           </div>
 
           <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <label>Type</label>
+                <div>
+                  <%= f.label :param_type, value: 'static', class: 'radio-inline' do %>
+                    <%= f.radio_button :param_type, 'static' %> Static
+                  <% end %>
+                  <%= f.label :param_type, value: 'password', class: 'radio-inline' do %>
+                    <%= f.radio_button :param_type, 'password' %> Password
+                  <% end %>
+                </div>
+                <p class="help-block">A password value is stored encrypted and can only be read back through the <em>Show</em> action.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
             <div class="col-md-12">
               <%= f.label :value, "Value" %>
               <%= f.text_field :value, class: 'form-control', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off', spellcheck: 'false' %>

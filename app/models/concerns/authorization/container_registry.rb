@@ -4,7 +4,6 @@ module Authorization
     include Authorization::Generic
 
     class_methods do
-
       # @param [User] current_user
       # @return [Array<ContainerRegistry>]
       def find_all_for(current_user)
@@ -19,6 +18,5 @@ module Authorization
       return true if current_user == user || current_user.is_admin
       container_registry_collaborators.where(user_id: current_user.id, active: true).exists?
     end
-
   end
 end

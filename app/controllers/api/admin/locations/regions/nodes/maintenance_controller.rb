@@ -1,7 +1,6 @@
 ##
 # # Node Maintenance Status
 class Api::Admin::Locations::Regions::Nodes::MaintenanceController < Api::Admin::Locations::Regions::Nodes::BaseController
-
   ##
   # Enable Maintenance Mode
   #
@@ -31,12 +30,11 @@ class Api::Admin::Locations::Regions::Nodes::MaintenanceController < Api::Admin:
   def destroy
     @node.maintenance = false
     @node.maintenance_updated = Time.now
-    @node.job_status = 'idle'
+    @node.job_status = "idle"
     return api_obj_error(@node.errors.full_messages) unless @node.save
     respond_to do |f|
       f.json { render json: {}, status: :accepted }
       f.xml { render xml: {}, status: :accepted }
     end
   end
-
 end

@@ -1,4 +1,4 @@
-require 'prometheus/api_client'
+require "prometheus/api_client"
 ##
 # Prometheus Service
 #
@@ -16,12 +16,11 @@ require 'prometheus/api_client'
 # * container_network_receive_bytes_total and container_network_transmit_bytes_total (use the rate query)
 #
 class MetricClient < ApplicationRecord
-
   has_many :regions, dependent: :nullify
 
   def call
     # https://github.com/prometheus/prometheus_api_client_ruby/blob/c5cf560fc299e61f60c9e0d03eb1256789f828a9/lib/prometheus/api_client/client.rb
-    Prometheus::ApiClient.client(url: endpoint_with_auth, options: { open_timeout: 5, timeout: 8 })
+    Prometheus::ApiClient.client(url: endpoint_with_auth, options: {open_timeout: 5, timeout: 8})
   end
 
   def endpoint_with_auth
@@ -30,6 +29,4 @@ class MetricClient < ApplicationRecord
     return nil if uri.count == 1 # missing protocol!
     "#{uri[0]}://#{username}:#{password}@#{uri[1]}"
   end
-
-
 end

@@ -11,19 +11,18 @@
 #   @return [User]
 #
 class DeploymentCollaborator < ApplicationRecord
-
   include Auditable
   include Collaborations
 
   belongs_to :deployment
-  belongs_to :collaborator, class_name: 'User', foreign_key: 'user_id'
+  belongs_to :collaborator, class_name: "User", foreign_key: "user_id"
 
   has_many :container_services, through: :deployment
   has_many :container_images, through: :deployment
   has_many :containers, through: :deployment, inverse_of: :deployed_containers
 
-  validates :deployment, uniqueness: { scope: :collaborator }
-  validates :collaborator, uniqueness: { scope: :deployment }
+  validates :deployment, uniqueness: {scope: :collaborator}
+  validates :collaborator, uniqueness: {scope: :deployment}
 
   after_create_commit :notify_user
 
@@ -52,5 +51,4 @@ class DeploymentCollaborator < ApplicationRecord
       end
     end
   end
-
 end

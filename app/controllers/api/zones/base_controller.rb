@@ -1,7 +1,5 @@
 class Api::Zones::BaseController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :dns_read }, only: %i[index show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :dns_write }, only: %i[update create destroy], unless: :current_user
+  api_scope read: :dns_read, write: :dns_write
 
   before_action :find_zone
 
@@ -12,5 +10,4 @@ class Api::Zones::BaseController < Api::ApplicationController
     return api_obj_missing if @dns_zone.nil?
     @dns_zone.current_user = current_user
   end
-
 end

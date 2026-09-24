@@ -1,4 +1,4 @@
-require 'sidekiq/api'
+require "sidekiq/api"
 module LoadBalancerServices
   ##
   # Ensure only 1 LB job is queued
@@ -8,13 +8,12 @@ module LoadBalancerServices
   # @!attribute queue_name
   #   @return [String]
   class DeployConfigService
-
     attr_accessor :lb,
-                  :queue_name
+      :queue_name
 
     def initialize(lb = nil)
       self.lb = lb
-      self.queue_name = 'default'
+      self.queue_name = "default"
     end
 
     def perform
@@ -28,15 +27,14 @@ module LoadBalancerServices
     def existing_jobs
       Sidekiq::Queue.new(queue_name).select do |i|
         if lb.nil?
-          q1 = i.item['class'] == 'LoadBalancerWorkers::DeployConfigWorker'
+          q1 = i.item["class"] == "LoadBalancerWorkers::DeployConfigWorker"
           q2 = i.args.empty?
         else
-          q1 = i.item['class'] == 'LoadBalancerWorkers::DeployConfigWorker'
+          q1 = i.item["class"] == "LoadBalancerWorkers::DeployConfigWorker"
           q2 = i.args.include? lb.global_id.to_s
         end
         q1 && q2
       end
     end
-
   end
 end

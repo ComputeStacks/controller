@@ -1,6 +1,5 @@
 module ContainerImages
   module ImageCollaboratorHelper
-
     # @param [ContainerImageCollaborator] entry
     def container_image_collaborators_path(image)
       return container_images_path if image.nil?
@@ -24,6 +23,5 @@ module ContainerImages
       return container_images_path if collab.nil?
       "#{container_image_collaborator_path(collab)}/edit"
     end
-
   end
 end

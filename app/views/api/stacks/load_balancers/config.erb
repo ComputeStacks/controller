@@ -1,11 +1,6 @@
 global
-<% if @load_balancer.cpus > 1 %>
-  nbproc 1
-  nbthread <%= @load_balancer.cpus %>
-  cpu-map auto:1/1-<%= @load_balancer.cpus %> 0-<%= @load_balancer.cpus - 1 %>
-<% end %>
-  log /dev/log local0 notice alert
-  log /dev/log local1 notice alert
+  log /dev/log local0 info
+  log /dev/log local1 info
   chroot /var/lib/haproxy
   user haproxy
   group haproxy

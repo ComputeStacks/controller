@@ -1,9 +1,7 @@
 require "test_helper"
 
 class Dns::ZoneCollaboratorTest < ActiveSupport::TestCase
-
-  test 'can list collaborated zones' do
-
+  test "can list collaborated zones" do
     z = dns_zones :user_zone
 
     refute_includes Dns::Zone.find_all_for(users(:user)), z
@@ -17,7 +15,6 @@ class Dns::ZoneCollaboratorTest < ActiveSupport::TestCase
     assert_includes Dns::Zone.find_all_for(users(:user)), z
 
     z.dns_zone_collaborators.delete_all
-
   end
 
   ##
@@ -33,5 +30,4 @@ class Dns::ZoneCollaboratorTest < ActiveSupport::TestCase
   #   assert zone.can_view?(users(:user))
   #
   # end
-
 end

@@ -1,7 +1,6 @@
 class ContainerDomainsController < AuthController
-
-  before_action :find_domain, only: %w(show edit update destroy)
-  before_action :load_project_services, only: %w(new edit update create)
+  before_action :find_domain, only: %w[show edit update destroy]
+  before_action :load_project_services, only: %w[new edit update create]
 
   def index
     @domains = Deployment::ContainerDomain.find_all_for(current_user).where(system_domain: false)
@@ -17,7 +16,8 @@ class ContainerDomainsController < AuthController
     @domain.container_service = @service if @service
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if @domain.update(domain_params)
@@ -47,7 +47,7 @@ class ContainerDomainsController < AuthController
     if @domain.destroy
       flash[:notice] = "Domain deleted"
     else
-      flash[:alert] = "Error removing domain: #{@domain.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error removing domain: #{@domain.errors.full_messages.join(" ")}"
     end
     redirect_to @deployment.nil? ? "/container_domains" : "/deployments/#{@deployment.token}#domains"
   end
@@ -55,11 +55,11 @@ class ContainerDomainsController < AuthController
   private
 
   def domain_params
-    params.require(:deployment_container_domain).permit(:domain, :le_enabled, :enabled, :ingress_rule_id, :header_hsts, :force_https)
+    params.require(:deployment_container_domain).permit(:domain, :le_enabled, :enabled, :ingress_rule_id, :header_hsts, :hsts_include_subdomains, :hsts_preload, :header_frame_options, :force_https)
   end
 
   def find_domain
-    @domain = Deployment::ContainerDomain.find_for current_user, { id: params[:id] }
+    @domain = Deployment::ContainerDomain.find_for current_user, {id: params[:id]}
     return(redirect_to("/container_domains", alert: "Unknown domain")) if @domain.nil?
     @deployment = @domain.deployment
     @domain.current_user = current_user
@@ -77,15 +77,14 @@ class ContainerDomainsController < AuthController
     @deployment = Deployment.find_for(current_user, token: params[:deployment_id]) if params[:deployment_id]
     @deployment = @image.deployment if @image&.deployment
     @services = if @deployment.nil?
-                  Deployment::ContainerService.find_all_for(current_user).web_only
-                else
-                  @deployment.services.web_only.sorted
-                end
+      Deployment::ContainerService.find_all_for(current_user).web_only
+    else
+      @deployment.services.web_only.sorted
+    end
     @ingress_rules = if @service
       @service.ingress_rules.where(external_access: true)
     else
       []
     end
   end
-
 end

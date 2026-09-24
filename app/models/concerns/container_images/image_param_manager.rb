@@ -4,7 +4,7 @@ module ContainerImages
 
     class_methods do
       def system_vars
-        %w(
+        %w[
           region.endpoint.api
           build.self.name
           build.self.name_short
@@ -15,10 +15,9 @@ module ContainerImages
           build.self.default_domain
           build.self.default_domain_with_proto
           build.self.ec_pub_key
-        )
+        ]
       end
     end
-
 
     # TODO: Estimate payload size for consul. Can't exceed 512_000
     # def estimated_payload_size(); end
@@ -49,6 +48,5 @@ module ContainerImages
       end
       vars
     end
-
   end
 end

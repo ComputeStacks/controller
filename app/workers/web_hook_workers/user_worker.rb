@@ -6,17 +6,14 @@ module WebHookWorkers
     include Sidekiq::Worker
 
     def perform(user_id)
-
       user = User.find_by(id: user_id)
       return if user.nil?
       setting = Setting.webhook_users
       template = "api/admin/users/show"
-      if setting.value =~ URI::regexp
+      if setting.value&.match?(URI::DEFAULT_PARSER.make_regexp)
         data = Rabl::Renderer.new(template, obj, {format: :json}).render
         WebHookService.new(setting, data).perform
       end
-
     end
-
   end
 end

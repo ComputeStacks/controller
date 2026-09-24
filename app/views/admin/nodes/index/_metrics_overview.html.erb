@@ -1,3 +1,13 @@
+<%#
+  `metrics` is a pre-fetched hash from Node.panel_metrics_for -- deliberately not
+  read off `node` here. Every reader is an HTTP round trip to the zone's
+  Prometheus, and this partial renders once per node in the fleet, so calling
+  them inline cost nine sequential round trips per node (disk four times, boot
+  time twice). Falls back to an empty hash so a node missing from the batch
+  renders as unknown rather than raising.
+%>
+<% metrics ||= {} %>
+<% disk = metrics[:disk] || [] %>
 <li>
   Containers
   <b class="pull-right"><%= node.container_count %></b>
@@ -8,32 +18,37 @@
 </li>
 <li>
   Online Since
-  <b class="pull-right"><%= node_uptime_in_words node %></b>
+  <b class="pull-right"><%= uptime_in_words metrics[:boot_time] %></b>
 </li>
 <hr />
 <li>
   Memory
-  <b class="pull-right"><%= node.metric_memory_usage %>%</b>
+  <b class="pull-right"><%= metrics[:memory] %>%</b>
 </li>
 <li>
   CPU
-  <b class="pull-right"><%= node.metric_cpu_usage %>%</b>
+  <b class="pull-right"><%= metrics[:cpu] %>%</b>
 </li>
-<% if node.metric_disk_usage.count == 1 %>
+<% if disk.count == 1 %>
   <li>
     Disk
-    <b class="pull-right"><%= node.metric_disk_usage.empty? ? '...' : node.metric_disk_usage[0][:usage] %>%</b>
+    <b class="pull-right"><%= disk[0][:usage] %>%</b>
+  </li>
+<% elsif disk.empty? %>
+  <li>
+    Disk
+    <b class="pull-right">...</b>
   </li>
 <% end %>
 <li>
   Load (5m)
-  <b class="pull-right"><%= node.metric_load %>
+  <b class="pull-right"><%= metrics[:load] %>
   </b>
 </li>
-<% if node.metric_disk_usage.count > 1 %>
+<% if disk.count > 1 %>
   <hr>
   <li><strong>STORAGE</strong></li>
-  <% node.metric_disk_usage.each do |i| %>
+  <% disk.each do |i| %>
     <li>
       <%= i[:mountpoint] %>
       <b class="pull-right"><%= i[:usage] %>%</b>

@@ -103,7 +103,7 @@ class Deployment < ApplicationRecord
   scope :sort_by_name, -> { order(:name) }
 
   belongs_to :user
-  has_many :services, class_name: 'Deployment::ContainerService', dependent: :destroy
+  has_many :services, class_name: "Deployment::ContainerService", dependent: :destroy
   has_many :load_balancers, through: :services
   has_many :ingress_rules, through: :services
   has_many :image_variants, through: :services
@@ -111,8 +111,7 @@ class Deployment < ApplicationRecord
   has_many :setting_params, through: :services
   has_many :networks, -> { distinct }, through: :services
 
-  has_one :private_network, class_name: 'Network', foreign_key: 'deployment_id'
-
+  has_one :private_network, class_name: "Network", foreign_key: "deployment_id"
 
   has_many :volumes, -> { distinct }, through: :services
   has_many :ssl_certificates, through: :services
@@ -132,20 +131,21 @@ class Deployment < ApplicationRecord
   has_many :locations, -> { distinct }, through: :regions
 
   has_many :orders, dependent: :nullify
+  has_many :volume_clone_jobs, dependent: :nullify
 
   # has_many :logs, class_name: "Deployment::EventLog", foreign_key: "deployment_id", dependent: :destroy
   has_and_belongs_to_many :event_logs
 
-  has_many :sftp_containers, class_name: 'Deployment::Sftp', dependent: :nullify
+  has_many :sftp_containers, class_name: "Deployment::Sftp", dependent: :nullify
 
-  has_many :project_notifiers, class_name: 'ProjectNotification', dependent: :destroy
+  has_many :project_notifiers, class_name: "ProjectNotification", dependent: :destroy
   # has_many :notification_rules, class_name: 'Deployment::NotificationRule', dependent: :destroy
   has_many :alert_notifications, through: :deployed_containers
 
   has_many :deployment_collaborators
   has_many :collaborators, through: :deployment_collaborators
 
-  has_many :project_ssh_keys, class_name: 'Deployment::SshKey'
+  has_many :project_ssh_keys, class_name: "Deployment::SshKey"
 
   before_destroy :cleanup_deployment
 
@@ -161,7 +161,7 @@ class Deployment < ApplicationRecord
 
   def resource_name
     return "null" if name.blank?
-    name.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+    name.strip.downcase.gsub(/[^a-z0-9\s]/i, "").tr(" ", "_")[0..10]
   end
 
   # Projects will be limited to a single region going forward.
@@ -184,18 +184,18 @@ class Deployment < ApplicationRecord
 
   def update_name!(name)
     return false if name.blank? || name.nil?
-    return false unless self.update_attribute :name, name
+    return false unless update_attribute :name, name
     true
   end
 
   # Locations available for this deployment.
   def available_locations
-    cr_nets = Location.where("networks.id IN (?)", self.networks.pluck(:id)).joins(:networks)
-    cr_nets.empty? ? self.locations : cr_nets
+    cr_nets = Location.where("networks.id IN (?)", networks.pluck(:id)).joins(:networks)
+    cr_nets.empty? ? locations : cr_nets
   end
 
   def image_icons(clear_cache = false)
-    cache_key = "proj_icons_#{self.id}"
+    cache_key = "proj_icons_#{id}"
     Rails.cache.fetch(cache_key, force: clear_cache, expires: 10.minutes) do
       container_images.where(is_load_balancer: false).order(:name).uniq
     end
@@ -227,9 +227,8 @@ class Deployment < ApplicationRecord
     deployment_collaborators.each do |i|
       i.current_user = user_performer
       unless i.destroy
-        errors.add(:base, %Q(Error deleting collaborator #{i.id} - #{i.errors.full_messages.join("\n")}))
+        errors.add(:base, %(Error deleting collaborator #{i.id} - #{i.errors.full_messages.join("\n")}))
       end
     end
   end
-
 end

@@ -9,14 +9,13 @@ module AdminAuthable
 
   def check_admin
     if current_user&.is_admin
-      unless Feature.check('admin', current_user)
-        redirect_to "/deployments", alert: 'Admin interface disabled.'
-        return false
+      unless Feature.check("admin", current_user)
+        redirect_to "/deployments", alert: "Admin interface disabled."
+        false
       end
     else
-      redirect_to "/deployments", :alert => "Invalid URL"
-      return false
+      redirect_to "/deployments", alert: "Invalid URL"
+      false
     end
   end
-
 end

@@ -3,7 +3,6 @@ module Volumes
     extend ActiveSupport::Concern
 
     class_methods do
-
       # Determine ID given a volume path.
       def name_by_path(remote_path)
         if remote_path.split("/var/lib/docker/volumes/").count > 1
@@ -21,21 +20,19 @@ module Volumes
         result = []
         Node.online.each do |node|
           node.list_all_containers.each do |c|
-            c.info['Mounts'].each do |mount|
-              next unless mount['Name'] == volume_name
+            c.info["Mounts"].each do |mount|
+              next unless mount["Name"] == volume_name
               result << {
-                container_name: c.info['Names'].first.split('/').last,
+                container_name: c.info["Names"].first.split("/").last,
                 node_id: node.id,
-                volume_driver: mount['Driver'],
-                mount_path: mount['Destination']
+                volume_driver: mount["Driver"],
+                mount_path: mount["Destination"]
               }
             end
           end
         end
         result
       end
-
     end
-
   end
 end

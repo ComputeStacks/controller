@@ -6,7 +6,7 @@ class Admin::BillingPlans::ApplicationController < Admin::ApplicationController
   def load_plan
     @billing_plan = BillingPlan.find_by(id: params[:billing_plan_id])
     if @billing_plan.nil?
-      redirect_to "/admin/billing_plans", alert: 'Unknown Billing Plan.'
+      redirect_to "/admin/billing_plans", alert: "Unknown Billing Plan."
       return false
     end
     @billing_plan.current_user = current_user

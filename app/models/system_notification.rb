@@ -18,7 +18,6 @@
 #   @return [Array]
 #
 class SystemNotification < ApplicationRecord
-
   include Auditable
   include Notifications::Common
 
@@ -29,7 +28,7 @@ class SystemNotification < ApplicationRecord
   # * PrometheusConfigurationReload
   # * PrometheusNotConnectedToAlertmanager
   def self.prometheus_alerts
-    %w(
+    %w[
       DiskWillFillIn4Hours
       ExporterDown
       HighCpuLoad
@@ -39,18 +38,17 @@ class SystemNotification < ApplicationRecord
       OutOfMemory
       UnusualDiskReadLatency
       UnusualDiskWriteLatency
-    )
+    ]
   end
 
   def self.app_event_alerts
-    %w(
+    %w[
       ContainerBootFailed
       NewOrder
       UserActivated
       UserCreated
       UserDeleted
       UserSuspended
-    )
+    ]
   end
-
 end

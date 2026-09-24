@@ -31,29 +31,27 @@
 #   @return [DateTime]
 #
 class BillingPhase < ApplicationRecord
-
   include Auditable
 
   belongs_to :billing_resource
   has_one :product, through: :billing_resource
   has_one :billing_plan, through: :billing_resource
-  has_many :prices, class_name: 'BillingResourcePrice', foreign_key: 'billing_phase_id', dependent: :destroy
+  has_many :prices, class_name: "BillingResourcePrice", foreign_key: "billing_phase_id", dependent: :destroy
   has_many :regions, -> { distinct }, through: :prices
 
   validate :can_change_phase?, on: :update
 
-  validates :phase_type, inclusion: { in: %w(trial discount final), message: 'Must be one of: trial, discount, or final.' }
-  validates :phase_type, uniqueness: { scope: :billing_resource_id }
-  validates :duration_qty, numericality: { greater_than: 0 }, if: Proc.new { |phase| phase.phase_type != 'final' && !phase.duration_qty.nil? }
-  validates :duration_unit, inclusion: { in: %w(hours days months years), message: 'Must be one of: hours, days, months, or years.' }, if: Proc.new { |phase| phase.duration_qty && phase.duration_qty > 0 }
+  validates :phase_type, inclusion: {in: %w[trial discount final], message: "Must be one of: trial, discount, or final."}
+  validates :phase_type, uniqueness: {scope: :billing_resource_id}
+  validates :duration_qty, numericality: {greater_than: 0}, if: proc { |phase| phase.phase_type != "final" && !phase.duration_qty.nil? }
+  validates :duration_unit, inclusion: {in: %w[hours days months years], message: "Must be one of: hours, days, months, or years."}, if: proc { |phase| phase.duration_qty && phase.duration_qty > 0 }
 
   before_destroy :migrate_subscriptions
 
-
   # @return [Array<String>]
   def available_currencies
-    cur = prices.select( Arel.sql( %Q( DISTINCT(currency) ) ) )
-    cur.nil? || cur.empty? ? [] : cur.map { |i| i.currency }
+    cur = prices.select(Arel.sql(%( DISTINCT(currency) )))
+    (cur.nil? || cur.empty?) ? [] : cur.map { |i| i.currency }
   end
 
   # @return [ActiveSupport::Duration]
@@ -69,7 +67,7 @@ class BillingPhase < ApplicationRecord
   #
   # @param [User] user
   def in_phase?(user)
-    return true if self.phase_type == 'final'
+    return true if phase_type == "final"
     return true if time_unit.nil?
     return true if user.phase_started.nil?
     (Time.now - user.phase_started) <= time_unit
@@ -78,13 +76,11 @@ class BillingPhase < ApplicationRecord
   private
 
   def migrate_subscriptions
-    return if self.phase_type == 'final'
+    return if phase_type == "final"
     SubscriptionWorkers::PhaseAdvanceWorker.perform_async
   end
 
   def can_change_phase?
-    errors.add(:phase_type, 'may not be changed from final to another value.') if phase_type_was == 'final'
+    errors.add(:phase_type, "may not be changed from final to another value.") if phase_type_was == "final"
   end
-
-
 end

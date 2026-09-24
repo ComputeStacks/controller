@@ -20,12 +20,12 @@ end
 # end
 node :services do |i|
   {
-      projects: i.deployments.count,
-      containers: i.deployed_containers.count,
-      container_services: i.container_services.count,
-      container_images: i.container_images.count,
-      container_registries: i.container_registries.count,
-      dns_zones: i.dns_zones.count
+    projects: i.deployments.count,
+    containers: i.deployed_containers.count,
+    container_services: i.container_services.count,
+    container_images: i.container_images.count,
+    container_registries: i.container_registries.count,
+    dns_zones: i.dns_zones.count
   }
 end
 node :quota do |i|

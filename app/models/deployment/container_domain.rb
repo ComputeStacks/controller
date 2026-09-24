@@ -7,6 +7,12 @@
 #   @return [String]
 # @!attribute header_hsts
 #   @return [Boolean] Manually enables or disables HSTS headers. Automatically enabled with lets encrypt
+# @!attribute hsts_include_subdomains
+#   @return [Boolean] Adds the includeSubDomains directive to the HSTS header. Opt-in; asserts every subdomain serves HTTPS.
+# @!attribute hsts_preload
+#   @return [Boolean] Adds the preload directive to the HSTS header. Only emitted when hsts_include_subdomains is also set.
+# @!attribute header_frame_options
+#   @return [Boolean] Emits 'X-Frame-Options: SAMEORIGIN' at the load balancer for this domain.
 # @!attribute is_sys
 #   @return [Boolean] Setting to true will disable domain name validation
 # @!attribute le_enabled
@@ -18,7 +24,6 @@
 # @!attribute sys_no_reload
 #   @return [Boolean] Setting to true will disable load balancer reload on update
 class Deployment::ContainerDomain < ApplicationRecord
-
   include Auditable
   include Authorization::ContainerDomain
   include LeContainerDomain
@@ -28,13 +33,13 @@ class Deployment::ContainerDomain < ApplicationRecord
   scope :orphaned, -> { where ingress_rule: nil }
 
   # @return [Array<Audit>]
-  has_many :audits, -> { where(rel_model: 'Deployment::ContainerDomain') }, foreign_key: :rel_id, class_name: 'Audit', dependent: :nullify
+  has_many :audits, -> { where(rel_model: "Deployment::ContainerDomain") }, foreign_key: :rel_id, class_name: "Audit", dependent: :nullify
 
   # @return [User]
   belongs_to :user
 
   # @return [IngressRule]
-  belongs_to :ingress_rule, class_name: 'Network::IngressRule', optional: true
+  belongs_to :ingress_rule, class_name: "Network::IngressRule", optional: true
 
   # @return [Deployment::ContainerService]
   has_one :container_service, through: :ingress_rule
@@ -45,7 +50,7 @@ class Deployment::ContainerDomain < ApplicationRecord
   has_many :collaborators, through: :deployment
 
   # @return [Array<EventLog>]
-  has_and_belongs_to_many :event_logs, foreign_key: 'deployment_container_domain_id'
+  has_and_belongs_to_many :event_logs, foreign_key: "deployment_container_domain_id"
 
   # @return [Array<EventLogDatum>]
   has_many :event_details, through: :event_logs
@@ -54,12 +59,12 @@ class Deployment::ContainerDomain < ApplicationRecord
 
   validates :user, presence: true
   validates :domain, presence: true
-  validates :domain, uniqueness: { case_sensitive: false }
-  validate :validate_domain_name, on: :create, unless: Proc.new { is_sys }
-  validate :ensure_ingress_present, unless: Proc.new { is_sys }
+  validates :domain, uniqueness: {case_sensitive: false}
+  validate :validate_domain_name, on: :create, unless: proc { is_sys }
+  validate :ensure_ingress_present, unless: proc { is_sys }
 
-  after_save :reload_load_balancer!, unless: Proc.new { sys_no_reload }
-  before_destroy :reload_load_balancer!, unless: Proc.new { sys_no_reload }
+  after_save :reload_load_balancer!, unless: proc { sys_no_reload }
+  before_destroy :reload_load_balancer!, unless: proc { sys_no_reload }
 
   after_update :update_le_on_user_change
 
@@ -72,11 +77,27 @@ class Deployment::ContainerDomain < ApplicationRecord
   def resource_name
     return "null" if domain.blank?
 
-    domain.strip.downcase.gsub(".","-")[0..10]
+    domain.strip.downcase.tr(".", "-")[0..10]
   end
 
   def enable_hsts_header?
     header_hsts || le_active? || system_domain
+  end
+
+  # Composes the Strict-Transport-Security header value from the per-domain toggles.
+  # 'preload' is only emitted alongside 'includeSubDomains' (the HSTS preload list
+  # requires it), so the header can never advertise 'preload' in an ineligible state.
+  # @return [String]
+  def hsts_value
+    parts = ["max-age=63072000"]
+    parts << "includeSubDomains" if hsts_include_subdomains
+    parts << "preload" if hsts_preload && hsts_include_subdomains
+    parts.join("; ")
+  end
+
+  # @return [Boolean]
+  def enable_frame_options_header?
+    header_frame_options
   end
 
   def expected_dns_entries
@@ -85,7 +106,7 @@ class Deployment::ContainerDomain < ApplicationRecord
     return pub if container_service&.load_balancer.nil?
 
     pub << container_service.load_balancer.public_ip
-    container_service.load_balancer.ipaddrs.where(role: 'public').each do |i|
+    container_service.load_balancer.ipaddrs.where(role: "public").each do |i|
       addr = i.ip_addr.to_s
       pub << addr unless pub.include?(addr)
     end
@@ -137,8 +158,8 @@ class Deployment::ContainerDomain < ApplicationRecord
         # @type [Deployment::ContainerService]
         lb_service = ingress_rule.load_balancer_rule&.container_service
         lb_service&.containers&.each do |container|
-            PowerCycleContainerService.new(container, 'restart', current_audit).perform
-          end
+          PowerCycleContainerService.new(container, "restart", current_audit).perform
+        end
       elsif container_service&.load_balancer
         LoadBalancerServices::DeployConfigService.new(container_service.load_balancer).perform
       end
@@ -149,17 +170,17 @@ class Deployment::ContainerDomain < ApplicationRecord
     sysd = Deployment::ContainerDomain.sys_domain
     is_reserved_domain = false
     sysd.each do |i|
-      is_reserved_domain = true if self.domain =~ /#{i}/
+      is_reserved_domain = true if /#{i}/.match?(domain)
     end
-    errors.add(:domain, 'is a reserved domain name.') if is_reserved_domain
-    errors.add(:domain, 'is an invalid domain.') unless Dns::Zone.valid_domain?(self.domain)
+    errors.add(:domain, "is a reserved domain name.") if is_reserved_domain
+    errors.add(:domain, "is an invalid domain.") unless Dns::Zone.valid_domain?(domain)
   end
 
   # If we update the user, check to see if the LE cert has moved to another user.
   # If it has, re-initialize LE.
   def update_le_on_user_change
-    if self.saved_change_to_attribute?("user_id")
-      if lets_encrypt && lets_encrypt_user && (lets_encrypt_user != self.user)
+    if saved_change_to_attribute?("user_id")
+      if lets_encrypt && lets_encrypt_user && (lets_encrypt_user != user)
         LetsEncryptWorkers::ChangeDomainOwnerWorker.perform_in(5.minutes, id)
       end
     end
@@ -176,5 +197,4 @@ class Deployment::ContainerDomain < ApplicationRecord
 
     container_service.update master_domain_id: id
   end
-
 end

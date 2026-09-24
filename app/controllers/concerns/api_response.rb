@@ -20,8 +20,8 @@ module ApiResponse
       end
     else
       respond_to do |format|
-        format.json { render json: { errors: msg }, status: :not_found }
-        format.xml { render xml: { errors: msg }, status: :not_found }
+        format.json { render json: {errors: msg}, status: :not_found }
+        format.xml { render xml: {errors: msg}, status: :not_found }
       end
     end
   end
@@ -39,8 +39,8 @@ module ApiResponse
   def api_obj_error(e)
     e = [e] unless e.is_a?(Array)
     respond_to do |format|
-      format.json { render json: { errors: e }, status: :unprocessable_entity }
-      format.xml { render xml: { errors: e }, status: :unprocessable_entity }
+      format.json { render json: {errors: e}, status: :unprocessable_entity }
+      format.xml { render xml: {errors: e}, status: :unprocessable_entity }
     end
   end
 
@@ -61,9 +61,8 @@ module ApiResponse
   def api_fatal_error(e, event_code)
     ExceptionAlertService.new(e, event_code).perform
     respond_to do |format|
-      format.json { render json: { errors: [e.message] }, status: :internal_server_error }
-      format.xml { render xml: { errors: [e.message] }, status: :internal_server_error }
+      format.json { render json: {errors: [e.message]}, status: :internal_server_error }
+      format.xml { render xml: {errors: [e.message]}, status: :internal_server_error }
     end
   end
-
 end

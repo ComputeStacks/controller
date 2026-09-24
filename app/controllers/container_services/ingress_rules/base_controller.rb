@@ -1,5 +1,4 @@
 class ContainerServices::IngressRules::BaseController < ContainerServices::BaseController
-
   include RescueResponder
 
   before_action :find_ingress_rule
@@ -14,5 +13,4 @@ class ContainerServices::IngressRules::BaseController < ContainerServices::BaseC
   def not_found_responder
     redirect_to helpers.container_service_path(@service)
   end
-
 end

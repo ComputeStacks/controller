@@ -1,0 +1,7 @@
+<%= if deployment.region&.guac_available?
+  link_to "<i class='fa-solid fa-terminal'></i> Cloud Shell".html_safe,
+  "/deployments/#{deployment.token}/cloud_shell",
+  class: "btn btn-sm btn-primary",
+  target: "_blank",
+  style: "margin-right: 5px;"
+end %>

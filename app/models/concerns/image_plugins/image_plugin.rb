@@ -37,7 +37,7 @@ module ImagePlugins
     def add_plugin_by_id
       return if add_plugin_id.blank?
       if current_user.nil?
-        errors.add(:base, 'missing user who performed this action')
+        errors.add(:base, "missing user who performed this action")
         return
       end
       plugin = ContainerImagePlugin.find_by id: add_plugin_id
@@ -56,6 +56,5 @@ module ImagePlugins
       return if container_image_plugins.exists?(plugin.id)
       container_image_plugins << plugin
     end
-
   end
 end

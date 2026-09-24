@@ -5,5 +5,5 @@ child deployment: :project do
   attributes :id, :name
 end
 child :user do
-  extends 'api/admin/users/short'
+  extends "api/admin/users/short"
 end

@@ -1,9 +1,7 @@
 require "test_helper"
 
 class ContainerImageCollaboratorTest < ActiveSupport::TestCase
-
-  test 'can list collaborated images' do
-
+  test "can list collaborated images" do
     wp = container_images :custom
     refute_includes ContainerImage.find_all_for(users(:user)), wp
 
@@ -17,11 +15,9 @@ class ContainerImageCollaboratorTest < ActiveSupport::TestCase
     assert_includes ContainerImage.find_all_for(users(:user)), wp
 
     wp.container_image_collaborators.delete_all
-
   end
 
-  test 'can add collaborators' do
-
+  test "can add collaborators" do
     wp = container_images :custom
     u = users :user
     refute wp.can_view? u
@@ -38,20 +34,16 @@ class ContainerImageCollaboratorTest < ActiveSupport::TestCase
     assert wp.can_edit? u
 
     wp.container_image_collaborators.delete_all
-
   end
 
-  test 'can view public image' do
-
+  test "can view public image" do
     wp = container_images :wordpress
     u = users :user
     assert wp.can_view? u
     refute wp.can_edit? u
-
   end
 
-  test 'delete user also deletes collaborator record' do
-
+  test "delete user also deletes collaborator record" do
     u = User.new(
       fname: "jimmy",
       lname: "little",
@@ -73,7 +65,5 @@ class ContainerImageCollaboratorTest < ActiveSupport::TestCase
     u.destroy
 
     refute wp.container_image_collaborators.where(user_id: u.id).exists?
-
   end
-
 end

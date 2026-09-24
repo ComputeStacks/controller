@@ -16,10 +16,9 @@ module ContainerWorkers
       container.container_exec!(command, event) unless Rails.env.test?
       event.done!
     rescue ActiveRecord::RecordNotFound
-      return
+      nil
     rescue => e
-      ExceptionAlertService.new(e, 'd55bc5f17b925a58').perform
+      ExceptionAlertService.new(e, "d55bc5f17b925a58").perform
     end
-
   end
 end

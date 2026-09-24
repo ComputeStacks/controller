@@ -1,7 +1,6 @@
 ##
 # # Pull Container Image
 class Api::Admin::ContainerImages::PullController < Api::Admin::ContainerImages::BaseController
-
   ##
   # Manually Pull Container Image
   #
@@ -14,5 +13,4 @@ class Api::Admin::ContainerImages::PullController < Api::Admin::ContainerImages:
       f.xml { render xml: {}, status: :accepted }
     end
   end
-
 end

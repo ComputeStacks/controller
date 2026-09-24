@@ -1,29 +1,27 @@
 Rails.application.routes.draw do
-
   ## LetsEncrypt
-  get '.well-known/acme-challenge/:id', to: 'acme_validator#show'
+  get ".well-known/acme-challenge/:id", to: "acme_validator#show"
 
-  load Rails.root.join('config/routes/api/admin.rb')
-  load Rails.root.join('config/routes/api/stacks.rb')
-  load Rails.root.join('config/routes/api/system.rb')
-  load Rails.root.join('config/routes/api/user.rb')
+  load Rails.root.join("config/routes/api/admin.rb")
+  load Rails.root.join("config/routes/api/stacks.rb")
+  load Rails.root.join("config/routes/api/system.rb")
+  load Rails.root.join("config/routes/api/user.rb")
 
-  scope 'api' do
+  scope "api" do
     use_doorkeeper do
-      controllers authorizations: 'auth/oauth_authorizations',
-                  applications: 'auth/oauth_applications',
-                  authorized_applications: 'auth/oauth_authorized_applications',
-                  tokens: 'auth/oauth_tokens'
+      controllers authorizations: "auth/oauth_authorizations",
+        applications: "auth/oauth_applications",
+        authorized_applications: "auth/oauth_authorized_applications",
+        tokens: "auth/oauth_tokens"
     end
   end
 
   namespace :api do
+    post "auth", to: "application#auth"
+    post "user/:external_id/authcheck", to: "application#secondfactor"
+    get "version", to: "application#version"
 
-    post 'auth', to: 'application#auth'
-    post 'user/:external_id/authcheck', to: 'application#secondfactor'
-    get 'version', to: 'application#version'
-
-    match '/', to: 'application#unknown_route', via: :all
-    match '*path', to: 'application#unknown_route', via: :all
+    match "/", to: "application#unknown_route", via: :all
+    match "*path", to: "application#unknown_route", via: :all
   end
 end

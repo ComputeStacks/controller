@@ -1,15 +1,12 @@
 module ProjectServices
-
   ##
   # Migrate from Calico to Private Networks
   class MigrateNetworkService
-
-
     attr_reader :project,
-                :event
+      :event
 
     attr_accessor :errors,
-                  :reload_lb
+      :reload_lb
 
     # @param [Deployment] p
     # @param [EventLog] event
@@ -21,7 +18,6 @@ module ProjectServices
     end
 
     def perform
-
       # Generate private network
       unless NetworkServices::GenerateProjectNetworkService.new(@event, @project.region, @project).perform
         errors << "Failed to generate private network"
@@ -57,18 +53,18 @@ module ProjectServices
         existing_ip = container.ip_address
         unless existing_ip.nil?
           unless existing_ip.destroy
-            errors << "Error removing container IP Address! #{container.class.to_s}-#{container.id} -- #{existing_ip.errors.full_messages.join(' ')}"
+            errors << "Error removing container IP Address! #{container.class}-#{container.id} -- #{existing_ip.errors.full_messages.join(" ")}"
             next
           end
         end
         container.reload
         unless container.set_ip_address!
-          errors << "Fatal error provisioning IP for #{container.class.to_s}-#{container.id}"
+          errors << "Fatal error provisioning IP for #{container.class}-#{container.id}"
           next
         end
         container.reload
         if container.ip_address.nil?
-          errors << "Fatal error generating IP. #{container.class.to_s}-#{container.id}"
+          errors << "Fatal error generating IP. #{container.class}-#{container.id}"
         end
       end
 
@@ -117,7 +113,5 @@ module ProjectServices
 
       errors.empty?
     end
-
   end
-
 end

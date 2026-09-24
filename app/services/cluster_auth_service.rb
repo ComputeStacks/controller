@@ -13,13 +13,12 @@
 #      sftp_id: Integer
 #    }
 class ClusterAuthService
-
   attr_accessor :node,
-                :project,
-                :service,
-                :container, # Either SFTP container or Container
-                :load_balancer,
-                :auth_token
+    :project,
+    :service,
+    :container, # Either SFTP container or Container
+    :load_balancer,
+    :auth_token
 
   # Initialize a new ClusterAuthService
   #
@@ -63,17 +62,17 @@ class ClusterAuthService
     headers = {}
     d = {}
     if node
-      d = {node_id: self.node.id}
+      d = {node_id: node.id}
       headers[:exp] = 20.minutes.from_now
     elsif container
       d = {
-        project_id: self.project&.id,
-        service_id: self.service&.id,
+        project_id: project&.id,
+        service_id: service&.id
       }
-      if self.container.is_a?(Deployment::Container)
-        d[:container_id] = self.container.id
-      elsif self.container.is_a?(Deployment::Sftp)
-        d[:sftp_id] = self.container.id
+      if container.is_a?(Deployment::Container)
+        d[:container_id] = container.id
+      elsif container.is_a?(Deployment::Sftp)
+        d[:sftp_id] = container.id
       else
         return nil # Shouldnt be here
       end
@@ -81,7 +80,7 @@ class ClusterAuthService
     d[:load_balancer_id] = load_balancer.id if load_balancer
     return nil if d.nil?
     d[:nonce] = SecureRandom.urlsafe_base64
-    JWT.encode(d, ENV["SECRET_KEY_BASE"], 'HS256', headers)
+    JWT.encode(d, ENV["SECRET_KEY_BASE"], "HS256", headers)
   end
 
   def load_from_payload!(payload)
@@ -95,11 +94,11 @@ class ClusterAuthService
       self.node = nil
       self.project = Deployment.find_by(id: response[:project_id])
       if response[:container_id]
-        self.service = self.project.services.find_by(id: response[:service_id])
-        self.container = self.service.containers.find_by(id: response[:container_id])
+        self.service = project.services.find_by(id: response[:service_id])
+        self.container = service.containers.find_by(id: response[:container_id])
       else
         self.service = nil
-        self.container = self.project.sftp_containers.find_by(id: response[:sftp_id])
+        self.container = project.sftp_containers.find_by(id: response[:sftp_id])
       end
     end
   rescue
@@ -107,13 +106,12 @@ class ClusterAuthService
   end
 
   def decoded_payload(payload)
-    body = JWT.decode(payload, ENV["SECRET_KEY_BASE"], true, { algorithm: 'HS256' })
-    if body[1]['exp']
-      return nil if Time.parse(body[1]['exp']) < Time.now
+    body = JWT.decode(payload, ENV["SECRET_KEY_BASE"], true, {algorithm: "HS256"})
+    if body[1]["exp"]
+      return nil if Time.parse(body[1]["exp"]) < Time.now
     end
     HashWithIndifferentAccess.new body[0]
   rescue
     nil
   end
-
 end

@@ -33,6 +33,16 @@
     <span class="help-block">This will override the <code>COMMAND</code> setting in the Dockerfile. Depending on the image, this can also be used to pass arguments to the default command.</span>
   </div>
 </div>
+<hr style="margin-top: 0;border-color:#CCC;">
+<div class="panel-body">
+  <div class="form-group">
+    <%= f.label :shm_size_mb, 'Shared Memory (/dev/shm) Size in MB' %>
+    <%= f.text_field :shm_size_mb, class: 'form-control' %>
+    <span class="help-block">
+      Override the image's default <code>/dev/shm</code> size. 0 = use the image default (64MB). Cannot exceed the service's memory limit.
+    </span>
+  </div>
+</div>
 <% if current_user.is_admin %>
   <hr style="margin-top: 0;border-color:#CCC;">
   <div class="panel-body">

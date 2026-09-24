@@ -2,7 +2,7 @@ module NetworkWorkers
   class TrashPolicyWorker
     include Sidekiq::Worker
 
-    sidekiq_options retry: 4, queue: 'dep'
+    sidekiq_options retry: 4, queue: "dep"
 
     def perform(region_id, policy_name)
       return false if policy_name.blank?
@@ -12,6 +12,5 @@ module NetworkWorkers
       return false if node.nil?
       node.host_client.client.exec!("calicoctl delete policy #{policy_name}")
     end
-
   end
 end

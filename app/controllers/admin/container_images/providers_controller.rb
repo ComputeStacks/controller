@@ -1,5 +1,4 @@
 class Admin::ContainerImages::ProvidersController < Admin::ApplicationController
-
   before_action :find_provider, only: %i[show edit update destroy]
 
   def index
@@ -16,17 +15,16 @@ class Admin::ContainerImages::ProvidersController < Admin::ApplicationController
     @provider.is_default = false
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if provider_params.empty?
       redirect_to admin_container_images_provider_url(@provider), notice: "Nothing was changed."
+    elsif @provider.update(provider_params)
+      redirect_to admin_container_images_provider_url(@provider), success: "Successfully updated provider."
     else
-      if @provider.update(provider_params)
-        redirect_to admin_container_images_provider_url(@provider), success: "Successfully updated provider."
-      else
-        render template: "admin/container_images/providers/edit"
-      end
+      render template: "admin/container_images/providers/edit"
     end
   end
 
@@ -44,7 +42,7 @@ class Admin::ContainerImages::ProvidersController < Admin::ApplicationController
     if @provider.destroy
       flash[:success] = "Successfully deleted provider."
     else
-      flash[:alert] = @provider.errors.full_messages.join('. ')
+      flash[:alert] = @provider.errors.full_messages.join(". ")
     end
     redirect_to admin_container_images_providers_url
   end
@@ -65,5 +63,4 @@ class Admin::ContainerImages::ProvidersController < Admin::ApplicationController
   rescue
     []
   end
-
 end

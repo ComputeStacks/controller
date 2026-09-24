@@ -1,5 +1,4 @@
 class Users::SecurityController < AuthController
-
-  def index; end
-
+  def index
+  end
 end

@@ -1,8 +1,7 @@
 module HTTParty
-
   class Response
     def is_ok?
-      self && (self.code == 200 || self.code == 201 || self.code == 204) ? true : false
+      (self && (code == 200 || code == 201 || code == 204)) ? true : false
     end
   end
 
@@ -16,5 +15,4 @@ module HTTParty
   #     end
   #   end
   # end
-
 end

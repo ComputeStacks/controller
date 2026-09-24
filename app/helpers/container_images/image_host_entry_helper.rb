@@ -1,6 +1,5 @@
 module ContainerImages
   module ImageHostEntryHelper
-
     # @param [ContainerImage] image
     def new_container_image_host_entry_path(image)
       return nil if image.nil?
@@ -18,6 +17,5 @@ module ContainerImages
       return "/container_images" if entry.nil?
       "#{container_image_host_entry_path(entry)}/edit"
     end
-
   end
 end

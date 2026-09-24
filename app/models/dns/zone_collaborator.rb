@@ -11,12 +11,11 @@
 #   @return [User]
 #
 class Dns::ZoneCollaborator < ApplicationRecord
-
   include Auditable
   include Collaborations
 
-  belongs_to :dns_zone, class_name: 'Dns::Zone', foreign_key: 'dns_zone_id'
-  belongs_to :collaborator, class_name: 'User', foreign_key: 'user_id'
+  belongs_to :dns_zone, class_name: "Dns::Zone", foreign_key: "dns_zone_id"
+  belongs_to :collaborator, class_name: "User", foreign_key: "user_id"
 
   has_many :records, through: :dns_zone
 
@@ -32,5 +31,4 @@ class Dns::ZoneCollaborator < ApplicationRecord
     return if ActiveRecord::Type::Boolean.new.cast(skip_confirmation)
     CollaborationMailer.dns_invite(dns_zone, collaborator).deliver_later
   end
-
 end

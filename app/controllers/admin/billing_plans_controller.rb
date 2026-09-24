@@ -1,5 +1,4 @@
 class Admin::BillingPlansController < Admin::ApplicationController
-
   before_action :load_plan, only: [:show, :edit, :update, :destroy]
 
   def index
@@ -18,14 +17,13 @@ class Admin::BillingPlansController < Admin::ApplicationController
   end
 
   def show
-    @packages = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%Q(products.kind = 'package'))).order( Arel.sql(%Q(lower(products.label))) )
-    @images = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%Q(products.kind = 'image'))).order( Arel.sql(%Q(lower(products.label))) )
-    @addons = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%Q(products.kind = 'addon'))).order( Arel.sql(%Q(lower(products.label))) )
-    @resources = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%Q(products.kind = 'resource'))).order( Arel.sql(%Q(lower(products.label))) )
+    @packages = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%(products.kind = 'package'))).order(Arel.sql(%(lower(products.label))))
+    @images = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%(products.kind = 'image'))).order(Arel.sql(%(lower(products.label))))
+    @addons = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%(products.kind = 'addon'))).order(Arel.sql(%(lower(products.label))))
+    @resources = @billing_plan.billing_resources.joins(:product).where(Arel.sql(%(products.kind = 'resource'))).order(Arel.sql(%(lower(products.label))))
   end
 
   def edit
-
   end
 
   def update
@@ -33,7 +31,7 @@ class Admin::BillingPlansController < Admin::ApplicationController
     if @billing_plan.update(plan_update_params)
       flash[:success] = "Plan Updated"
     else
-      flash[:alert] = "Error! #{@billing_plan.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error! #{@billing_plan.errors.full_messages.join(" ")}"
     end
     redirect_to "/admin/billing_plans/#{@billing_plan.id}"
   end
@@ -45,7 +43,7 @@ class Admin::BillingPlansController < Admin::ApplicationController
     if @billing_plan.save
       flash[:success] = "Plan Created"
     else
-      flash[:alert] = "Error! #{@billing_plan.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error! #{@billing_plan.errors.full_messages.join(" ")}"
     end
     redirect_to "/admin/billing_plans/#{@billing_plan.id}"
   end
@@ -55,7 +53,7 @@ class Admin::BillingPlansController < Admin::ApplicationController
     if @billing_plan.destroy
       flash[:success] = "Plan Deleted"
     else
-      flash[:alert] = "Error! #{@billing_plan.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error! #{@billing_plan.errors.full_messages.join(" ")}"
     end
     redirect_to "/admin/billing_plans"
   end
@@ -73,10 +71,9 @@ class Admin::BillingPlansController < Admin::ApplicationController
   def load_plan
     @billing_plan = BillingPlan.find_by(id: params[:id])
     if @billing_plan.nil?
-      redirect_to "/admin/billing_plans", alert: 'Unknown Billing Plan.'
+      redirect_to "/admin/billing_plans", alert: "Unknown Billing Plan."
       return false
     end
     @base_url = "/admin/billing_plans/#{@billing_plan.id}"
   end
-
 end

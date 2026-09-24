@@ -2,18 +2,21 @@
 # Store Project Metadata
 module ProjectServices
   class StoreMetadata
-
     attr_accessor :deployment
 
     def initialize(deployment)
       self.deployment = deployment
-      @consul_base = "projects/#{deployment.token}"
     end
 
     def perform
       return false if deployment&.region.nil?
-      return false if deployment.region.consul_config.nil?
-      Diplomat::Kv.put("#{@consul_base}/metadata", overview.to_json, deployment.region.consul_config)
+      # Push the full overview (unchanged — we keep all data) to the node agent's
+      # managed area instead of Consul KV. put_managed self-heals an unprovisioned
+      # tenant. NotReady (no online node / no agent token) degrades to false,
+      # matching the prior region-nil guard.
+      Agent::Client.new(deployment, region: deployment.region).put_managed("metadata", overview.to_json)
+    rescue Agent::Client::NotReady
+      false
     end
 
     def overview
@@ -29,8 +32,8 @@ module ProjectServices
     def overview_services
       s = []
       deployment.services.each do |i|
-        containers = i.containers.map  do |c|
-          { id: c.id, name: c.name, ip: c.ip_address&.ipaddr, node_id: c.node.id }
+        containers = i.containers.map do |c|
+          {id: c.id, name: c.name, ip: c.ip_address&.ipaddr, node_id: c.node&.id}
         end
         ingress_rules = i.ingress_rules.map do |c|
           {
@@ -51,19 +54,19 @@ module ProjectServices
           }
         end
         package_data = if i.package
-                         {
-                           label: i.package.product.label,
-                           cpu: i.package.cpu,
-                           memory: i.package.memory,
-                           storage: i.package.storage,
-                           bandwidth: i.package.bandwidth,
-                           local_disk: i.package.local_disk,
-                           memory_swap: i.package.memory_swap,
-                           memory_swappiness: i.package.memory_swappiness
-                         }
-                       else
-                         {}
-                       end
+          {
+            label: i.package.product.label,
+            cpu: i.package.cpu,
+            memory: i.package.memory,
+            storage: i.package.storage,
+            bandwidth: i.package.bandwidth,
+            local_disk: i.package.local_disk,
+            memory_swap: i.package.memory_swap,
+            memory_swappiness: i.package.memory_swappiness
+          }
+        else
+          {}
+        end
         s << {
           id: i.id,
           name: i.name,
@@ -75,7 +78,8 @@ module ProjectServices
             label: i.container_image.label,
             role: i.container_image.role,
             category: i.container_image.category,
-            tags: i.container_image.tags
+            tags: i.container_image.tags,
+            registry: i.image_variant&.full_image_path
           },
           containers:,
           ingress_rules:,
@@ -85,7 +89,5 @@ module ProjectServices
       end
       s
     end
-
-
   end
 end

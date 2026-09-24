@@ -1,7 +1,6 @@
 ##
 # Container Images
 class Api::ContainerImages::VolumeParamsController < Api::ContainerImages::BaseController
-
   before_action :find_volume, only: %i[show update destroy]
 
   ##
@@ -68,7 +67,8 @@ class Api::ContainerImages::VolumeParamsController < Api::ContainerImages::BaseC
   #     * `updated_at`: DateTime
   #     * `created_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   ##
   # Update a volume
@@ -137,10 +137,10 @@ class Api::ContainerImages::VolumeParamsController < Api::ContainerImages::BaseC
   def create
     @volume = @image.volumes.new(volume_params)
     @volume.current_user = current_user
-    @volume.borg_freq = '@daily' if volume_params[:borg_freq].blank?
-    @volume.borg_keep_daily = '5' if volume_params[:borg_keep_daily].blank?
-    @volume.borg_keep_weekly = '2' if volume_params[:borg_keep_weekly].blank?
-    @volume.borg_keep_monthly = '3' if volume_params[:borg_keep_monthly].blank?
+    @volume.borg_freq = "@daily" if volume_params[:borg_freq].blank?
+    @volume.borg_keep_daily = "5" if volume_params[:borg_keep_daily].blank?
+    @volume.borg_keep_weekly = "2" if volume_params[:borg_keep_weekly].blank?
+    @volume.borg_keep_monthly = "3" if volume_params[:borg_keep_monthly].blank?
     if @volume.save
       respond_to do |format|
         format.any(:json, :xml) { render :show, status: :created }
@@ -161,16 +161,15 @@ class Api::ContainerImages::VolumeParamsController < Api::ContainerImages::BaseC
     @volume.destroy ? api_obj_destroyed : api_obj_error(@volume.errors.full_messages)
   end
 
-
   private
 
   def volume_params
     params.require(:volume_param).permit(
-                                                   :mount_path, :enable_sftp, :label, :borg_enabled, :borg_freq, :borg_strategy,
-                                                   :source_volume_id, :mount_ro, :borg_keep_annually,
-                                                   :borg_keep_hourly, :borg_keep_weekly, :borg_keep_monthly, :borg_backup_error,
-                                                   :borg_restore_error, borg_pre_backup: [], borg_post_backup: [], borg_pre_restore: [],
-                                                   borg_post_restore: [], borg_rollback: []
+      :mount_path, :enable_sftp, :label, :borg_enabled, :borg_freq, :borg_strategy,
+      :source_volume_id, :mount_ro, :borg_keep_annually,
+      :borg_keep_hourly, :borg_keep_weekly, :borg_keep_monthly, :borg_backup_error,
+      :borg_restore_error, borg_pre_backup: [], borg_post_backup: [], borg_pre_restore: [],
+      borg_post_restore: [], borg_rollback: []
     )
   end
 
@@ -179,5 +178,4 @@ class Api::ContainerImages::VolumeParamsController < Api::ContainerImages::BaseC
     return api_obj_missing if @volume.nil?
     @volume.current_user = current_user
   end
-
 end

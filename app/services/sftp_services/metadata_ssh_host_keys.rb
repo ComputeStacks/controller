@@ -2,16 +2,20 @@
 # Store Host SSH Keys for a given SFTP Container
 module SftpServices
   class MetadataSshHostKeys
-
     attr_accessor :sftp
 
     def initialize(sftp)
       self.sftp = sftp
-      @consul_base = "projects/#{sftp.deployment.token}"
     end
 
     def perform
-      Diplomat::Kv.put("#{@consul_base}/#{sftp.name}", data.to_json, sftp.region.consul_config)
+      return false if sftp.region.nil?
+      # Per-SFTP-container host-keys blob, keyed by the container name (== the
+      # container's HOSTNAME, which init_bastion.rb reads). One node per region,
+      # so resolving via the region targets the SFTP container's own node.
+      Agent::Client.new(sftp.deployment, region: sftp.region).put_managed(sftp.name, data.to_json)
+    rescue Agent::Client::NotReady
+      false
     end
 
     private
@@ -40,14 +44,14 @@ module SftpServices
       data = Liquid::Template.parse Setting.ssh_motd
       data.render motd_vars
     rescue => e
-      ExceptionAlertService.new(e, '58b5d8d74c9d5786').perform
+      ExceptionAlertService.new(e, "58b5d8d74c9d5786").perform
       ""
     end
 
     # SSH Host Keys
     def host_keys
-      rsa = sftp.ssh_host_keys.find_by(algo: 'rsa')
-      ed25519 = sftp.ssh_host_keys.find_by(algo: 'ed25519')
+      rsa = sftp.ssh_host_keys.find_by(algo: "rsa")
+      ed25519 = sftp.ssh_host_keys.find_by(algo: "ed25519")
       keys = {}
       if rsa
         keys[:rsa] = {
@@ -63,6 +67,5 @@ module SftpServices
       end
       keys
     end
-
   end
 end

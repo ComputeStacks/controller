@@ -4,7 +4,6 @@ module Authorization
     include Authorization::Generic
 
     class_methods do
-
       # @param [User] current_user
       # @return [Array<ContainerImage>]
       def find_all_for(current_user, include_public = false)
@@ -14,7 +13,6 @@ module Authorization
           where("container_images.user_id = ? OR (container_image_collaborators.active = true AND container_image_collaborators.user_id = ?)", current_user.id, current_user.id).joins("LEFT JOIN container_image_collaborators ON container_images.id = container_image_collaborators.container_image_id").distinct
         end
       end
-
     end
 
     ##
@@ -48,6 +46,5 @@ module Authorization
       return true if current_user == user || current_user.is_admin
       container_image_collaborators.where(user_id: current_user.id, active: true).exists?
     end
-
   end
 end

@@ -1,12 +1,12 @@
-attributes :id, :domain, :system_domain, :le_enabled, :ingress_rule_id, :header_hsts, :force_https, :created_at, :updated_at
+attributes :id, :domain, :system_domain, :le_enabled, :ingress_rule_id, :header_hsts, :hsts_include_subdomains, :hsts_preload, :header_frame_options, :force_https, :created_at, :updated_at
 node :container_service do |i|
   i.container_service&.id
 end
 node :lets_encrypt do |i|
   if i.le_active?
-    'active'
+    "active"
   else
-    i.le_enabled ? 'pending' : 'inactive'
+    i.le_enabled ? "pending" : "inactive"
   end
 end
 node :links do |i|

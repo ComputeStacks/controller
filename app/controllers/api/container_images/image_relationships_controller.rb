@@ -1,7 +1,6 @@
 ##
 # Image Relationships
 class Api::ContainerImages::ImageRelationshipsController < Api::ContainerImages::BaseController
-
   before_action :find_rel, only: [:show, :update, :destroy]
 
   ##
@@ -35,7 +34,8 @@ class Api::ContainerImages::ImageRelationshipsController < Api::ContainerImages:
   #     * `default_variant_id`: Integer | Override the default variant for the specified image.
   #     * `created_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   ##
   # Update a container image relationship
@@ -103,5 +103,4 @@ class Api::ContainerImages::ImageRelationshipsController < Api::ContainerImages:
   def rel_params
     params.require(:image_relationship).permit(:requires_container_id, :default_variant_id)
   end
-
 end

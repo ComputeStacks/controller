@@ -1,5 +1,7 @@
 <div class="row">
   <div class="col-md-12">
+    <%# No clone banner here on purpose — deployments/show.html.erb polls it as its own
+        region above the tabs, so repeating it inside this tab would just say it twice. %>
     <table class="table">
       <thead>
         <tr>
@@ -7,6 +9,7 @@
           <th><%= t 'volumes.list.usage' %></th>
           <th><%= t 'volumes.list.backups' %></th>
           <th><%= t 'obj.service' %></th>
+          <th><%= t 'volumes.clone_status.column' %></th>
           <th></th>
         </tr>
       </thead>
@@ -21,10 +24,20 @@
             <td>
               <%= link_to truncate(i.label, length: 40), "/volumes/#{i.id}" %>
               <%= %Q(&nbsp; #{volume_ha_warning(i)}).html_safe if i.region.has_clustered_storage? && !i.uses_clustered_storage? %>
+              <%= %Q(&nbsp; #{volume_pending_mount_label(i)}).html_safe if i.awaiting_mount? %>
             </td>
             <td><%= i.usage %> GB</td>
-            <td><%= i.borg_enabled ? i.list_archives.count : tag.i(nil, class: 'fa-solid fa-ban') %></td>
+            <%# Backups are suppressed on purpose while the volume is pending, so say that
+                rather than showing an archive count of 0 that reads as a failure. %>
+            <td>
+              <% if i.awaiting_mount? %>
+                <%= volume_pending_mount_backups_label i %>
+              <% else %>
+                <%= i.borg_enabled ? i.list_archives.count : tag.i(nil, class: 'fa-solid fa-ban') %>
+              <% end %>
+            </td>
             <td><%= volume_attached_services i %></td>
+            <td><%= volume_clone_status_label @clone_jobs[i.id] %></td>
             <td class="text-right">
               <div class="btn-group">
                 <%= link_to icon('fa-solid', 'wrench'), edit_volume_url(i), class: 'btn btn-warning btn-xs' %>

@@ -1,8 +1,7 @@
 ##
 # Containers API
 class Api::ContainersController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :projects_read }, only: %i[show events], unless: :current_user
+  api_scope read: :project_read
 
   before_action :load_container
 
@@ -11,7 +10,7 @@ class Api::ContainersController < Api::ApplicationController
   #
   # `GET /api/containers/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   #
   # * `containers`: Array
@@ -38,6 +37,7 @@ class Api::ContainersController < Api::ApplicationController
   #             * `tcp_proxy_opt`: String<none,send-proxy,send-proxy-v2,send-proxy-v2-ssl,send-proxy-v2-ssl-cn>
   #             * `redirect_ssl`: Boolean
   #             * `restrict_cf`: Boolean | If true, only allow CloudFlare
+  #             * `restrict_bunny`: Boolean | If true, only allow Bunny CDN
   #             * `tcp_lb`: Boolean
   #             * `created_at`: Boolean
   #             * `updated_at`: Boolean
@@ -48,7 +48,8 @@ class Api::ContainersController < Api::ApplicationController
   #             * `links`: Object
   #                 * `domains`: String (url)
   #
-  def show; end
+  def show
+  end
 
   private
 
@@ -56,12 +57,11 @@ class Api::ContainersController < Api::ApplicationController
     @container = Deployment::Container.find_for current_user, id: params[:id]
     return api_obj_missing if @container.nil?
     if params[:include] && params[:include] == "logs"
-      limit = params[:limit].to_i > 0 ? params[:limit] : 500
-      period_start = params[:period_start].to_i > 0 ? Time.at(params[:period_start].to_i) : 1.day.ago
-      period_end = params[:period_end].to_i > 0 ? Time.at(params[:period_end].to_i) : Time.now
+      limit = (params[:limit].to_i > 0) ? params[:limit] : 500
+      period_start = (params[:period_start].to_i > 0) ? Time.at(params[:period_start].to_i) : 1.day.ago
+      period_end = (params[:period_end].to_i > 0) ? Time.at(params[:period_end].to_i) : Time.now
       @logs = @container.logs(period_start, period_end, limit)
-      @logs = @logs.map {|i| [Time.at(i[0]),i[1].gsub('/',''),i[2]]} if params[:date_string]
+      @logs = @logs.map { |i| [Time.at(i[0]), i[1].delete("/"), i[2]] } if params[:date_string]
     end
   end
-
 end

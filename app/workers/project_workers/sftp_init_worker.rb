@@ -18,31 +18,30 @@ module ProjectWorkers
         else
           event.event_details.create!(
             data: sftp_builder.errors.join("\n\n"),
-            event_code: '6810c5d1c32b9d46'
+            event_code: "6810c5d1c32b9d46"
           )
-          event.fail! 'Error Building Containers'
+          event.fail! "Error Building Containers"
         end
       else
         event.event_details.create!(
           data: sftp_prov.errors.join("\n\n"),
-          event_code: '74e18fa9f2e42605'
+          event_code: "74e18fa9f2e42605"
         )
-        event.fail! 'Error Selecting Containers'
+        event.fail! "Error Selecting Containers"
       end
       event.done! if event.running?
     rescue ActiveRecord::RecordNotFound
-      return
+      nil
     rescue => e
       user = nil
       if defined?(event) && event
         event.event_details.create!(
           data: e.message,
-          event_code: '0d0be20f7ff9768d'
+          event_code: "0d0be20f7ff9768d"
         )
         event.fail! e.message
       end
-      ExceptionAlertService.new(e, '0d0be20f7ff9768d', user).perform
+      ExceptionAlertService.new(e, "0d0be20f7ff9768d", user).perform
     end
-
   end
 end

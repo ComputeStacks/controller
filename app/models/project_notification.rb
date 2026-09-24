@@ -21,11 +21,9 @@
 #   @return [Array]
 #
 class ProjectNotification < ApplicationRecord
-
   include Auditable
   include Notifications::Common
 
   belongs_to :deployment
   has_one :user, through: :deployment
-
 end

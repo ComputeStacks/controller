@@ -1,5 +1,4 @@
 class Deployments::ProjectLogsController < Deployments::BaseController
-
   def index
     if request.xhr?
       @logs = @deployment.logs(3.days.ago, Time.now)
@@ -10,5 +9,4 @@ class Deployments::ProjectLogsController < Deployments::BaseController
       end
     end
   end
-
 end

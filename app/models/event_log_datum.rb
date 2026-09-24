@@ -12,7 +12,6 @@
 #   @return [String]
 #
 class EventLogDatum < ApplicationRecord
-
   scope :sorted, -> { order(created_at: :desc) }
 
   # @return [EventLog]
@@ -21,7 +20,7 @@ class EventLogDatum < ApplicationRecord
   def formatted_data
     return data if data.blank?
     case event_code
-    when 'af5dbfa43bebd5f5' # billing usage
+    when "af5dbfa43bebd5f5" # billing usage
       f_usage_data
     else
       data
@@ -33,24 +32,24 @@ class EventLogDatum < ApplicationRecord
   private
 
   def f_usage_data
-    return data unless data[0] == '[' # Only want to try and parse json data!
+    return data unless data[0] == "[" # Only want to try and parse json data!
     parsed = Oj.load(data)
     if parsed.count < 50
       result = []
       parsed.each do |i|
         result << {
-          user: i['user'],
+          user: i["user"],
           subscription: {
-            id: i['subscription_id'],
-            subscription_product_id: i['subscription_product_id']
+            id: i["subscription_id"],
+            subscription_product_id: i["subscription_product_id"]
           },
-          product: i['product'],
-          container_id: i['container_id'],
-          container_service_id: i['container_service_id'],
-          external_id: i['external_id'],
-          total: i['total'],
-          qty: i['qty'],
-          period: "#{i['period_start']} - #{i['period_end']}"
+          product: i["product"],
+          container_id: i["container_id"],
+          container_service_id: i["container_service_id"],
+          external_id: i["external_id"],
+          total: i["total"],
+          qty: i["qty"],
+          period: "#{i["period_start"]} - #{i["period_end"]}"
         }
       end
       result.to_yaml
@@ -58,5 +57,4 @@ class EventLogDatum < ApplicationRecord
       "Output of usage data hidden due to size."
     end
   end
-
 end

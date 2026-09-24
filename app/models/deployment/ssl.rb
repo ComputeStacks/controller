@@ -31,10 +31,9 @@
 #   @return [String]
 #
 class Deployment::Ssl < ApplicationRecord
-
   include Auditable
 
-  belongs_to :container_service, class_name: 'Deployment::ContainerService', foreign_key: 'container_service_id'
+  belongs_to :container_service, class_name: "Deployment::ContainerService", foreign_key: "container_service_id"
   has_one :deployment, through: :container_service
 
   validates :cert_serial, uniqueness: true
@@ -101,20 +100,20 @@ class Deployment::Ssl < ApplicationRecord
   # * Validate certificate belongs to private key, and vice versa.
   def validate_certificate
     # Check if private & certificate are valid keys.
-    key_check = if pkey[0..29] == '-----BEGIN EC PRIVATE KEY-----'
+    key_check = if pkey[0..29] == "-----BEGIN EC PRIVATE KEY-----"
       OpenSSL::PKey::EC.new pkey
     else
       OpenSSL::PKey::RSA.new pkey
     end
     errors.add(:base, "Not a valid private key") if key_check.nil? || !key_check.private?
     crt_check = OpenSSL::X509::Certificate.new(crt)
-    errors.add(:base, "Not a valid public key") if crt_check.nil? || !crt_check.serial.kind_of?(OpenSSL::BN)
+    errors.add(:base, "Not a valid public key") if crt_check.nil? || !crt_check.serial.is_a?(OpenSSL::BN)
     unless crt_check.check_private_key(key_check)
       errors.add(:base, "Private key does not match supplied certificate.")
     end
     unless ca.blank?
       ca_check = OpenSSL::X509::Certificate.new(ca)
-      errors.add(:base, "Invalid CA Certificate") if ca_check.nil? || !ca_check.serial.kind_of?(OpenSSL::BN)
+      errors.add(:base, "Invalid CA Certificate") if ca_check.nil? || !ca_check.serial.is_a?(OpenSSL::BN)
       if crt_check
         unless crt_check.verify(ca_check.public_key)
           errors.add(:base, "Certificate is not signed by the supplied CA certificate")
@@ -124,5 +123,4 @@ class Deployment::Ssl < ApplicationRecord
   rescue
     errors.add(:base, "Not a valid certificate")
   end
-
 end

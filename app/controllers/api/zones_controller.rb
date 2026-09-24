@@ -1,10 +1,9 @@
 ##
 # Zones Controller
 class Api::ZonesController < Api::ApplicationController
+  api_scope read: :dns_read
 
-  before_action -> { doorkeeper_authorize! :dns_read }, only: %i[index show], unless: :current_user
-
-  before_action :find_zone, except: %i[ index ]
+  before_action :find_zone, except: %i[index]
 
   ##
   # List all zones
@@ -118,5 +117,4 @@ class Api::ZonesController < Api::ApplicationController
     return api_obj_missing if @dns_zone.nil?
     @dns_zone.current_user = current_user
   end
-
 end

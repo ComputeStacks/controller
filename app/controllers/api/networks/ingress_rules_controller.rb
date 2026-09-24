@@ -1,9 +1,7 @@
 ##
 # Network Ingress Rules API
 class Api::Networks::IngressRulesController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :project_read }, unless: :current_user
-  before_action -> { doorkeeper_authorize! :projects_write }, only: %i[update create destroy], unless: :current_user
+  api_scope show: :project_read, write: :project_write
 
   before_action :find_ingress_rule, except: :create
   before_action :find_service, only: :create
@@ -13,7 +11,7 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
   #
   # `GET /api/networks/ingress_rules/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `ingress_rule`: Object
   #     * `id`: Integer
@@ -25,6 +23,7 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
   #     * `tcp_proxy_opt`: String<none,send-proxy,send-proxy-v2,send-proxy-v2-ssl,send-proxy-v2-ssl-cn>
   #     * `redirect_ssl`: Boolean
   #     * `restrict_cf`: Boolean | If true, only allow CloudFlare
+  #     * `restrict_bunny`: Boolean | If true, only allow Bunny CDN
   #     * `tcp_lb`: Boolean
   #     * `created_at`: Boolean
   #     * `updated_at`: Boolean
@@ -36,14 +35,15 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
   #     * `links`: Object
   #         * `domains`: String (url)
   #
-  def show; end
+  def show
+  end
 
   ##
   # Update Ingress Rule
   #
   # `PATCH /api/networks/ingress_rules/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `ingress_rule`: Object
   #     * `proto`: String<http,tcp,tls,udp>
@@ -52,12 +52,13 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
   #     * `backend_ssl`: String
   #     * `port`: Integer
   #     * `restrict_cf`: Boolean | If true, only allow CloudFlare
+  #     * `restrict_bunny`: Boolean | If true, only allow Bunny CDN
   #     * `tcp_lb`: Boolean
   #
   def update # enforce this being disabled.
     return api_obj_error(@ingress_rule.errors.full_messages) unless @ingress_rule.update(ingress_rule_params)
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/networks/ingress_rules/show', status: :accepted }
+      format.any(:json, :xml) { render template: "api/networks/ingress_rules/show", status: :accepted }
     end
   end
 
@@ -66,7 +67,7 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
   #
   # `POST /api/networks/ingress_rules`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `ingress_rule`: Object
   #     * `container_service_id`: Integer | ID of Container Service, not container.
@@ -76,6 +77,7 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
   #     * `backend_ssl`: String
   #     * `port`: Integer
   #     * `restrict_cf`: Boolean | If true, only allow CloudFlare
+  #     * `restrict_bunny`: Boolean | If true, only allow Bunny CDN
   #     * `tcp_lb`: Boolean
   #
   def create
@@ -84,10 +86,10 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
     @ingress_rule.region = @service.region
     return api_obj_error(@ingress_rule.errors.full_messages) unless @ingress_rule.save
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/networks/ingress_rules/show', status: :created }
+      format.any(:json, :xml) { render template: "api/networks/ingress_rules/show", status: :created }
     end
   rescue => e
-    return api_fatal_error(e, 'bd55319e964d1f73')
+    api_fatal_error(e, "bd55319e964d1f73")
   end
 
   ##
@@ -95,7 +97,7 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
   #
   # `DELETE /api/networks/ingress_rules/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   def destroy
     return api_obj_error(@ingress_rule.errors.full_messages) unless @ingress_rule.destroy
@@ -104,7 +106,7 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
       format.xml { render xml: {}, status: :ok }
     end
   rescue => e
-    return api_fatal_error(e, '303528a6b2f4806d')
+    api_fatal_error(e, "303528a6b2f4806d")
   end
 
   private
@@ -130,15 +132,14 @@ class Api::Networks::IngressRulesController < Api::ApplicationController
   # the user has permission to modify it.
   def find_service
     @service = Deployment::ContainerService.find_for_edit(current_user, id: create_ingress_rule_params[:container_service_id])
-    return api_obj_missing if @service.nil? || !@service.can_edit?(current_user)
+    api_obj_missing if @service.nil? || !@service.can_edit?(current_user)
   end
 
   def ingress_rule_params
-    params.require(:ingress_rule).permit(:proto, :external_access, :tcp_proxy_opt, :backend_ssl, :port, :restrict_cf, :tcp_lb)
+    params.require(:ingress_rule).permit(:proto, :external_access, :tcp_proxy_opt, :backend_ssl, :port, :restrict_cf, :restrict_bunny, :tcp_lb)
   end
 
   def create_ingress_rule_params
-    params.require(:ingress_rule).permit(:proto, :external_access, :tcp_proxy_opt, :backend_ssl, :port, :restrict_cf, :container_service_id, :tcp_lb)
+    params.require(:ingress_rule).permit(:proto, :external_access, :tcp_proxy_opt, :backend_ssl, :port, :restrict_cf, :restrict_bunny, :container_service_id, :tcp_lb)
   end
-
 end

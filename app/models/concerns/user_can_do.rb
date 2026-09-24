@@ -23,7 +23,6 @@ module UserCanDo
   # @return [Boolean]
   def can_force_local_storage?
     return false unless Feature.using_clustered_storage?
-    is_admin || ( user_group.allow_local_volume && user_group.regions.where(volume_backend: 'nfs').exists? )
+    is_admin || (user_group.allow_local_volume && user_group.regions.where(volume_backend: "nfs").exists?)
   end
-
 end

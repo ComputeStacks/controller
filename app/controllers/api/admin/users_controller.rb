@@ -58,7 +58,7 @@ class Api::Admin::UsersController < Api::Admin::ApplicationController
   #       ]
   #     }
   def index
-    @include_usage = params[:include] == 'balance'
+    @include_usage = params[:include] == "balance"
     @users = paginate User.sorted
     respond_to :json, :xml
   end
@@ -112,7 +112,7 @@ class Api::Admin::UsersController < Api::Admin::ApplicationController
   #       "last_sign_in_ip": "127.0.0.1"
   #     }
   def show
-    @include_usage = params[:include] == 'balance'
+    @include_usage = params[:include] == "balance"
     respond_to :json, :xml
   end
 
@@ -199,9 +199,9 @@ class Api::Admin::UsersController < Api::Admin::ApplicationController
   #       }
   #     }
   def create
-    return api_obj_error 'Missing User Object' if params[:user].nil?
+    return api_obj_error "Missing User Object" if params[:user].nil?
     if params.dig(:user, :password).blank?
-      generated_pw = SecureRandom.base64(12).gsub("=","")
+      generated_pw = SecureRandom.base64(12).delete("=")
       params[:user][:password] = generated_pw
       params[:user][:password_confirmation] = generated_pw
     elsif params.dig(:user, :password_confirmation).nil?
@@ -210,18 +210,18 @@ class Api::Admin::UsersController < Api::Admin::ApplicationController
     @user = User.new(user_params)
     # Default to en
     if @user.locale.blank? || !I18n.available_locales.include?(@user.locale.to_sym)
-      @user.locale = 'en'
+      @user.locale = "en"
     end
     @user.skip_confirmation! if params[:user][:skip_email_confirm]
     @user.gen_sso_creds = true
     @user.tmp_updated_password = user_params[:user][:password] if user_params.dig(:user, :password)
     return api_obj_error(@user.errors.full_messages) unless @user.save
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/admin/users/create', status: :created }
+      format.any(:json, :xml) { render template: "api/admin/users/create", status: :created }
     end
   rescue => e
-    ExceptionAlertService.new(e, '09a2f7b02aa6f00d', current_user).perform
-    api_fatal_error(e, '09a2f7b02aa6f00d')
+    ExceptionAlertService.new(e, "09a2f7b02aa6f00d", current_user).perform
+    api_fatal_error(e, "09a2f7b02aa6f00d")
   end
 
   ##
@@ -230,7 +230,7 @@ class Api::Admin::UsersController < Api::Admin::ApplicationController
   # `DELETE /api/admin/users/{id}`
   #
   def destroy
-    return api_obj_error(['Unable to delete support user']) if @user.is_support_admin?
+    return api_obj_error(["Unable to delete support user"]) if @user.is_support_admin?
     return api_obj_error(@user.errors.full_messages) unless @user.destroy
     respond_to do |format|
       format.any(:json, :xml) { head :no_content }
@@ -244,12 +244,11 @@ class Api::Admin::UsersController < Api::Admin::ApplicationController
   #
   def user_params # :doc:
     params.require(:user).permit(
-        :fname, :lname, :active, :email, :is_admin, :currency,
-        :password, :password_confirmation, :external_id, :country,
-        :city, :state, :address1, :address2, :zip, :bypass_billing,
-        :vat, :skip_email_confirm, :company_name, :phone, :locale,
-        :user_group_id, merge_labels: {}
+      :fname, :lname, :active, :email, :is_admin, :currency,
+      :password, :password_confirmation, :external_id, :country,
+      :city, :state, :address1, :address2, :zip, :bypass_billing,
+      :vat, :skip_email_confirm, :company_name, :phone, :locale,
+      :user_group_id, merge_labels: {}
     )
   end
-
 end

@@ -1,12 +1,12 @@
 class ContainerImages::EnvParamsController < ContainerImages::BaseController
-
   before_action :find_env, only: [:edit, :update, :destroy]
 
   def new
     @env = @image.env_params.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if @env.update(env_params)
@@ -31,7 +31,7 @@ class ContainerImages::EnvParamsController < ContainerImages::BaseController
     if @env.destroy
       flash[:success] = "#{name} deleted."
     else
-      flash[:alert] = "Error: #{@env.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error: #{@env.errors.full_messages.join(" ")}"
     end
     redirect_to helpers.container_image_path(@image)
   end
@@ -45,13 +45,11 @@ class ContainerImages::EnvParamsController < ContainerImages::BaseController
       return false
     end
     @env.current_user = current_user
-    @env.static_value = @env.value if @env.param_type == 'static'
-    @env.env_value = @env.value if @env.param_type == 'variable'
+    @env.static_value = @env.value if @env.param_type == "static"
+    @env.env_value = @env.value if @env.param_type == "variable"
   end
 
   def env_params
     params.require(:container_image_env_param).permit(:name, :label, :param_type, :static_value, :env_value)
   end
-
-
 end

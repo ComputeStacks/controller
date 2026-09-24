@@ -1,8 +1,7 @@
 ##
 # Container Service SSL Certificates
 class Api::ContainerServices::SslController < Api::ContainerServices::BaseController
-
-  before_action :load_certificate, only: %i[ destroy show update]
+  before_action :load_certificate, only: %i[destroy show update]
 
   ##
   # List SSL Certificates
@@ -11,7 +10,7 @@ class Api::ContainerServices::SslController < Api::ContainerServices::BaseContro
   #
   # `GET /api/container_services/{container-service-id}/ssl`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `certificates`: Array
   #     * `id`: Integer
@@ -32,7 +31,7 @@ class Api::ContainerServices::SslController < Api::ContainerServices::BaseContro
   #
   # `GET /api/container_services/{container-service-id}/ssl/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `certificates`: Object
   #     * `id`: Integer
@@ -44,14 +43,15 @@ class Api::ContainerServices::SslController < Api::ContainerServices::BaseContro
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   ##
   # Create SSL Certificate
   #
   # `POST /api/container_services/{container-service-id}/ssl`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `certificate`: Object
   #     * `ca`: String
@@ -71,7 +71,7 @@ class Api::ContainerServices::SslController < Api::ContainerServices::BaseContro
       end
     end
   rescue => e
-    return api_fatal_error(e, 'f4e7b07e027e5304')
+    api_fatal_error(e, "f4e7b07e027e5304")
   end
 
   ##
@@ -79,7 +79,7 @@ class Api::ContainerServices::SslController < Api::ContainerServices::BaseContro
   #
   # `DELETE /api/container_services/{container-service-id}/ssl/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   def destroy
     respond_to do |format|
@@ -95,7 +95,7 @@ class Api::ContainerServices::SslController < Api::ContainerServices::BaseContro
       end
     end
   rescue => e
-    return api_fatal_error(e, '7533e1a2059b4530')
+    api_fatal_error(e, "7533e1a2059b4530")
   end
 
   private
@@ -113,5 +113,4 @@ class Api::ContainerServices::SslController < Api::ContainerServices::BaseContro
     return api_obj_missing if @certificate.nil?
     @certificate.current_user = current_user
   end
-
 end

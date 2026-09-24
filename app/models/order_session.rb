@@ -3,17 +3,16 @@
 # @attr [integer] id Will become the Order ID (uuid)
 # @attr [Order] order nil if order does not exist yet.
 class OrderSession
-
   attr_accessor :id,
-                :user,
-                :order,
-                :project,
-                :location,
-                :skip_dep, # dont add dependency images
-                :skip_ssh, # defaults to false
-                :region, # Used to find prices
-                :images, # Container Images
-                :collections # image collections
+    :user,
+    :order,
+    :project,
+    :location,
+    :skip_dep, # dont add dependency images
+    :skip_ssh, # defaults to false
+    :region, # Used to find prices
+    :images, # Container Images
+    :collections # image collections
 
   def initialize(user, id = nil)
     return nil unless user.is_a? User
@@ -82,17 +81,15 @@ class OrderSession
       end
     end
     opts = opts.with_indifferent_access
-    volume_overrides = opts[:volume_overrides] ? opts[:volume_overrides] : []
+    volume_overrides = opts[:volume_overrides] || []
     collection_id = opts[:collection_id]
     # Container Source
     source_csrn = opts[:source]
     source_service = source_csrn.blank? ? nil : Csrn.locate(opts[:source])
     source = if source_service && source_service.is_a?(Deployment::ContainerService)
-               source_service.can_view?(user) ? source_service : nil
-             else
-               nil
-             end
-    to_add = [ image_variant ]
+      source_service.can_view?(user) ? source_service : nil
+    end
+    to_add = [image_variant]
     source_settings = {}
     if source
       source.setting_params.each do |ii|
@@ -102,7 +99,7 @@ class OrderSession
     to_add.each do |i|
       settings = {}
       i.container_image.setting_params.each do |ii|
-        next if ii.param_type == 'password' && source.nil?
+        next if ii.param_type == "password" && source.nil?
         settings[ii.name] = {
           type: ii.param_type,
           default_value: ii.value,
@@ -114,15 +111,15 @@ class OrderSession
       i.container_image.volumes.each do |ii|
         cloned_vol = volume_overrides.select { |vo| vo[:mount_path] == ii.mount_path }[0]
         vol_action = if cloned_vol
-                       cloned_vol[:action]
-                     else
-                       ii.source_volume ? 'mount' : 'create'
-                     end
+          cloned_vol[:action]
+        else
+          ii.source_volume ? "mount" : "create"
+        end
         vol_source = if cloned_vol
-                       cloned_vol[:source]
-                     else
-                       ii.source_volume&.csrn
-                     end
+          cloned_vol[:source]
+        else
+          ii.source_volume&.csrn
+        end
         vols << {
           csrn: ii.csrn,
           label: ii.label,
@@ -142,7 +139,7 @@ class OrderSession
         variant_label: i.label,
         params: settings,
         volumes: vols,
-        free: i.container_image.is_free ? 'yes' : 'no',
+        free: i.container_image.is_free ? "yes" : "no",
         min_cpu: i.container_image.min_cpu,
         min_mem: i.container_image.min_memory,
         addons: [],  # List of Addon IDs (ContainerImageProduct)
@@ -175,7 +172,7 @@ class OrderSession
     h = {} # { image_id => variant }
     collection.container_images.each do |i|
       i.dependency_parents.each do |i_dep|
-        variant = i_dep.default_variant ? i_dep.default_variant : i_dep.dependency.default_variant
+        variant = i_dep.default_variant || i_dep.dependency.default_variant
         h[i_dep.dependency.id] = variant
       end
     end
@@ -183,7 +180,7 @@ class OrderSession
     collection.container_images.each do |i|
       next if image_selected? i.id
       variant = h[i.id].nil? ? i.default_variant : h[i.id]
-      add_image variant, { collection_id: collection.id }
+      add_image variant, {collection_id: collection.id}
     end
   end
 
@@ -206,7 +203,7 @@ class OrderSession
         unless new_project?
           next if project.container_images.include?(i_dep.dependency)
         end
-        variant = i_dep.default_variant ? i_dep.default_variant : i_dep.dependency.default_variant
+        variant = i_dep.default_variant || i_dep.dependency.default_variant
         add_image variant, opts
       end
     end
@@ -247,7 +244,7 @@ class OrderSession
   def skip_to_confirmation?
     skip = true
     images.each do |i|
-      next if i[:params].empty? && i[:free] == 'yes'
+      next if i[:params].empty? && i[:free] == "yes"
       skip = false
     end
     skip
@@ -397,7 +394,6 @@ class OrderSession
   end
 
   def default_project_name
-    "#{NamesGenerator.name("").gsub("-", " ").gsub(/[A-Za-z']+/, &:capitalize)} (#{Date.today.strftime("%Y%m%d")})"
+    "#{NamesGenerator.name("").tr("-", " ").gsub(/[A-Za-z']+/, &:capitalize)} (#{Date.today.strftime("%Y%m%d")})"
   end
-
 end

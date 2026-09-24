@@ -1,12 +1,12 @@
 class Admin::BillingPlans::BillingResourcesController < Admin::BillingPlans::ApplicationController
-
   before_action :load_resource, only: [:edit, :update, :destroy]
 
   def new
     @billing_resource = @billing_plan.billing_resources.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def show
     redirect_to action: :edit
@@ -16,7 +16,7 @@ class Admin::BillingPlans::BillingResourcesController < Admin::BillingPlans::App
     if @billing_resource.update(resource_params)
       redirect_to @plan_base_url, notice: "Successfully updated."
     else
-      render template: 'admin/billing_plans/billing_resources/edit'
+      render template: "admin/billing_plans/billing_resources/edit"
     end
   end
 
@@ -26,15 +26,15 @@ class Admin::BillingPlans::BillingResourcesController < Admin::BillingPlans::App
     if @billing_resource.save
       redirect_to @plan_base_url, notice: "Successfully added resource."
     else
-      render template: 'admin/billing_plans/billing_resources/new'
+      render template: "admin/billing_plans/billing_resources/new"
     end
   end
 
   def destroy
     if @billing_resource.destroy
-      flash[:notice] = 'Resource removed from billing plan.'
+      flash[:notice] = "Resource removed from billing plan."
     else
-      flash[:alert] = 'Error deleting resource!'
+      flash[:alert] = "Error deleting resource!"
     end
     redirect_to @plan_base_url
   end
@@ -51,10 +51,9 @@ class Admin::BillingPlans::BillingResourcesController < Admin::BillingPlans::App
   def load_resource
     @billing_resource = @billing_plan.billing_resources.find_by(id: params[:id])
     if @billing_resource.nil?
-      redirect_to "/admin/billing_plans/#{@billing_plan.id}", alert: 'Unknown Resource'
+      redirect_to "/admin/billing_plans/#{@billing_plan.id}", alert: "Unknown Resource"
       return false
     end
     @billing_resource.current_user = current_user
   end
-
 end

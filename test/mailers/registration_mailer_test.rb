@@ -1,9 +1,8 @@
-require 'test_helper'
+require "test_helper"
 
 class RegistrationMailerTest < ActionMailer::TestCase
-
   setup do
-    I18n.locale = 'en'
+    I18n.locale = "en"
     @user = User.first
     @token = SecureRandom.hex(8)
   end
@@ -16,7 +15,6 @@ class RegistrationMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [@user.email], email.to
-
   end
 
   test "password_reset" do
@@ -27,7 +25,6 @@ class RegistrationMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [@user.email], email.to
-
   end
 
   test "unlock" do
@@ -38,7 +35,5 @@ class RegistrationMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [@user.email], email.to
-
   end
-
 end

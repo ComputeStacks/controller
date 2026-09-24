@@ -1,9 +1,7 @@
-require 'test_helper'
+require "test_helper"
 
 class ContainerService::CollaboratorTest < ActiveSupport::TestCase
-
-  test 'collaborator can view container service' do
-
+  test "collaborator can view container service" do
     s = Deployment::ContainerService.first
     u = User.where.not(id: s.user.id).first
 
@@ -18,7 +16,5 @@ class ContainerService::CollaboratorTest < ActiveSupport::TestCase
     assert_includes Deployment::ContainerService.find_all_for(u), s
 
     s.deployment.deployment_collaborators.delete_all
-
   end
-
 end

@@ -11,57 +11,59 @@ module Containers
         when "endpoint"
           case var[2]
           when "api"
-            param = {'type' => 'raw', 'value' => "#{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/api"}
+            param = {"type" => "raw", "value" => "#{PORTAL_HTTP_SCHEME}://#{Setting.hostname}/api"}
           end
         end
       when "build"
         case var[1]
         when "settings"
-          v = self.service.setting_params.find_by(name: var[2])
+          v = service.setting_params.find_by(name: var[2])
           return nil if v.nil?
-          param = {'type' => 'raw', 'value' => v.decrypted_value}
+          param = {"type" => "raw", "value" => v.decrypted_value}
         when "self"
           # ports are deprecated
           the_port = service.ingress_rules.first&.port
           case var[2]
           when "name"
-            param = {'type' => "raw", 'value' => self.name}
+            param = {"type" => "raw", "value" => name}
           when "name_short"
-            param = {'type' => "raw", 'value' => self.name.gsub("-","").gsub("_","")}
-          when 'service_name'
-            param = { 'type' => 'raw', 'value' => self.service.name }
-          when 'service_name_short'
-            param = { 'type' => 'raw', 'value' => self.service.name.gsub("-","").gsub("_","") }
+            param = {"type" => "raw", "value" => name.delete("-").delete("_")}
+          when "service_name"
+            param = {"type" => "raw", "value" => service.name}
+          when "service_name_short"
+            param = {"type" => "raw", "value" => service.name.delete("-").delete("_")}
           when "local_dns"
-            param = {'type' => "raw", 'value' => self.local_ip}
-          when 'ip'
-            param = {'type' => "raw", 'value' => self.local_ip}
-          when 'ip_with_port'
+            param = {"type" => "raw", "value" => local_ip}
+          when "ip"
+            param = {"type" => "raw", "value" => local_ip}
+          when "ip_with_port"
             return nil if the_port.nil?
-            param = {'type' => "raw", 'value' => "#{self.local_ip}:#{the_port}"}
-          when 'port'
+            param = {"type" => "raw", "value" => "#{local_ip}:#{the_port}"}
+          when "port"
             return nil if the_port.nil?
-            param = {'type' => "raw", 'value' => the_port}
+            param = {"type" => "raw", "value" => the_port}
           when "project_id"
-            param = {'type' => 'raw', 'value' => self.deployment&.id}
+            param = {"type" => "raw", "value" => deployment&.id}
           when "default_domain"
-            param = {'type' => 'raw', 'value' => service.default_domain}
+            param = {"type" => "raw", "value" => service.default_domain}
           when "default_domain_with_proto"
-            param = {'type' => 'raw', 'value' => "https://#{service.default_domain}"}
+            param = {"type" => "raw", "value" => "https://#{service.default_domain}"}
           when "ec_pub_key"
             existing_key = service.secrets.find_by(key_name: "ec_key")
             ec_signing_key = if existing_key
-                               Ed25519::SigningKey.new Base64.decode64(existing_key.decrypted)
-                             else
-                               Ed25519::SigningKey.generate
-                             end
-            service.secrets.create!(
-              key_name: "ec_key",
-              data: Base64.strict_encode64(ec_signing_key.to_bytes)
-            ) unless existing_key
+              Ed25519::SigningKey.new Base64.decode64(existing_key.decrypted)
+            else
+              Ed25519::SigningKey.generate
+            end
+            unless existing_key
+              service.secrets.create!(
+                key_name: "ec_key",
+                data: Base64.strict_encode64(ec_signing_key.to_bytes)
+              )
+            end
             param = {
-              'type' => 'raw',
-              'value' => Base64.strict_encode64(ec_signing_key.verify_key.to_bytes).gsub('/','\\/').gsub('+','\\\+')
+              "type" => "raw",
+              "value" => Base64.strict_encode64(ec_signing_key.verify_key.to_bytes).gsub("/", '\\/').gsub("+", '\\\+')
             }
           end
         end
@@ -71,7 +73,7 @@ module Containers
         dep_container = nil
         dep_service = nil
         # Find the correct container by its role.
-        self.service.service_resources.each do |c|
+        service.service_resources.each do |c|
           if c.container_image.role == dep_role
             dep_service = c
             dep_container = c.containers.first
@@ -83,11 +85,11 @@ module Containers
           param_key = var[3]
           param_option_key = var[4]
           dep_params = case param_key
-                       when 'settings'
-                         dep_service.setting_params.find_by(name: param_option_key)
-                       when 'env'
-                         dep_service.env_params.find_by(name: param_option_key)
-                       end
+          when "settings"
+            dep_service.setting_params.find_by(name: param_option_key)
+          when "env"
+            dep_service.env_params.find_by(name: param_option_key)
+          end
           if dep_params.nil?
             # l = self.event_logs.create(
             #   status: 'alert',
@@ -104,7 +106,7 @@ module Containers
             # l.users << self.user if self.user
             return nil
           else
-            param = dep_params.nil? ? nil : {'type' => 'raw', 'value' => dep_params.decrypted_value}
+            param = dep_params.nil? ? nil : {"type" => "raw", "value" => dep_params.decrypted_value}
             if param.nil?
               # l = self.event_logs.create(
               #   status: 'alert',
@@ -131,53 +133,52 @@ module Containers
           when "host" # No longer used. Keep for backwards compatability
             case var[3]
             when "ip"
-              param = {'type' => "raw", 'value' => dep_host_ip}
+              param = {"type" => "raw", "value" => dep_host_ip}
             when "ip_with_port"
-              param = {'type' => "raw", 'value' => "#{dep_host_ip}:#{external_port}"}
+              param = {"type" => "raw", "value" => "#{dep_host_ip}:#{external_port}"}
             when "port"
-              param = {'type' => "raw", 'value' => external_port}
+              param = {"type" => "raw", "value" => external_port}
             when "local_dns_with_port"
-              param = {'type' => "raw", 'value' => "#{dep_host_ip}:#{external_port}"}
+              param = {"type" => "raw", "value" => "#{dep_host_ip}:#{external_port}"}
             when "local_dns"
-              param = {'type' => "raw", 'value' => dep_host_ip}
+              param = {"type" => "raw", "value" => dep_host_ip}
             end
           when "self" # New version
             case var[3]
             when "ip"
-              param = {'type' => "raw", 'value' => dep_host_ip}
+              param = {"type" => "raw", "value" => dep_host_ip}
             when "ip_with_port"
-              param = {'type' => "raw", 'value' => "#{dep_host_ip}:#{external_port}"}
+              param = {"type" => "raw", "value" => "#{dep_host_ip}:#{external_port}"}
             when "port"
-              param = {'type' => "raw", 'value' => external_port}
+              param = {"type" => "raw", "value" => external_port}
             when "local_dns_with_port"
-              param = {'type' => "raw", 'value' => "#{dep_host_ip}:#{external_port}"}
+              param = {"type" => "raw", "value" => "#{dep_host_ip}:#{external_port}"}
             when "local_dns"
-              param = {'type' => "raw", 'value' => dep_host_ip}
+              param = {"type" => "raw", "value" => dep_host_ip}
             when "project_id"
-              param = {'type' => 'raw', 'value' => dep_service&.deployment&.id}
+              param = {"type" => "raw", "value" => dep_service&.deployment&.id}
             when "default_domain"
-              param = {'type' => 'raw', 'value' => dep_service.default_domain}
+              param = {"type" => "raw", "value" => dep_service.default_domain}
             when "default_domain_with_proto"
-              param = {'type' => 'raw', 'value' => "https://#{dep_service.default_domain}"}
+              param = {"type" => "raw", "value" => "https://#{dep_service.default_domain}"}
             end # END var[3]
           end # END var[2]
         end # END var[2] == parameters
       end # END case var.first
       if param
-        case param['type']
+        case param["type"]
         when "password"
-          return Secret.decrypt!(param['value'])
+          Secret.decrypt!(param["value"])
         when "variable"
-          return self.var_lookup(param['reference'])
+          var_lookup(param["reference"])
         when "port"
-          return param['options']['external']
+          param["options"]["external"]
         when "raw", "string", "static"
-          return param['value']
-        when 'integer'
-          return param['value'].to_i
+          param["value"]
+        when "integer"
+          param["value"].to_i
         end
       end
     end # END var_lookup
-
   end
 end

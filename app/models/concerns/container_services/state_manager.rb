@@ -12,14 +12,14 @@ module ContainerServices
     # * online
     # * inactive
     def current_state
-      return 'working' if working?
-      return 'alert' if has_failed_jobs?
-      return 'alert' if provisioning_failed?
-      return 'active_alert' if has_active_alerts?
-      return 'unhealthy' unless healthy?
-      return 'offline_containers' unless all_containers_online?
-      return 'resource_usage' unless resources_ok?
-      active? ? 'online' : 'inactive'
+      return "working" if working?
+      return "alert" if has_failed_jobs?
+      return "alert" if provisioning_failed?
+      return "active_alert" if has_active_alerts?
+      return "unhealthy" unless healthy?
+      return "offline_containers" unless all_containers_online?
+      return "resource_usage" unless resources_ok?
+      active? ? "online" : "inactive"
     end
 
     def working?
@@ -34,7 +34,7 @@ module ContainerServices
     end
 
     def all_containers_online?
-      containers.where(req_state: 'active').each do |i|
+      containers.where(req_state: "active").each do |i|
         return false unless i.running?
       end
       true
@@ -42,12 +42,12 @@ module ContainerServices
 
     # Track the most recent provisioning attempt.
     def provisioning_failed?
-      return false unless event_logs.where(locale: 'order.provision').exists?
-      event_logs.where(locale: 'order.provision').order(created_at: :desc).first.failed?
+      return false unless event_logs.where(locale: "order.provision").exists?
+      event_logs.where(locale: "order.provision").order(created_at: :desc).first.failed?
     end
 
     def active?
-      containers.where(req_state: 'running').exists?
+      containers.where(req_state: "running").exists?
     end
 
     ##
@@ -71,6 +71,5 @@ module ContainerServices
     def has_active_alerts?
       alert_notifications.active.exists?
     end
-
   end
 end

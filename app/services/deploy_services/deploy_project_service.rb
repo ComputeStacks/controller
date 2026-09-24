@@ -1,5 +1,4 @@
 module DeployServices
-
   # DeployProjectService
   #
   # This will ensure all project resources are provisioned
@@ -7,11 +6,10 @@ module DeployServices
   # This should be run AFTER creating them locally in the database.
   #
   class DeployProjectService
-
     attr_accessor :project,
-                  :event,
-                  :volume_clones,
-                  :errors
+      :event,
+      :volume_clones,
+      :errors
 
     def initialize(project, event)
       self.project = project
@@ -21,7 +19,6 @@ module DeployServices
     end
 
     def perform
-
       if project.region.has_clustered_networking?
         # Apply Project Service Policy
         NetworkWorkers::ProjectPolicyWorker.perform_async project.global_id
@@ -54,12 +51,12 @@ module DeployServices
 
       # Build it!
       containers.each do |container|
-        PowerCycleContainerService.new(container, 'build', event.audit).perform
+        PowerCycleContainerService.new(container, "build", event.audit).perform
       end
 
       # For SFTP containers, we will either rebuild or build depending on current state
       project.sftp_containers.active.each do |container|
-        j = PowerCycleContainerService.new(container, container.built? ? 'rebuild' : 'build', event.audit)
+        j = PowerCycleContainerService.new(container, container.built? ? "rebuild" : "build", event.audit)
         j.delay = 30.seconds
         j.perform
       end
@@ -71,33 +68,22 @@ module DeployServices
 
       ProjectServices::StoreMetadata.new(project).perform
 
-      # Clone Volumes
-      volume_clones.each do |i|
-        v = Volume.find_by(id: i[:vol_id])
-        if v.nil?
-          errors << "Volume #{i[:vol_id]} not found, unable to restore."
-          next
-        end
-        cv = VolumeServices::CloneVolumeService.new(v, event)
-        if i[:source_vol_id]
-          sv = Volume.find_by id: i[:source_vol_id]
-          if sv.nil?
-            errors << "Source Volume #{i[:source_vol_id]} not found, unable to restore."
-            next
-          end
-          cv.source_volume = sv
-        else
-          errors << "Missing source volume, unable to restore: #{i}"
-          next
-        end
-        cv.source_snapshot = i[:source_snap] if i[:source_snap]
-        unless cv.perform
-          if cv.errors.empty?
-            errors << "Fatal error restoring volume #{i[:vol_id]}"
-          else
-            errors + cv.errors
-          end
-        end
+      # Schedule volume clones.
+      #
+      # This used to run the clones INLINE and block on them: a Timeout+sleep loop per volume,
+      # budgeted at up to ~46 minutes each, serially, inside ProcessOrderWorker on the `default`
+      # queue. supervisord sends stopsignal=KILL, so any deploy annihilated that job and left
+      # the order wedged in `processing` forever. Now we only write durable VolumeCloneJob rows
+      # and hand them to the sweeper — the order finishes in milliseconds and the restores run
+      # asynchronously with their own per-volume events.
+      #
+      # NB `errors.concat`, not `errors + ...`. The old code's `errors + cv.errors` discarded its
+      # own result, and the single branch that populated cv.errors was exactly the one it threw
+      # away, so a volume that was never cloned still completed the order green.
+      unless volume_clones.empty?
+        enqueue = VolumeServices::EnqueueCloneService.new(project, event, volume_clones)
+        enqueue.perform
+        errors.concat enqueue.errors
       end
 
       # Clear project icon cache
@@ -105,6 +91,5 @@ module DeployServices
 
       errors.empty?
     end
-
   end
 end

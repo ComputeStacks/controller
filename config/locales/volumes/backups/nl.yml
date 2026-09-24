@@ -5,6 +5,12 @@ nl:
       restore:
         title_html: '<i class="fa-solid fa-rotate"></i> Restore'
         confirm: Are you sure? This will wipe out the current data set and restart the associated containers.
+      download:
+        ready_html: '<i class="fa-solid fa-download"></i> Download'
+        preparing_html: '<i class="fa-solid fa-rotate fa-spin"></i> Preparing…'
+        request_html: '<i class="fa-solid fa-download"></i> Request download'
+        expires: Link expires
+        failed: Previous download failed — try again
       name: Backup Name
       title: Backups
       size:

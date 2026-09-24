@@ -8,7 +8,6 @@
 #   @return [Integer]
 #
 class ContainerImageCollection < ApplicationRecord
-
   include Auditable
 
   default_scope { order :sort }
@@ -70,5 +69,4 @@ class ContainerImageCollection < ApplicationRecord
 
     end
   end
-
 end

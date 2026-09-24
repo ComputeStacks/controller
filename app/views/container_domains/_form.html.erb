@@ -1,31 +1,31 @@
 <div class="panel-body">
   <% if @domain.system_domain %>
     <div class="form-group">
-      <label><%= t 'container_services.domains.form.enabled' %></label>
-      <%= f.check_box :enabled, class: 'form-control' %>
-      <span class="help-block"><%= t 'container_services.domains.form.enabled_help.system' %></span>
+      <label><%= t "container_services.domains.form.enabled" %></label>
+      <%= f.check_box :enabled, class: "form-control" %>
+      <span class="help-block"><%= t "container_services.domains.form.enabled_help.system" %></span>
     </div>
   <% else %>
     <div class="row">
       <div class="col-sm-12">
         <div class="form-group">
-          <label><%= t 'obj.domain' %></label>
-          <%= f.text_field :domain, class: 'form-control' %>
+          <label><%= t "obj.domain" %></label>
+          <%= f.text_field :domain, class: "form-control" %>
         </div>
       </div>
     </div>
     <div class="row">
       <div class="col-sm-6">
         <div class="form-group">
-          <label><%= t 'container_services.domains.form.le' %></label>
-          <%= f.check_box :le_enabled, class: 'form-control' %>
+          <label><%= t "container_services.domains.form.le" %></label>
+          <%= f.check_box :le_enabled, class: "form-control" %>
         </div>
       </div>
       <div class="col-sm-6">
         <div class="form-group">
-          <label><%= t 'container_services.domains.form.enabled' %></label>
-          <%= f.check_box :enabled, class: 'form-control' %>
-          <span class="help-block"><%= t 'container_services.domains.form.enabled_help.user' %></span>
+          <label><%= t "container_services.domains.form.enabled" %></label>
+          <%= f.check_box :enabled, class: "form-control" %>
+          <span class="help-block"><%= t "container_services.domains.form.enabled_help.user" %></span>
         </div>
       </div>
     </div>
@@ -33,27 +33,65 @@
       <div class="col-sm-6">
         <div class="form-group">
           <label>Redirect HTTP to HTTPS</label>
-          <%= f.check_box :force_https, class: 'form-control' %>
-          <span class="help-block">Used for custom SSL only, LetsEncrypt will auto-redirect.</span>
+          <%= f.check_box :force_https, class: "form-control" %>
+          <span class="help-block">Used for custom SSL only, Automatic SSL will auto-redirect.</span>
         </div>
       </div>
       <div class="col-sm-6">
         <div class="form-group">
-          <label><%= t 'container_services.domains.form.hsts' %></label>
-          <% if @domain.system_domain || @domain.le_active? %>
-           <%= f.check_box :header_hsts, class: 'form-control', disabled: 'disabled' %>
-            <span class="help-block"><%= t 'container_services.domains.form.hsts_auto_help' %></span>
-          <% else%>
-            <%= f.check_box :header_hsts, class: 'form-control' %>
-            <span class="help-block"><%= t 'container_services.domains.form.hsts_help' %></span>
-          <% end%>
+          <label><%= t "container_services.domains.form.frame_options" %></label>
+          <%= f.check_box :header_frame_options, class: "form-control" %>
+          <span class="help-block"><%= t "container_services.domains.form.frame_options_help" %></span>
         </div>
       </div>
     </div>
-    <%= render partial: 'container_domains/form_rel', locals: { deployment: @deployment, services: @services, ingress_rules: @ingress_rules, domain: @domain } %>
+    <div class="panel panel-default">
+      <div class="panel-heading"><%= t "container_services.domains.form.hsts_group" %></div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label><%= t "container_services.domains.form.hsts" %></label>
+              <% if @domain.system_domain || @domain.le_active? %>
+                <%= f.check_box :header_hsts, class: "form-control", disabled: "disabled", data: {hsts_master: true} %>
+                <span class="help-block"><%= t "container_services.domains.form.hsts_auto_help" %></span>
+              <% else %>
+                <%= f.check_box :header_hsts, class: "form-control", data: {hsts_master: true} %>
+                <span class="help-block"><%= t "container_services.domains.form.hsts_help" %></span>
+              <% end %>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label><%= t "container_services.domains.form.hsts_include_subdomains" %></label>
+              <%= f.check_box :hsts_include_subdomains, class: "form-control", data: {hsts_subdomains: true} %>
+              <span class="help-block"><%= t "container_services.domains.form.hsts_include_subdomains_help" %></span>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label><%= t "container_services.domains.form.hsts_preload" %></label>
+              <%= f.check_box :hsts_preload, class: "form-control", data: {hsts_preload: true} %>
+              <span class="help-block"><%= t "container_services.domains.form.hsts_preload_help" %></span>
+            </div>
+          </div>
+        </div>
+        <span class="help-block"><%= t "container_services.domains.form.hsts_group_help" %></span>
+      </div>
+    </div>
+    <%= render partial: "container_domains/form_rel",
+    locals: {
+      deployment: @deployment,
+      services: @services,
+      ingress_rules: @ingress_rules,
+      domain: @domain,
+    } %>
   <% end %>
 </div>
 <div class="panel-footer">
-  <%= link_to t('actions.cancel'), :back, class: 'btn btn-default', style: 'margin-right: 10px;' %>
-  <%= submit_tag t('actions.save'), class: 'btn btn-success pull-right' %>
+  <%= link_to t("actions.cancel"),
+  :back,
+  class: "btn btn-default",
+  style: "margin-right: 10px;" %>
+  <%= submit_tag t("actions.save"), class: "btn btn-success pull-right" %>
 </div>

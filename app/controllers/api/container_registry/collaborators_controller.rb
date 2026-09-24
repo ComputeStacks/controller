@@ -1,9 +1,7 @@
 ##
 # Container Registry Collaborators
 class Api::ContainerRegistry::CollaboratorsController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :images_read }, only: %i[index show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :images_write }, only: %i[update create destroy], unless: :current_user
+  api_scope read: :images_read, write: :images_write
 
   before_action :load_registry
   before_action :find_collab, only: %i[show destroy]
@@ -13,7 +11,7 @@ class Api::ContainerRegistry::CollaboratorsController < Api::ApplicationControll
   #
   # `GET /api/container_registry/{container-registry-id}/collaborators`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `images_read`
   #
   #   * `collaborations`: Array
   #       * `id`: Integer
@@ -25,7 +23,7 @@ class Api::ContainerRegistry::CollaboratorsController < Api::ApplicationControll
   def index
     @collaborators = @registry.container_registry_collaborators
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/index_type' }
+      format.any(:json, :xml) { render template: "api/collaborations/index_type" }
     end
   end
 
@@ -34,7 +32,7 @@ class Api::ContainerRegistry::CollaboratorsController < Api::ApplicationControll
   #
   # `GET /api/container_registry/{container-registry-id}/collaborators/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `images_read`
   #
   # * `collaboration`: Object
   #     * `id`: String
@@ -52,7 +50,7 @@ class Api::ContainerRegistry::CollaboratorsController < Api::ApplicationControll
   #
   def show
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/show' }
+      format.any(:json, :xml) { render template: "api/collaborations/show" }
     end
   end
 
@@ -61,7 +59,7 @@ class Api::ContainerRegistry::CollaboratorsController < Api::ApplicationControll
   #
   # `POST /api/container_registry/{container-registry-id}/collaborators`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `images_write`
   #
   # * `collaborator`: Object
   #     * `user_email`: String
@@ -70,7 +68,7 @@ class Api::ContainerRegistry::CollaboratorsController < Api::ApplicationControll
     @collab = @registry.container_registry_collaborators.new user_email: collaborator_params[:user_email], current_user: current_user
     return api_obj_error(@collab.errors.full_messages) unless @collab.save
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/show', status: :created }
+      format.any(:json, :xml) { render template: "api/collaborations/show", status: :created }
     end
   end
 
@@ -79,7 +77,7 @@ class Api::ContainerRegistry::CollaboratorsController < Api::ApplicationControll
   #
   # `DELETE /api/container_registry/{container-registry-id}/collaborators/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `images_write`
   #
   def destroy
     return api_obj_error(@collab.errors.full_messages) unless @collab.destroy
@@ -89,7 +87,7 @@ class Api::ContainerRegistry::CollaboratorsController < Api::ApplicationControll
   private
 
   def load_registry
-    @registry = ContainerRegistry.find_for current_user, { id: params[:container_registry_id] }
+    @registry = ContainerRegistry.find_for current_user, {id: params[:container_registry_id]}
     return api_obj_missing if @registry.nil?
     return api_obj_missing unless @registry.can_administer?(current_user)
     @registry.current_user = current_user
@@ -104,5 +102,4 @@ class Api::ContainerRegistry::CollaboratorsController < Api::ApplicationControll
   def collaborator_params
     params.require(:collaborator).permit(:user_email)
   end
-
 end

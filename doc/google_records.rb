@@ -1,39 +1,39 @@
 zone = Dns::Zone.find(20)
 params = [
   {
-    name: '@',
+    name: "@",
     priority: 1,
     ttl: 86400,
-    type: 'MX',
-    hostname: 'ASPMX.L.GOOGLE.COM.'
+    type: "MX",
+    hostname: "ASPMX.L.GOOGLE.COM."
   },
   {
-    name: '@',
+    name: "@",
     priority: 5,
     ttl: 86400,
-    type: 'MX',
-    hostname: 'ALT1.ASPMX.L.GOOGLE.COM.'
+    type: "MX",
+    hostname: "ALT1.ASPMX.L.GOOGLE.COM."
   },
   {
-    name: '@',
+    name: "@",
     priority: 5,
     ttl: 86400,
-    type: 'MX',
-    hostname: 'ALT2.ASPMX.L.GOOGLE.COM.'
+    type: "MX",
+    hostname: "ALT2.ASPMX.L.GOOGLE.COM."
   },
   {
-    name: '@',
+    name: "@",
     priority: 10,
     ttl: 86400,
-    type: 'MX',
-    hostname: 'ASPMX2.GOOGLEMAIL.COM.'
+    type: "MX",
+    hostname: "ASPMX2.GOOGLEMAIL.COM."
   },
   {
-    name: '@',
+    name: "@",
     priority: 10,
     ttl: 86400,
-    type: 'MX',
-    hostname: 'ASPMX3.GOOGLEMAIL.COM.'
+    type: "MX",
+    hostname: "ASPMX3.GOOGLEMAIL.COM."
   }
 ]
 params.each do |p|
@@ -43,4 +43,4 @@ params.each do |p|
 end
 
 record = Dns::ZoneRecord.new(nil, zone)
-response = record.create!({name: '@', ttl: 86400, type: 'TXT', value: 'v=spf1 include:_spf.google.com ~all'})
+record.create!({name: "@", ttl: 86400, type: "TXT", value: "v=spf1 include:_spf.google.com ~all"})

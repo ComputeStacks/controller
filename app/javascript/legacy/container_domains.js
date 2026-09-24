@@ -96,4 +96,21 @@ jQuery(function() {
       });
     }
   });
+
+  // HSTS sub-options only apply when the HSTS header is enabled; preload
+  // additionally requires includeSubDomains. Disable the dependent checkboxes so
+  // the dependency is visually clear.
+  const $hstsMaster = $('[data-hsts-master]');
+  const $hstsSubdomains = $('[data-hsts-subdomains]');
+  const $hstsPreload = $('[data-hsts-preload]');
+  if ($hstsMaster.length && $hstsSubdomains.length && $hstsPreload.length) {
+    const syncHstsOptions = function() {
+      const hstsOn = $hstsMaster.is(':checked');
+      $hstsSubdomains.prop('disabled', !hstsOn);
+      $hstsPreload.prop('disabled', !(hstsOn && $hstsSubdomains.is(':checked')));
+    };
+    $hstsMaster.on('change', syncHstsOptions);
+    $hstsSubdomains.on('change', syncHstsOptions);
+    syncHstsOptions();
+  }
 });

@@ -1,12 +1,10 @@
-require 'test_helper'
+require "test_helper"
 
 class VolumesControllerTest < ActionDispatch::IntegrationTest
-
   include StandardTestControllerBase
   include Devise::Test::IntegrationHelpers
 
-  test 'collaborats can view volume' do
-
+  test "collaborats can view volume" do
     sign_in users(:user)
 
     d = deployments :project_test
@@ -26,7 +24,5 @@ class VolumesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     d.deployment_collaborators.delete_all
-
   end
-
 end

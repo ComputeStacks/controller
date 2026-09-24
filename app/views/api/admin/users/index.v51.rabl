@@ -1,4 +1,4 @@
-collection @users, root: 'users', object_root: false
+collection @users, root: "users", object_root: false
 attributes :id, :fname, :lname, :email, :active, :is_admin, :api_key, :api_version, :external_id, :billing_plan_id, :currency, :confirmed_at, :confirmation_sent_at, :last_request_at, :last_sign_in_at, :current_sign_in_at, :sign_in_count, :reset_password_sent_at, :locked_at, :failed_attempts, :address1, :address2, :city, :state, :zip, :country, :vat, :labels, :created_at, :updated_at
 node :currency_symbol do |i|
   Money.new(1, i.currency).symbol

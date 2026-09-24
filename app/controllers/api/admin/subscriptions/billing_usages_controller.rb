@@ -2,8 +2,7 @@
 # # Billing Usage
 #
 class Api::Admin::Subscriptions::BillingUsagesController < Api::Admin::Subscriptions::BaseController
-
-  before_action :load_usage, except: %i[ index ]
+  before_action :load_usage, except: %i[index]
 
   ##
   # List Usage for a subscription
@@ -58,10 +57,10 @@ class Api::Admin::Subscriptions::BillingUsagesController < Api::Admin::Subscript
   #         * `labels`: Object
 
   def index
-    if @user
-      @usages = paginate @user.billing_usages
+    @usages = if @user
+      paginate @user.billing_usages
     else
-      @usages = paginate @subscription.billing_usages
+      paginate @subscription.billing_usages
     end
     respond_to :json, :xml
   end
@@ -139,5 +138,4 @@ class Api::Admin::Subscriptions::BillingUsagesController < Api::Admin::Subscript
     @usage = BillingUsage.find_by(id: params[:id])
     api_obj_missing(["Unknown Usage."]) if @usage.nil?
   end
-
 end

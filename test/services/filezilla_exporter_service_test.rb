@@ -1,8 +1,7 @@
-require 'test_helper'
+require "test_helper"
 
 class FilezillaExporterServiceTest < ActiveSupport::TestCase
-
-  test 'can generate export for a project' do
+  test "can generate export for a project" do
     deployment = deployments :project_test
     data = UtilityServices::FilezillaExporterService.new
     data.deployment = deployment
@@ -39,7 +38,6 @@ class FilezillaExporterServiceTest < ActiveSupport::TestCase
     # Generate a hash of expected server values to test against
     server = []
     deployment.services.each do |service|
-
       next unless service.requires_sftp_containers?
       next if service.volumes.sftp_enabled.empty?
       sftp = service.sftp_containers.first
@@ -64,7 +62,7 @@ class FilezillaExporterServiceTest < ActiveSupport::TestCase
       selected_child = nil
       parsed_child_elements.each do |el|
         next if el.children.empty?
-        check_exists = el.children.select {|i| i.name == "Name" && i.content == item[:name]}
+        check_exists = el.children.select { |i| i.name == "Name" && i.content == item[:name] }
         next if check_exists.empty?
         selected_child = el
       end
@@ -85,8 +83,5 @@ class FilezillaExporterServiceTest < ActiveSupport::TestCase
         end
       end
     end
-
-
   end
-
 end

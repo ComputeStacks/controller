@@ -20,7 +20,6 @@
 #   @return [Boolean] Owner map is the primary mount, where backup rules etc are referenced from.
 #
 class VolumeMap < ApplicationRecord
-
   include Auditable
   include Volumes::VolumeMount
 
@@ -28,12 +27,12 @@ class VolumeMap < ApplicationRecord
   scope :only_services, -> { where.not container_service: nil }
 
   belongs_to :volume
-  belongs_to :container_service, class_name: 'Deployment::ContainerService'
+  belongs_to :container_service, class_name: "Deployment::ContainerService"
   has_one :deployment, through: :container_service
   has_many :containers, through: :container_service
 
   validates :mount_path, format: {with: /[\x00-\x1F\/\\:\*\?\"<>\|]/u}
-  validates :mount_path, presence: true, uniqueness: { scope: :container_service }
+  validates :mount_path, presence: true, uniqueness: {scope: :container_service}
   validate :no_nested_volumes
 
   before_destroy :ensure_not_primary
@@ -57,5 +56,4 @@ class VolumeMap < ApplicationRecord
     end
     errors.add(:mount_path, "is already in use.") if is_parent
   end
-
 end

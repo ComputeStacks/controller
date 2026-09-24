@@ -1,5 +1,4 @@
 module Admin::ContainerRegistriesHelper
-
   def admin_registries_path
     "/admin/container_registry"
   end
@@ -23,5 +22,4 @@ module Admin::ContainerRegistriesHelper
   def admin_registry_collaborator_path(registry, collaborator)
     admin_registry_collaborators_path(registry) + "/" + collaborator.id.to_s
   end
-
 end

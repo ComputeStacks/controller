@@ -4,24 +4,24 @@ module MockRegistry
   def mock_repositories
     data = [
       {
-        image: 'myapp',
+        image: "myapp",
         tags: [
           {
-            tag: 'latest'
+            tag: "latest"
           },
           {
-            tag: 'v1.0'
+            tag: "v1.0"
           },
           {
-            tag: 'beta'
+            tag: "beta"
           }
         ]
       },
       {
-        image: 'db',
+        image: "db",
         tags: [
           {
-            tag: 'latest'
+            tag: "latest"
           }
         ]
       }
@@ -32,11 +32,11 @@ module MockRegistry
         container_check = container_check.image_variants.find_by registry_image_tag: tag[:tag] if container_check
         unless container_check.nil?
           tag.merge!({
-                     container: {
-                       id: container_check.id,
-                       name: container_check.name
-                     }
-                   })
+            container: {
+              id: container_check.id,
+              name: container_check.name
+            }
+          })
         end
       end
     end
@@ -44,8 +44,7 @@ module MockRegistry
   end
 
   def mock_deploy!
-    set_port! if self.port.zero?
-    update_column :status, 'deployed'
+    set_port! if port.zero?
+    update_column :status, "deployed"
   end
-
 end

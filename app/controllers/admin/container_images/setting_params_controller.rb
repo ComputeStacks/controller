@@ -1,5 +1,4 @@
 class Admin::ContainerImages::SettingParamsController < Admin::ContainerImages::BaseController
-
   before_action :find_setting, only: [:edit, :update, :destroy]
 
   def new
@@ -34,7 +33,7 @@ class Admin::ContainerImages::SettingParamsController < Admin::ContainerImages::
     if @setting.destroy
       flash[:success] = "#{name} deleted."
     else
-      flash[:alert] = "Error: #{@setting.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error: #{@setting.errors.full_messages.join(" ")}"
     end
     redirect_to helpers.container_image_path(@image)
   end
@@ -53,6 +52,4 @@ class Admin::ContainerImages::SettingParamsController < Admin::ContainerImages::
   def setting_params
     params.require(:container_image_setting_param).permit(:name, :label, :param_type, :value)
   end
-
-
 end

@@ -12,7 +12,7 @@ module ImagePlugins
     # @return [Symbol] :container, :service, :aggregate
     def marketplace_billable_group
       case name
-      when 'demo', 'another_demo', 'required_demo'
+      when "demo", "another_demo", "required_demo"
         :container
       else
         :service
@@ -28,9 +28,9 @@ module ImagePlugins
     # @return [Hash]
     def marketplace_usage_report(service_plugin)
       case name
-      when 'monarx'
+      when "monarx"
         marketplace_usage_for_monarx service_plugin
-      when 'demo', 'another_demo', 'required_demo'
+      when "demo", "another_demo", "required_demo"
         marketplace_usage_for_demo service_plugin
       else
         {}
@@ -40,11 +40,10 @@ module ImagePlugins
     # @return [Array]
     def marketplace_enabled_services
       if Rails.env.production?
-        %w(monarx)
+        %w[monarx]
       else
-        %w(monarx demo another_demo required_demo)
+        %w[monarx demo another_demo required_demo]
       end
     end
-
   end
 end

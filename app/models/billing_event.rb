@@ -37,16 +37,15 @@
 #   @return [Product]
 #
 class BillingEvent < ApplicationRecord
-
   default_scope { order(created_at: :desc) }
 
-  belongs_to :performed_by, class_name: 'User', foreign_key: 'user_id', optional: true
+  belongs_to :performed_by, class_name: "User", foreign_key: "user_id", optional: true
   belongs_to :subscription_product, optional: true
   belongs_to :subscription, optional: true # Used for tracking global subscription changes. i.e. cancellations.
   belongs_to :audit, optional: true
 
-  belongs_to :source_product, class_name: 'Product', foreign_key: 'from_product_id', optional: true
-  belongs_to :destination_product, class_name: 'Product', foreign_key: 'to_product_id', optional: true
+  belongs_to :source_product, class_name: "Product", foreign_key: "from_product_id", optional: true
+  belongs_to :destination_product, class_name: "Product", foreign_key: "to_product_id", optional: true
 
   has_one :user, through: :subscription
 
@@ -61,17 +60,15 @@ class BillingEvent < ApplicationRecord
   end
 
   def linked_obj
-    return nil if self.rel_model.nil?
-    eval("#{self.rel_model}").find_by(id: self.rel_id)
+    return nil if rel_model.nil?
+    eval("#{rel_model}").find_by(id: rel_id)
   end
 
   def url(admin = true)
-    return nil if self.linked_obj.nil?
-    case self.rel_model
-    when 'Deployment::Container'
-      admin ? "/admin/deployments/#{self.linked_obj.deployment.token}/containers/#{self.rel_id}" : "/deployments/#{self.linked_obj.deployment.token}/containers/#{self.rel_id}"
-    else
-      nil
+    return nil if linked_obj.nil?
+    case rel_model
+    when "Deployment::Container"
+      admin ? "/admin/deployments/#{linked_obj.deployment.token}/containers/#{rel_id}" : "/deployments/#{linked_obj.deployment.token}/containers/#{rel_id}"
     end
   end
 
@@ -80,5 +77,4 @@ class BillingEvent < ApplicationRecord
   def init_webhook!
     WebHookJob.perform_later(self)
   end
-
 end

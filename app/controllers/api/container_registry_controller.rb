@@ -1,9 +1,7 @@
 ##
 # Container Registry API
 class Api::ContainerRegistryController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :images_read }, only: %i[index show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :images_write }, only: %i[update create destroy], unless: :current_user
+  api_scope read: :images_read, write: :images_write
 
   before_action :load_registry, except: [:index, :create]
 
@@ -49,7 +47,8 @@ class Api::ContainerRegistryController < Api::ApplicationController
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   ##
   # Update Container Registry
@@ -72,9 +71,8 @@ class Api::ContainerRegistryController < Api::ApplicationController
       end
     end
   rescue => e
-    return api_fatal_error(e, 'a55db85e89aecd4f')
+    api_fatal_error(e, "a55db85e89aecd4f")
   end
-
 
   ##
   # Create Container Registry
@@ -99,7 +97,7 @@ class Api::ContainerRegistryController < Api::ApplicationController
       end
     end
   rescue => e
-    return api_fatal_error(e, '916c7b337f1171d5')
+    api_fatal_error(e, "916c7b337f1171d5")
   end
 
   ##
@@ -116,8 +114,8 @@ class Api::ContainerRegistryController < Api::ApplicationController
           format.json { render json: {}, status: :accepted }
           format.xml { render xml: {}, status: :accepted }
         else
-          format.json { render json: { errors: @registry.errors.full_messages }, status: :bad_request }
-          format.xml { render xml: { errors: @registry.errors.full_messages }, status: :bad_request }
+          format.json { render json: {errors: @registry.errors.full_messages}, status: :bad_request }
+          format.xml { render xml: {errors: @registry.errors.full_messages}, status: :bad_request }
         end
 
       else
@@ -126,7 +124,7 @@ class Api::ContainerRegistryController < Api::ApplicationController
       end
     end
   rescue => e
-    return api_fatal_error(e, 'e3851bbfe5d21988')
+    api_fatal_error(e, "e3851bbfe5d21988")
   end
 
   private
@@ -136,9 +134,8 @@ class Api::ContainerRegistryController < Api::ApplicationController
   end
 
   def load_registry
-    @registry = ContainerRegistry.find_for current_user, { id: params[:id] }
+    @registry = ContainerRegistry.find_for current_user, {id: params[:id]}
     return api_obj_missing if @registry.nil?
     @registry.current_user = current_user
   end
-
 end

@@ -7,6 +7,8 @@ de:
       new_button_help: "Volumes sind persistenter Speicher für Ihren Container. Sie können mehrere Volumes pro Container haben, die an verschiedenen Stellen eingehängt sind."
       usage: Verwendung
       backups: Backups
+      cascade: Auf bestehende Dienste anwenden
+      cascade_confirm: "Dieses Volume auf allen bereitgestellten Diensten dieses Images anlegen? Container binden es beim nächsten Neuaufbau ein — es wird jetzt nichts neu gestartet. Alles, was an diesem Pfad bereits im Container gespeichert ist, wird durch das neue leere Volume verborgen, sobald es eingebunden wird."
     table:
       title: Persistenter Speicher
       name: Name
@@ -18,6 +20,33 @@ de:
       delete:
         confirm: Sind Sie sicher?
         attached: Trennen Sie den Dienst vor dem Löschen.
+    clone_status:
+      column: Daten
+      restoring: Daten werden wiederhergestellt
+      failed: Wiederherstellung fehlgeschlagen
+      banner:
+        one: "Daten werden in 1 Volume wiederhergestellt."
+        other: "Daten werden in %{count} Volumes wiederhergestellt."
+      banner_help: Ihre Dienste laufen bereits — die Daten werden im Hintergrund weiter kopiert.
+      banner_failed:
+        one: "Bei 1 Volume wurde die Wiederherstellung nicht abgeschlossen."
+        other: "Bei %{count} Volumes wurde die Wiederherstellung nicht abgeschlossen."
+      banner_failed_help: Das Volume ist möglicherweise leer oder enthält eine unvollständige Kopie. Prüfen Sie das Ereignis, bevor Sie es verwenden.
+      details: Details
+      steps:
+        pending: Wird vorbereitet
+        awaiting_container: Warten auf den Container
+        resolving_source: Quell-Volume wird geprüft
+        dispatching_backup: Snapshot wird angefordert
+        awaiting_backup: Snapshot des Quell-Volumes wird erstellt
+        discovering_archive: Snapshot wird gesucht
+        dispatching_restore: Wiederherstellung wird angefordert
+        awaiting_restore: Daten werden kopiert
+    awaiting_mount:
+      label: Ausstehend — wird beim nächsten Neuaufbau eingebunden
+      help: Das Volume existiert, aber kein Container hat es bisher eingebunden. Es bleibt leer und für Ihre Anwendung unsichtbar, bis dieser Dienst das nächste Mal neu aufgebaut wird.
+      backups: Backups pausiert
+      backups_help: Backups beginnen, sobald ein Container dieses Volume einbindet.
     path: Pfad
     containers: Angehängte Container
     high_availability:

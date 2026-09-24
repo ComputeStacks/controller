@@ -23,26 +23,35 @@
 #   @return [String]
 #
 class Network < ApplicationRecord
-
   include Auditable
   include NetworkSubnetManager
+
+  ##
+  # The labels docker carries for us on every network we create.
+  #
+  # `NETWORK_ID_LABEL` is the only handle on a docker network that survives this row being
+  # returned to the pool and reallocated -- allocation RENAMES the row (see
+  # NetworkServices::GenerateProjectNetworkService) and the name is what every other lookup
+  # uses. A copy left on a node across a release is findable by this and nothing else.
+  NETWORK_ID_LABEL = "com.computestacks.network_id"
+  DEPLOYMENT_ID_LABEL = "com.computestacks.deployment_id"
 
   scope :sorted, -> { order "lower(name) DESC" }
   scope :active, -> { where active: true }
   scope :inactive, -> { where active: false }
   scope :shared, -> { where is_shared: true }
-  scope :bridged, -> { where network_driver: 'bridge' }
-  scope :clustered, -> { where network_driver: 'calico_docker' }
+  scope :bridged, -> { where network_driver: "bridge" }
+  scope :clustered, -> { where network_driver: "calico_docker" }
 
-  validates :name, presence: true, uniqueness: { scope: :region_id }
+  validates :name, presence: true, uniqueness: {scope: :region_id}
   validates :label, presence: true
-  validates :subnet, presence: true, uniqueness: { scope: :region_id }
-  validates :network_driver, inclusion: { in: %w(calico_docker bridge) }
+  validates :subnet, presence: true, uniqueness: {scope: :region_id}
+  validates :network_driver, inclusion: {in: %w[calico_docker bridge]}
 
   validate :check_cidr_range
 
-  belongs_to :parent_network, class_name: 'Network', foreign_key: 'parent_network_id', optional: true
-  has_many :child_networks, class_name: 'Network', foreign_key: 'parent_network_id', dependent: :destroy
+  belongs_to :parent_network, class_name: "Network", foreign_key: "parent_network_id", optional: true
+  has_many :child_networks, class_name: "Network", foreign_key: "parent_network_id", dependent: :destroy
 
   belongs_to :deployment, optional: true
   belongs_to :region, optional: true
@@ -50,12 +59,12 @@ class Network < ApplicationRecord
   has_one :location, through: :region
   has_many :nodes, through: :region
 
-  has_many :addresses, class_name: 'Network::Cidr', dependent: :restrict_with_error
+  has_many :addresses, class_name: "Network::Cidr", dependent: :restrict_with_error
 
-  before_save :format_network_name
+  before_validation :format_network_name
 
   def to_net
-    "#{subnet.to_s}/#{subnet.prefix}"
+    "#{subnet}/#{subnet.prefix}"
   end
 
   def to_addr
@@ -64,7 +73,7 @@ class Network < ApplicationRecord
   end
 
   def has_clustered_networking?
-    network_driver == 'calico_docker'
+    network_driver == "calico_docker"
   end
 
   def docker_client(node)
@@ -111,25 +120,24 @@ class Network < ApplicationRecord
   private
 
   def check_cidr_range
-    errors.add(:subnet, 'Only IPv4 is enabled.') if subnet.ipv6?
-    errors.add(:subnet, 'Must be at least a /29') if subnet.to_range.count < 16
+    errors.add(:subnet, "Only IPv4 is enabled.") if subnet.ipv6?
+    errors.add(:subnet, "Must be at least a /29") if subnet.to_range.count < 16
     # Check for private ranges
-    case subnet.to_s.split('.').first.to_i
+    case subnet.to_s.split(".").first.to_i
     when 10
-      errors.add(:subnet, 'Must be a private IP range. 10.x networks need to be within 10.0.0.0/8.') unless IPAddr.new('10.0.0.0/8').include?(subnet)
+      errors.add(:subnet, "Must be a private IP range. 10.x networks need to be within 10.0.0.0/8.") unless IPAddr.new("10.0.0.0/8").include?(subnet)
     when 172
-      errors.add(:subnet, 'Must be a private IP range. 172.x networks need to be within 172.16.0.0/12.') unless IPAddr.new('172.16.0.0/12').include?(subnet)
+      errors.add(:subnet, "Must be a private IP range. 172.x networks need to be within 172.16.0.0/12.") unless IPAddr.new("172.16.0.0/12").include?(subnet)
     when 192
-      errors.add(:subnet, 'Must be a private IP range. 192.x networks need to be within 192.168.0.0/16.') unless IPAddr.new('192.168.0.0/16').include?(subnet)
+      errors.add(:subnet, "Must be a private IP range. 192.x networks need to be within 192.168.0.0/16.") unless IPAddr.new("192.168.0.0/16").include?(subnet)
     else
-      errors.add(:subnet, 'Must be a private IP range')
+      errors.add(:subnet, "Must be a private IP range")
     end
   rescue
     errors.add(:cidr)
   end
 
   def format_network_name
-    self.name = name.strip.downcase.gsub(/[^0-9A-Za-z]/, '')
+    self.name = name.strip.downcase.gsub(/[^0-9A-Za-z]/, "")
   end
-
 end

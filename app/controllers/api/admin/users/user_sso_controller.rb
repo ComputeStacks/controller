@@ -11,7 +11,6 @@
 #     https://my-cs-install.com/?username={{user_email}}&token={{auth_token}}
 #
 class Api::Admin::Users::UserSsoController < Api::Admin::Users::BaseController
-
   ##
   # Generate SSO Credential
   #
@@ -23,7 +22,7 @@ class Api::Admin::Users::UserSsoController < Api::Admin::Users::BaseController
   # * `expires`: DateTime
   #
   def create
-    unless @user.update( auth_token: SecureRandom.urlsafe_base64(24), auth_token_exp: 1.minute.from_now )
+    unless @user.update(auth_token: SecureRandom.urlsafe_base64(24), auth_token_exp: 1.minute.from_now)
       return api_obj_error(@user.errors.full_messages)
     end
     msg = {
@@ -36,5 +35,4 @@ class Api::Admin::Users::UserSsoController < Api::Admin::Users::BaseController
       format.xml { render xml: msg, status: :created }
     end
   end
-
 end

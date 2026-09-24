@@ -14,7 +14,6 @@
 #   @return [User]
 #
 class User::ApiCredential < ApplicationRecord
-
   include Auditable
   belongs_to :user
 
@@ -23,7 +22,7 @@ class User::ApiCredential < ApplicationRecord
   attr_accessor :generated_password # Only visible when created.
 
   def find_by_username(u)
-    where(username: u, users: { active: true }).joins(:user).first
+    where(username: u, users: {active: true}).joins(:user).first
   end
 
   def valid_password?(pw)
@@ -41,8 +40,8 @@ class User::ApiCredential < ApplicationRecord
       false
     end
   rescue => e
-    ExceptionAlertService.new(e, '9fb6e21854ad8d6e').perform
-    return false
+    ExceptionAlertService.new(e, "9fb6e21854ad8d6e").perform
+    false
   end
 
   private
@@ -54,5 +53,4 @@ class User::ApiCredential < ApplicationRecord
     end
     self.username = SecureRandom.urlsafe_base64(14) if username.blank?
   end
-
 end

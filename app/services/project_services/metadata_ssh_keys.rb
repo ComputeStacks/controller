@@ -3,16 +3,17 @@
 #
 module ProjectServices
   class MetadataSshKeys
-
     attr_accessor :deployment
 
     def initialize(deployment)
       self.deployment = deployment
-      @consul_base = "projects/#{deployment.token}"
     end
 
     def perform
-      Diplomat::Kv.put("#{@consul_base}/ssh_keys", data.to_json, deployment.region.consul_config)
+      return false if deployment&.region.nil?
+      Agent::Client.new(deployment, region: deployment.region).put_managed("ssh_keys", data.to_json)
+    rescue Agent::Client::NotReady
+      false
     end
 
     def data
@@ -33,6 +34,5 @@ module ProjectServices
       end
       k
     end
-
   end
 end

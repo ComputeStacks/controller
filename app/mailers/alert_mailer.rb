@@ -1,5 +1,4 @@
 class AlertMailer < ApplicationMailer
-
   layout false
 
   # @param [AlertNotification] alert
@@ -11,13 +10,13 @@ class AlertMailer < ApplicationMailer
     if alert.container
       c = alert.container
       s = c.service
-      @labels << [ "Project", c.deployment&.name ]
-      @labels << [ "Container", c.name ]
-      @labels << [ "Service", s.label ]
-      @labels << [ "Primary Domain", s.master_domain.domain ] if s.master_domain
+      @labels << ["Project", c.deployment&.name]
+      @labels << ["Container", c.name]
+      @labels << ["Service", s.label]
+      @labels << ["Primary Domain", s.master_domain.domain] if s.master_domain
     end
-    @labels << [ "SFTP Container", alert.sftp_container.name ] if alert.sftp_container
-    @labels << [ "Node", alert.node.label ] if alert.node
+    @labels << ["SFTP Container", alert.sftp_container.name] if alert.sftp_container
+    @labels << ["Node", alert.node.label] if alert.node
 
     mail to: email_alert, subject: "[#{Setting.app_name}] #{alert.name}"
   end
@@ -31,5 +30,4 @@ class AlertMailer < ApplicationMailer
     @labels = labels
     mail to: email_alert, subject: "[#{Setting.app_name}] #{subject}"
   end
-
 end

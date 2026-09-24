@@ -1,9 +1,8 @@
 ##
 # Billing Phases
 class Api::Admin::BillingPlans::BillingResources::BillingPhasesController < Api::Admin::BillingPlans::BaseController
-
   before_action :find_billing_resource
-  before_action :find_billing_phase, except: %i[ index create ]
+  before_action :find_billing_phase, except: %i[index create]
 
   ##
   # List All Billing Phases
@@ -104,14 +103,11 @@ class Api::Admin::BillingPlans::BillingResources::BillingPhasesController < Api:
 
   def find_billing_resource
     @billing_resource = @billing_plan.billing_resources.find_by(id: params[:billing_resource_id])
-    return api_obj_missing if @billing_resource.nil?
+    api_obj_missing if @billing_resource.nil?
   end
 
   def find_billing_phase
     @phase = @billing_resource.billing_phases.find_by(id: params[:id])
-    return api_obj_missing if @phase.nil?
+    api_obj_missing if @phase.nil?
   end
-
-
-
 end

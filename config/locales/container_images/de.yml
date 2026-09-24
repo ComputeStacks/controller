@@ -53,6 +53,7 @@ de:
     edit:
       breadcrumb: Image bearbeiten
     show:
+      events: Letzte Ereignisse
       overview:
         title: Übersicht
         free: Kostenloses Image?

@@ -5,4 +5,3 @@ node :user_groups do
     partial "api/admin/user_groups/group", object: i
   end
 end
-

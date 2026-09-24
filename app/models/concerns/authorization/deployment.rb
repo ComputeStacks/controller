@@ -4,7 +4,6 @@ module Authorization
     include Authorization::Generic
 
     class_methods do
-
       # @param [User] current_user
       # @return [Array<Deployment>]
       def find_all_for(current_user)
@@ -17,7 +16,7 @@ module Authorization
     def can_view?(current_user)
       return false if current_user.nil?
       return true if current_user.is_admin
-      return false if status == 'deleting' || deleting?
+      return false if status == "deleting" || deleting?
       return true if current_user == user
       deployment_collaborators.where(active: true, user_id: current_user.id).exists?
     end
@@ -30,6 +29,5 @@ module Authorization
       return true if current_user == user
       deployment_collaborators.where(active: true, user_id: current_user.id).exists?
     end
-
   end
 end

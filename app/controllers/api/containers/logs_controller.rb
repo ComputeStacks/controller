@@ -1,13 +1,12 @@
 ##
 # Container Logs API
 class Api::Containers::LogsController < Api::Containers::BaseController
-
   ##
   # View Recent Logs
   #
   # `GET /api/containers/{id}/logs`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `limit`: Integer | How many lines to include?
   # * `period_start`: Integer | Log date range (start). As an integer, time since epoch. Default: 1 day ago
@@ -35,14 +34,13 @@ class Api::Containers::LogsController < Api::Containers::BaseController
   #      ]
   #
   def index
-    limit = params[:limit].to_i > 0 ? params[:limit] : 500
-    period_start = params[:period_start].to_i > 0 ? Time.at(params[:period_start].to_i) : 1.day.ago
-    period_end = params[:period_end].to_i > 0 ? Time.at(params[:period_end].to_i) : Time.now
+    limit = (params[:limit].to_i > 0) ? params[:limit] : 500
+    period_start = (params[:period_start].to_i > 0) ? Time.at(params[:period_start].to_i) : 1.day.ago
+    period_end = (params[:period_end].to_i > 0) ? Time.at(params[:period_end].to_i) : Time.now
     @logs = @container.logs(period_start, period_end, limit)
     respond_to do |format|
       format.json { render json: @logs }
       format.xml { render xml: @logs }
     end
   end
-
 end

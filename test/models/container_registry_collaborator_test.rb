@@ -1,9 +1,7 @@
 require "test_helper"
 
 class ContainerRegistryCollaboratorTest < ActiveSupport::TestCase
-
-  test 'can list collaborated registries' do
-
+  test "can list collaborated registries" do
     r = ContainerRegistry.first
 
     refute_includes ContainerRegistry.find_all_for(users(:user)), r
@@ -17,11 +15,9 @@ class ContainerRegistryCollaboratorTest < ActiveSupport::TestCase
     assert_includes ContainerRegistry.find_all_for(users(:user)), r
 
     r.container_registry_collaborators.delete_all
-
   end
 
-  test 'can add collaborator' do
-
+  test "can add collaborator" do
     r = ContainerRegistry.first
     u = User.where.not(id: r.user.id).first
 
@@ -36,11 +32,9 @@ class ContainerRegistryCollaboratorTest < ActiveSupport::TestCase
     assert r.can_view?(u)
 
     r.container_registry_collaborators.delete_all
-
   end
 
-  test 'delete user also deletes collaborator record' do
-
+  test "delete user also deletes collaborator record" do
     u = User.new(
       fname: "jimmy",
       lname: "little",
@@ -62,7 +56,5 @@ class ContainerRegistryCollaboratorTest < ActiveSupport::TestCase
     u.destroy
 
     refute r.container_registry_collaborators.where(user_id: u.id).exists?
-
   end
-
 end

@@ -2,7 +2,7 @@
 <% content_for :breadcrumb do %>
   <div class="row has-breadcrumb">
     <ol class="breadcrumb">
-      <li><%= link_to 'Projects', "/admin/deployments" %></li>
+      <li><%= link_to "Projects", "/admin/deployments" %></li>
       <li class="active"><%= @deployment.name %></li>
     </ol>
   </div>
@@ -18,16 +18,30 @@
     </p>
   </div>
   <div class="text-right col-sm-6">
-    <div class="btn-group" style="margin-right:10px;">
-      <%= link_to '<i class="fa-solid fa-up-right-from-square"></i> Project Details'.html_safe, "/deployments/#{@deployment.token}", class: 'btn btn-primary btn-sm' %>
-    </div>
-    <div class="btn-group" style="margin-right:10px;">
-      <%= link_to '<i class="fa-solid fa-rotate"></i> Rebuild SFTP'.html_safe, "/admin/deployments/#{@deployment.id}/sftp", method: :post, class: 'btn btn-default btn-sm' %>
-    </div>
-    <div class="btn-group">
-      <%= link_to icon('fa-solid', 'wrench'), "/admin/deployments/#{@deployment.id}/edit", class: "btn btn-sm btn-default" %>
-      <%= link_to icon('fa-solid', 'trash'), "/admin/deployments/#{@deployment.id}", method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-sm btn-danger" %>
-    </div>
+    <%= render partial: "deployments/cloud_shell/button",
+    locals: {
+      deployment: @deployment,
+    } %>
+    <%= link_to '<i class="fa-solid fa-up-right-from-square"></i> Project Details'.html_safe,
+    "/deployments/#{@deployment.token}",
+    class: "btn btn-primary btn-sm",
+    style: "margin-right: 5px;" %>
+    <%= link_to '<i class="fa-solid fa-rotate"></i> Rebuild SFTP'.html_safe,
+    "/admin/deployments/#{@deployment.id}/sftp",
+    method: :post,
+    class: "btn btn-default btn-sm",
+    style: "margin-right: 5px;" %>
+    <%= link_to icon("fa-solid", "wrench"),
+    "/admin/deployments/#{@deployment.id}/edit",
+    class: "btn btn-sm btn-default",
+    style: "margin-right: 5px;" %>
+    <%= link_to icon("fa-solid", "trash"),
+    "/admin/deployments/#{@deployment.id}",
+    method: :delete,
+    data: {
+      confirm: "Are you sure?",
+    },
+    class: "btn btn-sm btn-danger" %>
 
   </div>
 </div>
@@ -41,31 +55,48 @@
   <div class="col-lg-10 col-md-9 col-xs-12">
     <div class="tab-content" style="padding-top:25px;">
       <div role="tabpanel" class="tab-pane active" id="overview">
-        <%= render partial: 'admin/deployments/show/overview', locals: {deployment: @deployment} %>
+        <%= render partial: "admin/deployments/show/overview",
+        locals: {
+          deployment: @deployment,
+        } %>
       </div>
       <div role="tabpanel" class="tab-pane" id="collaborators">
-        <div class="remote-resource refresh" data-url="<%= admin_deployments_path @deployment %>/collaborators">
+        <div
+          class="remote-resource refresh"
+          data-url="<%= admin_deployments_path @deployment %>/collaborators"
+        >
           <div class="text-center" style="padding: 25px 0;">
-            <%= icon('fa-solid fa-spin', 'rotate') %> <%= t 'common.loading_obj', obj: 'collaborators' %>
+            <%= icon("fa-solid fa-spin", "rotate") %>
+            <%= t "common.loading_obj", obj: "collaborators" %>
           </div>
         </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="sftp">
-        <div class="remote-resource refresh" data-url="<%= admin_deployments_path(@deployment) %>/sftp?js=true">
+        <div
+          class="remote-resource refresh"
+          data-url="<%= admin_deployments_path(@deployment) %>/sftp?js=true"
+        >
           <div class="text-center" style="padding: 25px 0;">
-            <%= icon('fa-solid fa-spin', 'rotate') %> <%= t 'common.loading_obj', obj: t('obj.containers') %>
+            <%= icon("fa-solid fa-spin", "rotate") %>
+            <%= t "common.loading_obj", obj: t("obj.containers") %>
           </div>
         </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="domains">
         <div class="row">
           <div class="col-md-12 text-right" style="margin-bottom:15px;">
-            <%= link_to "New Domain", admin_new_container_domain_path(@deployment), class: 'btn btn-success btn-sm' %>
+            <%= link_to "New Domain",
+            admin_new_container_domain_path(@deployment),
+            class: "btn btn-success btn-sm" %>
           </div>
         </div>
         <div class="row">
-          <div class="col-md-12 remote-resource refresh" data-url="<%= admin_deployments_path(@deployment) %>/domains?js=true">
-            <div class="text-center" style="padding: 25px 0;"><%= icon('fa-solid fa-spin', 'rotate') %> <%= t 'common.loading_obj', obj: t('obj.domains') %>
+          <div
+            class="col-md-12 remote-resource refresh"
+            data-url="<%= admin_deployments_path(@deployment) %>/domains?js=true"
+          >
+            <div class="text-center" style="padding: 25px 0;"><%= icon("fa-solid fa-spin", "rotate") %>
+              <%= t "common.loading_obj", obj: t("obj.domains") %>
             </div>
           </div>
         </div>
@@ -75,14 +106,21 @@
           <div class="col-md-12">
             <div class="panel panel-default">
               <div class="panel-body"><strong>SUBSCRIPTIONS</strong></div>
-              <%= render partial: 'admin/subscriptions/index/list', locals: { subscriptions: @deployment.subscriptions } %>
+              <%= render partial: "admin/subscriptions/index/list",
+              locals: {
+                subscriptions: @deployment.subscriptions,
+              } %>
             </div>
           </div>
         </div>
       </div>
       <div role="tabpanel" class="tab-pane refresh" id="volumes">
-        <div class="remote-resource" data-url="<%= admin_deployments_path(@deployment) %>/volumes?js=true">
-          <div class="text-center" style="padding: 25px 0;"><%= icon('fa-solid fa-spin', 'rotate') %> <%= t 'common.loading_obj', obj: t('obj.volumes') %>
+        <div
+          class="remote-resource"
+          data-url="<%= admin_deployments_path(@deployment) %>/volumes?js=true"
+        >
+          <div class="text-center" style="padding: 25px 0;"><%= icon("fa-solid fa-spin", "rotate") %>
+            <%= t "common.loading_obj", obj: t("obj.volumes") %>
           </div>
         </div>
       </div>

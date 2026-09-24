@@ -1,7 +1,6 @@
 ##
 # Project SSH Containers (Bastions)
 class Api::Projects::BastionsController < Api::Projects::BaseController
-
   before_action :find_bastion, only: :show
 
   ##
@@ -9,7 +8,7 @@ class Api::Projects::BastionsController < Api::Projects::BaseController
   #
   # `GET /api/projects/{project-id}/bastions`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `bastions`: Array
   #     * `id`: Integer
@@ -27,7 +26,7 @@ class Api::Projects::BastionsController < Api::Projects::BaseController
   def index
     @bastions = paginate @deployment.sftp_containers
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/bastions/index' }
+      format.any(:json, :xml) { render template: "api/bastions/index" }
     end
   end
 
@@ -36,7 +35,7 @@ class Api::Projects::BastionsController < Api::Projects::BaseController
   #
   # `GET /api/projects/{project-id}/bastions/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `bastion`: Object
   #     * `id`: Integer
@@ -53,7 +52,7 @@ class Api::Projects::BastionsController < Api::Projects::BaseController
   #
   def show
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/bastions/show' }
+      format.any(:json, :xml) { render template: "api/bastions/show" }
     end
   end
 
@@ -61,7 +60,6 @@ class Api::Projects::BastionsController < Api::Projects::BaseController
 
   def find_bastion
     @bastion = @deployment.sftp_containers.find_by(id: params[:id])
-    return api_obj_missing(["Unknown sftp container"]) if @bastion.nil?
+    api_obj_missing(["Unknown sftp container"]) if @bastion.nil?
   end
-
 end

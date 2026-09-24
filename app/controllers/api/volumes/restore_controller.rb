@@ -1,7 +1,6 @@
 ##
 # Restore Volume Backup
 class Api::Volumes::RestoreController < Api::Volumes::BaseController
-
   before_action :can_perform?, only: %i[create destroy]
 
   ##
@@ -9,7 +8,7 @@ class Api::Volumes::RestoreController < Api::Volumes::BaseController
   #
   # `POST /volumes/{volume-id}/restore`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `name`: String | Name of backup to restore (base64 decode of id)
   # * `callback`: Object | optional webhook to call after event is finished
@@ -17,29 +16,29 @@ class Api::Volumes::RestoreController < Api::Volumes::BaseController
   #     * `url`: String | fully qualified URL
   #
   def create
-    audit = Audit.create_from_object!(@volume, 'backup.restore', request.remote_ip, current_user)
+    audit = Audit.create_from_object!(@volume, "backup.restore", request.remote_ip, current_user)
     @volume.current_audit = audit
 
-    event = @volume.event_logs.new(
-      locale: 'volume.restore',
+    event = EventLog.new(
+      locale: "volume.restore",
       locale_keys: {},
-      status: 'pending',
+      status: "pending",
       audit: audit,
-      event_code: 'agent-bde07117ae85937d'
+      event_code: "agent-bde07117ae85937d"
     )
 
     if params[:callback]
-      event.labels['callback_auth'] = params[:callback][:authorization]
-      event.labels['callback_url'] = params[:callback][:url]
-    end
+      event.labels["callback_auth"] = params[:callback][:authorization]
+      event.labels["callback_url"] = params[:callback][:url]
+    end   
+
+    event.volumes << @volume
+    event.deployments << @volume.deployment if @volume.deployment
+    event.container_services << @volume.container_service
 
     unless event.save
       return api_obj_error(event.errors.full_messages)
     end
-
-    event.deployments << @volume.deployment if @volume.deployment
-    event.container_services << @volume.container_service
-
 
     unless @volume.restore_backup!(params[:name])
       event.fail! "Fatal Error"
@@ -55,13 +54,22 @@ class Api::Volumes::RestoreController < Api::Volumes::BaseController
   private
 
   def can_perform?
-    if @volume.operation_in_progress?
+    # A volume awaiting its first mount exists on the node but no container has the bind
+    # yet, so a restore would report success while the application never sees the data.
+    if @volume.awaiting_mount?
+      msg = ["This volume is not mounted by any container yet — it will be available after the service's next rebuild."]
       respond_to do |format|
-        format.json { render json: { errors: [ "Unable to perform while another operation is in progress." ] }, status: :method_not_allowed }
-        format.xml { render xml: { errors: [ "Unable to perform while another operation is in progress." ] }, status: :method_not_allowed }
+        format.json { render json: {errors: msg}, status: :method_not_allowed }
+        format.xml { render xml: {errors: msg}, status: :method_not_allowed }
       end
       return false
     end
+    if @volume.operation_in_progress?
+      respond_to do |format|
+        format.json { render json: {errors: ["Unable to perform while another operation is in progress."]}, status: :method_not_allowed }
+        format.xml { render xml: {errors: ["Unable to perform while another operation is in progress."]}, status: :method_not_allowed }
+      end
+      false
+    end
   end
-
 end

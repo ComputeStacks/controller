@@ -1,5 +1,4 @@
 class UserNotificationsController < AuthController
-
   include RescueResponder
 
   before_action :find_notification, except: %i[index new create]
@@ -17,30 +16,31 @@ class UserNotificationsController < AuthController
     redirect_to action: :edit
   end
 
-  def edit; end
+  def edit
+  end
 
   def create
     @notification = current_user.user_notifications.new notification_params
     if @notification.save
-      redirect_to "/user_notifications", success: 'Notification created'
+      redirect_to "/user_notifications", success: "Notification created"
     else
-      render template: 'user_notifications/new'
+      render template: "user_notifications/new"
     end
   end
 
   def update
     if @notification.update(notification_params)
-      redirect_to "/user_notifications", success: 'Notification updated'
+      redirect_to "/user_notifications", success: "Notification updated"
     else
-      render template: 'user_notifications/edit'
+      render template: "user_notifications/edit"
     end
   end
 
   def destroy
     if @notification.destroy
-      redirect_to "/user_notifications", success: 'Notification destroyed'
+      redirect_to "/user_notifications", success: "Notification destroyed"
     else
-      redirect_to user_notification_path(@notification), alert: @notification.errors.full_messages.join(' ')
+      redirect_to user_notification_path(@notification), alert: @notification.errors.full_messages.join(" ")
     end
   end
 
@@ -57,5 +57,4 @@ class UserNotificationsController < AuthController
   def not_found_responder
     redirect_to "/user_notifications", alert: "Unknown notification"
   end
-
 end

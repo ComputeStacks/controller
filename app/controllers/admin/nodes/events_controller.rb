@@ -1,5 +1,4 @@
 class Admin::Nodes::EventsController < Admin::Nodes::BaseController
-
   def index
     @logs = @node.event_logs.sorted.paginate(per_page: 30, page: params[:page])
   end
@@ -12,5 +11,4 @@ class Admin::Nodes::EventsController < Admin::Nodes::BaseController
     end
     @subscribers = @log.subscribers(current_user)
   end
-
 end

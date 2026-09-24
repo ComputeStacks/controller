@@ -1,5 +1,4 @@
 class AlertNotificationsController < AuthController
-
   include RescueResponder
 
   before_action :find_alert_notification, only: %i[show update]
@@ -18,9 +17,9 @@ class AlertNotificationsController < AuthController
   def show
     if request.xhr?
       if @alert.can_view? current_user
-        render template: 'alert_notifications/show', layout: false
+        render template: "alert_notifications/show", layout: false
       else
-        render pain: '', layout: false
+        render pain: "", layout: false
       end
     elsif !@alert.can_view?(current_user)
       not_found_responder
@@ -30,7 +29,7 @@ class AlertNotificationsController < AuthController
   def update
     @alert.resolve = true
     unless @alert.save
-      flash[:alert] = "#{@alert.errors.full_messages.join(' ')}"
+      flash[:alert] = "#{@alert.errors.full_messages.join(" ")}"
     end
     redirect_to "/alert_notifications"
   end
@@ -53,5 +52,4 @@ class AlertNotificationsController < AuthController
   def not_found_responder
     redirect_to "/deployments", alert: "Unknown Alert"
   end
-
 end

@@ -1,5 +1,4 @@
 class Api::System::AlertNotificationsController < Api::System::BaseController
-
   protect_from_forgery except: :create
 
   def create
@@ -12,14 +11,13 @@ class Api::System::AlertNotificationsController < Api::System::BaseController
   def alert_params
     params.permit(
       :receiver, :status, alerts: [[
-                                     :fingerprint,
-                                     labels: {},
-                                     annotations: [
-                                       :description,
-                                       :summary
-                                     ]
-                                   ]]
+        :fingerprint,
+        labels: {},
+        annotations: [
+          :description,
+          :summary
+        ]
+      ]]
     )
   end
-
 end

@@ -1,9 +1,7 @@
 require "test_helper"
 
 class DeploymentCollaboratorTest < ActiveSupport::TestCase
-
-  test 'can list collaborations' do
-
+  test "can list collaborations" do
     d = Deployment.first
     u = User.where.not(id: d.user.id).first
 
@@ -18,11 +16,9 @@ class DeploymentCollaboratorTest < ActiveSupport::TestCase
     assert_includes Deployment.find_all_for(u), d
 
     d.deployment_collaborators.delete_all
-
   end
 
-  test 'can add collaborator' do
-
+  test "can add collaborator" do
     d = Deployment.first
     i = d.container_images.first
     v = d.volumes.first
@@ -56,11 +52,9 @@ class DeploymentCollaboratorTest < ActiveSupport::TestCase
     assert v.can_view?(u)
 
     d.deployment_collaborators.delete_all
-
   end
 
-  test 'delete user also deletes collaborator record' do
-
+  test "delete user also deletes collaborator record" do
     u = User.new(
       fname: "jimmy",
       lname: "little",
@@ -82,7 +76,5 @@ class DeploymentCollaboratorTest < ActiveSupport::TestCase
     u.destroy
 
     refute d.deployment_collaborators.where(user_id: u.id).exists?
-
   end
-
 end

@@ -1,7 +1,6 @@
 ##
 # Setting Parameters
 class Api::ContainerImages::SettingParamsController < Api::ContainerImages::BaseController
-
   before_action :find_setting, only: [:show, :update, :destroy]
 
   ##
@@ -40,7 +39,8 @@ class Api::ContainerImages::SettingParamsController < Api::ContainerImages::Base
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   ##
   # Update a setting
@@ -101,7 +101,6 @@ class Api::ContainerImages::SettingParamsController < Api::ContainerImages::Base
     @setting.destroy ? api_obj_destroyed : api_obj_error(@setting.errors.full_messages)
   end
 
-
   private
 
   def find_setting
@@ -113,6 +112,4 @@ class Api::ContainerImages::SettingParamsController < Api::ContainerImages::Base
   def setting_params
     params.require(:setting_param).permit(:name, :label, :param_type, :value)
   end
-
-
 end

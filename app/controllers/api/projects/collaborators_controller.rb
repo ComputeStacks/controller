@@ -1,6 +1,5 @@
 # Project Collaborators
 class Api::Projects::CollaboratorsController < Api::Projects::BaseController
-
   before_action :verify_admin
   before_action :find_collab, only: %i[show destroy]
 
@@ -9,7 +8,7 @@ class Api::Projects::CollaboratorsController < Api::Projects::BaseController
   #
   # `GET /api/projects/{project-id}/collaborators`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   #   * `collaborations`: Array
   #       * `id`: Integer
@@ -21,7 +20,7 @@ class Api::Projects::CollaboratorsController < Api::Projects::BaseController
   def index
     @collaborators = @deployment.deployment_collaborators.sorted
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/index_type' }
+      format.any(:json, :xml) { render template: "api/collaborations/index_type" }
     end
   end
 
@@ -30,7 +29,7 @@ class Api::Projects::CollaboratorsController < Api::Projects::BaseController
   #
   # `GET /api/projects/{project-id}/collaborators/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `collaboration`: Object
   #     * `id`: String
@@ -48,7 +47,7 @@ class Api::Projects::CollaboratorsController < Api::Projects::BaseController
   #
   def show
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/show' }
+      format.any(:json, :xml) { render template: "api/collaborations/show" }
     end
   end
 
@@ -57,7 +56,7 @@ class Api::Projects::CollaboratorsController < Api::Projects::BaseController
   #
   # `POST /api/projects/{project-id}/collaborators`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `collaborator`: Object
   #     * `user_email`: String
@@ -66,7 +65,7 @@ class Api::Projects::CollaboratorsController < Api::Projects::BaseController
     @collab = @deployment.deployment_collaborators.new user_email: collaborator_params[:user_email], current_user: current_user
     return api_obj_error(@collab.errors.full_messages) unless @collab.save
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/show', status: :created }
+      format.any(:json, :xml) { render template: "api/collaborations/show", status: :created }
     end
   end
 
@@ -75,7 +74,7 @@ class Api::Projects::CollaboratorsController < Api::Projects::BaseController
   #
   # `DELETE /api/projects/{project-id}/collaborators/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   def destroy
     return api_obj_error(@collab.errors.full_messages) unless @collab.destroy
@@ -100,5 +99,4 @@ class Api::Projects::CollaboratorsController < Api::Projects::BaseController
   def collaborator_params
     params.require(:collaborator).permit(:user_email)
   end
-
 end

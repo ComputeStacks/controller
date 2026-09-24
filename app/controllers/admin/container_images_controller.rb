@@ -1,7 +1,6 @@
 class Admin::ContainerImagesController < Admin::ApplicationController
-
   before_action :load_container, only: [:edit, :update, :destroy, :show]
-  before_action :load_blocks, only: %w(new edit update create)
+  before_action :load_blocks, only: %w[new edit update create]
 
   def index
     containers = ContainerImage
@@ -14,69 +13,69 @@ class Admin::ContainerImagesController < Admin::ApplicationController
     end
 
     containers = case params[:state]
-    when 'public'
+    when "public"
       containers.where(user: nil)
-    when 'private'
+    when "private"
       containers.where.not(user: nil)
     else
       containers
     end
 
     containers = case params[:kind]
-    when 'containers'
+    when "containers"
       containers.where(is_load_balancer: false)
-    when 'loadbalancers'
+    when "loadbalancers"
       containers.where(is_load_balancer: true)
     else
       containers
     end
 
     containers = case params[:visible]
-    when 'yes'
+    when "yes"
       containers.where(active: true)
-    when 'no'
+    when "no"
       containers.where(active: false)
     else
       containers
-                 end
+    end
 
     containers = case params[:product]
-                 when 'yes'
-                   containers.joins(:product)
-                 when 'no'
-                   containers.where("product_id is NULL")
-                 else
-                   containers
-                 end
+    when "yes"
+      containers.joins(:product)
+    when "no"
+      containers.where("product_id is NULL")
+    else
+      containers
+    end
 
     @containers = containers.sorted.paginate page: params[:page], per_page: 30
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if @container.update(container_params)
       redirect_to helpers.container_image_path(@container), success: "Successfully updated container."
     else
-      flash[:alert] = @container.errors.full_messages.join('. ')
+      flash[:alert] = @container.errors.full_messages.join(". ")
       if params.dig(:container_image, :variant_pos)
         redirect_to helpers.container_image_path(@container)
       else
-        render template: 'admin/container_images/edit'
+        render template: "admin/container_images/edit"
       end
     end
   end
 
   def show
     if request.xhr?
-      render template: 'container_images/show/tag_validator', layout: false
+      render template: "container_images/show/tag_validator", layout: false
     else
       render template: "container_images/show"
     end
   end
 
   def new
-
     @container = nil
     if new_container_params
       if new_container_params[:parent_image_id]
@@ -105,12 +104,11 @@ class Admin::ContainerImagesController < Admin::ApplicationController
       end
     end
 
-    @container = current_user.container_images.new(
+    @container ||= current_user.container_images.new(
       current_user: current_user,
       can_scale: true,
-      container_image_provider: ContainerImageProvider.find_default&.first,
-      ) unless @container
-
+      container_image_provider: ContainerImageProvider.find_default&.first
+    )
   end
 
   def create
@@ -120,7 +118,7 @@ class Admin::ContainerImagesController < Admin::ApplicationController
     if @container.save
       redirect_to helpers.container_image_path(@container), success: "Successfully created image"
     else
-      render template: 'admin/container_images/new'
+      render template: "admin/container_images/new"
     end
   end
 
@@ -128,7 +126,7 @@ class Admin::ContainerImagesController < Admin::ApplicationController
     if @container.destroy
       flash[:notice] = "Successfully deleted image."
     else
-      flash[:alert] = @container.errors.full_messages.join('. ')
+      flash[:alert] = @container.errors.full_messages.join(". ")
     end
     redirect_to "/admin/container_images"
   end
@@ -166,5 +164,4 @@ class Admin::ContainerImagesController < Admin::ApplicationController
   def load_blocks
     @custom_blocks = Block.where("content_key is null OR content_key = ''").joins(:block_contents).distinct
   end
-
 end

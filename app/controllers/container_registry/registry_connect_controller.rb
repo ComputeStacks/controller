@@ -1,6 +1,6 @@
 class ContainerRegistry::RegistryConnectController < ContainerRegistry::BaseController
-
-  def index; end
+  def index
+  end
 
   def show
     if request.xhr?
@@ -9,5 +9,4 @@ class ContainerRegistry::RegistryConnectController < ContainerRegistry::BaseCont
       redirect_to action: :index
     end
   end
-
 end

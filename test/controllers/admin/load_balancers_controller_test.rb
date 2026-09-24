@@ -1,7 +1,6 @@
-require 'test_helper'
+require "test_helper"
 
 class LoadBalancersControllerTest < ActionDispatch::IntegrationTest
-
   include StandardTestControllerBase
   include Devise::Test::IntegrationHelpers
 
@@ -9,7 +8,7 @@ class LoadBalancersControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:admin) # Admin user owns the registry.
   end
 
-  test 'can create new load balancer' do
+  test "can create new load balancer" do
     key = OpenSSL::PKey::RSA.new(2048)
     public_key = key.public_key
 
@@ -27,13 +26,13 @@ class LoadBalancersControllerTest < ActionDispatch::IntegrationTest
     ef.subject_certificate = cert
     ef.issuer_certificate = cert
     cert.extensions = [
-      ef.create_extension("basicConstraints","CA:TRUE", true),
+      ef.create_extension("basicConstraints", "CA:TRUE", true),
       ef.create_extension("subjectKeyIdentifier", "hash")
     ]
     cert.add_extension ef.create_extension("authorityKeyIdentifier",
-                                           "keyid:always,issuer:always")
+      "keyid:always,issuer:always")
 
-    cert.sign key, OpenSSL::Digest::SHA256.new
+    cert.sign key, OpenSSL::Digest.new("SHA256")
     crt_bundle = "#{cert.to_pem}#{key.to_pem}".gsub("\n", "\r\n")
 
     region = Region.first
@@ -53,15 +52,14 @@ class LoadBalancersControllerTest < ActionDispatch::IntegrationTest
     }
     assert_response :redirect
 
-    lb = LoadBalancer.find_by(label: 'newlbone')
+    lb = LoadBalancer.find_by(label: "newlbone")
 
     assert_not_nil lb
     assert_equal crt_bundle, lb.shared_certificate
     assert_equal "192.168.100.10", lb.public_ip
-
   end
 
-  test 'can update certificate on existing load balancer' do
+  test "can update certificate on existing load balancer" do
     lb = LoadBalancer.first
 
     key = OpenSSL::PKey::RSA.new(2048)
@@ -81,13 +79,13 @@ class LoadBalancersControllerTest < ActionDispatch::IntegrationTest
     ef.subject_certificate = cert
     ef.issuer_certificate = cert
     cert.extensions = [
-      ef.create_extension("basicConstraints","CA:TRUE", true),
+      ef.create_extension("basicConstraints", "CA:TRUE", true),
       ef.create_extension("subjectKeyIdentifier", "hash")
     ]
     cert.add_extension ef.create_extension("authorityKeyIdentifier",
-                                           "keyid:always,issuer:always")
+      "keyid:always,issuer:always")
 
-    cert.sign key, OpenSSL::Digest::SHA256.new
+    cert.sign key, OpenSSL::Digest.new("SHA256")
     crt_bundle = "#{cert.to_pem}#{key.to_pem}".gsub("\n", "\r\n")
 
     patch "/admin/load_balancers/#{lb.id}", params: {
@@ -102,5 +100,4 @@ class LoadBalancersControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal crt_bundle, lb.shared_certificate
   end
-
 end

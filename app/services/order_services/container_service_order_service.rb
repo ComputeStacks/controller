@@ -1,13 +1,12 @@
 module OrderServices
   class ContainerServiceOrderService
-
     attr_accessor :order,
-                  :event,
-                  :project,
-                  :product, # In the `data` loop, these are the params
-                  :result,
-                  :provision_state, # Track what the parent hash
-                  :errors
+      :event,
+      :project,
+      :product, # In the `data` loop, these are the params
+      :result,
+      :provision_state, # Track what the parent hash
+      :errors
 
     def initialize(order, event, project, product)
       self.order = order
@@ -38,14 +37,14 @@ module OrderServices
     def perform
       return false unless valid?
       product_id = if product.dig(:product, :id)
-                     product.dig(:product, :id) # deprecated
-                   elsif product.dig(:resources, :product_id)
-                     product.dig(:resources, :product_id)
-                   elsif product.dig(:resources, :package_id) # deprecated
-                     product.dig(:resources, :package_id) # package_id is actually product_id!
-                   else
-                     nil
-                   end
+        product.dig(:product, :id) # deprecated
+      elsif product.dig(:resources, :product_id)
+        product.dig(:resources, :product_id)
+      elsif product.dig(:resources, :package_id) # deprecated
+        product.dig(:resources, :package_id) # package_id is actually product_id!
+      else
+        nil
+      end
       job = ProvisionServices::ContainerServiceProvisioner.new(
         order.user,
         project,
@@ -83,7 +82,6 @@ module OrderServices
     # All required mounted volumes ready?
     # @return [Boolean]
     def volumes_ready?
-
       # An array of VolumeParam CSRNs
       available_volumes = provision_state[:volume_map].map { |i| i[:template] }
       return true if (required_mountable_volumes - available_volumes).empty?
@@ -128,8 +126,8 @@ module OrderServices
       return [] if image.nil? # should never happen
 
       # Ignore volumes explicitly skipped.
-      skip_volumes = product[:volume_config].filter_map {|i| i[:csrn] if i[:action] == "skip" }
-      custom_mounted_volumes = product[:volume_config].filter_map {|i| i[:csrn] if i[:action] == "mount" }
+      skip_volumes = product[:volume_config].filter_map { |i| i[:csrn] if i[:action] == "skip" }
+      custom_mounted_volumes = product[:volume_config].filter_map { |i| i[:csrn] if i[:action] == "mount" }
       req_vols = image.volumes.filter_map do |i|
         next if skip_volumes.include?(i.csrn)
         if custom_mounted_volumes.include?(i.csrn) || i.source_volume
@@ -142,6 +140,5 @@ module OrderServices
       end
       req_vols
     end
-
   end
 end

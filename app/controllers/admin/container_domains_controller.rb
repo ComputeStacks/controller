@@ -1,38 +1,37 @@
 class Admin::ContainerDomainsController < Admin::ApplicationController
-
-  before_action :find_domain, only: %w(show edit update destroy)
-  before_action :load_project_services, only: %w(new edit update create)
+  before_action :find_domain, only: %w[show edit update destroy]
+  before_action :load_project_services, only: %w[new edit update create]
 
   def index
     domains = Deployment::ContainerDomain
     domains = case params[:status]
-              when 'disabled'
-                domains.where(enabled: false)
-              else
-                domains.where(enabled: true)
-              end
+    when "disabled"
+      domains.where(enabled: false)
+    else
+      domains.where(enabled: true)
+    end
     domains = case params[:kind]
-              when 'system'
-                domains.where(system_domain: true)
-              else
-                domains.where(system_domain: false)
-              end
+    when "system"
+      domains.where(system_domain: true)
+    else
+      domains.where(system_domain: false)
+    end
     domains = case params[:le]
-              when 'active'
-                domains.where(le_enabled: true, le_ready: true)
-              when 'pending'
-                domains.where(le_enabled: true, le_ready: false)
-              else
-                domains
-              end
+    when "active"
+      domains.where(le_enabled: true, le_ready: true)
+    when "pending"
+      domains.where(le_enabled: true, le_ready: false)
+    else
+      domains
+    end
     domains = case params[:service]
-              when 'linked'
-                domains.where.not(ingress_rule: nil)
-              when 'unlinked'
-                domains.where(ingress_rule: nil)
-              else
-                domains
-              end
+    when "linked"
+      domains.where.not(ingress_rule: nil)
+    when "unlinked"
+      domains.where(ingress_rule: nil)
+    else
+      domains
+    end
     @domains = domains.sorted.paginate per_page: 30, page: params[:page]
   end
 
@@ -41,7 +40,8 @@ class Admin::ContainerDomainsController < Admin::ApplicationController
     @services = []
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if @domain.update((@domain.system_domain ? system_domain_params : domain_params))
@@ -57,19 +57,17 @@ class Admin::ContainerDomainsController < Admin::ApplicationController
     if @domain.save
       if @domain.container_service.nil?
         redirect_to "/admin/container_domains/#{@domain.id}", notice: "Domain created successfully. Not active until linked to a service."
+      elsif @domain.deployment
+        @deployment = @domain.deployment
+        redirect_to "/admin/deployments/#{@deployment.id}#domains", success: "Domain created."
       else
-        if @domain.deployment
-          @deployment = @domain.deployment
-          redirect_to "/admin/deployments/#{@deployment.id}#domains", success: "Domain created."
-        else
-          redirect_to "/admin/container_domains", success: "Domain created."
-        end
+        redirect_to "/admin/container_domains", success: "Domain created."
       end
     else
-      if @domain.user
-        @services = @domain.user.container_services.sorted
+      @services = if @domain.user
+        @domain.user.container_services.sorted
       else
-        @services = []
+        []
       end
       render template: "admin/container_domains/new"
     end
@@ -80,7 +78,7 @@ class Admin::ContainerDomainsController < Admin::ApplicationController
     if @domain.destroy
       redirect_to @base_url, notice: "Domain deleted."
     else
-      redirect_to @base_url, alert: "Unable to delete domain: #{@domain.errors.full_messages.join(' ')}"
+      redirect_to @base_url, alert: "Unable to delete domain: #{@domain.errors.full_messages.join(" ")}"
     end
   end
 
@@ -100,7 +98,7 @@ class Admin::ContainerDomainsController < Admin::ApplicationController
   end
 
   def domain_params
-    params.require(:deployment_container_domain).permit(:domain, :le_enabled, :enabled, :ingress_rule_id, :user_id, :header_hsts, :force_https)
+    params.require(:deployment_container_domain).permit(:domain, :le_enabled, :enabled, :ingress_rule_id, :user_id, :header_hsts, :hsts_include_subdomains, :hsts_preload, :header_frame_options, :force_https)
   end
 
   def system_domain_params
@@ -128,6 +126,4 @@ class Admin::ContainerDomainsController < Admin::ApplicationController
       []
     end
   end
-
-
 end

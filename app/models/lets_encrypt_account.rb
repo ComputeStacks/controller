@@ -1,62 +1,79 @@
 class LetsEncryptAccount < ApplicationRecord
-
   include PrivateKeyManager
 
-  has_many :certificates, class_name: 'LetsEncrypt', foreign_key: 'account_id'
+  has_many :certificates, class_name: "LetsEncrypt", foreign_key: "account_id"
 
-  before_validation :set_default_email, on: :create
+  before_validation :set_defaults, on: :create
 
   validates :email, presence: true
 
   def setup!
-    return true unless self.account_id.blank?
-    account = client.new_account(contact: "mailto:#{self.email}", terms_of_service_agreed: true)
+    return true unless account_id.blank?
+    account = if LetsEncryptAccount.acme_uses_eab?
+      client.new_account(
+        contact: "mailto:#{email}",
+        terms_of_service_agreed: true,
+        external_account_binding: {
+          kid: Setting.acme_kid,
+          hmac_key: Setting.acme_hmac_key
+        }
+      )
+    else
+      client.new_account(contact: "mailto:#{email}", terms_of_service_agreed: true)
+    end
     if account.kid.blank?
       false
     else
-      self.update_attribute :account_id, account.kid
+      update_attribute :account_id, account.kid
     end
   end
 
   def client
-    if Rails.env.production?
-      Acme::Client.new(
-          private_key: private_key,
-          directory: LE_DIRECTORY,
-          kid: self.account_id.blank? ? nil : self.account_id,
-          bad_nonce_retry: 10
-      )
-    else
-      Acme::Client.new(
-          private_key: private_key,
-          directory: LE_DIRECTORY,
-          kid: self.account_id.blank? ? nil : self.account_id,
-          connection_options: { ssl: { verify: false } },
-          bad_nonce_retry: 10
-      )
-    end
+    Acme::Client.new(
+      private_key: private_key,
+      directory: acme_directory,
+      kid: account_id.presence,
+      connection_options: {ssl: {verify: Rails.env.production?}},
+      bad_nonce_retry: 10
+    )
   end
 
-  # @see [LetsEncrypt Integration Guide: One Account or Many?](https://letsencrypt.org/docs/integration-guide/#one-account-or-many)
   def self.find_or_create
-    a = nil
-    can_include = Setting.le_domains_per_account
-    LetsEncryptAccount.all.each do |i|
-      if i.certificates.count < can_include
-        a = i
-        break
-      end
-    end
+    # https://letsencrypt.org/docs/integration-guide/#one-account-or-many
+    # a = nil
+    # can_include = 300
+    # LetsEncryptAccount.all.each do |i|
+    #   if i.certificates.count < can_include
+    #     a = i
+    #     break
+    #   end
+    # end
+
+    # Find based on the _current_ default directory
+    a = LetsEncryptAccount.where(acme_directory: LetsEncryptAccount.acme_directory).where.not(account_id: nil).first
     return a unless a.nil?
+
     a = LetsEncryptAccount.create!
     a.setup!
     a
   end
 
-  private
+  # Allow us to override directory for test env
+  def self.acme_directory
+    return Setting.acme_directory unless Rails.env.test?
 
-  def set_default_email
-    self.email = 'admin@computestacks.com' if self.email.nil?
+    "https://#{ENV["DOCKER_IP"]}:#{ENV["ACME_API_PORT"]}/dir"
   end
 
+  # Is our default provider setup to use external account binding?
+  def self.acme_uses_eab?
+    !(Setting.acme_kid.blank? || Setting.acme_hmac_key.blank?)
+  end
+
+  private
+
+  def set_defaults
+    self.email = Setting.acme_email
+    self.acme_directory = LetsEncryptAccount.acme_directory
+  end
 end

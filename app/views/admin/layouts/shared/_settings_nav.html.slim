@@ -6,7 +6,7 @@
       li class="#{request.path =~ /networks/ ? 'active' : ''}"= link_to "Networks", "/admin/networks"
       li class="#{request.path =~ /load_balancers/ ? 'active' : ''}"= link_to "Load Balancers", "/admin/load_balancers"
       li class="#{request.path =~ /blocks/ ? 'active' : ''}"= link_to "Content Blocks", "/admin/blocks"
-      li class="#{request.path =~ /lets_encrypt/ ? 'active' : ''}"= link_to "Lets Encrypt", "/admin/lets_encrypt"
+      li class="#{request.path =~ /lets_encrypt/ ? 'active' : ''}"= link_to "ACME", "/admin/lets_encrypt"
       li class="#{request.path =~ /system_notifications/ ? 'active' : ''}"= link_to "Notifications", "/admin/system_notifications"
       li class="#{request.path =~ /settings/ ? 'active' : ''}"= link_to "Advanced Settings", "/admin/settings"
 

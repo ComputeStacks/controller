@@ -1,5 +1,4 @@
 class Admin::ContainerImages::ImageVariantsController < Admin::ContainerImages::BaseController
-
   include RescueResponder
 
   before_action :find_variant, only: [:edit, :update, :destroy, :show]
@@ -44,12 +43,11 @@ class Admin::ContainerImages::ImageVariantsController < Admin::ContainerImages::
     end
   end
 
-
   def destroy
     if @variant.destroy
       flash[:success] = "Variant removed"
     else
-      flash[:alert] = "Error deleting variant: #{@variant.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error deleting variant: #{@variant.errors.full_messages.join(" ")}"
     end
     redirect_to "/admin/container_images/#{@image.id}"
   end
@@ -72,5 +70,4 @@ class Admin::ContainerImages::ImageVariantsController < Admin::ContainerImages::
       :rollback_migrate
     )
   end
-
 end

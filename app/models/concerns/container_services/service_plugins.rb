@@ -3,16 +3,15 @@ module ContainerServices
     extend ActiveSupport::Concern
 
     included do
-
       has_many :service_plugins,
-               class_name: "Deployment::ContainerService::ServicePlugin",
-               foreign_key: 'deployment_container_service_id',
-               dependent: :destroy
+        class_name: "Deployment::ContainerService::ServicePlugin",
+        foreign_key: "deployment_container_service_id",
+        dependent: :destroy
 
       has_many :container_image_plugins, through: :service_plugins
 
       attr_accessor :new_plugin_list
-      after_update :update_plugin_list, if: Proc.new { new_plugin_list }
+      after_update :update_plugin_list, if: proc { new_plugin_list }
     end
 
     # Return a pristine list of plugins a user can enable
@@ -49,20 +48,19 @@ module ContainerServices
       return if change_list.empty?
       return if current_audit.nil?
       e = event_logs.create!(
-        locale: 'service.addons',
+        locale: "service.addons",
         locale_keys: {
           label: name
         },
-        status: 'completed',
+        status: "completed",
         audit: current_audit,
-        event_code: '1245f430e0f54052'
+        event_code: "1245f430e0f54052"
       )
       e.deployments << deployment
       e.event_details.create!(
         data: change_list.join("\n"),
-        event_code: '1245f430e0f54052'
+        event_code: "1245f430e0f54052"
       )
     end
-
   end
 end

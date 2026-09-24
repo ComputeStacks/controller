@@ -10,9 +10,8 @@ module NodeServices
   # @!attribute event
   #   @return [EventLog]
   class EvacuateNodeService
-
     attr_accessor :node,
-                  :event
+      :event
 
     # @param [Node] node
     # @param [EventLog] event
@@ -33,7 +32,7 @@ module NodeServices
       end
 
       # Quickly flag containers as migrating
-      node.containers.update_all status: 'migrating'
+      node.containers.update_all status: "migrating"
 
       trash_sftp!
 
@@ -63,9 +62,9 @@ module NodeServices
       if node.under_evacuation? && (Time.now - node.job_performed) < 15.minutes
         event.event_details.create!(
           data: "Already under evacuation, skipping..",
-          event_code: 'e318f7d65b7c1365'
+          event_code: "e318f7d65b7c1365"
         )
-        event.cancel! 'Already migrating'
+        event.cancel! "Already migrating"
         return false
       elsif node.under_evacuation? && (Time.now - node.job_performed) > 15.minutes
         # re-update the clock
@@ -79,10 +78,10 @@ module NodeServices
     # @param [Deployment::Container] container
     def migrate_container!(container)
       container_event = EventLog.create!(
-        locale: 'container.migrating',
-        locale_keys: { 'container' => container.name },
-        event_code: '4c7a96039fac57d9',
-        status: 'pending',
+        locale: "container.migrating",
+        locale_keys: {"container" => container.name},
+        event_code: "4c7a96039fac57d9",
+        status: "pending",
         audit: event.audit
       )
       container_event.containers << container
@@ -92,12 +91,12 @@ module NodeServices
       if migrator.perform
         event.event_details.create!(
           data: "Successfully migrated #{container.name} from #{node.label} to #{migrator.new_node.label}",
-          event_code: '6d2f56c959ec733e'
+          event_code: "6d2f56c959ec733e"
         )
       else
         event.event_details.create!(
-          data: %Q(failed to migrate container #{container.name}\n\n#{container_event.event_details.pluck(:data).join("\n")}),
-          event_code: 'c7b8c6d6330399b9'
+          data: %(failed to migrate container #{container.name}\n\n#{container_event.event_details.pluck(:data).join("\n")}),
+          event_code: "c7b8c6d6330399b9"
         )
         false
       end
@@ -117,6 +116,5 @@ module NodeServices
         DeployServices::DeployProjectService.new(d, event).perform
       end
     end
-
   end
 end

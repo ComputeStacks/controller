@@ -5,38 +5,65 @@ frontend https
   mode http
   maxconn <%= load_balancer.maxconn %>
   option httplog
-  option http-server-close
-  option forwardfor if-none
   http-request set-var(txn.host) hdr(Host)
-  <% if load_balancer.proxy_ipaddrs.empty? %>
-  http-request del-header X-Forwarded-For
-  http-request set-header X-Forwarded-Proto https
-  <% else %>
-  acl existing-proto-header req.hdr(X-Forwarded-Proto) -m found
-  acl proxied_conn src <%= load_balancer.proxy_ipaddrs.map { |i| "#{i.to_s}/#{i.prefix}" }.join(' ') %>
-  http-request del-header X-Forwarded-For if !proxied_conn
+  acl proxied_conn src -f <%= load_balancer.ext_dir %>/acl_proxy.lst
+  # Real client IP: the rightmost XFF token is the value the trusted edge appended
+  # (leftmost is client-spoofable). Floor to the connecting IP, override when proxied.
+  http-request set-var(txn.client_ip) req.hdr(X-Forwarded-For,-1) if proxied_conn
+  http-request set-header X-Real-IP %[src]
+  http-request set-header X-Forwarded-For %[src]
+  http-request set-header X-Real-IP %[var(txn.client_ip)] if proxied_conn { var(txn.client_ip) -m found }
+  http-request set-header X-Forwarded-For %[var(txn.client_ip)] if proxied_conn { var(txn.client_ip) -m found }
   http-request set-header X-Forwarded-Proto https if !proxied_conn
-  <% end %>
+  # Anti-spoofing: strip client-supplied forwarding headers we do not manage.
+  # Leaves X-Real-IP / X-Forwarded-For (set above) and the proxied-trust flow untouched.
+  http-request del-header X-Client-IP
+  http-request del-header X-Originating-IP
+  http-request del-header X-Remote-IP
+  http-request del-header X-Remote-Addr
+  http-request del-header X-Host
+  http-request del-header X-Forwarded-Server
+  http-request del-header X-HTTP-Host-Override
+  http-request del-header X-Forwarded-By
+  http-request del-header Forwarded-For
+  http-request del-header X-Forwarded-Host if !proxied_conn
+  http-request del-header Forwarded if !proxied_conn
+  # Baseline security response headers (only when the backend did not set its own).
+  http-response set-header X-Content-Type-Options nosniff if !{ res.hdr(X-Content-Type-Options) -m found }
+  http-response set-header Referrer-Policy strict-origin-when-cross-origin if !{ res.hdr(Referrer-Policy) -m found }
+  http-response del-header Server
   <% unless load_balancer.cloudflare_ipaddrs.empty? %>
-  acl cloudflare_only src <%= load_balancer.cloudflare_ipaddrs.map { |i| "#{i.to_s}/#{i.prefix}" }.join(' ') %>
+  acl cloudflare_only src -f <%= load_balancer.ext_dir %>/acl_cloudflare.lst
   acl restricted_url hdr(host) -i cloudflare-dummy.local
+  <% end %>
+  <% unless load_balancer.bunny_ipaddrs.empty? %>
+  acl bunny_only src -f <%= load_balancer.ext_dir %>/acl_bunny.lst
+  acl restricted_url_bunny hdr(host) -i bunny-dummy.local
   <% end %>
   acl is_letsencrypt path_beg -i /.well-known/acme-challenge/
   use_backend letsencrypt if is_letsencrypt
-  acl enable_hsts hdr(hosts) -i hsts-dummy.local
   <% load_balancer.container_services.each do |service| %>
     <% next if service.containers.empty? %>
     <% service.ingress_rules.where(external_access: true, proto: 'http').each do |ingress| %>
       <% ingress.global_container_domains.each do |domain| %>
-  acl host_rule_<%= index %> var(txn.host) -m str <%= domain.domain %>
+  acl host_rule_<%= index %> var(txn.host) -m str -i <%= domain.domain %>
         <% if domain.system_domain %>
   http-response set-header X-Robots-Tag "noindex, nofollow" if host_rule_<%= index %>
         <% end %>
   <% if ingress.restrict_cf %>
-  acl restricted_url var(txn.host) -m str <%= domain.domain %>
+  acl restricted_url var(txn.host) -m str -i <%= domain.domain %>
+  <% end %>
+  <% if ingress.restrict_bunny %>
+  acl restricted_url_bunny var(txn.host) -m str -i <%= domain.domain %>
   <% end %>
   <% if domain.enable_hsts_header? %>
-  http-response set-header Strict-Transport-Security "max-age=63072000; preload;" if host_rule_<%= index %>
+  http-response set-header Strict-Transport-Security "<%= domain.hsts_value %>" if host_rule_<%= index %>
+  <% end %>
+  <% if domain.enable_frame_options_header? %>
+  http-response set-header X-Frame-Options SAMEORIGIN if host_rule_<%= index %>
+  <% end %>
+  <% if domain.force_ssl? %>
+  http-response replace-header Location ^http://<%= domain.domain %>(/.*)?$ https://<%= domain.domain %>\1 if host_rule_<%= index %>
   <% end %>
   use_backend S_<%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %> if host_rule_<%= index %>
         <% index += 1 %>
@@ -47,39 +74,68 @@ frontend https
   <% unless load_balancer.cloudflare_ipaddrs.empty? %>
   http-request deny if restricted_url !cloudflare_only
   <% end %>
+  <% unless load_balancer.bunny_ipaddrs.empty? %>
+  http-request deny if restricted_url_bunny !bunny_only
+  <% end %>
 
 frontend http
   bind <% if load_balancer.ipv6_enabled? %>[::]<% end %>:80
   mode http
   maxconn <%= load_balancer.maxconn %>
-  <% if load_balancer.proxy_ipaddrs.empty? %>
-  http-request del-header X-Forwarded-For
-  http-request set-header X-Forwarded-Proto http
-  <% else %>
-  acl existing-proto-header req.hdr(X-Forwarded-Proto) -m found
-  acl proxied_conn src <%= load_balancer.proxy_ipaddrs.map { |i| "#{i.to_s}/#{i.prefix}" }.join(' ') %>
-  http-request del-header X-Forwarded-For if !proxied_conn
+  http-request set-var(txn.host) hdr(Host)
+  acl proxied_conn src -f <%= load_balancer.ext_dir %>/acl_proxy.lst
+  # Real client IP: the rightmost XFF token is the value the trusted edge appended
+  # (leftmost is client-spoofable). Floor to the connecting IP, override when proxied.
+  http-request set-var(txn.client_ip) req.hdr(X-Forwarded-For,-1) if proxied_conn
+  http-request set-header X-Real-IP %[src]
+  http-request set-header X-Forwarded-For %[src]
+  http-request set-header X-Real-IP %[var(txn.client_ip)] if proxied_conn { var(txn.client_ip) -m found }
+  http-request set-header X-Forwarded-For %[var(txn.client_ip)] if proxied_conn { var(txn.client_ip) -m found }
   http-request set-header X-Forwarded-Proto http if !proxied_conn
-  <% end %>
-  option forwardfor if-none
+  # Anti-spoofing: strip client-supplied forwarding headers we do not manage.
+  # Leaves X-Real-IP / X-Forwarded-For (set above) and the proxied-trust flow untouched.
+  http-request del-header X-Client-IP
+  http-request del-header X-Originating-IP
+  http-request del-header X-Remote-IP
+  http-request del-header X-Remote-Addr
+  http-request del-header X-Host
+  http-request del-header X-Forwarded-Server
+  http-request del-header X-HTTP-Host-Override
+  http-request del-header X-Forwarded-By
+  http-request del-header Forwarded-For
+  http-request del-header X-Forwarded-Host if !proxied_conn
+  http-request del-header Forwarded if !proxied_conn
+  # Baseline security response headers (only when the backend did not set its own).
+  http-response set-header X-Content-Type-Options nosniff if !{ res.hdr(X-Content-Type-Options) -m found }
+  http-response set-header Referrer-Policy strict-origin-when-cross-origin if !{ res.hdr(Referrer-Policy) -m found }
+  http-response del-header Server
   option httplog
-  option http-server-close
   acl is_letsencrypt path_beg -i /.well-known/acme-challenge/
   use_backend letsencrypt if is_letsencrypt
   <% unless load_balancer.cloudflare_ipaddrs.empty? %>
-  acl cloudflare_only src <%= load_balancer.cloudflare_ipaddrs.map { |i| "#{i.to_s}/#{i.prefix}" }.join(' ') %>
+  acl cloudflare_only src -f <%= load_balancer.ext_dir %>/acl_cloudflare.lst
   acl restricted_url hdr(host) -i cloudflare-dummy.local
+  <% end %>
+  <% unless load_balancer.bunny_ipaddrs.empty? %>
+  acl bunny_only src -f <%= load_balancer.ext_dir %>/acl_bunny.lst
+  acl restricted_url_bunny hdr(host) -i bunny-dummy.local
   <% end %>
   <% load_balancer.container_services.each do |service| %>
     <% next if service.containers.empty? %>
     <% service.ingress_rules.where(external_access: true, proto: 'http').each do |ingress| %>
       <% ingress.global_container_domains.each do |domain| %>
-  acl host_rule_<%= index %> hdr(host) -i <%= domain.domain %>
+  acl host_rule_<%= index %> var(txn.host) -m str -i <%= domain.domain %>
         <% if domain.system_domain %>
   http-response set-header X-Robots-Tag "noindex, nofollow" if host_rule_<%= index %>
         <% end %>
+  <% if domain.enable_frame_options_header? %>
+  http-response set-header X-Frame-Options SAMEORIGIN if host_rule_<%= index %>
+  <% end %>
   <% if ingress.restrict_cf %>
   acl restricted_url hdr(host) -i <%= domain.domain %>
+  <% end %>
+  <% if ingress.restrict_bunny %>
+  acl restricted_url_bunny hdr(host) -i <%= domain.domain %>
   <% end %>
         <% if domain.force_ssl? %>
   redirect scheme https code 301 if host_rule_<%= index %>
@@ -92,5 +148,8 @@ frontend http
   <% end %>
   <% unless load_balancer.cloudflare_ipaddrs.empty? %>
   http-request deny if restricted_url !cloudflare_only
+  <% end %>
+  <% unless load_balancer.bunny_ipaddrs.empty? %>
+  http-request deny if restricted_url_bunny !bunny_only
   <% end %>
 

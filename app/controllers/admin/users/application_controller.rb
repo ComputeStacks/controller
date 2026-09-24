@@ -1,5 +1,4 @@
 class Admin::Users::ApplicationController < Admin::ApplicationController
-
   before_action :load_user
 
   private
@@ -13,7 +12,7 @@ class Admin::Users::ApplicationController < Admin::ApplicationController
           format.xml { render xml: [], status: :not_found }
         end
       else
-        redirect_to "/admin/dashboard", alert: 'Unknown User.'
+        redirect_to "/admin/dashboard", alert: "Unknown User."
       end
       return false
     end

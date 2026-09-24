@@ -102,18 +102,22 @@
 # [+webhook_users+] Called each time a user's name, email, address, or password is updated.
 #
 class Api::Admin::ApplicationController < Api::ApplicationController
-
   before_action :ensure_admin!
 
-  before_action -> { doorkeeper_authorize! :admin_read }, only: %i[index show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :admin_write }, only: %i[update create destroy], unless: :current_user
+  # Every action on the admin API is plain CRUD: `index`/`show` read, and
+  # `create`/`update`/`destroy` write. Controllers that expose a verb as a nested
+  # singular resource (`.../pull`, `.../suspension`, `.../maintenance`,
+  # `.../process_order`, `.../user_sso`) implement it as `create` or `destroy`, so
+  # they are covered here too. `zones#show` and `image_collections#show` have no
+  # Ruby method and are dispatched straight to their templates; `read:` covers
+  # them because the callback chain still runs.
+  api_scope read: :admin_read, write: :admin_write
 
   private
 
   ##
   # =Require admin rights for all endpoints.
   def ensure_admin! # :doc:
-    return invalid_authentication unless current_user&.is_admin
+    invalid_authentication unless current_user&.is_admin
   end
-
 end

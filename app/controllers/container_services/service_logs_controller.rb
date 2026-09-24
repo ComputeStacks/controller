@@ -1,5 +1,4 @@
 class ContainerServices::ServiceLogsController < ContainerServices::BaseController
-
   def index
     if request.xhr?
       @logs = @service.logs(3.days.ago, Time.now)
@@ -10,5 +9,4 @@ class ContainerServices::ServiceLogsController < ContainerServices::BaseControll
       end
     end
   end
-
 end

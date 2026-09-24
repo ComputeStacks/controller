@@ -1,11 +1,10 @@
 module Admin::AuditHelper
-
   def admin_audit_description(audit)
     d = []
     d << audit.formatted_user
     d << audit.event
     d << audit.formatted_name
-    d.join(' ')
+    d.join(" ")
   end
 
   def audit_obj_url(audit)
@@ -15,5 +14,4 @@ module Admin::AuditHelper
   rescue
     nil
   end
-
 end

@@ -17,7 +17,7 @@ module ContainerWorkers
 
       return unless event.start!
 
-      result = Timeout::timeout(30) do
+      result = Timeout.timeout(30) do
         container.stop! event
       end
 
@@ -29,14 +29,14 @@ module ContainerWorkers
         end
       end
     rescue ActiveRecord::RecordNotFound
-      return # Silently fail
+      nil # Silently fail
     rescue Timeout::Error
       if defined?(event) && event
         event.event_details.create!(
           data: "Failed to connect to container host: Connection Timeout.",
-          event_code: 'a1034bfe4f6c2e86'
+          event_code: "a1034bfe4f6c2e86"
         )
-        event.fail! 'Fatal error'
+        event.fail! "Fatal error"
       end
     rescue => e
       user = nil
@@ -44,12 +44,11 @@ module ContainerWorkers
         user = event.audit&.user
         event.event_details.create!(
           data: "Fatal Error\n#{e.message}",
-          event_code: '2a6f993fade3c82e'
+          event_code: "2a6f993fade3c82e"
         )
-        event.fail! 'Fatal error'
+        event.fail! "Fatal error"
       end
-      ExceptionAlertService.new(e, '2a6f993fade3c82e', user).perform
+      ExceptionAlertService.new(e, "2a6f993fade3c82e", user).perform
     end
-
   end
 end

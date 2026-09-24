@@ -29,10 +29,9 @@
 #   @return [DateTime]
 #
 class ContainerImage::EnvParam < ApplicationRecord
-
   include Auditable
 
-  scope :sorted, -> { order( Arel.sql('lower(name)') ) }
+  scope :sorted, -> { order(Arel.sql("lower(name)")) }
 
   belongs_to :container_image
   has_many :dependent_params, class_name: "ContainerService::EnvConfig", foreign_key: "container_image_env_param_id", dependent: :nullify
@@ -41,9 +40,9 @@ class ContainerImage::EnvParam < ApplicationRecord
 
   before_validation :set_value
 
-  validates :param_type, inclusion: { in: %w(static variable) }
+  validates :param_type, inclusion: {in: %w[static variable]}
   validates :name, presence: true
-  validate :valid_env_param, if: -> { param_type == 'variable' }
+  validate :valid_env_param, if: -> { param_type == "variable" }
 
   def csrn
     "csrn:caas:template:vol:#{resource_name}:#{id}"
@@ -51,27 +50,26 @@ class ContainerImage::EnvParam < ApplicationRecord
 
   def resource_name
     return "null" if label.blank?
-    label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+    label.strip.downcase.gsub(/[^a-z0-9\s]/i, "").tr(" ", "_")[0..10]
   end
 
   private
 
   def set_value
-    self.label = self.name if self.label.blank?
+    self.label = name if label.blank?
     unless static_value.blank? && env_value.blank?
       case param_type
-      when 'static'
+      when "static"
         self.value = static_value
-      when 'variable'
+      when "variable"
         self.value = env_value
       end
     end
   end
 
   def valid_env_param
-    unless container_image&.available_vars.include?(env_value)
-      errors.add(:env_value, 'not a valid variable')
+    unless container_image&.available_vars&.include?(env_value)
+      errors.add(:env_value, "not a valid variable")
     end
   end
-
 end

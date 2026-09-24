@@ -5,7 +5,6 @@ module Containerized
   extend ActiveSupport::Concern
 
   class_methods do
-
     # Given a container name, find the local resource
     def resource_by_name(name)
       return nil if name.blank?
@@ -15,7 +14,6 @@ module Containerized
       c = LoadBalancer.find_by(name: name) if c.nil?
       c
     end
-
   end
 
   # @return [Boolean]
@@ -24,13 +22,12 @@ module Containerized
     # if the container is not on the node, then we _will_ have the latest image
     return true if c.nil?
 
-    c_image_tag = c.info['Config']['Image']
-    c_image_id = c.info['Image']
+    c_image_tag = c.info["Config"]["Image"]
+    c_image_id = c.info["Image"]
 
     running_image = Docker::Image.get(c_image_id, {}, node.client(3))
 
-    running_image.info['RepoTags'].include? c_image_tag
-
+    running_image.info["RepoTags"].include? c_image_tag
   rescue Docker::Error::NotFoundError
     true
   rescue => e
@@ -42,9 +39,9 @@ module Containerized
   end
 
   def halt_auto_recovery?
-    error_events = event_logs.where( Arel.sql(%Q(created_at >= '#{1.hour.ago.iso8601}')) ).starting.failed.count
-    start_events = event_logs.where( Arel.sql(%Q(created_at >= '#{30.minutes.ago.iso8601}')) ).starting.count
-    stop_events = event_logs.where( Arel.sql(%Q(created_at >= '#{30.minutes.ago.iso8601}')) ).starting.count
+    error_events = event_logs.where(Arel.sql(%(created_at >= '#{1.hour.ago.iso8601}'))).starting.failed.count
+    start_events = event_logs.where(Arel.sql(%(created_at >= '#{30.minutes.ago.iso8601}'))).starting.count
+    stop_events = event_logs.where(Arel.sql(%(created_at >= '#{30.minutes.ago.iso8601}'))).starting.count
     error_events > 3 || start_events > 6 || stop_events > 6
   end
 
@@ -52,31 +49,52 @@ module Containerized
   # @param [String] docker_status
   # @return [Boolean]
   def requires_intervention?(docker_status)
-    return true if docker_status == 'running' && !active?
+    return true if docker_status == "running" && !active?
 
     %w[created stopped exited].include?(docker_status) && active?
   end
 
   def metadata_env_params
     [
-      %W[METADATA_SERVICE http://metadata.internal:8500/v1/kv/projects/#{deployment.token}],
-      %W[METADATA_URL http://metadata.internal:8500/v1/kv/projects/#{deployment.token}/metadata?raw=true],
-      %W[METADATA_AUTH #{deployment.consul_auth_key}]
+      # METADATA_SERVICE is the bare agent root — consumers build /v1/managed/* and
+      # /v1/db/* from it. METADATA_URL is the NEW managed metadata endpoint, so new
+      # containers hit the real API; the legacy /v1/kv/.../metadata?raw=true shim only
+      # serves already-baked old containers (whose env can't change) until they recycle.
+      %W[METADATA_SERVICE http://metadata.internal:8500],
+      %W[METADATA_URL http://metadata.internal:8500/v1/managed/metadata],
+      %W[METADATA_AUTH #{deployment.consul_auth_key}],
+      # New monarx reads node_id directly from the env (no HTTP call). node is
+      # optional on Deployment::Container (always present on Sftp), so guard it.
+      %W[CS_NODE_ID #{node&.id}]
     ]
   end
 
   # This is used by both Container and SFTP.
   def build!(event)
-    build_client = if self.kind_of? Deployment::Container
-                     runtime_config event&.audit
-                   elsif self.kind_of? Deployment::Sftp
-                     build_command
-                   else
-                     nil
-                   end
+    build_client = if is_a? Deployment::Container
+      runtime_config event&.audit
+    elsif is_a? Deployment::Sftp
+      build_command
+    end
     return false if build_client.nil?
 
-    Docker::Container.create(build_client, node.client).is_a? Docker::Container
+    created = Docker::Container.create(build_client, node.client).is_a?(Docker::Container)
+    # Mount detection. This is the only place a container is actually created, so it is the only
+    # place we can know that a pending volume's bind really landed — and we deliberately use the
+    # bind list that was just sent to Docker rather than re-querying, so a volume attached after
+    # `runtime_config` was computed stays pending until the next rebuild.
+    #
+    # Guarded on Deployment::Container for a semantic reason, NOT a structural one:
+    # Deployment::Sftp#build_command emits HostConfig.Binds in exactly the same
+    # "name:path:mode" shape, so the guard is what keeps an SFTP container mounting a volume
+    # from counting as the customer's application seeing it. Do not relax it.
+    #
+    # The service never raises and never performs network I/O; see
+    # VolumeServices::MarkVolumesMountedService.
+    if created && is_a?(Deployment::Container)
+      VolumeServices::MarkVolumesMountedService.new(self, build_client.dig("HostConfig", "Binds"), event).perform
+    end
+    created
   rescue Docker::Error::ConflictError => e
     event.event_details.create!(
       data: e.message,
@@ -89,8 +107,8 @@ module Containerized
   def can_build?(event)
     if built?
       event.event_details.create!(
-        data: 'Unable to provision, container is already built; attempting start.',
-        event_code: '7ebfd45eba7e7dc8'
+        data: "Unable to provision, container is already built; attempting start.",
+        event_code: "7ebfd45eba7e7dc8"
       )
       ContainerWorkers::StartWorker.perform_async global_id, event.global_id
       return false
@@ -98,17 +116,17 @@ module Containerized
     if node.nil?
       event.event_details.create!(
         data: "Container has no node",
-        event_code: 'bf1c1f517b6acefa'
+        event_code: "bf1c1f517b6acefa"
       )
-      event.fail! 'Container has no node'
+      event.fail! "Container has no node"
       return false
     end
     unless node.online?
       event.event_details.create!(
-        data: 'Node is offline',
-        event_code: '4bea557d3255b1af'
+        data: "Node is offline",
+        event_code: "4bea557d3255b1af"
       )
-      event.fail! 'Node is offline'
+      event.fail! "Node is offline"
       return false
     end
     true
@@ -117,16 +135,16 @@ module Containerized
   # @param [Boolean] fast_client
   # @return [Docker::Container,nil]
   def docker_client(fast_client = false)
-    Docker::Container.get(self.name, {}, (fast_client ? node.fast_client : node.client(3)))
+    Docker::Container.get(name, {}, (fast_client ? node.fast_client : node.client(3)))
   rescue Excon::Error::Certificate => e
     # Unable to connect due to invalid certificateX
-    ec = '12b4317e8dde17af'
+    ec = "12b4317e8dde17af"
     se = SystemEvent.find_by(event_code: ec)
     if se.nil?
       se = SystemEvent.create!(
         message: "Docker Connection Error: #{node&.region&.name}",
-        log_level: 'warn',
-        data: { message: nil, count: 0 },
+        log_level: "warn",
+        data: {message: nil, count: 0},
         event_code: ec
       )
     end
@@ -137,13 +155,13 @@ module Containerized
     nil
   rescue Excon::Error::Socket => e
     # Unable to connect due to _missing_ tls certs on docker
-    ec = '06daa76c88d5f72a'
+    ec = "06daa76c88d5f72a"
     se = SystemEvent.find_by(event_code: ec)
     if se.nil?
       se = SystemEvent.create!(
         message: "Missing Docker TLS Cert on Node: #{node&.region&.name}",
-        log_level: 'warn',
-        data: { message: nil, count: 0 },
+        log_level: "warn",
+        data: {message: nil, count: 0},
         event_code: ec
       )
     end
@@ -161,7 +179,7 @@ module Containerized
   def container_exec!(command, event, timeout = 10)
     result = []
     client = docker_client
-    return { response: [], exit_code: 2 } if client.nil?
+    return {response: [], exit_code: 2} if client.nil?
 
     response = client.exec(command, wait: timeout)
     exit_code = 0
@@ -173,18 +191,18 @@ module Containerized
       if result.is_a?(Array)
         d = []
         result.each do |ii|
-          d << if ii.kind_of?(Array)
-                 ii.join(" ")
-               else
-                 ii
-               end
+          d << if ii.is_a?(Array)
+            ii.join(" ")
+          else
+            ii
+          end
         end
         result = d.join(" ")
       end
     end
     if event
       event.event_details.create!(
-        event_code: '76ed2ba5c0ef8883',
+        event_code: "76ed2ba5c0ef8883",
         data: "Exit Code: #{exit_code}\n\nResponse: #{result}"
       )
     end
@@ -219,14 +237,14 @@ module Containerized
     result = []
     vol_ids = []
     c = docker_client
-    binds = c.info.dig('HostConfig', 'Binds')
+    binds = c.info.dig("HostConfig", "Binds")
     binds = [] if binds.nil?
     binds.each do |m|
       id = m.split(":").first.strip
       vol_ids << id unless vol_ids.include?(id)
     end
-    if c.info['Volumes']
-      vols = c.info['Volumes']
+    if c.info["Volumes"]
+      vols = c.info["Volumes"]
       vols.each_with_index do |(k, v), i|
         id = Volume.name_by_path(v)
         vol_ids << id if id && !vol_ids.include?(id)
@@ -236,9 +254,9 @@ module Containerized
       vol = Volume.find_by(name: i)
       if vol
         result << {
-          'service' => vol.container_service&.name,
-          'volume' => vol.name,
-          'label' => vol.label.blank? ? vol.container_service.label : vol.label
+          "service" => vol.container_service&.name,
+          "volume" => vol.name,
+          "label" => vol.label.blank? ? vol.container_service.label : vol.label
         }
       end
     end
@@ -265,25 +283,25 @@ module Containerized
 
     if raw.empty?
       if node.nil?
-        update status: 'pending'
+        update status: "pending"
         nil
       end
       return nil unless node.online?
-    elsif raw['State'].nil?
+    elsif raw["State"].nil?
       return nil
     end
-    state_raw = raw.empty? ? docker_client(true).info['State'] : raw
-    state = (state_raw['Running'] || state_raw['Restarting']) ? 'running' : 'stopped'
-    state = 'error' if state == 'stopped' && !state_raw['ExitCode'].zero?
-    if state_raw['Health'].nil?
+    state_raw = raw.empty? ? docker_client(true).info["State"] : raw
+    state = (state_raw["Running"] || state_raw["Restarting"]) ? "running" : "stopped"
+    state = "error" if state == "stopped" && !state_raw["ExitCode"].zero?
+    if state_raw["Health"].nil?
       update status: state
-      return { state: state, health: {} }
+      return {state: state, health: {}}
     end
-    if state == 'running'
-      state = 'degraded' if state_raw['Health']['Status'] == 'unhealthy'
+    if state == "running"
+      state = "degraded" if state_raw["Health"]["Status"] == "unhealthy"
     end
     update status: state
-    { state: state, health: { state: state_raw['Health']['Status'], count: state_raw['Health']['FailingStreak'], log: state_raw['Health']['Log'] }}
+    {state: state, health: {state: state_raw["Health"]["Status"], count: state_raw["Health"]["FailingStreak"], log: state_raw["Health"]["Log"]}}
   rescue
     nil
   end
@@ -294,44 +312,51 @@ module Containerized
   def log_driver_config
     ##
     # Temporarily find `loki` to ensure it exists on customer deployments!
-    f = Feature.find_by(name: 'loki')
-    f = Feature.create!(name: 'loki', maintenance: false, active: true) if f.nil?
-    ff = Feature.find_by(name: 'loki_fluentd')
-    ff = Feature.create!(name: 'loki_fluentd', maintenance: false, active: false) if ff.nil?
+    f = Feature.find_by(name: "loki")
+    f = Feature.create!(name: "loki", maintenance: false, active: true) if f.nil?
+    ff = Feature.find_by(name: "loki_fluentd")
+    ff = Feature.create!(name: "loki_fluentd", maintenance: false, active: false) if ff.nil?
     if f.active
-      loki_labels = ['container_name={{.Name}}']
+      loki_labels = ["container_name={{.Name}}"]
       loki_labels << "project_id=#{deployment.id}" if deployment
-      loki_labels << "service_id=#{service.id}" if kind_of?(Deployment::Container)
+      loki_labels << "service_id=#{service.id}" if is_a?(Deployment::Container)
       if ff.active # Fluentd
         {
-          'Type' => 'fluentd',
-          'Config' => {
-            'fluentd-address' => 'tcp://localhost:9432',
-            'labels' => "com.computestacks.deployment_id,com.computestacks.service_id"
+          "Type" => "fluentd",
+          "Config" => {
+            "fluentd-address" => "tcp://localhost:9432",
+            # Without this, docker refuses to start a container whenever fluentd is
+            # unreachable -- and fluentd runs as a systemd-supervised `docker run` with
+            # RestartSec=30, so it is down for ~30s after every daemon restart or node
+            # reboot. Container recovery landing in that window fails, and enough failures
+            # trip `halt_auto_recovery?` -> `set_inactive!`, which takes the container out
+            # of auto-recovery permanently. Async buffers instead: logs can be dropped on
+            # buffer overflow, but the container always starts.
+            "fluentd-async" => "true",
+            "labels" => "com.computestacks.deployment_id,com.computestacks.service_id"
           }
         }
       else
         {
-          'Type' => 'loki',
-          'Config' => {
-            'max-size' => '5m',
-            'max-file' => '2',
-            'loki-url' => "#{region.loki_container_endpoint}/loki/api/v1/push",
-            'loki-retries' => region.loki_retries,
-            'loki-batch-size' => region.loki_batch_size,
-            'loki-external-labels' => "#{loki_labels.join(',')}"
+          "Type" => "loki",
+          "Config" => {
+            "max-size" => "5m",
+            "max-file" => "2",
+            "loki-url" => "#{region.loki_container_endpoint}/loki/api/v1/push",
+            "loki-retries" => region.loki_retries,
+            "loki-batch-size" => region.loki_batch_size,
+            "loki-external-labels" => "#{loki_labels.join(",")}"
           }
         }
       end
     else
       {
-        'Type' => 'json-file',
-        'Config' => {
-          'max-size' => '5m',
-          'max-file' => '2'
+        "Type" => "json-file",
+        "Config" => {
+          "max-size" => "5m",
+          "max-file" => "2"
         }
       }
     end
   end
-
 end

@@ -33,5 +33,4 @@ class ApplicationRecord < ActiveRecord::Base
   def why?
     context
   end
-
 end

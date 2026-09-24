@@ -17,7 +17,7 @@ class ModifyNetworks < ActiveRecord::Migration[7.0]
     add_column :regions, :p_net_size, :integer, default: 27, null: false
 
     # `alter table only regions alter column network_driver set default 'bridge';`
-    add_column :regions, :network_driver, :string, default: 'bridge', null: false
+    add_column :regions, :network_driver, :string, default: "bridge", null: false
 
     remove_column :networks, :is_public, :boolean
     remove_column :networks, :is_ipv4, :boolean
@@ -27,6 +27,5 @@ class ModifyNetworks < ActiveRecord::Migration[7.0]
     add_index :networks, :is_shared
     add_index :networks, :region_id
     add_index :networks, :parent_network_id
-
   end
 end

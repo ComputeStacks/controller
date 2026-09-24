@@ -1,5 +1,4 @@
 module ContainerImageHelper
-
   def container_images_path
     if request.path =~ /admin/ && current_user.is_admin?
       "/admin/container_images"
@@ -31,13 +30,13 @@ module ContainerImageHelper
   # @param [String] size must be small, medium.
   def container_image_img_icon_tag(image, size)
     style = case size
-            when 'small'
-              'width:20px;height:20px;'
-            else
-              # default (medium)
-              'width:25px;height:25px;'
-            end
-    %Q(<img src="#{image_path image.icon_url}" style="#{style}" title="#{image.label}" alt="#{image.label}" />).html_safe
+    when "small"
+      "width:20px;height:20px;"
+    else
+      # default (medium)
+      "width:25px;height:25px;"
+    end
+    %(<img src="#{image_path image.icon_url}" style="#{style}" title="#{image.label}" alt="#{image.label}" />).html_safe
   end
 
   def image_content_general(image)
@@ -49,7 +48,7 @@ module ContainerImageHelper
 
   def image_content_ssh(service)
     image = service.container_image
-    content_key = service.volumes.sftp_enabled.empty? ? 'container_image.ssh_bastion' : 'container_image.ssh'
+    content_key = service.volumes.sftp_enabled.empty? ? "container_image.ssh_bastion" : "container_image.ssh"
     if image.ssh_block.nil? || image.ssh_block.block_contents.find_by(locale: I18n.locale).nil?
       content = Block.find_by(content_key: content_key)&.block_contents&.find_by(locale: I18n.locale)
       content = Block.find_by(content_key: content_key)&.block_contents&.find_by(locale: I18n.default_locale) if content.nil?
@@ -63,8 +62,8 @@ module ContainerImageHelper
   def image_content_remote(service)
     image = service.container_image
     if image.remote_block.nil? || image.remote_block.block_contents.find_by(locale: I18n.locale).nil?
-      content = Block.find_by(content_key: 'container_image.ports')&.block_contents&.find_by(locale: I18n.locale)
-      content = Block.find_by(content_key: 'container_image.ports')&.block_contents&.find_by(locale: I18n.default_locale) if content.nil?
+      content = Block.find_by(content_key: "container_image.ports")&.block_contents&.find_by(locale: I18n.locale)
+      content = Block.find_by(content_key: "container_image.ports")&.block_contents&.find_by(locale: I18n.default_locale) if content.nil?
     else
       content = image.remote_block.block_contents.find_by(locale: I18n.locale)
       content = image.remote_block.block_contents.find_by(locale: I18n.default_locale) if content.nil?
@@ -74,8 +73,8 @@ module ContainerImageHelper
 
   def image_content_domain(image)
     if image.domains_block.nil? || image.domains_block.block_contents.find_by(locale: I18n.locale).nil?
-      content = Block.find_by(content_key: 'container_image.domain')&.block_contents&.find_by(locale: I18n.locale)
-      content = Block.find_by(content_key: 'container_image.domain')&.block_contents&.find_by(locale: I18n.default_locale) if content.nil?
+      content = Block.find_by(content_key: "container_image.domain")&.block_contents&.find_by(locale: I18n.locale)
+      content = Block.find_by(content_key: "container_image.domain")&.block_contents&.find_by(locale: I18n.default_locale) if content.nil?
     else
       content = image.domains_block.block_contents.find_by(locale: I18n.locale)
       content = image.domains_block.block_contents.find_by(locale: I18n.default_locale) if content.nil?
@@ -95,20 +94,20 @@ module ContainerImageHelper
     d = []
     d << "#{image.min_cpu} CPU" if image.min_cpu > 0
     d << "#{image.min_memory} MB" if image.min_memory > 0
-    d.join(' / ')
+    d.join(" / ")
   end
 
   def image_table_buttons(image)
     btns = [
-      link_to("#{icon('fa-solid', 'copy')} #{t('container_images.clone')}".html_safe, "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/new?container_image[parent_image_id]=#{image.id}", class: 'btn btn-sm btn-default'),
-      link_to(icon('fa-solid', 'gear'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{image.id}", class: 'btn btn-sm btn-default')
+      link_to("#{icon("fa-solid", "copy")} #{t("container_images.clone")}".html_safe, "#{/admin/.match?(request.path) ? "/admin" : ""}/container_images/new?container_image[parent_image_id]=#{image.id}", class: "btn btn-sm btn-default"),
+      link_to(icon("fa-solid", "gear"), "#{/admin/.match?(request.path) ? "/admin" : ""}/container_images/#{image.id}", class: "btn btn-sm btn-default")
     ]
-    if image.can_administer?(current_user)
-      btns << link_to(icon('fa-solid', 'trash'), "#{request.path =~ /admin/ ? '/admin' : ''}/container_images/#{image.id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger')
+    btns << if image.can_administer?(current_user)
+      link_to(icon("fa-solid", "trash"), "#{/admin/.match?(request.path) ? "/admin" : ""}/container_images/#{image.id}", method: :delete, data: {confirm: t("confirm_prompt")}, class: "btn btn-sm btn-danger")
     else
-      btns << link_to(icon('fa-solid', 'trash'), "/container_images/#{image.id}", disabled: 'disabled', title: 'only owners can delete', class: 'btn btn-sm btn-danger')
+      link_to(icon("fa-solid", "trash"), "/container_images/#{image.id}", disabled: "disabled", title: "only owners can delete", class: "btn btn-sm btn-danger")
     end
-    %Q(
+    %(
       <div class="text-right" style="vertical-align: middle;">
         <div class="btn-group">
           #{btns.join("\n")}
@@ -116,5 +115,4 @@ module ContainerImageHelper
       </div>
     )
   end
-
 end

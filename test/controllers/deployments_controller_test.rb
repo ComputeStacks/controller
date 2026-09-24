@@ -1,25 +1,23 @@
-require 'test_helper'
+require "test_helper"
 
 class DeploymentsControllerTest < ActionDispatch::IntegrationTest
-
   include StandardTestControllerBase
   include Devise::Test::IntegrationHelpers
 
-  test 'can list projects' do
+  test "can list projects" do
     sign_in users(:admin)
-    get '/deployments'
+    get "/deployments"
     assert_response :success
   end
 
-  test 'can view project' do
+  test "can view project" do
     sign_in users(:admin)
     get "/deployments/#{deployments(:project_test).token}"
 
     assert_response :success
-
   end
 
-  test 'can view collaborated project' do
+  test "can view collaborated project" do
     sign_in users(:user)
 
     get "/deployments/#{deployments(:project_test).token}"
@@ -38,7 +36,5 @@ class DeploymentsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     d.deployment_collaborators.delete_all
-
   end
-
 end

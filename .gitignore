@@ -37,6 +37,7 @@ dump.rdb
 
 .vscode/*
 lib/migration
+lib/proxy_ips/
 
 TAGS
 .tags*
@@ -69,7 +70,8 @@ yarn-debug.log*
 .yarn-integrity
 rgloader
 lib/dev/bin/
-lib/dev/keys/
+lib/dev/keys/*
+!lib/dev/keys/.gitkeep
 .yarn/
 workspace/
 
@@ -82,3 +84,8 @@ engines/**
 !engines/.keep
 
 .consul.token
+
+*.http
+
+.claude/worktrees
+.claude/*.lock

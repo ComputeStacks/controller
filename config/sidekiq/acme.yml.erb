@@ -1,0 +1,5 @@
+---
+:timeout: 600
+:concurrency: <%= ENV['QUEUE_LE'] || 2 %>
+:queues:
+  - acme

@@ -1,16 +1,29 @@
-require 'test_helper'
+require "test_helper"
 
 class CollectUsageTest < ActionDispatch::IntegrationTest
+  setup do
+    requires_external_infra!
+    # Seed predictable-but-fake volume + backup usage. Backup-repo state used to live in
+    # Consul (borg/repository/<name>); it now comes from the projected AgentRepository row
+    # that backs Volume#repo_info. Rows are rolled back by transactional fixtures.
+    Volume.all.each do |vol|
+      vol.update_attribute :usage, vol.id
+      vol.update_consul!
+      AgentRepository.create!(
+        name: vol.name,
+        size_on_disk: vol.id * 1024,
+        total_size: vol.id * 4096,
+        archives: []
+      )
+    end
+  end
 
-  include ConsulTestContainerConcern
-
-  test 'correct amounts are stored' do
+  test "correct amounts are stored" do
     BillingUsage.delete_all
     BillingUsageServices::CollectUsageService.new.perform
 
     # Note: This currently assumes 1 container per service.
     BillingUsage.all.each do |i|
-
       refute i.processed if i.total.positive?
 
       # We must have a subscription product!
@@ -35,7 +48,7 @@ class CollectUsageTest < ActionDispatch::IntegrationTest
       ##
       # Individual resource types
       case i.product.resource_kind
-      when 'backup'
+      when "backup"
         # Note about `inject`: We need to add the `(0)` part to make sure that's the first element, otherwise the first `id` won't be multiplied by `1024`.
         expected_amount = i.subscription.linked_obj.service.volumes.pluck(:id).inject(0) do |sum, id|
           # we are multiply the id * 1024 to generate fake usage data.
@@ -44,7 +57,7 @@ class CollectUsageTest < ActionDispatch::IntegrationTest
         expected_amount = expected_amount.zero? ? expected_amount : (expected_amount / BYTE_TO_GB).round(4)
         puts "ID: #{i.id} | E: #{expected_amount} | A: #{i.qty}" if expected_amount != i.qty
         assert_equal expected_amount, i.qty
-      when 'storage'
+      when "storage"
         next if i.subscription.linked_obj.service.volumes.empty?
 
         # add all IDs together
@@ -54,8 +67,6 @@ class CollectUsageTest < ActionDispatch::IntegrationTest
         puts "ID: #{i.id} | E: #{expected_usage} | A: #{i.qty}" if expected_usage != i.qty
         assert_equal expected_usage, i.qty
       end
-
     end
   end
-
 end

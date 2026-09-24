@@ -1,8 +1,7 @@
 ##
 # Billing Usage API
 class Api::Subscriptions::BillingUsagesController < Api::Subscriptions::BaseController
-
-  before_action :load_usage, except: %i[ index ]
+  before_action :load_usage, except: %i[index]
 
   ##
   # List all usages
@@ -62,7 +61,8 @@ class Api::Subscriptions::BillingUsagesController < Api::Subscriptions::BaseCont
   #         * `email`: String
   #         * `external_id`: String
   #
-  def show; end
+  def show
+  end
 
   private
 
@@ -70,5 +70,4 @@ class Api::Subscriptions::BillingUsagesController < Api::Subscriptions::BaseCont
     @usage = current_user.billing_usages.find_by(id: params[:id])
     api_obj_missing(["Unknown Usage."]) if @usage.nil?
   end
-
 end

@@ -1,4 +1,4 @@
-collection @collaborators, root: 'collaborators', object_root: false
+collection @collaborators, root: "collaborators", object_root: false
 attributes :id, :created_at, :updated_at
 node :collaborator do |i|
   {

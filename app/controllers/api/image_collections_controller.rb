@@ -1,8 +1,7 @@
 ##
 # Container Image Collections
 class Api::ImageCollectionsController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :images_read }, unless: :current_user
+  api_scope index: :images_read
 
   ##
   # List all images
@@ -22,5 +21,4 @@ class Api::ImageCollectionsController < Api::ApplicationController
   def index
     @collections = paginate ContainerImageCollection.where active: true
   end
-
 end

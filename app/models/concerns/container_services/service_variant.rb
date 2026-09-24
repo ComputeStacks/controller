@@ -28,7 +28,7 @@ module ContainerServices
       c = containers.first if c.nil?
       return "" if c.nil?
       data = Liquid::Template.parse cmd
-      vars = { 'service_name_short' => c.var_lookup('build.self.service_name_short') }
+      vars = {"service_name_short" => c.var_lookup("build.self.service_name_short")}
       setting_params.each do |param|
         vars[param.name] = c.var_lookup("build.settings.#{param.name}")
       end
@@ -44,6 +44,5 @@ module ContainerServices
       return unless prev_variant
       ContainerServiceWorkers::VariantMigrationWorker.perform_async id, current_audit.id, prev_variant
     end
-
   end
 end

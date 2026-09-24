@@ -17,7 +17,6 @@
 #   @return [String]
 #
 class BlockContent < ApplicationRecord
-
   belongs_to :block, inverse_of: :block_contents
   validates_presence_of :block
 
@@ -31,5 +30,4 @@ class BlockContent < ApplicationRecord
   def body_vars_by_obj(obj)
     obj.respond_to?(:content_variables) ? obj.content_variables : {}
   end
-
 end

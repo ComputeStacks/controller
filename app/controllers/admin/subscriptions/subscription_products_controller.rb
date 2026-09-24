@@ -1,15 +1,14 @@
 class Admin::Subscriptions::SubscriptionProductsController < Admin::Subscriptions::BaseController
-
-  before_action :find_sub_product, only: %w(show edit update destroy)
-  before_action :find_products, only: %w(edit new create update)
+  before_action :find_sub_product, only: %w[show edit update destroy]
+  before_action :find_products, only: %w[edit new create update]
 
   def index
     @products = @subscription.subscription_products.order(:created_at)
     render layout: false
   end
 
-  def edit; end
-
+  def edit
+  end
 
   def update
     if @subscription_product.update(sp_params)
@@ -39,7 +38,7 @@ class Admin::Subscriptions::SubscriptionProductsController < Admin::Subscription
     if @subscription_product.destroy
       flash[:notice] = "Product removed from subscription."
     else
-      flash[:alert] = @subscription_product.errors.full_messages.join(' ')
+      flash[:alert] = @subscription_product.errors.full_messages.join(" ")
     end
     redirect_to "/admin/subscriptions/#{@subscription.id}"
   end
@@ -49,20 +48,19 @@ class Admin::Subscriptions::SubscriptionProductsController < Admin::Subscription
   def find_sub_product
     @subscription_product = @subscription.subscription_products.find_by(id: params[:id])
     if @subscription_product.nil?
-      redirect_to "/admin/subscriptions/#{@subscription.id}", alert: 'Unknown Subscription Product'
+      redirect_to "/admin/subscriptions/#{@subscription.id}", alert: "Unknown Subscription Product"
     end
   end
 
   def find_products
     @products = if defined?(@subscription_product) && @subscription_product.product
-                  @subscription.user.billing_plan.products.where(kind: @subscription_product.product.kind).order(:label)
-                else
-                  @subscription.user.billing_plan.products.order(:label)
-                end
+      @subscription.user.billing_plan.products.where(kind: @subscription_product.product.kind).order(:label)
+    else
+      @subscription.user.billing_plan.products.order(:label)
+    end
   end
 
   def sp_params
     params.require(:subscription_product).permit(:active, :external_id, :phase_type, :product_id)
   end
-
 end

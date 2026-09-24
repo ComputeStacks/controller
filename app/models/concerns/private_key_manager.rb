@@ -2,7 +2,7 @@ module PrivateKeyManager
   extend ActiveSupport::Concern
 
   included do
-    before_save :init_private_key, if: Proc.new { pkey_encrypted.blank? }
+    before_save :init_private_key, if: proc { pkey_encrypted.blank? }
   end
 
   def private_key
@@ -15,5 +15,4 @@ module PrivateKeyManager
   def init_private_key
     self.pkey_encrypted = Secret.encrypt! OpenSSL::PKey::EC.generate("prime256v1").to_pem
   end
-
 end

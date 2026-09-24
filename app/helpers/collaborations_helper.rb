@@ -1,5 +1,4 @@
 module CollaborationsHelper
-
   def collaborations_path(collab)
     case collab
     when ContainerImageCollaborator
@@ -10,8 +9,6 @@ module CollaborationsHelper
       "/collaborations/#{collab.id}-project"
     when Dns::ZoneCollaborator
       "/collaborations/#{collab.id}-zone"
-    else
-      nil
     end
   end
 
@@ -25,8 +22,6 @@ module CollaborationsHelper
       "/deployments/#{collab.deployment.token}"
     when Dns::ZoneCollaborator
       "/dns/#{collab.dns_zone.id}"
-    else
-      nil
     end
   end
 
@@ -40,13 +35,11 @@ module CollaborationsHelper
       collab.deployment.name
     when Dns::ZoneCollaborator
       collab.dns_zone.name
-    else
-      nil
     end
   end
 
   def collab_content_warning
-    b = Block.find_by(content_key: 'collaborate.warning')
+    b = Block.find_by(content_key: "collaborate.warning")
     return "" unless b
     c = b.find_content_by_locale I18n.locale
     return "" if c.nil?
@@ -54,11 +47,10 @@ module CollaborationsHelper
   end
 
   def collab_content_faq
-    b = Block.find_by(content_key: 'collaborate.faq')
+    b = Block.find_by(content_key: "collaborate.faq")
     return "" unless b
     c = b.find_content_by_locale I18n.locale
     return "" if c.nil?
     c.body.html_safe
   end
-
 end

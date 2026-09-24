@@ -128,11 +128,11 @@ class ContainerImage < ApplicationRecord
   include UrlPathFinder
 
   scope :is_public, -> { where(user: nil) }
-  scope :non_lbs, -> { where 'container_images.is_load_balancer = false' }
+  scope :non_lbs, -> { where "container_images.is_load_balancer = false" }
   scope :available, -> { where active: true }
-  scope :sorted, -> { order 'lower(container_images.label)' }
+  scope :sorted, -> { order "lower(container_images.label)" }
 
-  has_many :image_variants, class_name: 'ContainerImage::ImageVariant', dependent: :destroy
+  has_many :image_variants, class_name: "ContainerImage::ImageVariant", dependent: :destroy
 
   has_many :deployed_services, through: :image_variants, source: :container_services, dependent: :restrict_with_error
   has_many :deployed_containers, through: :image_variants, source: :containers
@@ -146,15 +146,15 @@ class ContainerImage < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :product, optional: true
 
-  has_many :env_params, class_name: 'ContainerImage::EnvParam', dependent: :destroy
-  has_many :ingress_params, class_name: 'ContainerImage::IngressParam', dependent: :destroy
-  has_many :setting_params, class_name: 'ContainerImage::SettingParam', dependent: :destroy
-  has_many :host_entries, class_name: 'ContainerImage::CustomHostEntry', dependent: :destroy
+  has_many :env_params, class_name: "ContainerImage::EnvParam", dependent: :destroy
+  has_many :ingress_params, class_name: "ContainerImage::IngressParam", dependent: :destroy
+  has_many :setting_params, class_name: "ContainerImage::SettingParam", dependent: :destroy
+  has_many :host_entries, class_name: "ContainerImage::CustomHostEntry", dependent: :destroy
 
   has_many :host_entry_dependents,
-           class_name: 'ContainerImage::CustomHostEntry',
-           inverse_of: :source_image,
-           dependent: :destroy
+    class_name: "ContainerImage::CustomHostEntry",
+    inverse_of: :source_image,
+    dependent: :destroy
 
   has_many :volumes, class_name: "ContainerImage::VolumeParam", dependent: :destroy
 
@@ -163,11 +163,13 @@ class ContainerImage < ApplicationRecord
 
   has_and_belongs_to_many :container_image_collections
 
+  has_and_belongs_to_many :event_logs
+
   # Content Sections
-  belongs_to :general_block, class_name: 'Block', optional: true
-  belongs_to :remote_block, class_name: 'Block', optional: true
-  belongs_to :ssh_block, class_name: 'Block', optional: true
-  belongs_to :domains_block, class_name: 'Block', optional: true
+  belongs_to :general_block, class_name: "Block", optional: true
+  belongs_to :remote_block, class_name: "Block", optional: true
+  belongs_to :ssh_block, class_name: "Block", optional: true
+  belongs_to :domains_block, class_name: "Block", optional: true
 
   before_validation :set_name
 
@@ -179,8 +181,8 @@ class ContainerImage < ApplicationRecord
   validates :label, presence: true
   validates :registry_image_path, presence: true
   validates :role, presence: true
-  validates :min_cpu, numericality: { greater_than_or_equal_to: 0.0 }
-  validates :min_memory, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :min_cpu, numericality: {greater_than_or_equal_to: 0.0}
+  validates :min_memory, numericality: {only_integer: true, greater_than_or_equal_to: 0}
 
   accepts_nested_attributes_for :env_params
   accepts_nested_attributes_for :dependency_parents
@@ -205,7 +207,7 @@ class ContainerImage < ApplicationRecord
   def resource_name
     return "null" if name.blank?
 
-    name.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+    name.strip.downcase.gsub(/[^a-z0-9\s]/i, "").tr(" ", "_")[0..10]
   end
 
   def default_variant
@@ -241,7 +243,7 @@ class ContainerImage < ApplicationRecord
   end
 
   def service_container?
-    %w[cmptstks/phpmyadmin computestacks/cs-docker-pma].include?(registry_image_path)
+    %w[cmptstks/phpmyadmin computestacks/cs-docker-pma docker-images/phpmyadmin].include?(registry_image_path)
   end
 
   def content_variables
@@ -266,15 +268,15 @@ class ContainerImage < ApplicationRecord
     return true unless name.blank?
 
     name_check = if user
-                   "#{label.strip.parameterize}-#{user.id}"
-                 else
-                   label.strip.parameterize
-                 end
+      "#{label.strip.parameterize}-#{user.id}"
+    else
+      label.strip.parameterize
+    end
     self.name = if ContainerImage.where(name: name_check).exists?
-                  "#{name_check}#{SecureRandom.rand(1..1000)}"
-                else
-                  name_check
-                end
+      "#{name_check}#{SecureRandom.rand(1..1000)}"
+    else
+      name_check
+    end
   end
 
   def allowed_params
@@ -304,7 +306,6 @@ class ContainerImage < ApplicationRecord
     return unless !skip_variant_setup && registry_image_tag.blank?
 
     errors.add(:base, "Missing image tag")
-
   end
 
   # Create initial default tag on commit
@@ -341,7 +342,7 @@ class ContainerImage < ApplicationRecord
         next
       end
       unless v.update version: k
-        errors.add(:base, "Error saving variant #{v.id}: #{v.errors.full_messages.join(' ')}")
+        errors.add(:base, "Error saving variant #{v.id}: #{v.errors.full_messages.join(" ")}")
       end
       k += 1
     end
@@ -372,11 +373,9 @@ class ContainerImage < ApplicationRecord
 
     p = Product.find_by id: product_id
     if p.nil?
-      errors.add(:product_id, 'invalid')
+      errors.add(:product_id, "invalid")
     elsif !p.is_image?
-      errors.add(:product_id, 'is not an image product')
+      errors.add(:product_id, "is not an image product")
     end
-
   end
-
 end

@@ -38,35 +38,33 @@ module ProvisionServices
   # @!attribute result
   #   @return [Hash]
   class ContainerServiceProvisioner
-
     attr_accessor :data, # order provision data
-                  :project,
-                  :event,
-                  :container_service,
-                  :image,
-                  :image_variant,
-                  :user,
-                  :project_user,
-                  :region,
-                  :cpu,
-                  :memory,
-                  :subscription,
-                  :qty,
-                  :node,
-                  :source, # source container service
-                  :errors,
-                  :volume_maps,
-                  ##
-                  # Track what's been created
-                  #
-                  # {
-                  #   containers: [],
-                  #   subscriptions: [],
-                  #   volumes: []
-                  # }
-                  :result,
-                  :provision_state # Track what the parent hash
-
+      :project,
+      :event,
+      :container_service,
+      :image,
+      :image_variant,
+      :user,
+      :project_user,
+      :region,
+      :cpu,
+      :memory,
+      :subscription,
+      :qty,
+      :node,
+      :source, # source container service
+      :errors,
+      :volume_maps,
+      ##
+      # Track what's been created
+      #
+      # {
+      #   containers: [],
+      #   subscriptions: [],
+      #   volumes: []
+      # }
+      :result,
+      :provision_state # Track what the parent hash
 
     # @param [User] user
     # @param [Deployment] project
@@ -136,10 +134,10 @@ module ProvisionServices
           errors << "Unable to provision container, missing package"
           next
         end
-        if region.has_clustered_storage?
-          new_container.node = region.find_node p_region
+        new_container.node = if region.has_clustered_storage?
+          region.find_node p_region
         else
-          new_container.node = node
+          node
         end
         unless new_container.perform
           new_container.errors.each do |i|
@@ -199,7 +197,7 @@ module ProvisionServices
       return true if region.has_clustered_storage?
 
       # Find any volumes that have been marked as skip during the order process.
-      skip_volumes = data[:volume_config].filter_map {|i| i[:csrn] if i[:action] == "skip" }
+      skip_volumes = data[:volume_config].filter_map { |i| i[:csrn] if i[:action] == "skip" }
 
       # TODO: Try to first select volumes created in this order, and then fallback to volumes
       #       created within the project.
@@ -224,7 +222,6 @@ module ProvisionServices
         return true
       end
 
-
       if container_service.container_image.volumes.empty?
         self.node = nil
       else
@@ -237,10 +234,12 @@ module ProvisionServices
         n = container_service.nodes.empty? ? region.find_node(p_region) : container_service.nodes.first
         if n.nil?
           errors << "Expected to have a node, but nil was returned."
-          event.event_details.create!(
-            data: region.context.to_yaml,
-            event_code: "57e27d7a868e5e96"
-          ) unless region.context.empty?
+          unless region.context.empty?
+            event.event_details.create!(
+              data: region.context.to_yaml,
+              event_code: "57e27d7a868e5e96"
+            )
+          end
           return false
         end
         self.node = n
@@ -251,10 +250,10 @@ module ProvisionServices
     # @return [Boolean]
     def build_volumes!
       volume_driver = if container_service.container_image.force_local_volume
-                        'local'
-                      else
-                        container_service.region.volume_backend
-                      end
+        "local"
+      else
+        container_service.region.volume_backend
+      end
 
       skip_volumes = data[:volume_config].filter_map { |i| i[:csrn] if i[:action] == "skip" }
 
@@ -273,7 +272,7 @@ module ProvisionServices
         end
 
         source_snapshot = nil
-        vol_action = existing_volume ? 'mount' : 'create'
+        vol_action = existing_volume ? "mount" : "create"
         mount_ro = vol.mount_ro
 
         # Volume configuration overrides for this specific order.
@@ -315,41 +314,41 @@ module ProvisionServices
           source_snapshot = custom_vol_req[:snapshot] unless custom_vol_req[:snapshot].blank?
         end
 
-        new_vol = if existing_volume && vol_action == 'mount'
-                    existing_volume
-                  else
-                    container_service.volumes.new(
-                      label: vol.label,
-                      user: container_service.deployment.user,
-                      deployment: project,
-                      borg_enabled: vol.borg_enabled,
-                      borg_freq: vol.borg_freq,
-                      borg_strategy: vol.borg_strategy,
-                      borg_keep_hourly: vol.borg_keep_hourly,
-                      borg_keep_daily: vol.borg_keep_daily,
-                      borg_keep_weekly: vol.borg_keep_weekly,
-                      borg_keep_monthly: vol.borg_keep_monthly,
-                      borg_keep_annually: vol.borg_keep_annually,
-                      borg_backup_error: vol.borg_backup_error,
-                      borg_restore_error: vol.borg_restore_error,
-                      borg_pre_backup: vol.borg_pre_backup,
-                      borg_post_backup: vol.borg_post_backup,
-                      borg_pre_restore: vol.borg_pre_restore,
-                      borg_post_restore: vol.borg_post_restore,
-                      borg_rollback: vol.borg_rollback,
-                      enable_sftp: vol.enable_sftp,
-                      region: container_service.region,
-                      volume_backend: volume_driver,
-                      template: vol
-                    )
-                  end
+        new_vol = if existing_volume && vol_action == "mount"
+          existing_volume
+        else
+          container_service.volumes.new(
+            label: vol.label,
+            user: container_service.deployment.user,
+            deployment: project,
+            borg_enabled: vol.borg_enabled,
+            borg_freq: vol.borg_freq,
+            borg_strategy: vol.borg_strategy,
+            borg_keep_hourly: vol.borg_keep_hourly,
+            borg_keep_daily: vol.borg_keep_daily,
+            borg_keep_weekly: vol.borg_keep_weekly,
+            borg_keep_monthly: vol.borg_keep_monthly,
+            borg_keep_annually: vol.borg_keep_annually,
+            borg_backup_error: vol.borg_backup_error,
+            borg_restore_error: vol.borg_restore_error,
+            borg_pre_backup: vol.borg_pre_backup,
+            borg_post_backup: vol.borg_post_backup,
+            borg_pre_restore: vol.borg_pre_restore,
+            borg_post_restore: vol.borg_post_restore,
+            borg_rollback: vol.borg_rollback,
+            enable_sftp: vol.enable_sftp,
+            region: container_service.region,
+            volume_backend: volume_driver,
+            template: vol
+          )
+        end
 
         primary_mount = false
         provision_volume_job = nil
-        if %w(create clone).include?(vol_action)
+        if %w[create clone].include?(vol_action)
           ##
           # Ensure that the volume is allowed on _all_ nodes in the region when clustering.
-          if volume_driver == 'nfs'
+          if volume_driver == "nfs"
             # We need to ensure all nodes have the volume
             container_service.region.nodes.each do |node|
               new_vol.nodes << node
@@ -359,15 +358,15 @@ module ProvisionServices
           end
 
           unless new_vol.save
-            errors << "Failed to create volume: #{new_vol.errors.full_messages.join(' ')}"
+            errors << "Failed to create volume: #{new_vol.errors.full_messages.join(" ")}"
             return false
           end
           result[:volumes] << new_vol
-          result[:volume_map] << { template: new_vol.template.csrn, volume: new_vol.csrn }
+          result[:volume_map] << {template: new_vol.template.csrn, volume: new_vol.csrn}
           primary_mount = true
           provision_volume_job = VolumeServices::ProvisionVolumeService.new(new_vol, event)
 
-          if vol_action == 'clone' # Regardless of state, pass if cloning.
+          if vol_action == "clone" # Regardless of state, pass if cloning.
             result[:volume_clones] << {
               vol_id: new_vol.id,
               source_vol_id: existing_volume&.id,
@@ -383,7 +382,7 @@ module ProvisionServices
           is_owner: primary_mount
         )
         unless vol_map.save
-          errors << "Failed to create volume map: #{vol_map.errors.full_messages.join(' ')}"
+          errors << "Failed to create volume map: #{vol_map.errors.full_messages.join(" ")}"
           return false
         end
 
@@ -393,10 +392,9 @@ module ProvisionServices
             return false
           end
         end
-
       end
     rescue => e
-      ExceptionAlertService.new(e, '38e27fb46115333a').perform
+      ExceptionAlertService.new(e, "38e27fb46115333a").perform
       errors << "Fatal error provisioning volumes: #{e.message}"
       false
     end
@@ -478,10 +476,8 @@ module ProvisionServices
         return true
       end
       image_product = if image.product
-                        image.product.allow_user?(project_user) ? image.product : nil
-                      else
-                        nil
-                      end
+        image.product.allow_user?(project_user) ? image.product : nil
+      end
       service_products = []
 
       service_products << image_product if image_product
@@ -497,18 +493,18 @@ module ProvisionServices
         service_products << i.product
       end
 
-      bw = Product.lookup(project_user.billing_plan, 'bandwidth')
+      bw = Product.lookup(project_user.billing_plan, "bandwidth")
       if bw.nil?
         errors << "Missing bandwidth product in billing plan."
         return false
       end
       service_products << bw
-      disk = Product.lookup(project_user.billing_plan, 'storage')
+      disk = Product.lookup(project_user.billing_plan, "storage")
       if disk.nil?
         errors << "Missing storage product in billing plan."
         return false
       end
-      local_disk = Product.lookup(project_user.billing_plan, 'local_disk')
+      local_disk = Product.lookup(project_user.billing_plan, "local_disk")
       if local_disk.nil?
         errors << "Missing temporary storage product in billing plan."
         return false
@@ -543,7 +539,7 @@ module ProvisionServices
       if subscription.save
         result[:subscriptions] << subscription
       else
-        errors << subscription.errors.full_messages.join(' ')
+        errors << subscription.errors.full_messages.join(" ")
         return false
       end
       service_products.each do |p|
@@ -576,7 +572,7 @@ module ProvisionServices
       container_service.current_audit = event.audit if event&.audit
       container_service.initial_subscription = subscription if subscription
       unless container_service.save
-        errors << container_service.errors.full_messages.join(' ')
+        errors << container_service.errors.full_messages.join(" ")
         return false
       end
       event.container_services << container_service
@@ -593,10 +589,10 @@ module ProvisionServices
     def init_service_plugins!
       image.container_image_plugins.each do |i|
         plugin_active = if data[:addons].include?(i.id)
-                          true
-                        else
-                          i.is_optional ? false : true
-                        end
+          true
+        else
+          i.is_optional ? false : true
+        end
         p = container_service.service_plugins.new(
           container_image_plugin: i,
           active: plugin_active,
@@ -614,11 +610,10 @@ module ProvisionServices
     def init_private_lbs!
       lb_job = ProvisionServices::IngressControllerProvisioner.new(container_service, event)
       unless lb_job.perform
-        errors << "Error generating private Load Balancer: #{lb_job.errors.join(' ')}"
+        errors << "Error generating private Load Balancer: #{lb_job.errors.join(" ")}"
       end
       result[:load_balancers] = lb_job.load_balancers
       lb_job.errors.empty?
     end
-
   end
 end

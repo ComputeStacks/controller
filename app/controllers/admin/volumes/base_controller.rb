@@ -1,5 +1,4 @@
 class Admin::Volumes::BaseController < Admin::ApplicationController
-
   before_action :find_volume
 
   private
@@ -10,10 +9,9 @@ class Admin::Volumes::BaseController < Admin::ApplicationController
       if request.xhr?
         render plain: "Volume does not exist.", layout: false
       else
-        redirect_to "/admin/volumes", alert: 'Unknown volume.'
+        redirect_to "/admin/volumes", alert: "Unknown volume."
       end
-      return false
+      false
     end
   end
-
 end

@@ -1,11 +1,10 @@
 module RegionServices
   class MigrateProjectNetworksService
-
     attr_reader :region,
-                :audit
+      :audit
 
     attr_accessor :errors,
-                  :event
+      :event
 
     # @param [Region] region
     # @param [Audit] audit
@@ -21,16 +20,15 @@ module RegionServices
 
       # create event
       self.event = EventLog.create!(
-        locale: 'region.network',
-        locale_keys: { 'region' => @region.name },
-        event_code: '1aa76ff818fded56',
-        status: 'pending',
+        locale: "region.network",
+        locale_keys: {"region" => @region.name},
+        event_code: "1aa76ff818fded56",
+        status: "pending",
         audit: audit
       )
 
       # Start
       RegionWorkers::MigrateNetworkWorker.perform_async @region.id, event.id
-
     end
 
     private
@@ -42,11 +40,10 @@ module RegionServices
       if region.networks.bridged.empty?
         errors << "Missing bridged networks"
       end
-      if region.deployments.where(private_network: { id: nil }).includes(:private_network).empty?
+      if region.deployments.where(private_network: {id: nil}).includes(:private_network).empty?
         errors << "No projects to migrate"
       end
       errors.empty?
     end
-
   end
 end

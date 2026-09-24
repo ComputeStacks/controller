@@ -1,7 +1,6 @@
 ##
 # User Suspension
 class Api::Admin::Users::SuspensionController < Api::Admin::Users::BaseController
-
   ##
   # Suspend a user
   #
@@ -27,5 +26,4 @@ class Api::Admin::Users::SuspensionController < Api::Admin::Users::BaseControlle
       f.xml { render xml: {}, status: :accepted }
     end
   end
-
 end

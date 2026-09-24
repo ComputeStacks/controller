@@ -1,6 +1,5 @@
 # Add and Remove plugins from an image
 class ContainerImages::ImagePluginsController < ContainerImages::BaseController
-
   before_action :find_available_plugins, only: %i[new create]
   before_action :ensure_available_plugins, only: :new
   before_action :authorize_action, only: %i[new create destroy]
@@ -9,7 +8,8 @@ class ContainerImages::ImagePluginsController < ContainerImages::BaseController
     @plugins = ContainerImagePlugin.active
   end
 
-  def new; end
+  def new
+  end
 
   def create
     if @image.update add_plugin_id: params[:add_plugin_id]
@@ -30,7 +30,7 @@ class ContainerImages::ImagePluginsController < ContainerImages::BaseController
   def authorize_action
     unless current_user.is_admin
       redirect_to "/admin/container_images", alert: "permission denied"
-      return false
+      false
     end
   end
 
@@ -45,5 +45,4 @@ class ContainerImages::ImagePluginsController < ContainerImages::BaseController
       redirect_to "/container_images/#{@image.id}", alert: "There are no available plugins."
     end
   end
-
 end

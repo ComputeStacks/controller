@@ -1,6 +1,6 @@
 class Users::TotpController < AuthController
-
-  def index; end
+  def index
+  end
 
   def new
     @otp_secret = ROTP::Base32.random
@@ -10,7 +10,7 @@ class Users::TotpController < AuthController
 
   def create
     if totp_params[:otp_secret].blank? || totp_params[:otp_setup_code].blank? || totp_params[:current_password].blank?
-      redirect_to '/users/totp/new', alert: "Missing OTP Parameters"
+      redirect_to "/users/totp/new", alert: "Missing OTP Parameters"
       return false
     end
     @otp_secret = totp_params[:otp_secret]
@@ -22,7 +22,7 @@ class Users::TotpController < AuthController
       redirect_to "/users/security", success: "Two-Factor Authentication Enabled"
     else
       @qr_code = qr_code otp_setup.provisioning_uri(current_user.email)
-      current_user.errors.add(:base, "Invalid authenticator code")  unless otp_timestamp
+      current_user.errors.add(:base, "Invalid authenticator code") unless otp_timestamp
       render :new
     end
   end
@@ -31,7 +31,7 @@ class Users::TotpController < AuthController
     if current_user.update(otp_secret_enc: nil)
       flash[:success] = "Two Factor Auth Disabled"
     else
-      flash[:alert] = "Failed to disable: #{current_user.errors.full_messages.join(' ')}"
+      flash[:alert] = "Failed to disable: #{current_user.errors.full_messages.join(" ")}"
     end
     redirect_to "/users/security"
   end
@@ -45,5 +45,4 @@ class Users::TotpController < AuthController
   def totp_params
     params.require(:user).permit(:otp_secret, :otp_setup_code, :current_password)
   end
-
 end

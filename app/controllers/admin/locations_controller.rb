@@ -1,18 +1,19 @@
 class Admin::LocationsController < Admin::ApplicationController
-
-  before_action :load_location, except: %w(index new create)
+  before_action :load_location, except: %w[index new create]
 
   def index
     @locations = Location.sorted
   end
 
-  def show; end
+  def show
+  end
 
   def new
     @location = Location.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if @location.update(location_params)
@@ -36,7 +37,7 @@ class Admin::LocationsController < Admin::ApplicationController
     if @location.destroy
       redirect_to "/admin/locations", notice: "#{@location.name} successfully deleted."
     else
-      redirect_to "/admin/locations", alert: "#{@location.errors.full_messages.join(', ')}"
+      redirect_to "/admin/locations", alert: "#{@location.errors.full_messages.join(", ")}"
     end
   end
 
@@ -56,5 +57,4 @@ class Admin::LocationsController < Admin::ApplicationController
     end
     @location.current_user = current_user
   end
-
 end

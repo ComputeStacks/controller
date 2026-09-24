@@ -2,9 +2,9 @@ Rails.application.configure do
   config.lograge.enabled = true
   config.lograge.formatter = Lograge::Formatters::KeyValue.new
   config.lograge.custom_options = lambda do |event|
-    exceptions = %w(controller action format id)
+    exceptions = %w[controller action format id]
     opts = {
-      customer: ENV['APP_ID'],
+      customer: ENV["APP_ID"],
       params: event.payload[:params].except(*exceptions),
       timestamp: Time.now.utc.iso8601
     }
@@ -15,6 +15,6 @@ Rails.application.configure do
     opts
   end
   config.lograge.ignore_custom = lambda do |event|
-    return true if event.payload[:poll] # see ApplicationController for how this is defined.
+    true if event.payload[:poll] # see ApplicationController for how this is defined.
   end
 end

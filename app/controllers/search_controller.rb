@@ -1,6 +1,6 @@
 class SearchController < AuthController
-
-  def new; end
+  def new
+  end
 
   def create
     sparams = {
@@ -19,16 +19,16 @@ class SearchController < AuthController
       if uuid_regex.match?(@q)
         sparams[:volumes] = Volume.find_all_for(current_user).where(name: @q)
         sparams[:deployments] = Deployment.find_all_for(current_user).where(token: @q)
-      elsif @q =~ Resolv::IPv4::Regex # IP Address
+      elsif Resolv::IPv4::Regex.match?(@q) # IP Address
         sparams[:cidr] = Network::Cidr.where(cidr: @q)
       else
-        sparams[:deployments] = Deployment.find_all_for(current_user).where Arel.sql %Q(lower(deployments.name) ~ '#{@q}')
-        sparams[:containers] = Deployment::Container.find_all_for(current_user).where Arel.sql %Q(lower(deployment_containers.name) ~ '#{@q}')
-        sparams[:container_services] = Deployment::ContainerService.find_all_for(current_user).where Arel.sql %Q( lower(deployment_container_services.name) ~ '#{@q}' OR lower(deployment_container_services.label) ~ '#{@q}' )
-        sparams[:volumes] = Volume.find_all_for(current_user).where Arel.sql %Q( lower(volumes.name) ~ '#{@q}' OR lower(volumes.label) ~ '#{@q}' )
-        sparams[:container_domains] = Deployment::ContainerDomain.find_all_for(current_user).where Arel.sql %Q(domain ~ '#{@q}')
-        sparams[:dns_zones] = Dns::Zone.find_all_for(current_user).where Arel.sql %Q( dns_zones.name ~ '#{@q}' )
-        sparams[:images] = ContainerImage.find_all_for(current_user).where Arel.sql %Q(lower(container_images.name) ~ '#{@q}' OR lower(container_images.label) ~ '#{@q}')
+        sparams[:deployments] = Deployment.find_all_for(current_user).where Arel.sql %(lower(deployments.name) ~ '#{@q}')
+        sparams[:containers] = Deployment::Container.find_all_for(current_user).where Arel.sql %(lower(deployment_containers.name) ~ '#{@q}')
+        sparams[:container_services] = Deployment::ContainerService.find_all_for(current_user).where Arel.sql %( lower(deployment_container_services.name) ~ '#{@q}' OR lower(deployment_container_services.label) ~ '#{@q}' )
+        sparams[:volumes] = Volume.find_all_for(current_user).where Arel.sql %( lower(volumes.name) ~ '#{@q}' OR lower(volumes.label) ~ '#{@q}' )
+        sparams[:container_domains] = Deployment::ContainerDomain.find_all_for(current_user).where Arel.sql %(domain ~ '#{@q}')
+        sparams[:dns_zones] = Dns::Zone.find_all_for(current_user).where Arel.sql %( dns_zones.name ~ '#{@q}' )
+        sparams[:images] = ContainerImage.find_all_for(current_user).where Arel.sql %(lower(container_images.name) ~ '#{@q}' OR lower(container_images.label) ~ '#{@q}')
       end
     end
     @search_params = []
@@ -92,12 +92,11 @@ class SearchController < AuthController
     end
     sparams[:images].each do |i|
       @search_params << {
-        label: %q(<span class="label label-warning">Image</span>),
+        label: '<span class="label label-warning">Image</span>',
         link: "/container_images/#{i.id}",
         title: i.label,
         created_at: i.created_at
       }
     end
   end
-
 end

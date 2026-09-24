@@ -2,15 +2,15 @@ module ApiAuth
   extend ActiveSupport::Concern
 
   included do
-    before_action :auth_request!, except: %i[ auth secondfactor ]
+    before_action :auth_request!, except: %i[auth secondfactor]
   end
 
   ##
   # =Deprecated token authentication
   def auth
     respond_to do |format|
-      format.json { render json: { errors: ["this authentication method has been replaced with oauth2.", "Please see the api documentation: /documentation/api"] }, status: :bad_request }
-      format.xml { render xml: { errors: ["this authentication method has been replaced with oauth2.", "Please see the api documentation: /documentation/api"] }, status: :bad_request }
+      format.json { render json: {errors: ["this authentication method has been replaced with oauth2.", "Please see the api documentation: /documentation/api"]}, status: :bad_request }
+      format.xml { render xml: {errors: ["this authentication method has been replaced with oauth2.", "Please see the api documentation: /documentation/api"]}, status: :bad_request }
     end
   end
 
@@ -30,34 +30,32 @@ module ApiAuth
     status = :ok
     msg = {}
     if user.nil?
-      msg = {errors: ['User does not exist.']}
+      msg = {errors: ["User does not exist."]}
       status = :not_found
-    else
-      if user.require_2fa_auth?
-        if user.last_second_factor_auth && user.last_second_factor_auth > 8.hours.ago
-          raw_ip = request.remote_ip
-          # raw_ip = request.env['HTTP_X_FORWARDED_FOR'].nil? ? request.remote_ip : request.env['HTTP_X_FORWARDED_FOR']
-          remote_ip = raw_ip.to_s.split(":ffff:").last
-          specified_remote_ip = params[:rip]
-          existing_ips = []
-          existing_ips << user.last_sign_in_ip.to_s
-          existing_ips << user.current_sign_in_ip.to_s
-          if existing_ips.include?(remote_ip) || existing_ips.include?(specified_remote_ip)
-            # We've seen this ip before
-            status = :accepted
-          else
-            msg = {errors: ['Requires 2FA.']}
-          end
+    elsif user.require_2fa_auth?
+      if user.last_second_factor_auth && user.last_second_factor_auth > 8.hours.ago
+        raw_ip = request.remote_ip
+        # raw_ip = request.env['HTTP_X_FORWARDED_FOR'].nil? ? request.remote_ip : request.env['HTTP_X_FORWARDED_FOR']
+        remote_ip = raw_ip.to_s.split(":ffff:").last
+        specified_remote_ip = params[:rip]
+        existing_ips = []
+        existing_ips << user.last_sign_in_ip.to_s
+        existing_ips << user.current_sign_in_ip.to_s
+        if existing_ips.include?(remote_ip) || existing_ips.include?(specified_remote_ip)
+          # We've seen this ip before
+          status = :accepted
         else
-          msg = {errors: ['Requires 2FA.']}
+          msg = {errors: ["Requires 2FA."]}
         end
       else
-        status = :accepted
+        msg = {errors: ["Requires 2FA."]}
       end
+    else
+      status = :accepted
     end
     respond_to do |format|
       format.json { render json: msg, status: status }
-      format.xml { render xml: msg, status: status  }
+      format.xml { render xml: msg, status: status }
     end
   end
 
@@ -66,13 +64,12 @@ module ApiAuth
   ##
   # =Basic Auth Request
   def auth_request! # :doc:
-
     # Intercept OPTIONS request (used by CORS prior; auth will be missing.)
     # CORS headers are configured in nginx and will be appended to this response.
-    return unknown_route if request.request_method == 'OPTIONS'
+    return unknown_route if request.request_method == "OPTIONS"
 
     # Allow basic auth -- all other auth types will be handled by OAuth.
-    if request.authorization =~ /Basic/
+    if http_basic_request?
       authenticate_with_http_basic do |username, password|
         auth = User::ApiCredential.find_by_username username
         resource = auth&.user
@@ -83,10 +80,27 @@ module ApiAuth
           @current_user = resource
         end
       end
-      return invalid_authentication unless @current_user
+      invalid_authentication unless @current_user
     end
   rescue
-    return invalid_authentication
+    invalid_authentication
+  end
+
+  ##
+  # =Is this request presenting HTTP Basic credentials?
+  #
+  # Deliberately shared with +ApiScopes#authorize_api_scope!+, which skips the
+  # OAuth scope gate for Basic requests. Two separately written predicates would
+  # be a bypass primitive: a header the scope gate reads as Basic but
+  # +auth_request!+ does not would skip *both* checks. One definition, both call
+  # sites.
+  #
+  # This asks only whether the header *is* Basic, not whether it authenticated:
+  # +auth_request!+ is registered in this concern's +included+ block, so it runs
+  # before anything a subclass adds and has already rendered 401 for bad
+  # credentials.
+  def http_basic_request? # :doc:
+    ActionController::HttpAuthentication::Basic.has_basic_credentials?(request)
   end
 
   def current_user
@@ -101,7 +115,7 @@ module ApiAuth
   def invalid_authentication
     respond_to do |format|
       format.json { render json: {errors: ["Not Authorized"]}, status: :unauthorized }
-      format.xml { render xml: {errors: ["Not Authorized"]}, status: :unauthorized  }
+      format.xml { render xml: {errors: ["Not Authorized"]}, status: :unauthorized }
     end
   end
 
@@ -110,5 +124,4 @@ module ApiAuth
   def auth_params
     params.permit(:api_key, :api_secret)
   end
-
 end

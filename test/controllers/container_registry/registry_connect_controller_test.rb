@@ -1,7 +1,6 @@
-require 'test_helper'
+require "test_helper"
 
 class ContainerRegistry::RegistryConnectControllerTest < ActionDispatch::IntegrationTest
-  
   include StandardTestControllerBase
   include Devise::Test::IntegrationHelpers
 
@@ -10,7 +9,6 @@ class ContainerRegistry::RegistryConnectControllerTest < ActionDispatch::Integra
   end
 
   test "can view registry password" do
-
     registry = ContainerRegistry.first
 
     assert_not_nil registry
@@ -22,7 +20,5 @@ class ContainerRegistry::RegistryConnectControllerTest < ActionDispatch::Integra
     assert_response :success
 
     assert_equal response.body, registry.registry_password
-
   end
-
 end

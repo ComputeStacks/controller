@@ -1,5 +1,4 @@
 class Api::Admin::ContainerImages::ImageVariants::BaseController < Api::Admin::ContainerImages::BaseController
-
   before_action :find_variant
 
   private
@@ -8,5 +7,4 @@ class Api::Admin::ContainerImages::ImageVariants::BaseController < Api::Admin::C
     @variant = @image.image_variants.find params[:image_variant_id]
     @variant.current_user = current_user
   end
-
 end

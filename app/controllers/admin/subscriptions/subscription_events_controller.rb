@@ -1,5 +1,4 @@
 class Admin::Subscriptions::SubscriptionEventsController < Admin::Subscriptions::BaseController
-
   before_action :load_event, except: :index
 
   def index
@@ -7,7 +6,6 @@ class Admin::Subscriptions::SubscriptionEventsController < Admin::Subscriptions:
   end
 
   def show
-
   end
 
   private
@@ -16,8 +14,7 @@ class Admin::Subscriptions::SubscriptionEventsController < Admin::Subscriptions:
     @event = @subscription.billing_events.find_by(id: params[:id])
     if @event.nil?
       redirect_to "/admin/subscriptions/#{@subscription.id}/subscription_events"
-      return falseApplicationControllerApplicationController
+      falseApplicationControllerApplicationController
     end
   end
-
 end

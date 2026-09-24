@@ -19,19 +19,17 @@
 # @!attribute expires_at
 #   @return [Date]
 class LetsEncryptAuth < ApplicationRecord
-
-  scope :sorted, -> { order( Arel.sql("domain ASC, expires_at DESC") ) }
-  scope :expired, -> { where Arel.sql(%Q(expires_at < '#{Time.now.iso8601}')) }
+  scope :sorted, -> { order(Arel.sql("domain ASC, expires_at DESC")) }
+  scope :expired, -> { where Arel.sql(%(expires_at < '#{Time.now.iso8601}')) }
 
   # @return [Deployment::ContainerDomain]
-  belongs_to :container_domain, class_name: 'Deployment::ContainerDomain', foreign_key: 'domain_id', optional: true
+  belongs_to :container_domain, class_name: "Deployment::ContainerDomain", foreign_key: "domain_id", optional: true
 
   # @return [LetsEncrypt]
-  belongs_to :certificate, class_name: 'LetsEncrypt', foreign_key: 'lets_encrypt_id'
+  belongs_to :certificate, class_name: "LetsEncrypt", foreign_key: "lets_encrypt_id"
 
   # @return [LetsEncryptAccount]
   has_one :account, through: :certificate
-
 
   # @return [Boolean]
   def expired?
@@ -45,13 +43,12 @@ class LetsEncryptAuth < ApplicationRecord
     count = 4
     z = nil
     loop do
-      tld = domain.split('.').last(i)
-      z = Dns::Zone.find_by(name: tld.join('.'))
+      tld = domain.split(".").last(i)
+      z = Dns::Zone.find_by(name: tld.join("."))
       break unless z.nil?
       break if i > count
       i += 1
     end
     z
   end
-
 end

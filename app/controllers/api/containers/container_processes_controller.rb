@@ -1,13 +1,12 @@
 ##
 # Container Processes API
 class Api::Containers::ContainerProcessesController < Api::Containers::BaseController
-
   ##
   # List Container Processes
   #
   # `GET /api/containers/{container-id}/container_processes`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # Returns an Array of Objects containing:
   #
@@ -27,5 +26,4 @@ class Api::Containers::ContainerProcessesController < Api::Containers::BaseContr
       format.xml { render xml: processes }
     end
   end
-
 end

@@ -2,17 +2,33 @@
 <% content_for :breadcrumb do %>
   <div class="row has-breadcrumb hidden-xs">
     <ol class="breadcrumb pull-left" style="padding-top:10px;">
-      <li><%= link_to t('obj.deployments'), "/deployments" %></li>
+      <li><%= link_to t("obj.deployments"), "/deployments" %></li>
       <li class="active"><%= @deployment.name %></li>
     </ol>
     <ol class="breadcrumb breadcrumb-action text-right">
       <% if current_user == @deployment.user %>
-        <li><%= link_to raw("#{icon('fa-solid', 'copy')} Clone"), "/deployments/#{@deployment.token}/clone_project", method: :create, data: { confirm: t('confirm_prompt') }, class: "btn btn-sm btn-default", style: "margin-right:5px;" %></li>
+        <li><%= link_to raw("#{icon("fa-solid", "copy")} Clone"),
+          "/deployments/#{@deployment.token}/clone_project",
+          method: :create,
+          data: {
+            confirm: t("confirm_prompt"),
+          },
+          class: "btn btn-sm btn-default",
+          style: "margin-right:5px;" %></li>
       <% end %>
       <% if current_user.is_admin %>
-        <%= link_to '<i class="fa-solid fa-up-right-from-square"></i> View In Admin'.html_safe, "/admin/deployments/#{@deployment.id}", class: 'btn btn-sm btn-default', style: 'margin-right:5px;' %>
+        <%= link_to '<i class="fa-solid fa-up-right-from-square"></i> View In Admin'.html_safe,
+        "/admin/deployments/#{@deployment.id}",
+        class: "btn btn-sm btn-default",
+        style: "margin-right:5px;" %>
       <% end %>
-      <li><%= link_to raw("<i class='fa-solid fa-cube'></i> #{t('.header.new_container')}"), "/deployments/orders?o=#{@deployment.token}&t=container", class: "btn btn-sm btn-default" %></li>
+      <%= render partial: "deployments/cloud_shell/button",
+      locals: {
+        deployment: @deployment,
+      } %>
+      <li><%= link_to raw("<i class='fa-solid fa-cube'></i> #{t(".header.new_container")}"),
+        "/deployments/orders?o=#{@deployment.token}&t=container",
+        class: "btn btn-sm btn-default" %></li>
     </ol>
   </div>
 <% end %>
@@ -30,14 +46,16 @@
       <% end %>
       <% unless @deployment.is_resource_owner?(current_user) %>
         <span style="font-size:12px;vertical-align:text-top;">
-          &nbsp;&nbsp;<span class="label label-primary"><i class="fa-solid fa-users"></i> <%= @deployment.user.full_name %></span>
+          &nbsp;&nbsp;<span class="label label-primary"><i class="fa-solid fa-users"></i>
+            <%= @deployment.user.full_name %></span>
         </span>
       <% end %>
     </h4>
     <% if current_user.is_admin && current_user != @deployment.user %>
       <div>
-        <strong><%= t('deployments.show.owner') %>:</strong>
-        &nbsp;<%= link_to @deployment.user.full_name, "/admin/users/#{@deployment.user.id}-#{@deployment.user.full_name.parameterize}" %>
+        <strong><%= t("deployments.show.owner") %>:</strong>
+        &nbsp;<%= link_to @deployment.user.full_name,
+        "/admin/users/#{@deployment.user.id}-#{@deployment.user.full_name.parameterize}" %>
         <% unless @deployment.user.active %>
           &nbsp;&nbsp;<span class="label label-danger">SUSPENDED</span>
         <% end %>
@@ -45,84 +63,119 @@
     <% end %>
   </div>
   <div class="col-xs-6 text-right">
-    <%= render partial: 'deployments/show/top_buttons' %>
+    <%= render partial: "deployments/show/top_buttons" %>
   </div>
 </div>
 
 <div class="row deployment-overview-sub hidden-xs">
   <div class="col-xs-3">
-    <div class="deployment-overview-sub-header"><%= t('deployments.show.header.price').upcase %></div>
+    <div class="deployment-overview-sub-header"><%= t("deployments.show.header.price").upcase %></div>
     <div class="deployment-overview-sub-content"><%= deployment_run_rate(@deployment) %></div>
   </div>
   <div class="col-xs-3">
-    <div class="deployment-overview-sub-header"><%= t('deployments.show.header.bandwidth').upcase %></div>
+    <div class="deployment-overview-sub-header"><%= t("deployments.show.header.bandwidth").upcase %></div>
     <div class="deployment-overview-sub-content"><%= "#{@deployment.current_bandwidth.round(3)} GB" %></div>
   </div>
   <div class="col-xs-3">
-    <div class="deployment-overview-sub-header"><%= t('deployments.show.header.storage').upcase %></div>
+    <div class="deployment-overview-sub-header"><%= t("deployments.show.header.storage").upcase %></div>
     <div class="deployment-overview-sub-content"><%= "#{@deployment.current_storage.round(3)} GB" %></div>
   </div>
   <div class="col-xs-3">
-    <div class="deployment-overview-sub-header"><%= t('deployments.show.header.last_event').upcase %></div>
-    <div class="deployment-overview-sub-content remote-resource refresh" data-url="/deployments/<%= @deployment.token %>/events/last_event"><%= icon 'fa-regular', 'ellipsis', class: 'fa-fade' %></div>
+    <div class="deployment-overview-sub-header"><%= t("deployments.show.header.last_event").upcase %></div>
+    <div
+      class="deployment-overview-sub-content remote-resource refresh"
+      data-url="/deployments/<%= @deployment.token %>/events/last_event"
+    ><%= icon "fa-regular", "ellipsis", class: "fa-fade" %></div>
   </div>
 </div>
+
+<%# Volume clones run after the order completes, so the project is usable while its data is
+    still copying. Polled on its own rather than folded into a tab, because the customer is
+    dropped on the overview tab and would otherwise never see it. Empty for most projects. %>
+<div
+  class="remote-resource refresh"
+  data-url="/deployments/<%= @deployment.token %>/volume_clones"
+></div>
 
 <div class="row">
   <div class="col-lg-2 col-md-3 col-xs-12"><%= render partial: "deployments/show/sidebar" %></div>
   <div class="col-lg-10 col-md-9 col-xs-12">
     <div class="tab-content" style="padding-top:25px;">
-      <div id="overview" class="tab-pane remote-resource refresh active" data-url="/deployments/<%= @deployment.token %>/services">
+      <div
+        id="overview"
+        class="tab-pane remote-resource refresh active"
+        data-url="/deployments/<%= @deployment.token %>/services"
+      >
         <div class="row">
           <div class="col-md-12 text-center" style="padding:25px 0;">
-            <%= icon('fa-solid fa-spin', 'rotate') %>
-            <%= t 'deployments.show.loading.containers' %>
+            <%= icon("fa-solid fa-spin", "rotate") %>
+            <%= t "deployments.show.loading.containers" %>
           </div>
         </div>
       </div>
 
-      <div id="domains" class="tab-pane remote-resource refresh" data-url="/deployments/<%= @deployment.token %>/domains">
+      <div
+        id="domains"
+        class="tab-pane remote-resource refresh"
+        data-url="/deployments/<%= @deployment.token %>/domains"
+      >
         <div class="row">
           <div class="col-md-12 text-center" style="padding:25px 0;">
-            <%= icon('fa-solid fa-spin', 'rotate') %>
-            <%= t 'deployments.show.loading.domains' %>
+            <%= icon("fa-solid fa-spin", "rotate") %>
+            <%= t "deployments.show.loading.domains" %>
           </div>
         </div>
       </div>
 
-      <div id="ssl" class="tab-pane remote-resource refresh" data-url="/deployments/<%= @deployment.token %>/certificates">
+      <div
+        id="ssl"
+        class="tab-pane remote-resource refresh"
+        data-url="/deployments/<%= @deployment.token %>/certificates"
+      >
         <div class="row">
           <div class="col-md-12 text-center" style="padding:25px 0;">
-            <%= icon('fa-solid fa-spin', 'rotate') %>
-            <%= t 'deployments.show.loading.certs' %>
+            <%= icon("fa-solid fa-spin", "rotate") %>
+            <%= t "deployments.show.loading.certs" %>
           </div>
         </div>
       </div>
 
-      <div id="volumes" class="tab-pane remote-resource" data-url="/deployments/<%= @deployment.token %>/volumes">
+      <div
+        id="volumes"
+        class="tab-pane remote-resource refresh"
+        data-url="/deployments/<%= @deployment.token %>/volumes"
+      >
         <div class="row">
           <div class="col-md-12 text-center" style="padding:25px 0;">
-            <%= icon('fa-solid fa-spin', 'rotate') %>
-            <%= t 'deployments.show.loading.volumes' %>
+            <%= icon("fa-solid fa-spin", "rotate") %>
+            <%= t "deployments.show.loading.volumes" %>
           </div>
         </div>
       </div>
 
       <% if @deployment.services.load_balancers.exists? %>
-        <div id="load_balancers" class="tab-pane remote-resource" data-url="/deployments/<%= @deployment.token %>/services?load_balancers=true">
+        <div
+          id="load_balancers"
+          class="tab-pane remote-resource"
+          data-url="/deployments/<%= @deployment.token %>/services?load_balancers=true"
+        >
           <div class="row">
             <div class="col-md-12 text-center" style="padding:25px 0;">
-              <%= icon('fa-solid fa-spin', 'rotate') %>
-              <%= t 'deployments.show.loading.containers' %>
+              <%= icon("fa-solid fa-spin", "rotate") %>
+              <%= t "deployments.show.loading.containers" %>
             </div>
           </div>
         </div>
       <% end %>
 
-      <div id="collaborators" class="tab-pane remote-resource" data-url="/deployments/<%= @deployment.token %>/collaborators">
+      <div
+        id="collaborators"
+        class="tab-pane remote-resource"
+        data-url="/deployments/<%= @deployment.token %>/collaborators"
+      >
         <div class="row">
           <div class="col-md-12 text-center" style="padding:25px 0;">
-            <%= icon('fa-solid fa-spin', 'rotate') %>
+            <%= icon("fa-solid fa-spin", "rotate") %>
             Loading Collaborators
           </div>
         </div>
@@ -131,4 +184,4 @@
   </div>
 </div>
 
-<%= render partial: 'deployments/show/edit' %>
+<%= render partial: "deployments/show/edit" %>

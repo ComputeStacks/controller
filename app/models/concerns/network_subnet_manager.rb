@@ -17,7 +17,7 @@ module NetworkSubnetManager
       0.upto(a.len - 2) do |i|
         ip = a.nth(i)
         next if in_use.include?(ip.addr)
-        return "#{ip.to_s}/32"
+        return "#{ip}/32"
       end
     end
     nil
@@ -60,7 +60,7 @@ module NetworkSubnetManager
       next if n.parent_network.nil? # only parent networks
       next if n.id == id # don't look out ourselves
       if n.subnet.include?(subnet) || subnet.include?(n.subnet)
-        errors.add :subnet, 'overlaps with an existing network in this availability zone'
+        errors.add :subnet, "overlaps with an existing network in this availability zone"
       end
     end
   end
@@ -71,22 +71,20 @@ module NetworkSubnetManager
 
     # Check for container addresses
     unless addresses.empty?
-      errors.add :subnet, 'has addresses in use, unable to modify network'
+      errors.add :subnet, "has addresses in use, unable to modify network"
     end
 
     # Check for dependent networks
     unless child_networks.empty?
       # With deployments
       if child_networks.where.not(deployment_id: nil).exists?
-        errors.add :subnet, 'has child networks in use, unable to modify network'
+        errors.add :subnet, "has child networks in use, unable to modify network"
       end
       # check for active (on node) networks
       if child_networks.active.exists?
-        errors.add :subnet, 'has child networks on node, unable to modify network'
+        errors.add :subnet, "has child networks on node, unable to modify network"
       end
     end
-
-
   end
 
   def cascade_network_changes
@@ -111,5 +109,4 @@ module NetworkSubnetManager
       )
     end
   end
-
 end

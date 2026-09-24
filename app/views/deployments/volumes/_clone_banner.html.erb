@@ -1,0 +1,71 @@
+<%#
+  In-flight / recently-failed volume clones for a project.
+
+  Polled as its own region above the tabs (Deployments::VolumesController#clone_status)
+  rather than rendered inside the volumes tab, because the customer lands on the *overview*
+  tab after ordering — OrdersController#show redirects there within one poll — and would
+  otherwise see nothing while their data is still copying.
+
+  `jobs` is a VolumeCloneJob::surfaced collection. Renders nothing when it is empty, which is
+  the case for essentially every project.
+
+  Deliberately not built on .alert — see app/assets/stylesheets/volume_clones.scss for why.
+%>
+<% in_flight = jobs.select(&:working?) %>
+<% failed = jobs.reject(&:working?) %>
+
+<% if in_flight.any? || failed.any? %>
+  <div class="row">
+    <div class="col-xs-12">
+
+      <% if in_flight.any? %>
+        <div class="clone-status">
+          <div class="clone-status-head">
+            <%= icon "fa-solid fa-spin", "rotate" %>
+            <%= t "volumes.clone_status.banner", count: in_flight.count %>
+            <span class="clone-status-note"><%= t "volumes.clone_status.banner_help" %></span>
+          </div>
+          <ul class="clone-status-list">
+            <% in_flight.each do |job| %>
+              <li class="clone-status-item">
+                <span class="clone-status-volume">
+                  <%# A nil volume means it was destroyed mid-clone; the next tick cancels the
+                      job, so this is a sub-tick window rather than a state worth naming. %>
+                  <%= job.volume ? link_to(truncate(job.volume.label, length: 40), volume_path(job.volume)) : "&mdash;".html_safe %>
+                </span>
+                <span class="clone-status-step"><%= volume_clone_step job %></span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <% if failed.any? %>
+        <div class="clone-status clone-status--failed">
+          <div class="clone-status-head">
+            <%= icon "fa-solid", "triangle-exclamation" %>
+            <%= t "volumes.clone_status.banner_failed", count: failed.count %>
+            <span class="clone-status-note"><%= t "volumes.clone_status.banner_failed_help" %></span>
+          </div>
+          <ul class="clone-status-list">
+            <% failed.each do |job| %>
+              <li class="clone-status-item">
+                <span class="clone-status-volume">
+                  <%= job.volume ? truncate(job.volume.label, length: 40) : "&mdash;".html_safe %>
+                </span>
+                <span class="clone-status-step clone-status-step--failed">
+                  <% if (path = volume_clone_event_path(job)) %>
+                    <%= link_to t("volumes.clone_status.details"), path %>
+                  <% else %>
+                    <%= t "volumes.clone_status.failed" %>
+                  <% end %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+    </div>
+  </div>
+<% end %>

@@ -1,12 +1,11 @@
 module ContainerServices
   # Given a service, run any variant scripts and rebuild the container
   class VariantMigrationService
-
     attr_accessor :container,
-                  :previous_variant,
-                  :service,
-                  :audit,
-                  :event
+      :previous_variant,
+      :service,
+      :audit,
+      :event
 
     # @param [Deployment::ContainerService] service
     # @param [Audit] audit
@@ -22,11 +21,14 @@ module ContainerServices
     # @return [Boolean]
     def perform
       build_event!
+      return false if event.nil?
       return false unless valid?
-      service.containers.each do |i|
-        self.container = i if i.running?(true)
-        break if container
-      end unless container
+      unless container
+        service.containers.each do |i|
+          self.container = i if i.running?(true)
+          break if container
+        end
+      end
       # IF we don't need to run any scripts, allow stopped containers.
       self.container = service.containers.first if container.nil? && allow_stopped?
       return false unless can_perform?
@@ -35,7 +37,7 @@ module ContainerServices
       return false unless post_migration!
       true
     rescue => e
-      ExceptionAlertService.new(e, '3932bc1fa2eebfcf').perform
+      ExceptionAlertService.new(e, "3932bc1fa2eebfcf").perform
       if defined?(event) && event
         event.event_details.create!(
           data: "Fatal error: #{e.message}",
@@ -46,7 +48,7 @@ module ContainerServices
       false
     ensure
       if event
-        self.event.reload
+        event.reload
         event.done! if event.running?
       end
     end
@@ -56,19 +58,49 @@ module ContainerServices
       v.before_migrate.blank? && v.after_migrate.blank? && v.rollback_migrate.blank?
     end
 
+    def build_event!(callback_params = {})
+      return unless event.nil?
+
+      self.event = EventLog.new(
+        locale: "service.variant_migrate",
+        locale_keys: {
+          "old" => previous_variant.registry_image_tag,
+          "variant" => service.image_variant.registry_image_tag,
+          "image" => service.container_image.label
+        },
+        event_code: "0793974d766b33fe",
+        status: "running",
+        audit: audit
+      )
+      event.supervised = true
+      event.deployments << service.deployment
+      event.container_services << service
+
+      unless callback_params.empty?
+        event.labels["callback_url"] = callback_params['url']
+        event.labels["callback_auth"] = callback_params['authorization']
+      end
+
+      unless event.save
+        self.event = nil
+      end
+    end
+
     private
 
     def pre_migration!
-      Timeout::timeout(300) do
+      Timeout.timeout(300) do
         # Exec pre migrate script
         before_migrate = service.variant_pre_script container
         unless before_migrate.blank?
           if container && !Rails.env.test?
             result = container.container_exec! before_migrate, nil, 180
-            event.event_details.create!(
-              data: result[:response].split('\n').join("\n"),
-              event_code: "30635f08f9c2ade0"
-            ) unless result[:response].blank?
+            unless result[:response].blank?
+              event.event_details.create!(
+                data: result[:response].split('\n').join("\n"),
+                event_code: "30635f08f9c2ade0"
+              )
+            end
             if result[:exit_code] > 0
               rollback!
               return false
@@ -78,18 +110,22 @@ module ContainerServices
         true
       end
     rescue Timeout::Error
-      event.event_details.create!(
-        data: "Timeout during pre migration",
-        event_code: "e5250991f67c7a2b"
-      ) if event
+      if event
+        event.event_details.create!(
+          data: "Timeout during pre migration",
+          event_code: "e5250991f67c7a2b"
+        )
+      end
       rollback!
       false
     rescue => e
-      ExceptionAlertService.new(e, '34b2ec44f520960f').perform
-      event.event_details.create!(
-        data: "Fatal error during pre_migration: #{e.message}",
-        event_code: "34b2ec44f520960f"
-      ) if event
+      ExceptionAlertService.new(e, "34b2ec44f520960f").perform
+      if event
+        event.event_details.create!(
+          data: "Fatal error during pre_migration: #{e.message}",
+          event_code: "34b2ec44f520960f"
+        )
+      end
       rollback!
       false
     end
@@ -97,14 +133,14 @@ module ContainerServices
     def rebuild!(fail_to_rollback = true)
       # When arriving from rollback, we need to refresh the image.
       unless fail_to_rollback
-        self.service.reload
-        self.container.reload
+        service.reload
+        container.reload
       end
 
       # Ensure image exists on node
       return false unless ProvisionServices::ImageReadyService.new(container, event).perform
 
-      Timeout::timeout(300) do
+      Timeout.timeout(300) do
         # Rebuild
         unless container.stop!(event, true)
           event.event_details.create!(
@@ -139,33 +175,39 @@ module ContainerServices
         true
       end
     rescue Timeout::Error
-      event.event_details.create!(
-        data: "Timeout during  #{fail_to_rollback ? 'rebuild' : 'rollback rebuild'}",
-        event_code: "772b174cb14a42b0"
-      ) if event
+      if event
+        event.event_details.create!(
+          data: "Timeout during  #{fail_to_rollback ? "rebuild" : "rollback rebuild"}",
+          event_code: "772b174cb14a42b0"
+        )
+      end
       rollback!(true) if fail_to_rollback
       false
     rescue => e
-      ExceptionAlertService.new(e, '1029d4189fed296e').perform
-      event.event_details.create!(
-        data: "Fatal error during #{fail_to_rollback ? 'rebuild' : 'rollback rebuild'}: #{e.message}\n\n",
-        event_code: "1029d4189fed296e"
-      ) if event
+      ExceptionAlertService.new(e, "1029d4189fed296e").perform
+      if event
+        event.event_details.create!(
+          data: "Fatal error during #{fail_to_rollback ? "rebuild" : "rollback rebuild"}: #{e.message}\n\n",
+          event_code: "1029d4189fed296e"
+        )
+      end
       rollback! if fail_to_rollback
       false
     end
 
     def post_migration!
-      Timeout::timeout(300) do
+      Timeout.timeout(300) do
         # Exec pre migrate script
         after_migrate = service.variant_post_script container
         unless after_migrate.blank?
           if container && !Rails.env.test?
             result = container.container_exec! after_migrate, nil, 180
-            event.event_details.create!(
-              data: result[:response].split('\n').join("\n"),
-              event_code: "2c095a61c526be4f"
-            ) unless result[:response].blank?
+            unless result[:response].blank?
+              event.event_details.create!(
+                data: result[:response].split('\n').join("\n"),
+                event_code: "2c095a61c526be4f"
+              )
+            end
             if result[:exit_code] > 0
               rollback! true
               return false
@@ -175,18 +217,22 @@ module ContainerServices
         true
       end
     rescue Timeout::Error
-      event.event_details.create!(
-        data: "Timeout during post migration",
-        event_code: "9db27ce73abc5016"
-      ) if event
+      if event
+        event.event_details.create!(
+          data: "Timeout during post migration",
+          event_code: "9db27ce73abc5016"
+        )
+      end
       rollback! true
       false
     rescue => e
-      ExceptionAlertService.new(e, 'a5f95dbea503a741').perform
-      event.event_details.create!(
-        data: "Fatal error during post_migration: #{e.message}",
-        event_code: "a5f95dbea503a741"
-      ) if event
+      ExceptionAlertService.new(e, "a5f95dbea503a741").perform
+      if event
+        event.event_details.create!(
+          data: "Fatal error during post_migration: #{e.message}",
+          event_code: "a5f95dbea503a741"
+        )
+      end
       rollback! true
       false
     end
@@ -218,9 +264,9 @@ module ContainerServices
       if container.nil?
         event.event_details.create!(
           data: "Unable to locate running container, aborting.",
-          event_code: '5c2183886cefdf90'
+          event_code: "5c2183886cefdf90"
         )
-        event.cancel! 'No online containers'
+        event.cancel! "No online containers"
         rollback!
         return false
       end
@@ -229,14 +275,14 @@ module ContainerServices
 
     def rollback!(container_rollback = false)
       service.update current_audit: audit,
-                     skip_variant_migration: true,
-                     image_variant: previous_variant
+        skip_variant_migration: true,
+        image_variant: previous_variant
 
-      self.service.reload
+      service.reload
 
       unless container_rollback
         event.fail!("Fatal error")
-        self.event.reload
+        event.reload
         return true
       end
 
@@ -246,7 +292,7 @@ module ContainerServices
         return false
       end
 
-      Timeout::timeout(300) do
+      Timeout.timeout(300) do
         # Exec rollback script
         rollback_script = service.variant_rollback_script container
         unless rollback_script.blank?
@@ -256,38 +302,22 @@ module ContainerServices
         end
       end
 
-      self.event.reload
+      event.reload
       event.fail!("Fatal error") unless event.failed?
     rescue Timeout::Error
-      event.event_details.create!(
-        data: "Timeout during rollback",
-        event_code: "1e576b37618a2f85"
-      ) if event
+      if event
+        event.event_details.create!(
+          data: "Timeout during rollback",
+          event_code: "1e576b37618a2f85"
+        )
+      end
       false
     ensure
       if event
-        self.event.reload
+        event.reload
         event.fail!("Fatal error") if event.running?
       end
     end
 
-    def build_event!
-      self.event = EventLog.create!(
-        locale: 'service.variant_migrate',
-        locale_keys: {
-          'old' => previous_variant.registry_image_tag,
-          'variant' => service.image_variant.registry_image_tag,
-          'image' => service.container_image.label
-        },
-        event_code: '0793974d766b33fe',
-        status: 'running',
-        audit: audit
-      )
-      event.supervised = true
-      event.deployments << service.deployment
-      event.container_services << service
-    end
-
   end
-
 end

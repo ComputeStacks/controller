@@ -1,14 +1,11 @@
-require 'test_helper'
+require "test_helper"
 
 class ContainerRegistryTest < ActiveSupport::TestCase
-
   test "can list container registries" do
-
     r = ContainerRegistry.first
     u = r.user
 
     assert_includes ContainerRegistry.find_all_for(u), r
-
   end
 
   test "can create new registry and provider" do
@@ -30,7 +27,5 @@ class ContainerRegistryTest < ActiveSupport::TestCase
     assert new_reg.can_view? users(:user)
 
     new_reg.container_registry_collaborators.delete_all
-
   end
-
 end

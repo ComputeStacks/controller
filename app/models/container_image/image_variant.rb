@@ -27,7 +27,6 @@
 #   @return [DateTime]
 #
 class ContainerImage::ImageVariant < ApplicationRecord
-
   include Auditable
   include ContainerImages::ImageRegistryValidator
 
@@ -43,7 +42,7 @@ class ContainerImage::ImageVariant < ApplicationRecord
   has_one :container_registry, through: :container_image_provider
 
   # Dependencies
-  has_many :container_services, class_name: 'Deployment::ContainerService', dependent: :restrict_with_error
+  has_many :container_services, class_name: "Deployment::ContainerService", dependent: :restrict_with_error
   has_many :containers, through: :container_services
 
   has_many :image_dependents, class_name: "ContainerImage::ImageRel", foreign_key: "default_variant_id", dependent: :nullify
@@ -67,7 +66,7 @@ class ContainerImage::ImageVariant < ApplicationRecord
     parent_rn = container_image.resource_name
     return "null" if parent_rn == "null" && label.blank?
     return parent_rn if label.blank?
-    "#{parent_rn}/#{name.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]}"
+    "#{parent_rn}/#{name.strip.downcase.gsub(/[^a-z0-9\s]/i, "").tr(" ", "_")[0..10]}"
   end
 
   def friendly_name
@@ -75,7 +74,7 @@ class ContainerImage::ImageVariant < ApplicationRecord
   end
 
   def full_image_path
-    "#{container_image.provider_path}#{container_image.provider_path.blank? ? '' : '/'}#{container_image.registry_image_path}:#{registry_image_tag}"
+    "#{container_image.provider_path}#{container_image.provider_path.blank? ? "" : "/"}#{container_image.registry_image_path}:#{registry_image_tag}"
   end
 
   def exists_on_node?(node)
@@ -87,18 +86,18 @@ class ContainerImage::ImageVariant < ApplicationRecord
       data: {
         error: connection_error.message
       },
-      event_code: '734d76176fcecb49'
+      event_code: "734d76176fcecb49"
     )
     nil
   rescue => e
-    ExceptionAlertService.new(e, '7dcc930ebebcae8c').perform
+    ExceptionAlertService.new(e, "7dcc930ebebcae8c").perform
     SystemEvent.create!(
       message: "Error retrieving image from node",
       log_level: "warn",
       data: {
         error: e.message
       },
-      event_code: '7dcc930ebebcae8c'
+      event_code: "7dcc930ebebcae8c"
     )
     nil
   end
@@ -137,10 +136,10 @@ class ContainerImage::ImageVariant < ApplicationRecord
       end
     end
     self.version = if container_image.image_variants.last
-                    container_image.image_variants.last.version + 1
-                  else
-                    0
-                  end
+      container_image.image_variants.last.version + 1
+    else
+      0
+    end
   end
 
   def halt_if_default
@@ -154,5 +153,4 @@ class ContainerImage::ImageVariant < ApplicationRecord
   def set_default_label
     self.label = registry_image_tag if label.blank?
   end
-
 end

@@ -1,11 +1,10 @@
 class Admin::Deployments::CollaboratorsController < Admin::Deployments::BaseController
-
   before_action :find_collaborator, only: %i[destroy]
 
   def index
     @collaborators = @deployment.deployment_collaborators.sorted
     if request.xhr?
-      render template: 'admin/deployments/collaborators/index', layout: false
+      render template: "admin/deployments/collaborators/index", layout: false
     end
   end
 
@@ -27,7 +26,7 @@ class Admin::Deployments::CollaboratorsController < Admin::Deployments::BaseCont
 
   def destroy
     unless @collab.destroy
-      flash[:alert] = "Error: #{@collab.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error: #{@collab.errors.full_messages.join(" ")}"
     end
     redirect_to "/admin/deployments/#{@deployment.id}#collaborators"
   end
@@ -42,5 +41,4 @@ class Admin::Deployments::CollaboratorsController < Admin::Deployments::BaseCont
   def collaborator_params
     params.require(:deployment_collaborator).permit(:user_email, :skip_confirmation)
   end
-
 end

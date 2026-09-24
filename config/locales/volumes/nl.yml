@@ -7,6 +7,8 @@ nl:
       new_button_help: "Volumes are persistent storage for your container. You can have multiple volumes per container, mounted at different points."
       usage: Usage
       backups: Backups
+      cascade: Apply to existing services
+      cascade_confirm: "Create this volume on every deployed service using this image? Containers mount it the next time they are rebuilt — nothing is restarted now. Anything already stored at that path inside the container will be hidden by the new empty volume once it mounts."
     table:
       title: Persistent Storage
       name: Name
@@ -18,6 +20,33 @@ nl:
       delete:
         confirm: Are you sure?
         attached: Detach from service before deleting.
+    clone_status:
+      column: Data
+      restoring: Restoring data
+      failed: Restore failed
+      banner:
+        one: "Restoring data into 1 volume."
+        other: "Restoring data into %{count} volumes."
+      banner_help: Your services are already running — the data is still copying in the background.
+      banner_failed:
+        one: "1 volume did not finish restoring its data."
+        other: "%{count} volumes did not finish restoring their data."
+      banner_failed_help: The volume may be empty or hold a partial copy. Review the event before using it.
+      details: Details
+      steps:
+        pending: Preparing
+        awaiting_container: Waiting for the container
+        resolving_source: Checking the source volume
+        dispatching_backup: Requesting a snapshot
+        awaiting_backup: Snapshotting the source volume
+        discovering_archive: Locating the snapshot
+        dispatching_restore: Requesting the restore
+        awaiting_restore: Copying data
+    awaiting_mount:
+      label: Pending — mounts on next rebuild
+      help: The volume exists but no container has mounted it yet. It stays empty and invisible to your application until this service is next rebuilt.
+      backups: Backups paused
+      backups_help: Backups start once a container mounts this volume.
     path: Path
     containers: Attached Containers
     high_availability:

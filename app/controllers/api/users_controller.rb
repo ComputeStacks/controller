@@ -1,10 +1,9 @@
 ##
 # Your User API
 class Api::UsersController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :profile_read }, only: %i[show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :profile_update }, only: %i[update], unless: :current_user
-  before_action -> { doorkeeper_authorize! :register }, only: :create, unless: :current_user
+  # Three different scopes for three actions: `create` is account signup and is
+  # gated by `register`, not by `profile_update`.
+  api_scope show: :profile_read, update: :profile_update, create: :register
 
   ##
   # View your user account
@@ -115,7 +114,7 @@ class Api::UsersController < Api::ApplicationController
   #      }
   #    }
 
-  def show;
+  def show
   end
 
   ##
@@ -143,11 +142,11 @@ class Api::UsersController < Api::ApplicationController
   #     * `merge_labels`: Object
 
   def update
-    user   = current_user
+    user = current_user
     status = :ok
-    msg    = {}
+    msg = {}
     unless user.update(user_params)
-      msg    = { errors: user.errors.full_messages }
+      msg = {errors: user.errors.full_messages}
       status = :bad_request
     end
     respond_to do |format|
@@ -216,17 +215,17 @@ class Api::UsersController < Api::ApplicationController
   #
   def create
     @user = User.new(user_params)
-    if user_params[:currency].blank?
-      @user.currency = ENV['CURRENCY']
+    @user.currency = if user_params[:currency].blank?
+      ENV["CURRENCY"]
     else
-      @user.currency = user_params[:currency].upcase
+      user_params[:currency].upcase
     end
     @user.active = true
     if params[:provider_username].blank? || params[:provider_server].blank?
       return api_obj_error(["missing provider settings"])
     else
       provider = params[:provider].blank? ? :cpanel : params[:provider].downcase.to_sym
-      labels = { provider => { params[:provider_server] => params[:provider_username] } }
+      labels = {provider => {params[:provider_server] => params[:provider_username]}}
       if params[:labels]
         labels = labels.merge! create_user_params[:labels]
       end
@@ -235,13 +234,13 @@ class Api::UsersController < Api::ApplicationController
 
     # Default to en
     if @user.locale.blank? || !I18n.available_locales.include?(@user.locale.to_sym)
-      @user.locale = 'en'
+      @user.locale = "en"
     end
     pw = SecureRandom.urlsafe_base64(12)
     @user.skip_confirmation!
     @user.password = pw
     @user.password_confirmation = pw
-    @user.tmp_updated_password  = pw
+    @user.tmp_updated_password = pw
     # Generate an email if the email already exists, or if none is supplied.
     if @user.email.blank? || User.where(email: @user.email).exists?
       @user.email = "#{params[:provider_username]}_#{SecureRandom.hex(6)}@#{Setting.hostname.split(":").first}"
@@ -249,7 +248,7 @@ class Api::UsersController < Api::ApplicationController
     if @user.save
       @api_credential = @user.api_credentials.create!(name: "generated-on-signup")
       respond_to do |format|
-        format.any(:json, :xml) { render template: 'api/users/create', status: :created }
+        format.any(:json, :xml) { render template: "api/users/create", status: :created }
       end
     else
       api_obj_error @user.errors.full_messages
@@ -272,5 +271,4 @@ class Api::UsersController < Api::ApplicationController
       :external_id, merge_labels: {}
     )
   end
-
 end

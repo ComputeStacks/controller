@@ -1,11 +1,10 @@
 class ContainerServices::BaseController < AuthController
-
   before_action :find_service
 
   private
 
   def find_service
-    @service = Deployment::ContainerService.find_for current_user, { id: params[:container_service_id] }
+    @service = Deployment::ContainerService.find_for current_user, {id: params[:container_service_id]}
     if @service.nil?
       return respond_to do |format|
         format.html { redirect_to("/deployments", alert: "Unknown container service") }
@@ -16,5 +15,4 @@ class ContainerServices::BaseController < AuthController
     @deployment = @service&.deployment
     @project_owner = @deployment.nil? ? current_user : @deployment.user
   end
-
 end

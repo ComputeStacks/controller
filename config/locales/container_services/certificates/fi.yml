@@ -12,10 +12,10 @@ fi:
         privkey: Yksityinen avain
       none:
         custom: Omaa sertifikaattia ei löydetty.
-        le: LetsEncrypt sertifikaattia ei löydetty.
+        le: No Automatic SSL certificates found.
       verify_domain: Vahvista DNS
       le:
-        title: LetsEncrypt Ilmainen sertifikaatti
+        title: Automatic Free SSL Certificates
         action: Ota käyttöön ilmainen SSL
       custom:
         title: Omat SSL Sertifikaatit

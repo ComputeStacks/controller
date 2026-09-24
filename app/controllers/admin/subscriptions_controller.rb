@@ -1,7 +1,6 @@
 class Admin::SubscriptionsController < Admin::ApplicationController
-
-  before_action :find_subscription, only: %w(show edit update destroy)
-  before_action :load_users, only: %w(edit update)
+  before_action :find_subscription, only: %w[show edit update destroy]
+  before_action :load_users, only: %w[edit update]
 
   def index
     subscriptions = Subscription
@@ -10,22 +9,22 @@ class Admin::SubscriptionsController < Admin::ApplicationController
       subscriptions = @user.subscriptions if @user
     end
     subscriptions = case params[:state]
-                    when 'inactive'
-                      subscriptions.where(active: false)
-                    else
-                      subscriptions.where(active: true)
-                    end
+    when "inactive"
+      subscriptions.where(active: false)
+    else
+      subscriptions.where(active: true)
+    end
     subscriptions = case params[:product].to_i
-                    when 0
-                      subscriptions
-                    else
-                      product = Product.find_by(id: params[:product])
-                      if product
-                        subscriptions.where(products: {id: product.id}).joins(:products)
-                      else
-                        subscriptions
-                      end
-                    end
+    when 0
+      subscriptions
+    else
+      product = Product.find_by(id: params[:product])
+      if product
+        subscriptions.where(products: {id: product.id}).joins(:products)
+      else
+        subscriptions
+      end
+    end
     @subscriptions = subscriptions.sorted.paginate per_page: 25, page: params[:page]
   end
 
@@ -34,14 +33,13 @@ class Admin::SubscriptionsController < Admin::ApplicationController
   end
 
   def edit
-
   end
 
   def update
     if @subscription.update(subscription_params)
       redirect_to action: :show
     else
-      render template: 'admin/subscriptions/update'
+      render template: "admin/subscriptions/update"
     end
   end
 
@@ -69,15 +67,14 @@ class Admin::SubscriptionsController < Admin::ApplicationController
   end
 
   def load_users
-    if @subscription.container
-      @users = User.joins(:deployed_containers).order(:fname)
+    @users = if @subscription.container
+      User.joins(:deployed_containers).order(:fname)
     else
-      @users = User.where("2 = 3") # provide an empty record set.
+      User.where("2 = 3") # provide an empty record set.
     end
   end
 
   def subscription_params
     params.require(:subscription).permit(:label, :external_id, :user_id, :active, container: :id)
   end
-
 end

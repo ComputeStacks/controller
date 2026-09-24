@@ -1,5 +1,4 @@
 class EventLogsController < AuthController
-
   def show
     @event = EventLog.find_for_user(params[:id], current_user)
     if @event.nil?
@@ -8,5 +7,4 @@ class EventLogsController < AuthController
       @subscribers = @event.subscribers(current_user)
     end
   end
-
 end

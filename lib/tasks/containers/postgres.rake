@@ -1,18 +1,17 @@
 namespace :containers do
   desc "Install postgres container"
   task postgres: :environment do
-
-    unless ContainerImage.where(name: 'postgres').exists?
+    unless ContainerImage.where(name: "postgres").exists?
       dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
-      pg         = ContainerImage.create!(
-        name:                     'postgres',
-        label:                    'PostgreSQL',
-        role:                     'postgres',
-        category:               'database',
-        can_scale:                false,
-        is_free:                  false,
+      pg = ContainerImage.create!(
+        name: "postgres",
+        label: "PostgreSQL",
+        role: "postgres",
+        category: "database",
+        can_scale: false,
+        is_free: false,
         container_image_provider: dhprovider,
-        registry_image_path:      "postgres",
+        registry_image_path: "postgres",
         skip_variant_setup: true
       )
       pg.image_variants.create!(
@@ -66,41 +65,39 @@ namespace :containers do
         skip_tag_validation: true
       )
       pg.ingress_params.create!(
-        port:            5432,
-        proto:           'tcp',
+        port: 5432,
+        proto: "tcp",
         external_access: false
       )
       pg.volumes.create!(
-        label:             'data',
-        mount_path:        '/var/lib/postgresql/data',
-        enable_sftp:       false,
-        borg_enabled:      true,
-        borg_freq:         '@daily',
-        borg_strategy:     'postgres',
-        borg_keep_hourly:  1,
-        borg_keep_daily:   7,
-        borg_keep_weekly:  4,
+        label: "data",
+        mount_path: "/var/lib/postgresql/data",
+        enable_sftp: false,
+        borg_enabled: true,
+        borg_freq: "@daily",
+        borg_strategy: "postgres",
+        borg_keep_hourly: 1,
+        borg_keep_daily: 7,
+        borg_keep_weekly: 4,
         borg_keep_monthly: 0
       )
       pg.setting_params.create!(
-        name:       'postgres_password',
-        label:      'Password',
-        param_type: 'password'
+        name: "postgres_password",
+        label: "Password",
+        param_type: "password"
       )
       pg.env_params.create!(
-        name:         'POSTGRES_USER',
-        label:        'Username',
-        param_type:   'static',
-        static_value: 'postgres'
+        name: "POSTGRES_USER",
+        label: "Username",
+        param_type: "static",
+        static_value: "postgres"
       )
       pg.env_params.create!(
-        name:       'POSTGRES_PASSWORD',
-        label:      'Password',
-        param_type: 'variable',
-        env_value:  'build.settings.postgres_password'
+        name: "POSTGRES_PASSWORD",
+        label: "Password",
+        param_type: "variable",
+        env_value: "build.settings.postgres_password"
       )
     end
-
   end
-
 end

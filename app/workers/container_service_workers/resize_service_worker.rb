@@ -16,21 +16,20 @@ module ContainerServiceWorkers
         end
       end
       ProjectServices::StoreMetadata.new(service.deployment).perform
-      success ? event.done! : event.fail!('Error resizing containers')
+      success ? event.done! : event.fail!("Error resizing containers")
     rescue ActiveRecord::RecordNotFound
-      return # Silently fail
+      nil # Silently fail
     rescue => e
       user = nil
       if defined?(event) && event
         event.event_details.create!(
           data: e.message,
-          event_code: 'f25e7dbf2b735858'
+          event_code: "f25e7dbf2b735858"
         )
         event.fail! e.message
         user = event.audit&.user
       end
-      ExceptionAlertService.new(e, 'f25e7dbf2b735858', user).perform
+      ExceptionAlertService.new(e, "f25e7dbf2b735858", user).perform
     end
-
   end
 end

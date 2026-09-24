@@ -60,7 +60,6 @@
 #   @return [Location]
 #
 class Deployment::Container < ApplicationRecord
-
   include Auditable
   include Authorization::Container
   include Containerized
@@ -77,16 +76,60 @@ class Deployment::Container < ApplicationRecord
   include Containers::StateManager
   include UrlPathFinder
 
-  scope :active, -> { where(req_state: 'running') }
-  scope :migrating, -> { where status: 'migrating' }
+  scope :active, -> { where(req_state: "running") }
+  scope :migrating, -> { where status: "migrating" }
   scope :sorted, -> { order(:name) }
 
-  has_one :ip_address, class_name: 'Network::Cidr', dependent: :destroy
+  ##
+  # Committed cpu/memory across a set of containers, as two aggregate queries.
+  #
+  # This replaces a row-by-row walk that asked the database for each container's
+  # subscription and then that subscription's billing package -- 1061 queries for one
+  # availability zone, 3.1s, on the customer order path.
+  #
+  # These columns are the AUTHORITATIVE per-container resource record. They are NOT a
+  # cache of the billing package -- believe that and you will eventually stop maintaining
+  # them, and the capacity gates will start lying:
+  #
+  # * They are what the node actually enforces. +Containers::ContainerRuntime+ builds the
+  #   Docker payload's +NanoCPUs+ and +Memory+ from them directly; the package is consulted
+  #   only for +memory_swap+ / +memory_swappiness+.
+  # * They are what metered billing charges on (+SubscriptionProduct#current_qty+), and
+  #   what +Location#allocated_resources+ has always summed for the admin capacity API.
+  # * They are the ONLY record for a container with no subscription. Project load
+  #   balancers never get one (+ContainerProvisioner+ returns before +init_subscription!+
+  #   when +service.is_load_balancer+), nor does an image ordered with the free toggle
+  #   (+container_image.is_free+). That is 503 of 2310 containers in production.
+  #
+  # +SubscriptionProduct#update_linked_resources+ reconciles them TOWARD the package for a
+  # subscribed container, which is why the two agree in production.
+  #
+  # A capacity gate wants the enforced figure, not the billed one. They are normally the
+  # same; where they diverge -- an admin editing a BillingPackage in place, say -- the node
+  # is still enforcing the column, so the column is the number that decides placement.
+  #
+  # Verified against production on 2026-09-04: for all nine zones this sum equals the
+  # package-derived walk plus the unsubscribed containers' own columns, exactly.
+  #
+  # Columns are table-qualified for clarity: +deployment_container_services+ also has
+  # +cpu+ and +memory+, and the region-scoped caller reaches containers through a join
+  # against that table. Rails qualifies a bare symbol too, so this is not load-bearing.
+  #
+  # @param scope [ActiveRecord::Relation] any relation of Deployment::Container
+  # @return [Hash] {cpu: Numeric, memory: Integer}
+  def self.allocated_resources(scope = all)
+    {
+      cpu: scope.sum("deployment_containers.cpu"),
+      memory: scope.sum("deployment_containers.memory")
+    }
+  end
+
+  has_one :ip_address, class_name: "Network::Cidr", dependent: :destroy
   has_one :network, through: :ip_address
 
   belongs_to :service,
-             class_name: 'Deployment::ContainerService',
-             foreign_key: 'container_service_id'
+    class_name: "Deployment::ContainerService",
+    foreign_key: "container_service_id"
 
   has_one :region, through: :service
   has_one :load_balancer, through: :service
@@ -109,9 +152,9 @@ class Deployment::Container < ApplicationRecord
   has_one :log_client, through: :region
   has_many :volumes, through: :service
 
-  has_and_belongs_to_many :event_logs, foreign_key: 'deployment_container_id'
+  has_and_belongs_to_many :event_logs, foreign_key: "deployment_container_id"
 
-  has_many :alert_notifications, dependent: :destroy, foreign_key: 'container_id'
+  has_many :alert_notifications, dependent: :destroy, foreign_key: "container_id"
 
   after_update_commit :update_service_resource
 
@@ -131,7 +174,7 @@ class Deployment::Container < ApplicationRecord
   # Helper to determine if this container can migrate to a different node
   def can_migrate?
     # service.volumes.empty? || service.volumes.where.not(volume_backend: 'local').exists?
-    !service.volumes.where(volume_backend: 'local').exists?
+    !service.volumes.where(volume_backend: "local").exists?
   end
 
   def can_delete_stopped?
@@ -145,7 +188,7 @@ class Deployment::Container < ApplicationRecord
   end
 
   def client
-    return nil if self.node.nil?
+    return nil if node.nil?
     node.client(3)
   end
   ####
@@ -166,13 +209,13 @@ class Deployment::Container < ApplicationRecord
   # Update Container Service with CPU & Memory
   #
   def update_service_resource
-    watched_attr = Set[ 'cpu', 'memory' ]
+    watched_attr = Set["cpu", "memory"]
     have_attr = previous_changes.keys.to_set
     if watched_attr.intersect?(have_attr)
       unless service.cpu == cpu && service.memory == memory
         service.update(
-                   cpu: cpu,
-                   memory: memory
+          cpu: cpu,
+          memory: memory
         )
       end
     end
@@ -181,5 +224,4 @@ class Deployment::Container < ApplicationRecord
   def refresh_user_quota
     user.current_quota(true) if user
   end
-
 end

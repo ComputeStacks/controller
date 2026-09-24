@@ -11,27 +11,25 @@ module ContainerServiceWorkers
       event = GlobalID::Locator.locate event_id
 
       event.start!
-      qty = event.locale_keys['to']
+      qty = event.locale_keys["to"]
       unless ProvisionServices::ScaleServiceProvisioner.new(service, event, qty).perform
         unless event.failed?
-          event.fail! 'Fatal Error'
+          event.fail! "Fatal Error"
         end
       end
-
     rescue ActiveRecord::RecordNotFound
-      return # Silently fail
+      nil # Silently fail
     rescue => e
       user = nil
       if defined?(event) && event
         event.event_details.create!(
           data: e.message,
-          event_code: '0f78f7b3f13c57ae'
+          event_code: "0f78f7b3f13c57ae"
         )
         event.fail! e.message
         user = event.audit&.user
       end
-      ExceptionAlertService.new(e, '0f78f7b3f13c57ae', user).perform
+      ExceptionAlertService.new(e, "0f78f7b3f13c57ae", user).perform
     end
-
   end
 end

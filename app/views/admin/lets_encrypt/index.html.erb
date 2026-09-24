@@ -1,10 +1,10 @@
-<%= render partial: 'admin/layouts/shared/settings_nav' %>
+<%= render partial: "admin/layouts/shared/settings_nav" %>
 
 <% if @lets_encrypts.empty? %>
   <div class="row">
     <div class="col-xs-12">
       <div class="text-center">
-        No Lets Encrypt Certificates have been created
+        No ACME Certificates have been created
       </div>
     </div>
   </div>
@@ -27,11 +27,11 @@
           <% @lets_encrypts.each do |i| %>
             <tr>
               <td><%= link_to i.id, "/admin/lets_encrypt/#{i.id}" %></td>
-              <td><%= i.user.nil? ? 'System' : link_to(i.user.full_name, admin_user_path(i.user)) %></td>
-              <td><%= truncate i.names.join(', '), length: 20 %></td>
+              <td><%= i.user.nil? ? "System" : link_to(i.user.full_name, admin_user_path(i.user)) %></td>
+              <td><%= truncate i.names.join(", "), length: 20 %></td>
               <td><%= i.status %></td>
-              <td><%= i.expires_at.nil? ? 'n/a' : l(i.expires_at, format: :short) %></td>
-              <td><%= i.last_generated_at.nil? ? 'n/a' : l(i.last_generated_at, format: :short) %></td>
+              <td><%= i.expires_at.nil? ? "n/a" : l(i.expires_at, format: :short) %></td>
+              <td><%= i.last_generated_at.nil? ? "n/a" : l(i.last_generated_at, format: :short) %></td>
               <td><%= l i.created_at, format: :short %></td>
             </tr>
           <% end %>

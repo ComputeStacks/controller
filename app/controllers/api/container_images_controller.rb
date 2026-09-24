@@ -1,11 +1,7 @@
 ##
 # Container Images API
 class Api::ContainerImagesController < Api::ApplicationController
-  before_action -> { doorkeeper_authorize! :images_write }, only: %i[ update create destroy ], unless: :current_user
-
-  before_action only: %i[ index show ], unless: :current_user do
-    doorkeeper_authorize! :public, :images_read
-  end
+  api_scope read: [:public, :images_read], write: :images_write
 
   ##
   # List all images
@@ -87,19 +83,17 @@ class Api::ContainerImagesController < Api::ApplicationController
   #         * `created_at`: DateTime
   #
   def index
-    if params[:filter] == 'owned'
-      @container_images = current_user.nil? ? [] : paginate(ContainerImage.find_all_for(current_user))
+    @container_images = if params[:filter] == "owned"
+      current_user.nil? ? [] : paginate(ContainerImage.find_all_for(current_user))
+    elsif current_user
+      paginate ContainerImage.find_all_for(current_user, true)
     else
-      if current_user
-        @container_images = paginate ContainerImage.find_all_for(current_user, true)
-      else
-        @container_images = paginate ContainerImage.where("active = true AND user_id IS NULL").sorted
-      end
+      paginate ContainerImage.where("active = true AND user_id IS NULL").sorted
     end
     if params[:byname]
       @container_images = @container_images.where(Arel.sql("label ~ '#{params[:byname].to_alpha}'"))
     end
-    if params[:filter] == 'isLoadBalancer'
+    if params[:filter] == "isLoadBalancer"
       @container_images = @container_images.where(is_load_balancer: ActiveRecord::Type::Boolean.new.cast(params[:filter][:isLoadBalancer]))
     end
   end
@@ -114,12 +108,12 @@ class Api::ContainerImagesController < Api::ApplicationController
   # @see Api::ContainerImagesController#index
   #
   def show
-    if current_user
-      @container_image = ContainerImage.find_for current_user, { id: params[:id] }
+    @container_image = if current_user
+      ContainerImage.find_for current_user, {id: params[:id]}
     else
-      @container_image = ContainerImage.find_by("id = ? and active = true AND user_id is null", params[:id])
+      ContainerImage.find_by("id = ? and active = true AND user_id is null", params[:id])
     end
-    return api_obj_missing if @container_image.nil?
+    api_obj_missing if @container_image.nil?
   end
 
   ##
@@ -161,7 +155,6 @@ class Api::ContainerImagesController < Api::ApplicationController
       api_obj_error @container_image.errors.full_messages
     end
   end
-
 
   ##
   # Create an image
@@ -227,8 +220,8 @@ class Api::ContainerImagesController < Api::ApplicationController
   #         * `borg_rollback`: `Array<String>`
   #
   def create
-    @container_image              = ContainerImage.new(current_user.is_admin ? admin_image_params : image_params)
-    @container_image.user_id      = current_user.id
+    @container_image = ContainerImage.new(current_user.is_admin ? admin_image_params : image_params)
+    @container_image.user_id = current_user.id
     @container_image.current_user = current_user
     if @container_image.save
       respond_to do |format|
@@ -251,9 +244,9 @@ class Api::ContainerImagesController < Api::ApplicationController
     return api_obj_missing if @container_image.nil?
     @container_image.current_user = current_user
     status = :accepted
-    msg    = {}
+    msg = {}
     unless @container_image.destroy
-      msg    = { errors: 'Unable to delete container image. Verify there are no containers using this image, and that you have permission to delete it.' }
+      msg = {errors: "Unable to delete container image. Verify there are no containers using this image, and that you have permission to delete it."}
       status = :internal_server_error
     end
     respond_to do |format|
@@ -326,11 +319,11 @@ class Api::ContainerImagesController < Api::ApplicationController
       :docker_init,
       :category,
       :tag_list,
-      dependency_parents:        [:requires_container_id],
-      env_params_attributes:     [:name, :label, :param_type, :env_value, :static_value],
+      dependency_parents: [:requires_container_id],
+      env_params_attributes: [:name, :label, :param_type, :env_value, :static_value],
       ingress_params_attributes: [:port, :proto, :backend_ssl, :external_access, :tcp_proxy_opt],
       setting_params_attributes: [:name, :label, :param_type, :value],
-      volumes_attributes:        [
+      volumes_attributes: [
         :label,
         :mount_path,
         :enable_sftp,
@@ -373,29 +366,28 @@ class Api::ContainerImagesController < Api::ApplicationController
       :product_id,
       :shm_size,
       :tag_list,
-      dependency_parents:        [:requires_container_id],
-      env_params_attributes:     [:name, :label, :param_type, :env_value, :static_value],
+      dependency_parents: [:requires_container_id],
+      env_params_attributes: [:name, :label, :param_type, :env_value, :static_value],
       ingress_params_attributes: [:port, :proto, :backend_ssl, :external_access, :tcp_proxy_opt],
       setting_params_attributes: [:name, :label, :param_type, :value],
-      volumes_attributes:        [
-                       :label,
-                       :mount_path,
-                       :enable_sftp,
-                       :borg_enabled,
-                       :borg_freq,
-                       :borg_strategy,
-                       :borg_keep_hourly,
-                       :borg_keep_daily,
-                       :borg_keep_weekly,
-                       :borg_keep_monthly,
-                       :borg_keep_annually,
-                       :borg_pre_backup,
-                       :borg_post_backup,
-                       :borg_pre_restore,
-                       :borg_post_restore,
-                       :borg_rollback
-                     ]
+      volumes_attributes: [
+        :label,
+        :mount_path,
+        :enable_sftp,
+        :borg_enabled,
+        :borg_freq,
+        :borg_strategy,
+        :borg_keep_hourly,
+        :borg_keep_daily,
+        :borg_keep_weekly,
+        :borg_keep_monthly,
+        :borg_keep_annually,
+        :borg_pre_backup,
+        :borg_post_backup,
+        :borg_pre_restore,
+        :borg_post_restore,
+        :borg_rollback
+      ]
     )
   end
-
 end

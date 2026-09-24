@@ -5,7 +5,6 @@
 # GET /admin/sftp/:sftp_id/password
 #
 class Admin::Sftp::PasswordController < Admin::Sftp::BaseController
-
   def index
     if request.xhr?
       render plain: @container.password, layout: false
@@ -13,5 +12,4 @@ class Admin::Sftp::PasswordController < Admin::Sftp::BaseController
       redirect_to "/admin/sftp/#{@container.id}"
     end
   end
-
 end

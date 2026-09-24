@@ -1,20 +1,24 @@
 class Api::ApplicationController < ActionController::Base
-
   protect_from_forgery unless: -> { request.format.json? || request.format.xml? }
 
   include ApiAuth
   include ApiMissingRoute
   include ApiResponse
+  include ApiScopes # must come after ApiAuth -- see the concern's ordering note
   include ApiVersion
   include LogPayload
   include Rails::Pagination
 
   before_action :set_locale, if: :current_user
 
+  # `public` is a default scope, so any token can read the version; `admin_read`
+  # is accepted as well so an admin-only application need not also ask for it.
+  api_scope version: [:public, :admin_read]
 
-  before_action only: :version, unless: :current_user do
-    doorkeeper_authorize! :public, :admin_read # allow admins to read version without asking for the public scope.
-  end
+  # `auth` is a deprecated stub that always 400s, `secondfactor` is deliberately
+  # unauthenticated (it is excluded from `auth_request!` and is used by SSO and
+  # billing integrations), and `unknown_route` is the 404 catch-all.
+  api_scope_none :auth, :secondfactor, :unknown_route
 
   respond_to :json, :xml
 
@@ -29,9 +33,9 @@ class Api::ApplicationController < ActionController::Base
   #
   def version
     v = {
-        "version" => COMPUTESTACKS_VERSION,
-        "api_latest_version" => COMPUTESTACKS_VERSION.split(".")[0..1].join('').to_i,
-        "api_available_versions" => VersionCake.config.versioned_resources.last.deprecated_versions + VersionCake.config.versioned_resources.last.supported_versions
+      "version" => COMPUTESTACKS_VERSION,
+      "api_latest_version" => COMPUTESTACKS_VERSION.split(".")[0..1].join("").to_i,
+      "api_available_versions" => VersionCake.config.versioned_resources.last.deprecated_versions + VersionCake.config.versioned_resources.last.supported_versions
     }
     respond_to do |format|
       format.json { render json: v }
@@ -48,5 +52,4 @@ class Api::ApplicationController < ActionController::Base
       end
     end
   end
-
 end

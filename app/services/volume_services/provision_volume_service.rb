@@ -7,11 +7,10 @@ module VolumeServices
   # @!attribute event
   #   @return [EventLog]
   class ProvisionVolumeService
-
     attr_accessor :volume,
-                  :source_volume,
-                  :source_snapshot, # In Base64
-                  :event
+      :source_volume,
+      :source_snapshot, # In Base64
+      :event
 
     # @param [Volume] volume
     # @param [EventLog] event
@@ -32,8 +31,8 @@ module VolumeServices
       else
         if event
           event.event_details.create!(
-            data: client.errors.empty? ? "Fatal error" : client.errors.join(' '),
-            event_code: '3ace7a0db8fcc88f'
+            data: client.errors.empty? ? "Fatal error" : client.errors.join(" "),
+            event_code: "3ace7a0db8fcc88f"
           )
         end
         return false
@@ -47,12 +46,12 @@ module VolumeServices
           volume: volume.inspect,
           error: connection_error.message
         },
-        event_code: '04bed58fa43fab49'
+        event_code: "04bed58fa43fab49"
       )
       event.event_details.create!(data: connection_error.message, event_code: "04bed58fa43fab49") if event
       false
     rescue Docker::Error::ServerError => server_error
-      ExceptionAlertService.new(server_error, '7644f82e2a97cd0e').perform
+      ExceptionAlertService.new(server_error, "7644f82e2a97cd0e").perform
       SystemEvent.create!(
         message: "Error creating volume.",
         log_level: "warn",
@@ -60,7 +59,7 @@ module VolumeServices
           volume: volume.inspect,
           error: server_error.message
         },
-        event_code: '7644f82e2a97cd0e'
+        event_code: "7644f82e2a97cd0e"
       )
       event.event_details.create!(data: server_error.message, event_code: "7644f82e2a97cd0e") if event
       false
@@ -70,7 +69,7 @@ module VolumeServices
       end
       false
     rescue => e
-      ExceptionAlertService.new(e, 'cec8b7094470e525').perform
+      ExceptionAlertService.new(e, "cec8b7094470e525").perform
       SystemEvent.create!(
         message: "Error creating volume.",
         log_level: "warn",
@@ -78,11 +77,10 @@ module VolumeServices
           volume: volume&.inspect,
           error: e.message
         },
-        event_code: 'cec8b7094470e525'
+        event_code: "cec8b7094470e525"
       )
       event.event_details.create!(data: e.message, event_code: "cec8b7094470e525") if event
       false
     end
-
   end
 end

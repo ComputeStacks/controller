@@ -11,15 +11,14 @@
 #   @return [Array]
 #
 class PowerCycleContainerService
-
   attr_accessor :audit,
-                :action,
-                :container,
-                :event,
-                :delay, # eg: 30.seconds
-                :errors,
-                :callback_auth,
-                :callback_url
+    :action,
+    :container,
+    :event,
+    :delay, # eg: 30.seconds
+    :errors,
+    :callback_auth,
+    :callback_url
 
   # @param [Deployment::Container] container
   # @param [String] action
@@ -37,7 +36,7 @@ class PowerCycleContainerService
 
   # @return [Boolean]
   def perform
-    self.action = 'rebuild' if %w(start restart).include?(action) && !container.built?
+    self.action = "rebuild" if %w[start restart].include?(action) && !container.built?
 
     self.event = audit.event_logs.first if audit && audit.event_logs.count == 1
     build_event! if event.nil?
@@ -53,9 +52,9 @@ class PowerCycleContainerService
     if container.deployment.nil?
       event.event_details.create!(
         data: "Error: Container no longer has a project.",
-        event_code: 'e7842b49012cb980'
+        event_code: "e7842b49012cb980"
       )
-      event.fail! 'Fatal error'
+      event.fail! "Fatal error"
       return false
     end
 
@@ -63,28 +62,28 @@ class PowerCycleContainerService
 
     unless validate!
       event.event_details.create!(
-        data: "Error: #{errors.join(' ')}",
-        event_code: '79eb562a7e6d5d61'
+        data: "Error: #{errors.join(" ")}",
+        event_code: "79eb562a7e6d5d61"
       )
-      event.fail! 'Fatal error'
+      event.fail! "Fatal error"
       return false
     end
 
     if in_progress? event
       event.event_details.create!(
         data: "Action already in progress, please try again later.",
-        event_code: '65a0ac3cf9131abb'
+        event_code: "65a0ac3cf9131abb"
       )
-      event.cancel! 'Action already in progress'
+      event.cancel! "Action already in progress"
       return true
     end
 
     unless container.node.online?
       event.event_details.create!(
         data: "Node is offline, cancelling",
-        event_code: '7f55ffc42c0dac14'
+        event_code: "7f55ffc42c0dac14"
       )
-      event.cancel! 'Node offline'
+      event.cancel! "Node offline"
       return false
     end
 
@@ -97,30 +96,30 @@ class PowerCycleContainerService
 
     if delay.nil?
       case action
-      when 'build'
+      when "build"
         ContainerWorkers::ProvisionWorker.perform_async container.global_id, event.global_id
-      when 'rebuild'
+      when "rebuild"
         ContainerWorkers::RebuildWorker.perform_async container.global_id, event.global_id
-      when 'restart'
+      when "restart"
         ContainerWorkers::RestartWorker.perform_async container.global_id, event.global_id
-      when 'start'
+      when "start"
         ContainerWorkers::StartWorker.perform_async container.global_id, event.global_id
-      when 'stop'
+      when "stop"
         ContainerWorkers::StopWorker.perform_async container.global_id, event.global_id
       else
         return false
       end
     else
       case action
-      when 'build'
+      when "build"
         ContainerWorkers::ProvisionWorker.perform_in delay, container.global_id, event.global_id
-      when 'rebuild'
+      when "rebuild"
         ContainerWorkers::RebuildWorker.perform_in delay, container.global_id, event.global_id
-      when 'restart'
+      when "restart"
         ContainerWorkers::RestartWorker.perform_in delay, container.global_id, event.global_id
-      when 'start'
+      when "start"
         ContainerWorkers::StartWorker.perform_in delay, container.global_id, event.global_id
-      when 'stop'
+      when "stop"
         ContainerWorkers::StopWorker.perform_in delay, container.global_id, event.global_id
       else
         return false
@@ -134,7 +133,7 @@ class PowerCycleContainerService
   def build_event!
     self.event = EventLog.new(
       locale_keys: {
-        label: container.is_a?(Deployment::Sftp) ? 'SFTP' : container.label,
+        label: container.is_a?(Deployment::Sftp) ? "SFTP" : container.label,
         container: container.name
       },
       status: "pending"
@@ -142,45 +141,45 @@ class PowerCycleContainerService
     event.audit = audit if audit
 
     case action
-    when 'build'
-      event.event_code = '3b6c028e41b0875b'
-      event.locale = 'container.build'
-    when 'rebuild'
-      event.event_code = '14bbe1dc184afba0'
-      event.locale = 'container.rebuild'
-    when 'restart'
-      event.event_code = 'd611b2bbf50bd48c'
-      event.locale = 'container.restart'
-    when 'start'
-      event.event_code = 'f59498e7717c7106'
-      event.locale = 'container.start'
-    when 'stop'
-      event.event_code = '0b264bd661e2d449'
-      event.locale = 'container.stop'
+    when "build"
+      event.event_code = "3b6c028e41b0875b"
+      event.locale = "container.build"
+    when "rebuild"
+      event.event_code = "14bbe1dc184afba0"
+      event.locale = "container.rebuild"
+    when "restart"
+      event.event_code = "d611b2bbf50bd48c"
+      event.locale = "container.restart"
+    when "start"
+      event.event_code = "f59498e7717c7106"
+      event.locale = "container.start"
+    when "stop"
+      event.event_code = "0b264bd661e2d449"
+      event.locale = "container.stop"
     else
-      event.event_code = '79eb562a7e6d5d61'
-      event.locale = 'unknown'
+      event.event_code = "79eb562a7e6d5d61"
+      event.locale = "unknown"
     end
 
     unless callback_url.blank?
-      event.labels['callback_url'] = callback_url
-      event.labels['callback_auth'] = callback_auth
+      event.labels["callback_url"] = callback_url
+      event.labels["callback_auth"] = callback_auth
     end
 
     unless event.save
-      self.errors << "Fatal error setting up job."
+      errors << "Fatal error setting up job."
     end
   end
 
   # @return [Boolean]
   def validate!
     unless container.is_a?(Deployment::Container) || container.is_a?(Deployment::Sftp)
-      self.errors << "Unknown container"
+      errors << "Unknown container"
     end
-    unless %w(build rebuild restart start stop).include? action
-      self.errors << "Unknown action. Only start, stop, rebuild, and restart are permitted"
+    unless %w[build rebuild restart start stop].include? action
+      errors << "Unknown action. Only start, stop, rebuild, and restart are permitted"
     end
-    self.errors.empty?
+    errors.empty?
   end
 
   # @param [EventLog] event
@@ -191,5 +190,4 @@ class PowerCycleContainerService
     return true if container.event_logs.where.not(id: event.id).stopping.active.exists?
     false
   end
-
 end

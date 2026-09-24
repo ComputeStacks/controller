@@ -1,6 +1,5 @@
 # User SSH Keys
 class Api::Admin::Users::SshKeysController < Api::Admin::Users::BaseController
-
   before_action :find_key, only: %i[show destroy]
 
   # List all User SSH Keys
@@ -27,7 +26,8 @@ class Api::Admin::Users::SshKeysController < Api::Admin::Users::BaseController
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
 
-  def show; end
+  def show
+  end
 
   # Create User SSH Key
   #
@@ -38,7 +38,7 @@ class Api::Admin::Users::SshKeysController < Api::Admin::Users::BaseController
 
   def create
     @ssh_key = @user.ssh_keys.new ssh_key_params
-    @ssh_key.current_audit = Audit.create_from_object! @user, 'updated', request.remote_ip, current_user
+    @ssh_key.current_audit = Audit.create_from_object! @user, "updated", request.remote_ip, current_user
     @ssh_key.save
     return api_obj_error(@ssh_key.errors.full_messages) unless @ssh_key.errors.empty?
     render action: :show, status: :created
@@ -49,7 +49,7 @@ class Api::Admin::Users::SshKeysController < Api::Admin::Users::BaseController
   # `DELETE /api/admin/users/{user-id}/ssh_keys/{id}
   # `
   def destroy
-    @ssh_key.current_audit = Audit.create_from_object! current_user, 'deleted', request.remote_ip, current_user
+    @ssh_key.current_audit = Audit.create_from_object! current_user, "deleted", request.remote_ip, current_user
     return api_obj_error(@ssh_key.errors.full_messages) unless @ssh_key.destroy
     render status: :accepted
   end
@@ -63,5 +63,4 @@ class Api::Admin::Users::SshKeysController < Api::Admin::Users::BaseController
   def find_key
     @ssh_key = @user.ssh_keys.find params[:id]
   end
-
 end

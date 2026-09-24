@@ -1,6 +1,5 @@
 class Admin::LetsEncryptController < Admin::ApplicationController
-
-  before_action :load_certificate, only: %w(show edit update destroy)
+  before_action :load_certificate, only: %w[show edit update destroy]
 
   def index
     @lets_encrypts = ::LetsEncrypt.all
@@ -13,7 +12,6 @@ class Admin::LetsEncryptController < Admin::ApplicationController
   end
 
   def update
-
   end
 
   def new
@@ -23,7 +21,6 @@ class Admin::LetsEncryptController < Admin::ApplicationController
   end
 
   def destroy
-    
   end
 
   private
@@ -32,8 +29,7 @@ class Admin::LetsEncryptController < Admin::ApplicationController
     @lets_encrypt = ::LetsEncrypt.find_by(id: params[:id])
     if @lets_encrypt.nil?
       redirect_to "/lets_encrypt", alert: "Unknown LetsEncrypt Certificate."
-      return false
+      false
     end
   end
-
 end

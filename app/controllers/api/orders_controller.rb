@@ -1,11 +1,9 @@
 ##
 # Orders API
 class Api::OrdersController < Api::ApplicationController
+  api_scope read: :order_read, write: :order_write
 
-  before_action -> { doorkeeper_authorize! :order_read }, only: %i[index show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :order_write }, only: %i[update create destroy], unless: :current_user
-
-  before_action :load_order, only: %i[ show ]
+  before_action :load_order, only: %i[show]
 
   ##
   # List all orders
@@ -43,7 +41,8 @@ class Api::OrdersController < Api::ApplicationController
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   ##
   # Create a new order
@@ -92,32 +91,32 @@ class Api::OrdersController < Api::ApplicationController
     audit = Audit.create!(
       user: current_user,
       ip_addr: request.remote_ip,
-      event: 'created'
+      event: "created"
     )
     build_order = BuildOrderService.new(audit, new_deployment_params)
     build_order.process_order = true
 
     msg = if build_order.perform
-            {
-              order: {
-                id: build_order.order.id,
-                redirect_url: build_order.redirect_url,
-                load_balancer_ip: build_order.order.data.dig('load_balancer_ip')
-              }
-            }
-          else
-            {
-              errors: build_order.errors
-            }
-          end
+      {
+        order: {
+          id: build_order.order.id,
+          redirect_url: build_order.redirect_url,
+          load_balancer_ip: build_order.order.data.dig("load_balancer_ip")
+        }
+      }
+    else
+      {
+        errors: build_order.errors
+      }
+    end
 
     respond_to do |format|
-      format.json {render json: msg, status: (msg[:errors] ? :unprocessable_entity : :created)}
-      format.xml {render xml: msg, status: (msg[:errors] ? :unprocessable_entity : :created)}
+      format.json { render json: msg, status: (msg[:errors] ? :unprocessable_entity : :created) }
+      format.xml { render xml: msg, status: (msg[:errors] ? :unprocessable_entity : :created) }
     end
   rescue => e
     Rails.logger.warn(e) unless Rails.env.production?
-    return api_fatal_error(e, 'e209b330586af9f2')
+    api_fatal_error(e, "e209b330586af9f2")
   end
 
   private
@@ -134,16 +133,16 @@ class Api::OrdersController < Api::ApplicationController
   def new_deployment_params
     params.require(:order).permit(
       :project_name, :skip_ssh, :location_id, :project_id, containers: [
-      :image_variant_id, :name, :container_image_id, :product_id, :package_id,
-      resources: [
-        :product_id, :package_id
-      ],
-      params: [:key, :value],
-      domains: [],
-      volumes: [
-        :csrn, :action, :source, :mount_ro, :snapshot
+        :image_variant_id, :name, :container_image_id, :product_id, :package_id,
+        resources: [
+          :product_id, :package_id
+        ],
+        params: [:key, :value],
+        domains: [],
+        volumes: [
+          :csrn, :action, :source, :mount_ro, :snapshot
+        ]
       ]
-    ]
     )
   end
 
@@ -151,7 +150,6 @@ class Api::OrdersController < Api::ApplicationController
   # Load the order
   def load_order # :doc:
     @order = current_user.orders.find_by(id: params[:id])
-    return api_obj_missing if @order.nil?
+    api_obj_missing if @order.nil?
   end
-
 end

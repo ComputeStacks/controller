@@ -1,16 +1,22 @@
 ##
-# Sample ComputeStacks Database Config File
-# For production, this file is omitted and removed since we set the DB using environmental variables.
-# For local dev environments, you may simply copy this file to `config/database.yml` without making any changes,
-# unless you're not using our Vagrant image.
-development:
+# Sample ComputeStacks database config.
+# For production this file is omitted; the database is configured entirely from
+# environment variables.
+#
+# For local development, copy it verbatim — the connection details come from
+# DEV_DB_URL / TEST_DB_URL in your .envrc:
+#
+#   cp config/database.sample.yml config/database.yml
+#
+default: &default
   adapter: postgresql
   encoding: unicode
-  database: computestacks
-  pool: 25
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 25) %>
+
+development:
+  <<: *default
+  url: <%= ENV["DEV_DB_URL"] %>
 
 test:
-  adapter: postgresql
-  encoding: unicode
-  database: computestacks_test
-  pool: 25
+  <<: *default
+  url: <%= ENV["TEST_DB_URL"] %>

@@ -5,11 +5,13 @@ backend <%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %>
   mode http
   option redispatch
   option httpchk HEAD /
+  http-reuse safe
 <% if service.containers.count > 1 %>
   cookie SERVERID insert indirect nocache httponly
 <% end %>
     <% service.containers.each do |container| %>
       <% next if container.ip_address.nil? %>
+      <% next if container.node.nil? # May be in-process %>
       <% if !load_balancer.direct_connect && (node != container.node) %>
   server <%= container.name %> <%= container.node.primary_ip %>:443 ssl verify none maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %><% if service.containers.count > 1 %> cookie s<%= container.name.split('-').last %><% end %>
       <% else %>
@@ -26,11 +28,13 @@ backend S_<%= Digest::MD5.hexdigest("#{service.name}#{ingress.id}") %>
   mode http
   option redispatch
   option httpchk HEAD /
+  http-reuse safe
 <% if service.containers.count > 1 %>
   cookie SERVERID insert indirect nocache httponly secure
 <% end %>
     <% service.containers.each do |container| %>
       <% next if container.ip_address.nil? %>
+      <% next if container.node.nil? # May be in-process %>
       <% if !load_balancer.direct_connect && (node != container.node) %>
   server <%= container.name %> <%= container.node.primary_ip %>:443 ssl verify none maxconn <%= load_balancer.maxconn_c %> maxqueue <%= load_balancer.max_queue %><% if service.containers.count > 1 %> cookie s<%= container.name.split('-').last %><% end %>
       <% else %>

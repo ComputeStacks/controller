@@ -12,7 +12,6 @@
 #   @return [Boolean]
 #
 class ContainerImagePlugin < ApplicationRecord
-
   include Auditable
   include ImagePlugins::Marketplace
   include ImagePlugins::Marketplace::Demo
@@ -27,7 +26,7 @@ class ContainerImagePlugin < ApplicationRecord
   has_many :service_plugins, class_name: "Deployment::ContainerService::ServicePlugin", dependent: :destroy
   belongs_to :product, optional: true
 
-  validates :name, uniqueness: true, inclusion: { in: %w(monarx demo another_demo required_demo) }
+  validates :name, uniqueness: true, inclusion: {in: %w[monarx demo another_demo required_demo]}
 
   def label
     name.titleize
@@ -37,9 +36,9 @@ class ContainerImagePlugin < ApplicationRecord
   def available?
     return false unless active
     case name
-    when 'monarx'
+    when "monarx"
       monarx_available?
-    when 'demo', 'another_demo', 'required_demo'
+    when "demo", "another_demo", "required_demo"
       true
     else
       false
@@ -53,13 +52,12 @@ class ContainerImagePlugin < ApplicationRecord
   def can_enable?(user)
     return false unless active
     case name
-    when 'monarx'
+    when "monarx"
       monarx_can_enable?(user)
-    when 'demo', 'another_demo', 'required_demo'
+    when "demo", "another_demo", "required_demo"
       user.is_admin
     else
       false
     end
   end
-
 end

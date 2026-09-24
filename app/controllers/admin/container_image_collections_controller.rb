@@ -1,5 +1,4 @@
 class Admin::ContainerImageCollectionsController < Admin::ApplicationController
-
   include RescueResponder
 
   before_action :find_collection, only: %i[show edit update destroy]
@@ -9,9 +8,11 @@ class Admin::ContainerImageCollectionsController < Admin::ApplicationController
     @collections = ContainerImageCollection.all
   end
 
-  def show; end
+  def show
+  end
 
-  def edit; end
+  def edit
+  end
 
   def new
     @collection = ContainerImageCollection.new
@@ -58,5 +59,4 @@ class Admin::ContainerImageCollectionsController < Admin::ApplicationController
   def not_found_responder
     redirect_to "/admin/container_image_collections", alert: "Unknown Collection"
   end
-
 end

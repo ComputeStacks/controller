@@ -3,7 +3,7 @@ module ImageCloner
 
   included do
     attr_accessor :parent_image_id
-    #after_create_commit :clone!, if: :parent_image_id
+    # after_create_commit :clone!, if: :parent_image_id
     after_create :clone!, if: :parent_image_id
     validate :can_clone?, on: [:create], if: :parent_image_id
   end
@@ -27,24 +27,24 @@ module ImageCloner
       next if image_variants.where(registry_image_tag: i.registry_image_tag).exists?
       new_variant = i.dup
       new_variant.current_user = current_user
-      new_variant.container_image_id = self.id
+      new_variant.container_image_id = id
       new_variant.save
     end
 
     parent_image.host_entries.each do |i|
       new_entry = i.dup
       new_entry.current_user = current_user
-      new_entry.container_image_id = self.id
+      new_entry.container_image_id = id
       new_entry.save
     end
 
     parent_image.dependency_parents.each do |i|
       new_param = i.dup
       new_param.current_user = current_user
-      new_param.container_image_id = self.id
+      new_param.container_image_id = id
       unless new_param.save
         local_errors << {
-          kind: 'dependeny_params',
+          kind: "dependeny_params",
           parant_param_id: i.id,
           errors: new_param.errors.full_messages
         }
@@ -52,10 +52,10 @@ module ImageCloner
     end
     parent_image.setting_params.each do |i|
       new_param = i.dup
-      new_param.container_image_id = self.id
+      new_param.container_image_id = id
       unless new_param.save
         local_errors << {
-          kind: 'setting_param',
+          kind: "setting_param",
           parant_param_id: i.id,
           errors: new_param.errors.full_messages
         }
@@ -63,12 +63,12 @@ module ImageCloner
     end
     parent_image.env_params.each do |i|
       new_param = i.dup
-      new_param.static_value = new_param.value if new_param.param_type == 'static'
-      new_param.env_value = new_param.value if new_param.param_type == 'variable'
-      new_param.container_image_id = self.id
+      new_param.static_value = new_param.value if new_param.param_type == "static"
+      new_param.env_value = new_param.value if new_param.param_type == "variable"
+      new_param.container_image_id = id
       unless new_param.save
         local_errors << {
-          kind: 'env_param',
+          kind: "env_param",
           parant_param_id: i.id,
           errors: new_param.errors.full_messages
         }
@@ -76,10 +76,10 @@ module ImageCloner
     end
     parent_image.ingress_params.each do |i|
       new_param = i.dup
-      new_param.container_image_id = self.id
+      new_param.container_image_id = id
       unless new_param.save
         local_errors << {
-          kind: 'ingress_param',
+          kind: "ingress_param",
           parant_param_id: i.id,
           errors: new_param.errors.full_messages
         }
@@ -87,10 +87,10 @@ module ImageCloner
     end
     parent_image.volumes.each do |i|
       new_param = i.dup
-      new_param.container_image_id = self.id
+      new_param.container_image_id = id
       unless new_param.save
         local_errors << {
-          kind: 'volume_param',
+          kind: "volume_param",
           parant_param_id: i.id,
           errors: new_param.errors.full_messages
         }
@@ -107,5 +107,4 @@ module ImageCloner
 
     true
   end
-
 end

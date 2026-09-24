@@ -31,11 +31,11 @@ child({auths: :external_integrations}, object_root: false) do
 end
 node :services do |i|
   {
-      deployments: i.deployments.count,
-      containers: i.deployed_containers.count,
-      container_services: i.container_services.count,
-      container_images: i.container_images.count,
-      container_registries: i.container_registries.count,
-      dns_zones: i.dns_zones.count
+    deployments: i.deployments.count,
+    containers: i.deployed_containers.count,
+    container_services: i.container_services.count,
+    container_images: i.container_images.count,
+    container_registries: i.container_registries.count,
+    dns_zones: i.dns_zones.count
   }
 end

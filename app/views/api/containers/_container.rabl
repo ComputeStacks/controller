@@ -1,5 +1,5 @@
 attributes :id, :name, :req_state, :stats, :current_state,
-           :local_ip, :public_ip, :created_at, :updated_at
+  :local_ip, :public_ip, :created_at, :updated_at
 
 attributes deployment_id: :project_id, service_id: :container_service_id
 

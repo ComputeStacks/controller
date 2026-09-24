@@ -1,11 +1,10 @@
 ##
 # Dns Zone Record
 class Dns::ZoneRecord
-
   attr_accessor :id,
-                :zone,
-                :zone_client,
-                :type
+    :zone,
+    :zone_client,
+    :type
 
   # @param [Dns::Zone] zone
   def initialize(id, zone, type = nil)
@@ -16,15 +15,15 @@ class Dns::ZoneRecord
   end
 
   def client
-    if self.zone.available_actions.include?('update_by_zone') && !self.id.nil?
-      self.zone_client = self.zone.state_load!
-      client = self.zone_client.records[self.type][self.id] # self.id = array index.
-    elsif self.zone.available_actions.include?('update_by_zone')
-      self.zone_client = self.zone.state_load!
-      self.zone.provision_driver.zone_record.new(self.zone.provision_driver.service_client, self.id, self.zone.provider_ref)
+    if zone.available_actions.include?("update_by_zone") && !id.nil?
+      self.zone_client = zone.state_load!
+      zone_client.records[type][id] # self.id = array index.
+    elsif zone.available_actions.include?("update_by_zone")
+      self.zone_client = zone.state_load!
+      zone.provision_driver.zone_record.new(zone.provision_driver.service_client, id, zone.provider_ref)
     else
       begin
-        client = self.zone.provision_driver.zone_record.new(self.zone.auth.client, self.id, self.zone.provider_ref)
+        client = zone.provision_driver.zone_record.new(zone.auth.client, id, zone.provider_ref)
       rescue
         nil
       else
@@ -39,14 +38,14 @@ class Dns::ZoneRecord
       begin
         ip_check = IPAddr.new(params[:ip])
       rescue
-        return {'success' => false, 'message' => "Invalid IP Address Format."}
+        return {"success" => false, "message" => "Invalid IP Address Format."}
       end
-      the_client.type = ip_check.ipv6? ? 'AAAA' : 'A'
+      the_client.type = ip_check.ipv6? ? "AAAA" : "A"
     else
       the_client.type = params[:type]
     end
     the_client.ttl = params[:ttl]
-    the_client.name = params[:name].blank? ? '@' : params[:name]
+    the_client.name = params[:name].blank? ? "@" : params[:name]
     the_client.email = params[:email]
     the_client.primary_dns = params[:primary_dns]
     the_client.expire = params[:expire]
@@ -55,8 +54,8 @@ class Dns::ZoneRecord
     the_client.hostname = params[:hostname]
     the_client.ip = params[:ip]
     the_client.priority = params[:priority]
-    if the_client.type == 'TXT'
-      zone_value = params[:value].gsub('"', '').gsub("'", '')
+    if the_client.type == "TXT"
+      zone_value = params[:value].delete('"').delete("'")
       the_client.value = zone_value
       # the_client.value = "\"#{zone_value}\""
       # if @dns_driver.has_txt_limit? # Does not work.
@@ -67,28 +66,27 @@ class Dns::ZoneRecord
     else
       the_client.value = params[:value]
     end
-    if self.zone.available_actions.include?('update_by_zone')
+    if zone.available_actions.include?("update_by_zone")
       the_client.name = format_name(the_client.name)
       the_client.hostname = format_hostname(the_client.hostname) unless the_client.hostname.nil? || the_client.hostname.blank?
       validate!(the_client)
-      self.zone_client = self.zone.state_load!
-      self.zone_client.records[the_client.type] << the_client
-      self.zone.state_save!(self.zone_client)
-      {'success' => true}
+      self.zone_client = zone.state_load!
+      zone_client.records[the_client.type] << the_client
+      zone.state_save!(zone_client)
+      {"success" => true}
     else
       begin
         the_client.save
       rescue => e
-        ExceptionAlertService.new(e, 'cbd8110a311f6a10').perform
-        {'success' => false, 'message' => e.message}
+        ExceptionAlertService.new(e, "cbd8110a311f6a10").perform
+        {"success" => false, "message" => e.message}
       else
-        {'success' => true}
+        {"success" => true}
       end
     end
   end
 
   def update!(params)
-
     the_client = client
     the_client.ttl = params[:ttl]
     the_client.name = params[:name]
@@ -100,8 +98,8 @@ class Dns::ZoneRecord
     the_client.hostname = params[:hostname]
     the_client.ip = params[:ip]
     the_client.priority = params[:priority]
-    if the_client.type == 'TXT'
-      zone_value = params[:value].gsub('"', '').gsub("'", '')
+    if the_client.type == "TXT"
+      zone_value = params[:value].delete('"').delete("'")
       the_client.value = zone_value
       # the_client.value = "\"#{zone_value}\""
       # if @dns_driver.has_txt_limit? # Does not work.
@@ -112,65 +110,64 @@ class Dns::ZoneRecord
     else
       the_client.value = params[:value]
     end
-    if self.zone.available_actions.include?('update_by_zone')
+    if zone.available_actions.include?("update_by_zone")
       the_client.name = format_name(the_client.name)
       the_client.hostname = format_hostname(the_client.hostname) unless the_client.hostname.nil? || the_client.hostname.blank?
       validate!(the_client)
-      self.zone.state_save!(self.zone_client)
-      {'success' => true}
+      zone.state_save!(zone_client)
+      {"success" => true}
     else
       begin
         the_client.save
       rescue => e
-        ExceptionAlertService.new(e, '6e369cd3bb9660fb').perform
-        {'success' => false, 'message' => e.message}
+        ExceptionAlertService.new(e, "6e369cd3bb9660fb").perform
+        {"success" => false, "message" => e.message}
       else
-        {'success' => true}
+        {"success" => true}
       end
     end
   end
 
   def destroy
-    if self.zone.available_actions.include?('update_by_zone')
-      return {'success' => false, 'message' => "Missing record type."} if self.type.nil?
-      return {'success' => false, 'message' => 'Invalid record ID'} if self.id.nil?
-      self.zone_client = self.zone.state_load!
-      self.zone_client.records[self.type].delete_at(self.id)
-      self.zone.state_save!(self.zone_client)
-      {'success' => true}
+    if zone.available_actions.include?("update_by_zone")
+      return {"success" => false, "message" => "Missing record type."} if type.nil?
+      return {"success" => false, "message" => "Invalid record ID"} if id.nil?
+      self.zone_client = zone.state_load!
+      zone_client.records[type].delete_at(id)
+      zone.state_save!(zone_client)
+      {"success" => true}
     else
       begin
-        self.client.destroy
+        client.destroy
       rescue => e
-        ExceptionAlertService.new(e, '7c93980e45360e1d').perform
-        {'success' => false, 'message' => e.message}
+        ExceptionAlertService.new(e, "7c93980e45360e1d").perform
+        {"success" => false, "message" => e.message}
       else
-        {'success' => true}
+        {"success" => true}
       end
     end
   end
 
   # Local zone file
   def format_name(name)
-    if name == '@' || name == self.zone.name || name == "#{self.zone.name}." || (self.zone.name[-1] == '.' && "#{name}." == self.zone.name)
-      self.zone.name[-1] == '.' ? self.zone.name : "#{self.zone.name}."
+    if name == "@" || name == zone.name || name == "#{zone.name}." || (zone.name[-1] == "." && "#{name}." == zone.name)
+      (zone.name[-1] == ".") ? zone.name : "#{zone.name}."
     else
-      a = name.gsub(".#{self.zone.name}.", '').gsub(".#{self.zone.name}", '').gsub("#{self.zone.name}.", '').gsub(self.zone.name, '')
-      self.zone.name[-1] == '.' ? "#{a}.#{self.zone.name}" : "#{a}.#{self.zone.name}."
+      a = name.gsub(".#{zone.name}.", "").gsub(".#{zone.name}", "").gsub("#{zone.name}.", "").gsub(zone.name, "")
+      (zone.name[-1] == ".") ? "#{a}.#{zone.name}" : "#{a}.#{zone.name}."
     end
   end
 
   # Pointing to: CNAME, MX.
   def format_hostname(hostname)
     a = hostname.strip
-    a[-1] == '.' ? a : "#{a}."
+    (a[-1] == ".") ? a : "#{a}."
   end
 
   # Check!
   def validate!(params)
-    if params.type == 'CNAME'
-      return {'success' => false, 'message' => "Can't create CNAME on root domain."} if params.name == "#{self.zone.name}."
+    if params.type == "CNAME"
+      {"success" => false, "message" => "Can't create CNAME on root domain."} if params.name == "#{zone.name}."
     end
   end
-
 end

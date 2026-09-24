@@ -15,27 +15,27 @@ module Containers
 
       # Config
       c = {
-        'name' => name,
-        'Hostname' => name,
-        'Domainname' => "service.internal",
-        'ExposedPorts' => {},
-        'Labels' => {
-          'com.computestacks.service_id' => service.id.to_s,
-          'com.computestacks.deployment_id' => deployment.id.to_s,
-          'com.computestacks.image_name' => image_variant.full_image_path
+        "name" => name,
+        "Hostname" => name,
+        "Domainname" => "service.internal",
+        "ExposedPorts" => {},
+        "Labels" => {
+          "com.computestacks.service_id" => service.id.to_s,
+          "com.computestacks.deployment_id" => deployment.id.to_s,
+          "com.computestacks.image_name" => image_variant.full_image_path
         },
-        'Image' => image_variant.full_image_path,
-        'HostConfig' => {
-          'PortBindings' => {},
-          'NetworkMode' => ip_address.network.name,
-          'VolumeDriver' => 'local',
-          'LogConfig' => log_driver_config, # Containerized.log_driver_config
+        "Image" => image_variant.full_image_path,
+        "HostConfig" => {
+          "PortBindings" => {},
+          "NetworkMode" => ip_address.network.name,
+          "VolumeDriver" => "local",
+          "LogConfig" => log_driver_config # Containerized.log_driver_config
         },
-        'NetworkingConfig' => {
-          'EndpointsConfig' => {
+        "NetworkingConfig" => {
+          "EndpointsConfig" => {
             ip_address.network.name => {
-              'IPAMConfig' => {
-                'IPv4Address' => local_ip
+              "IPAMConfig" => {
+                "IPv4Address" => local_ip
               }
             }
           }
@@ -43,38 +43,38 @@ module Containers
       }
 
       if container_image.docker_init
-        c['HostConfig']['Init'] = true
+        c["HostConfig"]["Init"] = true
       end
 
       unless health_check_config.nil?
-        c['Healthcheck'] = health_check_config
+        c["Healthcheck"] = health_check_config
       end
 
       if region.has_clustered_networking?
-        c['Labels']['org.projectcalico.label.token'] = deployment.token
-        c['Labels']['org.projectcalico.label.service'] = service.name
+        c["Labels"]["org.projectcalico.label.token"] = deployment.token
+        c["Labels"]["org.projectcalico.label.service"] = service.name
       end
       runtime_env.each do |k, v|
-        (c['Env'] ||= []) << "#{k}=#{v}"
+        (c["Env"] ||= []) << "#{k}=#{v}"
       end
-      service.volumes.where(nodes: { id: node.id }).joins(:nodes).distinct.each do |vol|
+      service.volumes.where(nodes: {id: node.id}).joins(:nodes).distinct.each do |vol|
         vm = vol.volume_maps.find_by container_service: service
         next if vm.nil?
-        (c['HostConfig']['Binds'] ||= []) << "#{vm.volume.name}:#{vm.mount_path.strip}:#{vm.mount_ro ? 'ro' : 'rw'}"
+        (c["HostConfig"]["Binds"] ||= []) << "#{vm.volume.name}:#{vm.mount_path.strip}:#{vm.mount_ro ? "ro" : "rw"}"
       end
       cmd = parsed_command
       if cmd
         if cmd[0..9] == "/bin/sh -c"
-          c['CMD'] = ["/bin/sh", "-c", cmd.gsub("/bin/sh -c", "")]
+          c["CMD"] = ["/bin/sh", "-c", cmd.gsub("/bin/sh -c", "")]
         elsif cmd[0..11] == "/bin/bash -c"
-          c['CMD'] = ["/bin/sh", "-c", cmd.gsub("/bin/sh -c", "")]
+          c["CMD"] = ["/bin/sh", "-c", cmd.gsub("/bin/sh -c", "")]
         else
-          cmd.split(' ').each do |i|
-            (c['Cmd'] ||= []) << i
+          cmd.split(" ").each do |i|
+            (c["Cmd"] ||= []) << i
           end
         end
       end
-      c['HostConfig']['NanoCPUs'] = cpu ? (cpu * 1e9).to_i : (1 * 1e9).to_i
+      c["HostConfig"]["NanoCPUs"] = cpu ? (cpu * 1e9).to_i : (1 * 1e9).to_i
       m = memory.nil? ? 256 : memory
       # Also change `resize_job.rb`.
       # 1 GiB = 1073741824 on docker inspect
@@ -88,13 +88,13 @@ module Containers
         mem_swap = mem_value + (p.memory_swap * 1048576).to_i if p.memory_swap
         mem_swappiness = p.memory_swappiness if p.memory_swappiness
       end
-      c['HostConfig']['Memory'] = mem_value
-      c['HostConfig']['MemorySwap'] = mem_swap
-      c['HostConfig']['MemorySwappiness'] = mem_swappiness if mem_swappiness
+      c["HostConfig"]["Memory"] = mem_value
+      c["HostConfig"]["MemorySwap"] = mem_swap
+      c["HostConfig"]["MemorySwappiness"] = mem_swappiness if mem_swappiness
 
-      c['HostConfig']['ExtraHosts'] = custom_host_entries
+      c["HostConfig"]["ExtraHosts"] = custom_host_entries
 
-      c['HostConfig'].merge! node.container_io_limits
+      c["HostConfig"].merge! node.container_io_limits
       service.service_plugins.each do |p|
         c = p.apply_plugin_config! c
       end
@@ -102,19 +102,19 @@ module Containers
       ##
       # SHM Size Override
       shm = service.shm_size.zero? ? container_image.shm_size : service.shm_size
-      c['HostConfig']['ShmSize'] = shm unless shm.zero?
+      c["HostConfig"]["ShmSize"] = shm unless shm.zero?
 
       c
     rescue => e
-      ExceptionAlertService.new(e, 'a974dd3087e0cf79').perform
+      ExceptionAlertService.new(e, "a974dd3087e0cf79").perform
       l = event_logs.create!(
-        status: 'alert',
+        status: "alert",
         notice: true,
-        locale: 'deployment.errors.fatal',
-        event_code: 'a974dd3087e0cf79',
+        locale: "deployment.errors.fatal",
+        event_code: "a974dd3087e0cf79",
         audit: audit
       )
-      l.event_details.create!(data: "Error generating runtime config for container #{name}: #{e.message}", event_code: 'a974dd3087e0cf79')
+      l.event_details.create!(data: "Error generating runtime config for container #{name}: #{e.message}", event_code: "a974dd3087e0cf79")
       l.deployments << deployment if deployment
       l.users << user if user
       nil
@@ -125,7 +125,7 @@ module Containers
       return nil if service.command&.strip.blank?
       raw_command = service.command.strip
       data = Liquid::Template.parse(raw_command)
-      vars = { 'service_name_short' => var_lookup('build.self.service_name_short') }
+      vars = {"service_name_short" => var_lookup("build.self.service_name_short")}
       service.setting_params.each do |param|
         vars[param.name] = var_lookup("build.settings.#{param.name}")
       end
@@ -184,15 +184,15 @@ module Containers
       end
       true
     rescue => e
-      ExceptionAlertService.new(e, 'ab4f48d8615f2ef7').perform
+      ExceptionAlertService.new(e, "ab4f48d8615f2ef7").perform
       l = event_logs.create!(
-        status: 'alert',
+        status: "alert",
         notice: true,
-        locale: 'deployment.errors.fatal',
-        event_code: 'ab4f48d8615f2ef7',
+        locale: "deployment.errors.fatal",
+        event_code: "ab4f48d8615f2ef7",
         audit: audit
       )
-      l.event_details.create!(data: "Error generating custom hosts for #{name}: #{e.message}", event_code: 'ab4f48d8615f2ef7')
+      l.event_details.create!(data: "Error generating custom hosts for #{name}: #{e.message}", event_code: "ab4f48d8615f2ef7")
       l.deployments << deployment if deployment
       l.users << user if user
       nil
@@ -201,21 +201,21 @@ module Containers
     def runtime_env
       result = []
       vars = {
-        'service_name_short' => var_lookup('build.self.service_name_short'),
-        'default_domain' => var_lookup('build.self.default_domain')
+        "service_name_short" => var_lookup("build.self.service_name_short"),
+        "default_domain" => var_lookup("build.self.default_domain")
       }
       service.setting_params.each do |param|
         vars[param.name] = var_lookup param.name
       end
       service.env_params.each do |i|
         case i.param_type
-        when 'variable'
+        when "variable"
           val = var_lookup(i.value)
           if val.nil?
             raise "Unknown variable #{i.value}"
           end
           result << [i.name, val]
-        when 'static'
+        when "static"
           result << [i.name, Liquid::Template.parse(i.value).render(vars)]
         end
       end
@@ -225,21 +225,18 @@ module Containers
     def health_check_config
       return nil if is_a?(Deployment::Sftp)
       case container_image.role
-      when 'redis'
-        { 'Test' => ["CMD", "redis-cli", "--raw", "incr", "ping"] }
-      when 'mariadb'
-        { 'Test' => ["CMD", '/usr/local/bin/healthcheck.sh', '--connect'] }
-      when 'mysql'
+      when "redis"
+        {"Test" => ["CMD", "redis-cli", "--raw", "incr", "ping"]}
+      when "mariadb"
+        {"Test" => ["CMD", "/usr/local/bin/healthcheck.sh", "--connect"]}
+      when "mysql"
         # mysql does not include the healthcheck script
-        if container_image.registry_image_path == 'mariadb'
-          { 'Test' => ["CMD", '/usr/local/bin/healthcheck.sh', '--connect'] }
+        if container_image.registry_image_path == "mariadb"
+          {"Test" => ["CMD", "/usr/local/bin/healthcheck.sh", "--connect"]}
         end
-      when 'postgres'
-        { 'Test' => ["CMD", "pg_isready"] }
-      else
-        nil
+      when "postgres"
+        {"Test" => ["CMD", "pg_isready"]}
       end
     end
-
   end
 end

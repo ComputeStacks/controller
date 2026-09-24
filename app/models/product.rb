@@ -57,14 +57,13 @@
 #   @return [Array<Deployment::Container>]
 #
 class Product < ApplicationRecord
-
   include Auditable
 
   scope :sorted, -> { order "lower(label)" }
-  scope :packages, -> { where(kind: 'package' ) }
-  scope :addons, -> { where(kind: 'addon' ) }
-  scope :images, -> { where(kind: 'image' ) }
-  scope :resources, -> { where(kind: 'resource' ) }
+  scope :packages, -> { where(kind: "package") }
+  scope :addons, -> { where(kind: "addon") }
+  scope :images, -> { where(kind: "image") }
+  scope :resources, -> { where(kind: "resource") }
 
   has_many :billing_resources, dependent: :destroy
   has_many :prices, through: :billing_resources
@@ -75,8 +74,8 @@ class Product < ApplicationRecord
   has_many :subscription_products, dependent: :restrict_with_error
   has_many :subscriptions, through: :subscription_products
 
-  has_many :containers, class_name: 'Deployment::Container', through: :subscriptions
-  has_one :package, class_name: 'BillingPackage', dependent: :destroy
+  has_many :containers, class_name: "Deployment::Container", through: :subscriptions
+  has_one :package, class_name: "BillingPackage", dependent: :destroy
 
   has_many :image_plugins, class_name: "ContainerImagePlugin", dependent: :nullify
 
@@ -86,9 +85,9 @@ class Product < ApplicationRecord
   before_save :set_aggregation
 
   validates :label, presence: true
-  validates :kind, inclusion: { in: %w(resource package image addon), message: 'Must be one of: resource, package, image, addon' }
-  validates :unit, numericality: { greater_than: 0 }, if: Proc.new { |product| product.kind == 'resource' }
-  validates :unit_type, presence: true, if: Proc.new { |product| product.kind == 'resource' }
+  validates :kind, inclusion: {in: %w[resource package image addon], message: "Must be one of: resource, package, image, addon"}
+  validates :unit, numericality: {greater_than: 0}, if: proc { |product| product.kind == "resource" }
+  validates :unit_type, presence: true, if: proc { |product| product.kind == "resource" }
 
   accepts_nested_attributes_for :package
 
@@ -97,19 +96,19 @@ class Product < ApplicationRecord
   end
 
   def is_package?
-    kind == 'package'
+    kind == "package"
   end
 
   def is_image?
-    kind == 'image'
+    kind == "image"
   end
 
   def is_addon?
-    kind == 'addon'
+    kind == "addon"
   end
 
   def is_resource?
-    kind == 'resource'
+    kind == "resource"
   end
 
   # Find a particular price for a given user & region
@@ -118,13 +117,13 @@ class Product < ApplicationRecord
   def price_lookup(user, region, qty = 0)
     prices = price_phases(user, region)
     price = nil
-    prices[:final].reverse.each do |i|
+    prices[:final].reverse_each do |i|
       price = i if i.max_qty.nil? || i.max_qty >= qty
     end
-    prices[:discount].reverse.each do |i|
+    prices[:discount].reverse_each do |i|
       price = i if i.max_qty.nil? || i.max_qty >= qty
     end
-    prices[:trial].reverse.each do |i|
+    prices[:trial].reverse_each do |i|
       price = i if i.max_qty.nil? || i.max_qty >= qty
     end
     price
@@ -137,14 +136,14 @@ class Product < ApplicationRecord
     return result if billing_plan.nil?
     resource = billing_resources.find_by(billing_plan: billing_plan)
     return result if resource.nil?
-    available_prices = self.prices.where('billing_resource_id = ? AND regions.id = ?', resource.id, region).joins(:regions).order( Arel.sql("max_qty NULLS LAST") )
+    available_prices = prices.where("billing_resource_id = ? AND regions.id = ?", resource.id, region).joins(:regions).order(Arel.sql("max_qty NULLS LAST"))
     available_prices.each do |i|
       case i.billing_phase.phase_type
-      when 'trial'
+      when "trial"
         result[:trial] << i if i.billing_phase.in_phase?(user)
-      when 'discount'
+      when "discount"
         result[:discount] << i if i.billing_phase.in_phase?(user)
-      when 'final'
+      when "final"
         result[:final] << i
       end
     end
@@ -167,14 +166,13 @@ class Product < ApplicationRecord
   end
 
   class << self
-
     # Temporary. Move labels to i18n.
     def resource_kinds
       [
-        ['Disk', 'storage'],
-        ['Local Disk', 'local_disk'],
-        ['Bandwidth', 'bandwidth'],
-        ['Backup & Image Storage', 'backup']
+        ["Disk", "storage"],
+        ["Local Disk", "local_disk"],
+        ["Bandwidth", "bandwidth"],
+        ["Backup & Image Storage", "backup"]
       ]
     end
 
@@ -188,7 +186,6 @@ class Product < ApplicationRecord
       end
       product
     end
-
   end
 
   private
@@ -200,15 +197,13 @@ class Product < ApplicationRecord
     if unit.to_i.zero? && package
       self.unit = 1
     end
-
   end
 
   def set_aggregation
-    self.is_aggregated = resource_kind == 'bandwidth'
+    self.is_aggregated = resource_kind == "bandwidth"
   end
 
   def update_product_name
     self.name = label.parameterize
   end
-
 end

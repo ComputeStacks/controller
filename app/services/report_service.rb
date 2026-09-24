@@ -9,7 +9,6 @@
 #     File.open('/usr/src/app/tmp/data.csv', 'w') { |f| f.write(data) }
 #
 class ReportService
-
   attr_accessor :klass
 
   def initialize(klass)
@@ -18,10 +17,8 @@ class ReportService
 
   def perform
     case klass
-    when 'Deployment::Container'
+    when "Deployment::Container"
       container_export
-    else
-      nil
     end
   end
 
@@ -29,14 +26,12 @@ class ReportService
 
   def container_export
     CSV.generate(headers: true) do |csv|
-      csv << %w(id project user package image region node created)
+      csv << %w[id project user package image region node created]
       Deployment::Container.all.each do |i|
         package = i.service.package
-        plan = package.nil? ? '' : package.product.name
+        plan = package.nil? ? "" : package.product.name
         csv << [i.id, i.deployment.name, i.user&.email, plan, i.container_image.label, i.region.name, i.node.label, i.created_at.iso8601]
       end
     end
   end
-
-
 end

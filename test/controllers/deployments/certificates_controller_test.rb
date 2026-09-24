@@ -1,7 +1,6 @@
-require 'test_helper'
+require "test_helper"
 
 class CertificatesControllerTest < ActionDispatch::IntegrationTest
-  
   include StandardTestControllerBase
   include Devise::Test::IntegrationHelpers
 
@@ -9,8 +8,7 @@ class CertificatesControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:admin) # Admin user owns the registry.
   end
 
-  test 'can create new ssl certificate' do
-
+  test "can create new ssl certificate" do
     deployment = Deployment.first
     service = deployment.services.web_only.first
 
@@ -31,13 +29,13 @@ class CertificatesControllerTest < ActionDispatch::IntegrationTest
     ef.subject_certificate = cert
     ef.issuer_certificate = cert
     cert.extensions = [
-      ef.create_extension("basicConstraints","CA:TRUE", true),
+      ef.create_extension("basicConstraints", "CA:TRUE", true),
       ef.create_extension("subjectKeyIdentifier", "hash")
     ]
     cert.add_extension ef.create_extension("authorityKeyIdentifier",
-                                          "keyid:always,issuer:always")
+      "keyid:always,issuer:always")
 
-    cert.sign key, OpenSSL::Digest::SHA256.new
+    cert.sign key, OpenSSL::Digest.new("SHA256")
 
     post "/deployments/#{deployment.token}/certificates", params: {
       deployment_ssl: {
@@ -52,13 +50,10 @@ class CertificatesControllerTest < ActionDispatch::IntegrationTest
     # attempt to find this cert and verify
 
     created_crt = Deployment::Ssl.find_by(cert_serial: cert.serial.to_s)
-    
+
     assert_not_nil created_crt
 
     assert_equal cert.to_pem, created_crt.crt
     assert_equal key.to_pem, created_crt.pkey
-    
-
   end
-
 end

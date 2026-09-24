@@ -1,19 +1,18 @@
-require 'test_helper'
+require "test_helper"
 
 class DeploymentTest < ActiveSupport::TestCase
-
-  test 'can change deployment owner' do
-    admin = User.find_by(email: 'peter@pp.net')
-    user = User.find_by(email: 'a@example.local')
+  test "can change deployment owner" do
+    admin = User.find_by(email: "peter@pp.net")
+    user = User.find_by(email: "a@example.local")
 
     d = Deployment.first
 
     orig_user = d.user
-    new_user = orig_user == admin ? user : admin
+    new_user = (orig_user == admin) ? user : admin
 
     d.user = new_user
 
-    audit = Audit.create_from_object!(d, 'updated', '127.0.0.1', admin)
+    audit = Audit.create_from_object!(d, "updated", "127.0.0.1", admin)
 
     d.current_audit = audit
 
@@ -38,12 +37,10 @@ class DeploymentTest < ActiveSupport::TestCase
     end
   end
 
-  test 'can list deployments' do
-
+  test "can list deployments" do
     d = Deployment.first
     u = d.user
 
     assert_includes Deployment.find_all_for(u), d
   end
-
 end

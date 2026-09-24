@@ -3,31 +3,31 @@ module Containers
     extend ActiveSupport::Concern
 
     def current_state
-      return 'migrating' if migrating?
-      return 'starting' if starting?
-      return 'stopping' if stopping?
-      return 'working' if working?
-      return 'unhealthy' unless healthy?
-      return 'alert' if has_failed_jobs?
-      return 'resource_usage' unless resources_ok?
-      stopped? ? 'offline' : 'online'
+      return "migrating" if migrating?
+      return "starting" if starting?
+      return "stopping" if stopping?
+      return "working" if working?
+      return "unhealthy" unless stopped? || healthy?
+      return "alert" if has_failed_jobs?
+      return "resource_usage" unless resources_ok?
+      stopped? ? "offline" : "online"
     rescue
-      ''
+      ""
     end
 
     ##
     # Should this container be online?
 
     def active?
-      req_state == 'running'
+      req_state == "running"
     end
 
     def set_active!
-      update req_state: 'running'
+      update req_state: "running"
     end
 
     def set_inactive!
-      update req_state: 'stopped'
+      update req_state: "stopped"
     end
 
     ##
@@ -42,11 +42,11 @@ module Containers
     # otherwise it will directly query for the container within Docker.
     def running?(direct = false)
       unless direct || event_logs.where("created_at > ?", 3.minutes.ago).exists?
-        return status == 'running'
+        return status == "running"
       end
       s = health_status(direct)
       return nil if s.nil?
-      s[:state] == 'running'
+      s[:state] == "running"
     end
 
     # Store larger health object for caching
@@ -62,12 +62,12 @@ module Containers
 
     def healthy?(direct = false)
       unless direct || event_logs.where("created_at > ?", 3.minutes.ago).exists?
-        return status != 'degraded'
+        return status != "degraded"
       end
       s = health_status(direct)
       return true if s.nil?
       return true if s[:health].empty?
-      %w(healthy starting).include? s[:health][:state]
+      %w[healthy starting].include? s[:health][:state]
     end
 
     def stopped?
@@ -95,11 +95,11 @@ module Containers
     end
 
     def migrating?
-      status == 'migrating'
+      status == "migrating"
     end
 
     def set_is_migrating!
-      update status: 'migrating' unless migrating?
+      update status: "migrating" unless migrating?
     end
 
     def resources_ok?
@@ -113,6 +113,5 @@ module Containers
     def restore_in_progress?
       event_logs.active.where(event_code: "agent-bde07117ae85937d").exists?
     end
-
   end
 end

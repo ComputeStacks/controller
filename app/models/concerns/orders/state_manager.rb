@@ -3,22 +3,21 @@ module Orders
     extend ActiveSupport::Concern
 
     included do
-      scope :pending, -> { where( Arel.sql( %Q(status IN ('#{pending_statuses.join("','")}')) )) }
-      scope :pending_projects, -> { where Arel.sql(%Q(deployment_id IS NULL AND status IN ('#{(pending_statuses + ['processing']).join("','")}'))) }
+      scope :pending, -> { where(Arel.sql(%(status IN ('#{pending_statuses.join("','")}')))) }
+      scope :pending_projects, -> { where Arel.sql(%(deployment_id IS NULL AND status IN ('#{(pending_statuses + ["processing"]).join("','")}'))) }
     end
 
     class_methods do
-
       def pending_statuses
-        %w(
+        %w[
           awaiting_payment
           open
           pending
-        )
+        ]
       end
 
       def allowed_statuses
-        %w(
+        %w[
           open
           pending
           awaiting_payment
@@ -26,9 +25,8 @@ module Orders
           cancelled
           completed
           failed
-        )
+        ]
       end
-
     end
 
     ##
@@ -36,7 +34,7 @@ module Orders
 
     # Are we cloning from another project?
     def is_clone?
-      order_data['raw_order'].detect { |i| !i['source'].blank? }
+      order_data["raw_order"].detect { |i| !i["source"].blank? }
     end
 
     ##
@@ -47,7 +45,7 @@ module Orders
     end
 
     def processing?
-      status == 'processing'
+      status == "processing"
     end
 
     def can_process?
@@ -59,51 +57,50 @@ module Orders
     end
 
     def need_payment?
-      status == 'awaiting_payment'
+      status == "awaiting_payment"
     end
 
     def cancelled?
-      status == 'cancelled'
+      status == "cancelled"
     end
 
     def success?
-      status == 'completed'
+      status == "completed"
     end
 
     def failed?
-      status == 'failed'
+      status == "failed"
     end
 
     ##
     # Update State
 
     def processing!
-      update_attribute :status, 'processing'
+      update_attribute :status, "processing"
     end
 
     def open!
-      update_attribute :status, 'open'
+      update_attribute :status, "open"
     end
 
     def pending!
-      update_attribute :status, 'pending'
+      update_attribute :status, "pending"
     end
 
     def need_payment!
-      update_attribute :status, 'awaiting_payment'
+      update_attribute :status, "awaiting_payment"
     end
 
     def fail!
-      update_attribute :status, 'failed'
+      update_attribute :status, "failed"
     end
 
     def cancel!
-      update_attribute :status, 'cancelled'
+      update_attribute :status, "cancelled"
     end
 
     def done!
-      update_attribute :status, 'completed'
+      update_attribute :status, "completed"
     end
-
   end
 end

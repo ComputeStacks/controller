@@ -1,7 +1,6 @@
 ##
 # Container Service Bastions
 class Api::ContainerServices::BastionsController < Api::ContainerServices::BaseController
-
   before_action :find_bastion, only: :show
 
   ##
@@ -9,7 +8,7 @@ class Api::ContainerServices::BastionsController < Api::ContainerServices::BaseC
   #
   # `GET /api/container_services/{container-service-id}/bastions`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `bastions`: Array
   #     * `id`: Integer
@@ -28,7 +27,7 @@ class Api::ContainerServices::BastionsController < Api::ContainerServices::BaseC
   def index
     @bastions = @service.sftp_containers
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/bastions/index' }
+      format.any(:json, :xml) { render template: "api/bastions/index" }
     end
   end
 
@@ -37,7 +36,7 @@ class Api::ContainerServices::BastionsController < Api::ContainerServices::BaseC
   #
   # `GET /api/container_services/{container-service-id}/bastions/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `bastion`: Object
   #     * `id`: Integer
@@ -55,7 +54,7 @@ class Api::ContainerServices::BastionsController < Api::ContainerServices::BaseC
   #
   def show
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/bastions/show' }
+      format.any(:json, :xml) { render template: "api/bastions/show" }
     end
   end
 
@@ -63,7 +62,6 @@ class Api::ContainerServices::BastionsController < Api::ContainerServices::BaseC
 
   def find_bastion
     @bastion = @service.deployment.sftp_containers.find_by(id: params[:id])
-    return api_obj_missing(["Unknown bastion container"]) if @bastion.nil?
+    api_obj_missing(["Unknown bastion container"]) if @bastion.nil?
   end
-
 end

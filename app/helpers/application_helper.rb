@@ -1,15 +1,14 @@
 module ApplicationHelper
-
   def flash_class(type)
     case type
-      when 'success'
-        'success'
-      when 'info', 'notice'
-        'info'
-      when 'warning'
-        'warning'
-      else
-        'danger'
+    when "success"
+      "success"
+    when "info", "notice"
+      "info"
+    when "warning"
+      "warning"
+    else
+      "danger"
     end
   end
 
@@ -24,24 +23,24 @@ module ApplicationHelper
     if format == "MB"
       amount = amount.to_i
       if amount >= 1024 && amount % 1024 == 0
-        return "#{amount / 1024} GB"
+        "#{amount / 1024} GB"
       elsif amount < 1024
-        return "#{amount} MB"
+        "#{amount} MB"
       else
-        return "#{sprintf('%0.1f', (amount / 1024) + ((amount % 1024) / 1024.00))} GB"
+        "#{sprintf("%0.1f", (amount / 1024) + ((amount % 1024) / 1024.00))} GB"
       end
     elsif format == "KB"
       amount = amount.to_i
       if amount >= 1000000 && amount % 1000000 == 0
-        return "#{amount / 1000000} GB"
+        "#{amount / 1000000} GB"
       elsif amount >= 1000000
-        return "#{sprintf('%0.1f', (amount / 1000000) + ((amount % 1000000) / 1000000.00))} GB"
+        "#{sprintf("%0.1f", (amount / 1000000) + ((amount % 1000000) / 1000000.00))} GB"
       elsif amount >= 1024 && amount % 1024 == 0
-        return "#{amount / 1024} MB"
+        "#{amount / 1024} MB"
       elsif amount < 1024
-        return "#{amount} MB"
+        "#{amount} MB"
       else
-        return "#{sprintf('%0.1f', (amount / 1024) + ((amount % 1024) / 1024.00))} MB"
+        "#{sprintf("%0.1f", (amount / 1024) + ((amount % 1024) / 1024.00))} MB"
       end
     else
       false
@@ -56,5 +55,4 @@ module ApplicationHelper
       raw(setting.value)
     end
   end
-
 end

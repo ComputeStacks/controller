@@ -1,11 +1,10 @@
 module RegionServices
   # unused
   class RegionMigratorService
-
     attr_accessor :region,
-                  :new_region,
-                  :event,
-                  :errors
+      :new_region,
+      :event,
+      :errors
 
     # @param [Region] region
     # @param [Region] new_region
@@ -48,18 +47,22 @@ module RegionServices
       cleanup
 
       # Ensure we capture any other errors
-      event.event_details.create!(
-        data: errors.join("\n"),
-        event_code: "1c02551d43fa33e0"
-      ) unless errors.empty?
+      unless errors.empty?
+        event.event_details.create!(
+          data: errors.join("\n"),
+          event_code: "1c02551d43fa33e0"
+        )
+      end
       # Complete event
       event.done!
     rescue => e
       if event
-        event.event_details.create!(
-          data: errors.join("\n"),
-          event_code: "f524a910890e5f10"
-        ) unless errors.empty?
+        unless errors.empty?
+          event.event_details.create!(
+            data: errors.join("\n"),
+            event_code: "f524a910890e5f10"
+          )
+        end
         event.event_details.create!(
           data: e.message,
           event_code: "f524a910890e5f10"
@@ -104,11 +107,11 @@ module RegionServices
       errors.empty?
     end
 
-    # Check docker, ssh, and consul connectivity with new nodes
+    # Check docker and ssh connectivity with new nodes
     # @return [Boolean]
     def infra_online?
       # Docker
-      docker_client_opts = Docker.connection.options
+      docker_client_opts = Docker.connection.options.dup # see Node#client -- shared hash, by reference
       docker_client_opts[:connect_timeout] = 3
       docker_client_opts[:read_timeout] = 3
       docker_client_opts[:write_timeout] = 3
@@ -123,19 +126,6 @@ module RegionServices
         rescue
           errors << "Unable to connect to docker api: #{n.label}"
         end
-      end
-
-      # Consul
-      dc = new_region.name.strip.downcase
-      n = new_region.nodes.online.first.primary_ip
-      begin
-        Diplomat::Node.get_all({
-                                 http_addr: "#{CONSUL_API_PROTO}://#{n}:#{CONSUL_API_PORT}",
-                                 dc: dc.blank? ? nil : dc,
-                                 token: new_region.consul_token
-                               })
-      rescue
-        errors << "Unable to connect to consul: #{new_region.name}"
       end
 
       errors.empty?
@@ -155,7 +145,7 @@ module RegionServices
       )
       loop_timeout = (container_names.count * 10.seconds + 3.minutes).from_now
       successful_stop = false
-      while loop_timeout > Time.now do
+      while loop_timeout > Time.now
         stopped_containers = []
         running_containers = []
         (region.containers + region.sftp_containers).each do |c|
@@ -257,10 +247,12 @@ module RegionServices
           c.ip_address.update network: new_net
         end
       end
-      event.event_details.create!(
-        data: "Unable to retain all previous IPs due to conflicts: \n\n#{new_ips.join("\n")}",
-        event_code: "5dededa4b3e03588"
-      ) unless new_ips.empty?
+      unless new_ips.empty?
+        event.event_details.create!(
+          data: "Unable to retain all previous IPs due to conflicts: \n\n#{new_ips.join("\n")}",
+          event_code: "5dededa4b3e03588"
+        )
+      end
     end
 
     def migrate_volumes
@@ -268,12 +260,12 @@ module RegionServices
       new_region.container_services.each do |s|
         next if @skipped_services.include? s
         volume_driver = if s.container_image.force_local_volume
-                          'local'
-                        else
-                          new_region.volume_backend
-                        end
+          "local"
+        else
+          new_region.volume_backend
+        end
         s.volumes.each do |vol|
-          unless vol.update volume_backend: volume_driver, region: new_region, nodes: (volume_driver == 'nfs' ? new_region.nodes : s.nodes)
+          unless vol.update volume_backend: volume_driver, region: new_region, nodes: ((volume_driver == "nfs") ? new_region.nodes : s.nodes)
             errors << "Error updating volume #{vol.name} for service #{s.name}: #{vol.errors.full_messages.join(" ")}"
             @skipped_volumes << vol
             next
@@ -284,7 +276,6 @@ module RegionServices
             errors << "Error creating volume #{vol.name} for service #{s.name}"
             @skipped_volumes << vol
           end
-
         end
       end
     end
@@ -364,6 +355,5 @@ module RegionServices
       end
       false
     end
-
   end
 end

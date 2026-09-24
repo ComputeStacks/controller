@@ -1,11 +1,10 @@
 class Api::Stacks::BaseController < ActionController::Base
-
   before_action :load_resource
 
   private
 
   def load_resource
-    response = ClusterAuthService.new(request.headers['Authorization']&.gsub("Bearer ", "").strip)
+    response = ClusterAuthService.new(request.headers["Authorization"]&.gsub("Bearer ", "")&.strip)
     if response.node || response.container
       @node = response.node.nil? ? response.container.node : response.node
       @load_balancer = response.load_balancer if response.load_balancer
@@ -16,5 +15,4 @@ class Api::Stacks::BaseController < ActionController::Base
       render json: {errors: ["Invalid authentication header"]}, status: :forbidden
     end
   end
-
 end

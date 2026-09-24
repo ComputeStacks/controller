@@ -1,6 +1,5 @@
 class UpdateVolumeProjects < ActiveRecord::Migration[7.0]
   def change
-
     puts "Mapping volumes to projects"
     Volume.all.each do |vol|
       m = vol.volume_maps.primary.first
@@ -11,8 +10,8 @@ class UpdateVolumeProjects < ActiveRecord::Migration[7.0]
 
     puts "Rebuilding sftp containers"
     Deployment::Sftp.all.each do |sftp|
-      audit = Audit.create_from_object! sftp, 'updated', '127.0.0.1'
-      PowerCycleContainerService.new(sftp, 'rebuild', audit).perform
+      audit = Audit.create_from_object! sftp, "updated", "127.0.0.1"
+      PowerCycleContainerService.new(sftp, "rebuild", audit).perform
     end
   end
 end

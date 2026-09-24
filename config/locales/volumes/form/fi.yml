@@ -8,6 +8,8 @@ fi:
       mount_path: Liitoskohta
       mount_path_help: Mihin hakemistoon liitetään kontin sisällä
       destroy: Aikatauluta tallennustilan poisto
+      cascade: Create this volume on existing deployed services?
+      cascade_help: "Containers mount it the next time they are rebuilt — nothing is restarted now. Anything already stored at that path inside the container will be hidden by the new empty volume once it mounts."
       backups:
         title: Tallennustilan varmuuskopioasetukset
         enabled: Varmuuskopiot käytössä

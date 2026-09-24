@@ -1,6 +1,5 @@
 class Admin::LoadBalancersController < Admin::ApplicationController
-
-  before_action :find_load_balancer, except: %w(index new create)
+  before_action :find_load_balancer, except: %w[index new create]
 
   def index
     @load_balancers = LoadBalancer.sorted
@@ -22,8 +21,8 @@ class Admin::LoadBalancersController < Admin::ApplicationController
   end
 
   def edit
-    @load_balancer.external_ips = @load_balancer.ext_ip.join(',')
-    @load_balancer.internal_ips = @load_balancer.internal_ip.join(',')
+    @load_balancer.external_ips = @load_balancer.ext_ip.join(",")
+    @load_balancer.internal_ips = @load_balancer.internal_ip.join(",")
     @regions = Region.sorted
   end
 
@@ -35,7 +34,7 @@ class Admin::LoadBalancersController < Admin::ApplicationController
       render template: "admin/load_balancers/edit"
     end
   rescue => e
-    ExceptionAlertService.new(e, 'd5598a176c476394', current_user).perform
+    ExceptionAlertService.new(e, "d5598a176c476394", current_user).perform
     redirect_to "/admin/load_balancers", alert: "Fatal Error: #{e.message}"
   end
 
@@ -50,7 +49,7 @@ class Admin::LoadBalancersController < Admin::ApplicationController
       render template: "admin/load_balancers/new"
     end
   rescue => e
-    ExceptionAlertService.new(e, 'cc2fe84d8b431644', current_user).perform
+    ExceptionAlertService.new(e, "cc2fe84d8b431644", current_user).perform
     redirect_to "/admin/load_balancers", alert: "Fatal Error: #{e.message}"
   end
 
@@ -66,12 +65,12 @@ class Admin::LoadBalancersController < Admin::ApplicationController
 
   def network_params
     params.require(:load_balancer).permit(
-        :label, :status, :region_id, :le,
-        :internal_ips, :external_ips, :public_ip,
-        :domain, :shared_certificate, :cpus, :maxconn,
-        :maxconn_c, :ssl_cache, :direct_connect, :max_queue,
-        :g_timeout_connect, :g_timeout_client, :g_timeout_server,
-        :proto_alpn, :proto_11, :proto_20, :proto_23
+      :label, :status, :region_id, :le,
+      :internal_ips, :external_ips, :public_ip,
+      :domain, :shared_certificate, :cpus, :maxconn,
+      :maxconn_c, :ssl_cache, :direct_connect, :max_queue,
+      :g_timeout_connect, :g_timeout_client, :g_timeout_server,
+      :proto_alpn, :proto_11, :proto_20, :proto_23
     )
   end
 

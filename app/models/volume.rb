@@ -43,6 +43,10 @@
 # @!attribute borg_enabled
 #   @return [Boolean] Backups
 #
+# @!attribute awaiting_mount
+#   @return [Boolean] The row, its VolumeMap and the docker volume exist, but no container
+#     has been created with the bind yet. See the `awaiting_mount` scope below.
+#
 # @!attribute borg_freq
 #   @return [String] A cron string
 #
@@ -111,7 +115,6 @@
 #   @return [Array<EventLog>]
 #
 class Volume < ApplicationRecord
-
   include Auditable
   include Authorization::Volume
   include UrlPathFinder
@@ -124,10 +127,43 @@ class Volume < ApplicationRecord
   scope :trashable, -> { where("to_trash = true and trash_after <= ?", Time.now) }
   scope :active, -> { where(to_trash: false) }
   scope :sorted, -> { order(created_at: :desc) }
-  scope :sftp_enabled, -> { where(enable_sftp: true) }
-  scope :all_local, -> { where(volume_backend: 'local') }
+  # "Reachable over SFTP", which is what every caller of this scope means — the exporters that
+  # write FileZilla/Transmit bookmarks, and the SFTP help panel that tells a customer their
+  # paths. `awaiting_mount` volumes are excluded for the same reason
+  # `Containers::SshVolumes#volumes` excludes them: the SFTP container will not mount one, so a
+  # bookmark or a documented path pointing at it leads nowhere.
+  scope :sftp_enabled, -> { where(enable_sftp: true, awaiting_mount: false) }
+  scope :all_local, -> { where(volume_backend: "local") }
+
+  # Volumes whose bind has not landed in a container yet.
+  #
+  # `awaiting_mount` means: this row, its VolumeMap and the real docker volume on the node
+  # ALL exist, but no container has ever been created carrying the bind — so the mount is
+  # not present inside any running container. Docker bakes binds at container-create time,
+  # so a volume attached to an already-deployed service stays in this state until that
+  # service's next natural rebuild (we deliberately do not rebuild or restart anything).
+  #
+  # While it is true, the volume is empty and unreachable from the application, so:
+  #   * the agent is told `backup: false` (see Volumes::ConsulVolume#default_consul_data) —
+  #     otherwise borg builds a healthy-looking archive series containing none of the
+  #     customer's data;
+  #   * manual backup and restore are refused;
+  #   * it is not offered as a clone source (ContainerImage::VolumeParam#available_to_clone);
+  #   * it is not exposed over SFTP (Containers::SshVolumes#volumes) — a customer must never
+  #     be able to upload into a volume their app cannot see and that has backups suppressed.
+  #
+  # The flag is cleared by the mount detector when a container is actually built with the
+  # bind; nothing else should write it.
+  scope :awaiting_mount, -> { where(awaiting_mount: true) }
 
   has_many :volume_maps, dependent: :destroy
+
+  # `:nullify`, never `:destroy`: a cascade would delete the clone job — and with it
+  # owns_snapshot/clone_label — while the temporary borg archive still sits in the SOURCE
+  # volume's repo, leaking it permanently. See VolumeCloneJob.
+  has_one :volume_clone_job, dependent: :nullify
+  has_many :source_clone_jobs, class_name: "VolumeCloneJob", foreign_key: :source_volume_id,
+    dependent: :nullify
   has_many :container_services, through: :volume_maps
   has_many :containers, through: :volume_maps
   belongs_to :deployment, optional: true
@@ -147,7 +183,7 @@ class Volume < ApplicationRecord
 
   # has_many :logs, class_name: 'Deployment::EventLog', dependent: :nullify
   has_and_belongs_to_many :event_logs
-  has_many :audits, -> { where(rel_model: 'Volume') }, foreign_key: :rel_id, class_name: 'Audit', dependent: :nullify
+  has_many :audits, -> { where(rel_model: "Volume") }, foreign_key: :rel_id, class_name: "Audit", dependent: :nullify
 
   belongs_to :subscription, optional: true
 
@@ -155,18 +191,21 @@ class Volume < ApplicationRecord
 
   before_validation :set_name, on: :create
 
-  before_save :set_trash_after #, if: :persisted?
+  before_save :set_trash_after # , if: :persisted?
   before_save :update_user, unless: :skip_user_update
   # after_save :rebuild_services, if: :force_rebuild
 
   after_save :update_subscription
 
   after_commit :set_detached
-  after_commit :update_consul!
+  # Only on create/update — NOT destroy. `volume.destroy`'s teardown issues a DELETE to the
+  # agent (TrashVolumeService); a destroy-time re-PUT would re-add a `trash:true` desired-state
+  # row after that DELETE and loop teardown.
+  after_commit :update_consul!, on: [:create, :update]
 
   validates :name, presence: true, uniqueness: true
 
-  belongs_to :trashed_by, class_name: 'Audit', optional: true
+  belongs_to :trashed_by, class_name: "Audit", optional: true
 
   before_destroy :ensure_can_trash!
 
@@ -185,9 +224,19 @@ class Volume < ApplicationRecord
     "csrn:caas:project:vol:#{resource_name}:#{id}"
   end
 
+  # The agent-facing project_id. A detached volume (no deployment) maps null→the reserved
+  # sentinel 0 (Deployment ids are ≥1, so it can't collide). Applied consistently in the
+  # volume PUT URL path, the task POST body, and the volume desired-state `project_id` — the
+  # three must agree or the agent's scheduled-backup task project_id diverges. Use `.to_s` at
+  # HTTP call sites.
+  # @return [Integer]
+  def agent_project_id
+    deployment&.id || 0
+  end
+
   def resource_name
     return "null" if label.blank?
-    label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+    label.strip.downcase.gsub(/[^a-z0-9\s]/i, "").tr(" ", "_")[0..10]
   end
 
   # Pick the primary container service
@@ -200,7 +249,7 @@ class Volume < ApplicationRecord
   end
 
   def operation_in_progress?
-    event_logs.running.exists?
+    event_logs.running.where.not(event_code: EventLog.non_blocking_codes).exists?
   end
 
   # Which container services can this volume be migrated to.
@@ -221,13 +270,13 @@ class Volume < ApplicationRecord
       unknown: []
     }
     if region.nil? && !nodes.empty?
-      self.update_column :region_id, nodes.first.region&.id
+      update_column :region_id, nodes.first.region&.id
     end
     nodes.available.each do |i|
       i.list_all_containers.each do |c|
-        c.info['Mounts'].each do |m|
-          if m['Name'] == self.name
-            cname = c.info['Names'].first.split('/').last
+        c.info["Mounts"].each do |m|
+          if m["Name"] == name
+            cname = c.info["Names"].first.split("/").last
             cl = Deployment::Container.find_by(name: cname)
             cl = Deployment::Sftp.find_by(name: cname) if cl.nil?
             if cl.nil?
@@ -244,19 +293,19 @@ class Volume < ApplicationRecord
     end
     result
   rescue => e
-    ExceptionAlertService.new(e, 'cf7db317de13af0c').perform
+    ExceptionAlertService.new(e, "cf7db317de13af0c").perform
     SystemEvent.create!(
-      message: "Error loading volume services #{self.id}.",
+      message: "Error loading volume services #{id}.",
       log_level: "warn",
       data: {
         volume: {
-          id: self.id,
-          name: self.name,
-          user: self.user&.id
+          id: id,
+          name: name,
+          user: user&.id
         },
         errors: e.message
       },
-      event_code: 'cf7db317de13af0c'
+      event_code: "cf7db317de13af0c"
     )
     nil
   end
@@ -272,17 +321,15 @@ class Volume < ApplicationRecord
   end
 
   class << self
-
     # Exclude this volume from SFTP containers for specific roles.
     def excluded_roles
-      db_roles + %w(pma)
+      db_roles + %w[pma]
     end
 
     # This is considered a database volumes for the following roles
     def db_roles
-      %w(mysql postgres mariadb postgresql percona pg)
+      %w[mysql postgres mariadb postgresql percona pg]
     end
-
   end
 
   private
@@ -296,7 +343,7 @@ class Volume < ApplicationRecord
   end
 
   def set_name
-    self.name = SecureRandom.uuid.strip if self.name.blank?
+    self.name = SecureRandom.uuid.strip if name.blank?
   end
 
   # Ensure we record the user.
@@ -323,10 +370,10 @@ class Volume < ApplicationRecord
         subscription.update(
           active: false,
           details: {
-            volume_name: self.name
+            volume_name: name
           }
         )
-      elsif !self.to_trash
+      elsif !to_trash
         subscription.update active: true
       end
     end
@@ -335,5 +382,4 @@ class Volume < ApplicationRecord
   def ensure_can_trash!
     throw(:abort) unless can_trash?
   end
-
 end

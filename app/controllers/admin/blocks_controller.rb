@@ -1,6 +1,5 @@
 class Admin::BlocksController < Admin::ApplicationController
-
-  before_action :load_block, only: %w(show edit update destroy)
+  before_action :load_block, only: %w[show edit update destroy]
 
   def index
     @blocks = Block.order(created_at: :desc).paginate page: params[:page], per_page: 30
@@ -14,7 +13,8 @@ class Admin::BlocksController < Admin::ApplicationController
     @block = Block.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if @block.update(block_params)
@@ -37,7 +37,7 @@ class Admin::BlocksController < Admin::ApplicationController
     if @block.destroy
       flash[:notice] = "Block deleted."
     else
-      flash[:alert] = "Error: #{@block.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error: #{@block.errors.full_messages.join(" ")}"
     end
     redirect_to "/admin/blocks"
   end
@@ -50,7 +50,6 @@ class Admin::BlocksController < Admin::ApplicationController
 
   def load_block
     @block = Block.find_by(id: params[:id])
-    return(redirect_to("/admin/blocks", alert: "Unknown block.")) if @block.nil?
+    redirect_to("/admin/blocks", alert: "Unknown block.") if @block.nil?
   end
-
 end

@@ -1,5 +1,4 @@
 module Admin::BillingResourcesHelper
-
   def available_products(billing_plan, current_product = nil)
     products = []
     products_in_use = billing_plan.products.pluck(:id)
@@ -19,12 +18,11 @@ module Admin::BillingResourcesHelper
       "Price is per-unit, as it's consumed. It will be aggregated and billed monthly."
     else
       case price.term
-      when 'hour'
+      when "hour"
         "Price is per-hour"
-      when 'month'
+      when "month"
         "Price is per-month"
       end
     end
   end
-
 end

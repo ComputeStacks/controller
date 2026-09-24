@@ -1,8 +1,7 @@
 ##
 # # Nodes
 class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::Regions::BaseController
-
-  before_action :find_node, except: %i[ index create ]
+  before_action :find_node, except: %i[index create]
 
   ##
   # List All Nodes
@@ -14,6 +13,7 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
   #     * `label`: String
   #     * `hostname`: String
   #     * `primary_ip`: String
+  #     * `agent_host`: String (optional; cs-agent address, defaults to primary_ip)
   #     * `disconnected`: Boolean
   #     * `failed_health_checks`: Integer
   #     * `active`: Boolean
@@ -48,6 +48,7 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
   #     * `label`: String
   #     * `hostname`: String
   #     * `primary_ip`: String
+  #     * `agent_host`: String (optional; cs-agent address, defaults to primary_ip)
   #     * `disconnected`: Boolean
   #     * `failed_health_checks`: Integer
   #     * `active`: Boolean
@@ -81,6 +82,7 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
   # * `node`: Object
   #     * `label`: String
   #     * `primary_ip`: String
+  #     * `agent_host`: String (optional; cs-agent address, defaults to primary_ip)
   #     * `active`: Boolean
   #     * `public_ip`: String
   #     * `region_id`: Integer
@@ -106,6 +108,7 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
   # * `node`: Object
   #     * `label`: String
   #     * `primary_ip`: String
+  #     * `agent_host`: String (optional; cs-agent address, defaults to primary_ip)
   #     * `active`: Boolean
   #     * `public_ip`: String
   #     * `region_id`: Integer
@@ -141,14 +144,14 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
 
   def node_create_params
     params.require(:node).permit(
-      :label, :hostname, :primary_ip, :active, :public_ip,
+      :label, :hostname, :primary_ip, :agent_host, :active, :public_ip,
       :volume_device, :block_write_bps, :block_read_bps, :block_write_iops, :block_read_iops
     )
   end
 
   def node_update_params
     params.require(:node).permit(
-      :label, :primary_ip, :active, :public_ip, :volume_device,
+      :label, :primary_ip, :agent_host, :active, :public_ip, :volume_device,
       :block_write_bps, :block_read_bps, :block_write_iops, :block_read_iops
     )
   end
@@ -158,5 +161,4 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
     return api_obj_missing if @node.nil?
     @node.current_user = current_user
   end
-
 end

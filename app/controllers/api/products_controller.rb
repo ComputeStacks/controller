@@ -4,8 +4,7 @@
 # Available products and pricing
 #
 class Api::ProductsController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :profile_read }, unless: :current_user
+  api_scope index: :profile_read
 
   ##
   # List all available products
@@ -32,7 +31,7 @@ class Api::ProductsController < Api::ApplicationController
     if request_version < 51
       respond_to do |format|
         format.json { render json: current_user.price_list }
-        format.xml { render xml: current_user.price_list  }
+        format.xml { render xml: current_user.price_list }
       end
     else
       respond_to do |format|
@@ -41,5 +40,4 @@ class Api::ProductsController < Api::ApplicationController
       end
     end
   end
-
 end

@@ -1,7 +1,6 @@
 ##
 # Container Image Environmental Variable
 class Api::ContainerImages::EnvParamsController < Api::ContainerImages::BaseController
-
   before_action :find_env, only: [:show, :update, :destroy]
 
   ##
@@ -40,7 +39,8 @@ class Api::ContainerImages::EnvParamsController < Api::ContainerImages::BaseCont
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   ##
   # Update an environmental parameter
@@ -109,8 +109,8 @@ class Api::ContainerImages::EnvParamsController < Api::ContainerImages::BaseCont
     @env = @image.env_params.find_by(id: params[:id])
     return api_obj_missing if @env.nil?
     @env.current_user = current_user
-    @env.static_value = @env.value if @env.param_type == 'static'
-    @env.env_value = @env.value if @env.param_type == 'variable'
+    @env.static_value = @env.value if @env.param_type == "static"
+    @env.env_value = @env.value if @env.param_type == "variable"
   end
 
   def env_params
@@ -118,6 +118,4 @@ class Api::ContainerImages::EnvParamsController < Api::ContainerImages::BaseCont
       :name, :label, :param_type, :static_value, :env_value
     )
   end
-
-
 end

@@ -1,0 +1,5 @@
+plugins:
+  - standard-rails
+ignore:
+  - 'app/**/*':
+    - Lint/UselessAssignment

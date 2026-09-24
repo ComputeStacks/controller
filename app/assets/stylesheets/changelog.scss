@@ -1,0 +1,78 @@
+// /admin/changelog (app/views/admin/dashboard/changelog.html.slim).
+//
+// The release notes are long prose entries, so the whole job here is separating
+// them. Previously the rake task stripped every <p> and set `list-unstyled` on the
+// list, which left each release as one unbroken wall of text: no bullets, no
+// paragraph breaks, and no gap between one entry and the next.
+.changelog {
+  // `## vX.Y.Z` stays an <h2> in the markup; it is sized here rather than being
+  // rewritten to an <h4> by the renderer.
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 2.5em 0 0.75em;
+    padding-bottom: 0.4em;
+    border-bottom: 1px solid #e4e6e6;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  ul {
+    padding-left: 1.4em;
+    margin-bottom: 1.5em;
+  }
+
+  // The gap between entries is what was missing. Each <li> is several sentences,
+  // so it needs more room than a normal list item.
+  li {
+    margin-bottom: 1.4em;
+    line-height: 1.6;
+  }
+
+  p {
+    margin: 0 0 1em;
+    line-height: 1.6;
+  }
+
+  // A release whose entries are all one paragraph renders a TIGHT list (no <p>
+  // inside the <li>); one containing a multi-paragraph entry renders LOOSE, and
+  // every item in it gets wrapped. Both shapes have to end up with the same
+  // rhythm, so paragraphs inside an entry sit closer together (0.8em) than
+  // entries do (1.4em), and the last one adds nothing on top of the item's own
+  // margin. Without this the final paragraph of every loose entry paid twice.
+  li p {
+    margin-bottom: 0.8em;
+  }
+
+  li > p:last-child {
+    margin-bottom: 0;
+  }
+
+  // The "This is an ordinary upgrade" / "Requires cs-agent vX" trailers that follow
+  // a release's list. Set apart because they are instructions to the operator, not
+  // another change entry.
+  ul + p {
+    margin: 0 0 1.5em;
+    padding: 0.75em 1em;
+    background: #f7f7f9;
+    border-left: 3px solid #d0d2d5;
+  }
+
+  .label {
+    margin-right: 0.4em;
+    vertical-align: baseline;
+  }
+
+  code {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  pre {
+    margin: 0 0 1em;
+    white-space: pre;
+    overflow-x: auto;
+  }
+}

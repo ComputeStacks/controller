@@ -7,21 +7,19 @@
 # be sure to set `process_order = true`.
 #
 class BuildOrderService
-
   attr_accessor :audit,
-                :event,
-                :errors,
-                :params, # Order data
-                :order,
-                :process_order,
-                :user,
-                :project_user,
-                :redirect_url, # built order!
-
-                ## Additional local params ##
-                :project,
-                :location,
-                :region
+    :event,
+    :errors,
+    :params, # Order data
+    :order,
+    :process_order,
+    :user,
+    :project_user,
+    :redirect_url, # built order!
+    ## Additional local params ##
+    :project,
+    :location,
+    :region
 
   def initialize(audit, data = {})
     self.process_order = false
@@ -55,12 +53,12 @@ class BuildOrderService
 
     params[:containers].each do |c|
       item = {
-        product_type: 'container',
+        product_type: "container",
         source: c[:source], # Source service CSRN
         label: c[:name],
         image_variant_id: c[:image_variant_id].to_i,
         qty: c[:qty],
-        domains: c[:domains] ? c[:domains] : [],
+        domains: c[:domains] || [],
         resources: c[:resources],
         addons: c[:addons].nil? ? [] : c[:addons], # List of Addon IDs (ContainerImageProduct)
         params: {},
@@ -78,7 +76,7 @@ class BuildOrderService
       # Merge params
       if c[:params] && c[:params].is_a?(Array)
         c[:params].each do |i|
-          item[:params][i[:key]] = { value: i[:value], type: i[:type] }
+          item[:params][i[:key]] = {value: i[:value], type: i[:type]}
         end
       end
       formatted_container_data << item
@@ -121,7 +119,7 @@ class BuildOrderService
 
       # Update Audit Object
       # order.audits << audit  # this won't add the `rel_model` portion, so we need to set it by updating the audit record directly.
-      audit.update(rel_uuid: order.id, rel_model: 'Order')
+      audit.update(rel_uuid: order.id, rel_model: "Order")
 
       if process_order
         order.pending!
@@ -140,7 +138,7 @@ class BuildOrderService
 
   def requested_packages
     products = []
-    params[:containers].each_with_index do |c,i|
+    params[:containers].each_with_index do |c, i|
       product_id = c.dig(:resources, :product_id).nil? ? nil : c.dig(:resources, :product_id).to_i
       next if product_id.nil?
       p = Product.find_by id: product_id
@@ -161,36 +159,40 @@ class BuildOrderService
   # First round of basic sanity checks
   def valid_order?
     errors << "Missing user" if user.nil?
-    errors << "Missing project name" if params[:project_name].blank?
+    errors << "Missing project name" if params[:project_name].blank? && params[:project_id].blank?
     errors << "Missing containers" if params[:containers].nil? || params[:containers].empty?
     self.project = if params[:project_id].blank? || user.nil?
-                     nil
-                   else
-                     Deployment.find_for(user, { id: params[:project_id] })
-                   end
+      nil
+    else
+      Deployment.find_for(user, {id: params[:project_id]})
+    end
     errors << "Unknown project" if project.nil? && user && !params[:project_id].blank?
     return false unless errors.empty? # Stop here before proceeding
     self.project_user = project.nil? ? user : project.user
     # 1 location per project!
     self.location = if project && !project.locations.empty? # Choose existing project location
-                      project.locations.first
-                    elsif params[:location_id] # Location requested
-                      Location.find_for_user(params[:location_id], project_user)
-                    else # Pick next available location
-                      Location.available_for(project_user, 'container').first
-                    end
+      project.locations.first
+    elsif params[:location_id] # Location requested
+      Location.find_for_user(params[:location_id], project_user)
+    else # Pick next available location
+      Location.available_for(project_user, "container").first
+    end
     errors << "Unknown Region" if location.nil?
     self.region = if project && !project.locations.empty?
-                    project.regions.first
-                  elsif !params[:region_id].blank?
-                    Region.find_by id: params[:region_id]
-                  elsif location
-                    location.next_region requested_packages, project_user, 1
-                  else
-                    nil
-                  end
-    errors << "There are no availability zones available" if region.nil?
-    errors << "Now allowed to deploy to this region" unless region.allow_user?(project_user)
+      project.regions.first
+    elsif !params[:region_id].blank?
+      Region.find_by id: params[:region_id]
+    elsif location
+      location.next_region requested_packages, project_user, 1
+    end
+    if region.nil?
+      # Guard: this used to fall straight through to region.allow_user? and raise
+      # NoMethodError on nil, so a customer ordering into a location with no eligible
+      # zone got a 500 instead of this message.
+      errors << "There are no availability zones available"
+    elsif !region.allow_user?(project_user)
+      errors << "Now allowed to deploy to this region"
+    end
     errors.empty?
   end
 
@@ -206,13 +208,12 @@ class BuildOrderService
     end
 
     # Expected params
-    req_params = %i(image_id name resources params source volumes)
+    req_params = %i[image_id name resources params source volumes]
 
-    params[:containers].each_with_index do |c,i|
-
+    params[:containers].each_with_index do |c, i|
       # Match array of instance variables and ensure we have the same array
       unless c != req_params
-        errors << "Incomplete container params. Have: #{c.to_s}, need: #{req_params.to_s}"
+        errors << "Incomplete container params. Have: #{c}, need: #{req_params}"
         next
       end
 
@@ -247,13 +248,18 @@ class BuildOrderService
         end
       end
 
-      product_id = c.dig(:resources, :product_id).nil? ? nil : c.dig(:resources, :product_id).to_i
+      product_id = c.dig(:resources, :product_id)
+      product_id = product_id.to_i if product_id
+
+      # This must be before resources, otherwise it could be omitted on free containers.
+      c[:qty] = 1 if c[:qty].nil? || c[:qty].to_i.zero?
+      qty = c[:qty].to_i
 
       # If this is a free image, then set the resources here and ignore what the user asks for.
       if img.is_free
         c[:resources] = {
-          cpu: img.min_cpu.zero? ? 1.0 : min_cpu,
-          memory: img.min_memory.zero? ? 768 : min_memory
+          cpu: img.min_cpu.zero? ? 1.0 : img.min_cpu,
+          memory: img.min_memory.zero? ? 768 : img.min_memory
         }
         next
       elsif product_id.nil?
@@ -261,11 +267,10 @@ class BuildOrderService
         next
       end
 
-      c[:qty] = 1 if c[:qty].to_i.zero?
-      qty = c[:qty].to_i
-
-      cpu = c.dig(:resources, :cpu).nil? ? nil : c.dig(:resources, :cpu).to_i
-      mem = c.dig(:resources, :memory).nil? ? nil : c.dig(:resources, :memory).to_i
+      cpu = c.dig(:resources, :cpu)
+      cpu = cpu.to_i if cpu
+      mem = c.dig(:resources, :memory)
+      mem = mem.to_i if mem
 
       # Check and validate resources
       if product_id.nil?
@@ -326,7 +331,7 @@ class BuildOrderService
       # validate dependent containers
       img_deps = img.dependencies.pluck(:id)
       unless (img_deps - included_image_ids).empty?
-        errors << "Missing required dependent services. Have #{(img_deps & included_image_ids).to_s}, Need #{(img_deps - included_image_ids).to_s}"
+        errors << "Missing required dependent services. Have #{img_deps & included_image_ids}, Need #{img_deps - included_image_ids}"
         errors << c[:image_variant_id]
       end # END dependency check
 
@@ -345,7 +350,7 @@ class BuildOrderService
         have_source_ids = c[:volumes].filter_map { |i| i[:source] if i[:source] && i[:source] =~ /template/ }
 
         c[:volumes].each do |i|
-          next if i[:action] == 'create'
+          next if i[:action] == "create"
           id = i[:csrn]
           action = i[:action]
           source = i[:source]
@@ -354,7 +359,7 @@ class BuildOrderService
 
           # For volumes that are created in this order, vol will be a ContainerImage::VolumeParam.
           # Verify that this volume param exists in this order.
-          if action == 'mount'
+          if action == "mount"
             unless have_source_ids.include?(source)
               errors << "Requested mounted volume template is not found in this order"
             end
@@ -375,7 +380,7 @@ class BuildOrderService
           when "clone"
             errors << "Clone action requires a source volume" if source.blank?
           else
-            errors << "Unknown action: #{action.blank? ? 'null' : action}"
+            errors << "Unknown action: #{action.blank? ? "null" : action}"
           end
 
           # Ensure we have a source volume
@@ -387,8 +392,12 @@ class BuildOrderService
           unless source.blank?
 
             # Ensure volume exists and user has permission to access it
+            # `is_a?(Volume)`, not just `nil?`: a csrn under the `template` namespace resolves
+            # to a ContainerImage::VolumeParam, which answers none of the methods below —
+            # `can_view?` included — so a template csrn sent as a clone source used to 500
+            # instead of being rejected.
             source_vol = Csrn.locate source
-            if source_vol.nil? || !source_vol.can_view?(user)
+            unless source_vol.is_a?(Volume) && source_vol.can_view?(user)
               errors << "Unknown source volume #{source}"
               source_vol = nil # wipe found volume if we don't have permission to use it.
             end
@@ -400,10 +409,23 @@ class BuildOrderService
                 errors << "You may only mount volumes from the same project"
               end
 
-              # Clone with Snapshot: Ensure snapshot exists for volume
-              if action == "clone" && !snapshot.blank?
-                locate_snapshot = vol.list_archives.select { |i| i[:id] == snapshot }
-                errors << "Snapshot not found" if locate_snapshot.empty?
+              if action == "clone"
+
+                # Clone: the source's borg repository is node-bound, so a source in another
+                # availability zone can never be restored into this order's volume. Rejected
+                # here, at submit time, rather than by the clone worker minutes later — where
+                # the only way to say so is a failed event on an already-paid-for order.
+                if source_vol.region && region && source_vol.region != region
+                  errors << "You may only clone volumes from the same availability zone"
+                end
+
+                # Clone with Snapshot: Ensure the snapshot exists on the SOURCE volume.
+                # This read used to be `vol.list_archives` — `vol` is the *target*, which for
+                # a volume this order creates is a ContainerImage::VolumeParam with no such
+                # method, so every clone+snapshot request raised NoMethodError and 500'd.
+                unless snapshot.blank?
+                  errors << "Snapshot not found" if source_vol.list_archives.none? { |i| i[:id] == snapshot }
+                end
               end
 
             end
@@ -421,20 +443,19 @@ class BuildOrderService
   # * `:package_id` to `:product_id`
   #
   def deprecation_clean_up!
+    if params[:containers].is_a?(Array)
+      params[:containers].each do |i|
+        # `:container_image_id` to `:image_id`
+        i[:image_id] = i[:container_image_id].to_i if i[:container_image_id]
 
-    params[:containers].each do |i|
-      # `:container_image_id` to `:image_id`
-      i[:image_id] = i[:container_image_id].to_i if i[:container_image_id]
+        next if i.dig(:resources, :product_id) # all OK
 
-      next if i.dig(:resources, :product_id) # all OK
-
-      # `:package_id` to `:product_id`
-      i[:resources] = {} unless i[:resources].is_a?(Hash)
-      i[:resources][:product_id] = i.dig(:resources, :package_id) if i.dig(:resources, :package_id)
-      i[:resources][:product_id] = i[:product_id] if i[:product_id]
-      i[:resources][:product_id] = i[:package_id] if i[:package_id]
-
-    end if params[:containers].is_a?(Array)
+        # `:package_id` to `:product_id`
+        i[:resources] = {} unless i[:resources].is_a?(Hash)
+        i[:resources][:product_id] = i.dig(:resources, :package_id) if i.dig(:resources, :package_id)
+        i[:resources][:product_id] = i[:product_id] if i[:product_id]
+        i[:resources][:product_id] = i[:package_id] if i[:package_id]
+      end
+    end
   end
-
 end

@@ -1,4 +1,4 @@
-<% Location.active.each do |location| %>
+<% @locations.each do |location| %>
   <div class="row">
     <div class="col-md-12">
       <div class="panel panel-default">
@@ -8,7 +8,7 @@
 
         <table class="table">
           <tbody>
-          <% location.regions.joins(:nodes).distinct.each do |region| %>
+          <% @regions_by_location.fetch(location.id, []).each do |region| %>
             <tr class="remote-resource" data-url="/admin/regions/<%= region.id %>">
               <td style="vertical-align: middle;">
                 <%= link_to region.name, "/admin/regions/#{region.id}" %>

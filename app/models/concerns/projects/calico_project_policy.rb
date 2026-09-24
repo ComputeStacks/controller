@@ -4,23 +4,23 @@ module Projects
 
     def calico_policy
       {
-        apiVersion: 'v1',
-        kind: 'policy',
+        apiVersion: "v1",
+        kind: "policy",
         metadata: {
           name: token
         },
         spec: {
           order: 1,
-          selector: %Q(token == "#{token}"),
+          selector: %(token == "#{token}"),
           ingress: [
             {
-              action: 'allow',
+              action: "allow",
               source: {
-                selector: %Q(token == "#{token}")
+                selector: %(token == "#{token}")
               }
             }
           ],
-          egress: calico_egress_rules,
+          egress: calico_egress_rules
         }
       }
     end
@@ -30,38 +30,40 @@ module Projects
     # @return [Array]
     def calico_egress_rules
       rules = [{
-        action: 'allow',
-        protocol: 'tcp',
+        action: "allow",
+        protocol: "tcp",
         source: {
-          selector: %Q(token == "#{token}")
+          selector: %(token == "#{token}")
         },
         destination: {
           nets: calico_node_ips,
-          ports: %w(80 443 8500 10000:59999)
+          ports: %w[80 443 8500 10000:59999]
         }
       }]
-      rules << {
-        action: 'deny',
-        source: {
-          selector: %Q(token == "#{token}")
-        },
-        destination: {
-          nets: calico_nfs_hosts
+      unless calico_nfs_hosts.empty?
+        rules << {
+          action: "deny",
+          source: {
+            selector: %(token == "#{token}")
+          },
+          destination: {
+            nets: calico_nfs_hosts
+          }
         }
-      } unless calico_nfs_hosts.empty?
+      end
       rules << {
-        action: 'deny',
+        action: "deny",
         source: {
-          selector: %Q(token == "#{token}")
+          selector: %(token == "#{token}")
         },
         destination: {
           nets: calico_node_ips
         }
       }
       rules << {
-        action: 'allow',
+        action: "allow",
         source: {
-          selector: %Q(token == "#{token}")
+          selector: %(token == "#{token}")
         },
         destination: {}
       }
@@ -83,13 +85,12 @@ module Projects
 
     # @return [Array]
     def calico_nfs_hosts
-      Region.where(Arel.sql( %q(nfs_remote_host is not null AND nfs_remote_host != '' AND nfs_remote_host != ' ') )).pluck(:nfs_remote_host)
+      Region.where(Arel.sql("nfs_remote_host is not null AND nfs_remote_host != '' AND nfs_remote_host != ' '")).pluck(:nfs_remote_host)
     end
 
     # @return [Array]
     def calico_node_ips
-      Node.where( Arel.sql( %q(primary_ip is not null and primary_ip != '' and primary_ip != ' ') ) ).pluck(:primary_ip)
+      Node.where(Arel.sql("primary_ip is not null and primary_ip != '' and primary_ip != ' '")).pluck(:primary_ip)
     end
-
   end
 end

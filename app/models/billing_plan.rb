@@ -15,7 +15,6 @@
 #   @return [String] hour,month
 #
 class BillingPlan < ApplicationRecord
-
   include Auditable
 
   scope :default, -> { find_by(is_default: true) }
@@ -29,7 +28,7 @@ class BillingPlan < ApplicationRecord
   has_many :billing_phases, through: :billing_resources
 
   validates :name, presence: true
-  validates :term, inclusion: { in: %w(hour month), message: 'Must be one of: hour or month.' }
+  validates :term, inclusion: {in: %w[hour month], message: "Must be one of: hour or month."}
 
   after_save :update_default_plan
   after_save :clone_plan
@@ -38,70 +37,89 @@ class BillingPlan < ApplicationRecord
 
   attr_accessor :clone
 
+  # A plan is usable only once a product exists for each of these resource_kinds.
+  # Compared downcased, matching Product.lookup's `lower(resource_kind)`.
+  REQUIRED_RESOURCE_KINDS = %w[bandwidth storage local_disk].freeze
+
+  ##
+  # Plans that have at least one user but are missing a required product.
+  #
+  # Deliberately set-based. The previous version joined :users WITHOUT distinct,
+  # so it instantiated one BillingPlan per USER and ran three Product.lookup
+  # calls on each -- each of those a seq scan plus an association load per
+  # matching product. Measured on production: 13,327 queries / 114s, which
+  # gateway-timed-out the admin dashboard (the only caller). Now two queries.
+  #
+  # @return [Array<BillingPlan>]
   def self.invalid_plans
-    result = []
-    BillingPlan.joins(:users).each do |i|
-      result << i unless i.available?
-    end
-    result
+    in_use = BillingPlan.joins(:users).distinct
+    present = resource_kinds_by_plan(in_use.select(:id))
+    in_use.reject { |plan| (REQUIRED_RESOURCE_KINDS - present.fetch(plan.id, [])).empty? }
   end
+
+  ##
+  # Downcased resource_kind list for each of the given plan ids, in one query.
+  # Inner join on :product is intentional: billing_resources.product_id is
+  # nullable, and a resource with no product contributes no resource_kind.
+  #
+  # @param plan_ids [ActiveRecord::Relation, Array<Integer>]
+  # @return [Hash{Integer => Array<String>}]
+  def self.resource_kinds_by_plan(plan_ids)
+    BillingResource.joins(:product)
+      .where(billing_plan_id: plan_ids)
+      .pluck(:billing_plan_id, Arel.sql("lower(products.resource_kind)"))
+      .each_with_object({}) { |(plan_id, kind), acc| (acc[plan_id] ||= []) << kind }
+  end
+  private_class_method :resource_kinds_by_plan
 
   # Determine if all required products are added and it's ready to use.
   # @return [Boolean]
   def available?
-    if Product.lookup(self, 'bandwidth').nil?
-      return false
-    end
-    if Product.lookup(self, 'storage').nil?
-      return false
-    end
-    if Product.lookup(self, 'local_disk').nil?
-      return false
-    end
-    true
+    missing_required_products.empty?
   end
 
-  # @return [Array]
+  ##
+  # Required resource_kinds this plan has no product for, in REQUIRED_RESOURCE_KINDS
+  # order. One query instead of three Product.lookup round trips -- this runs per row
+  # on admin/billing_plans#index via #available?.
+  #
+  # @return [Array<String>]
   def missing_required_products
-    p = []
-    p << 'bandwidth' if Product.lookup(self, 'bandwidth').nil?
-    p << 'storage' if Product.lookup(self, 'storage').nil?
-    p << 'local_disk' if Product.lookup(self, 'local_disk').nil?
-    p
+    REQUIRED_RESOURCE_KINDS - products.pluck(Arel.sql("lower(products.resource_kind)"))
   end
 
   # @return [Boolean]
   def billed_hourly?
-    term == 'hour'
+    term == "hour"
   end
 
   # @return [Boolean]
   def billed_monthly?
-    term == 'month'
+    term == "month"
   end
 
   ##
   # Determine if the Product is available in this billing plan.
   # Used for API's.
   def product_available?(product)
-    self.products.include?(product)
+    products.include?(product)
   end
 
   def available_currencies
-    cur = prices.select( Arel.sql( %Q( DISTINCT(currency) ) ) )
-    cur.nil? || cur.empty? ? [] : cur.map { |i| i.currency }
+    cur = prices.select(Arel.sql(%( DISTINCT(currency) )))
+    (cur.nil? || cur.empty?) ? [] : cur.map { |i| i.currency }
   end
 
   # @param cpu [Float]
   # @param memory [Integer]
   def packages_by_resource(cpu, memory)
-    BillingPackage.find_by_plan self, { cpu: cpu, memory: memory }
+    BillingPackage.find_by_plan self, {cpu: cpu, memory: memory}
   end
 
   private
 
   def update_default_plan
-    self.class.where('id != ? and is_default', self.id).update_all(is_default: false) if self.is_default
+    self.class.where("id != ? and is_default", id).update_all(is_default: false) if is_default
   end
 
   def clone_plan
@@ -138,5 +156,4 @@ class BillingPlan < ApplicationRecord
       end
     end
   end
-
 end

@@ -1,5 +1,4 @@
 class ContainerServices::ChartsController < ContainerServices::BaseController
-
-  def index; end
-
+  def index
+  end
 end

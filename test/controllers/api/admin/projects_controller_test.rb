@@ -1,10 +1,9 @@
-require 'test_helper'
+require "test_helper"
 
 class Api::Admin::ProjectsControllerTest < ActionDispatch::IntegrationTest
-
   include ApiTestControllerBase
 
-  test 'can change project owner' do
+  test "can change project owner" do
     deployment = deployments(:project_test)
     original_user = deployment.user
 
@@ -28,7 +27,7 @@ class Api::Admin::ProjectsControllerTest < ActionDispatch::IntegrationTest
     put "/api/admin/projects/#{deployment.id}", params: new_user, as: :json, headers: @basic_auth_headers
     assert_response :success
     data = JSON.parse(response.body)
-    assert_equal users(:user).id, data['project']['user']['id']
+    assert_equal users(:user).id, data["project"]["user"]["id"]
 
     ##
     # Reset to previous user for other tests
@@ -40,10 +39,9 @@ class Api::Admin::ProjectsControllerTest < ActionDispatch::IntegrationTest
     put "/api/admin/projects/#{deployment.id}", params: old_user, as: :json, headers: @basic_auth_headers
     assert_response :success
     data2 = JSON.parse(response.body)
-    assert_equal original_user.id, data2['project']['user']['id']
+    assert_equal original_user.id, data2["project"]["user"]["id"]
 
     # cleanup
     image.container_image_collaborators
   end
-
 end

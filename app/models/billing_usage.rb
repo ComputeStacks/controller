@@ -55,7 +55,6 @@
 # * The qty will be what's in excess of their included amount. Not the total amount.
 #
 class BillingUsage < ApplicationRecord
-
   default_scope { order(created_at: :desc) }
 
   belongs_to :user, optional: true
@@ -75,5 +74,4 @@ class BillingUsage < ApplicationRecord
     period_length = ((period_end - period_start).to_f / 1.hour).round(4)
     (total / period_length).round(8)
   end
-
 end

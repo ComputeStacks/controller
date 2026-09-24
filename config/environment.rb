@@ -1,7 +1,7 @@
 # Load the Rails application.
-require_relative 'application'
-require './lib/core_ext/array'
-require './lib/core_ext/string'
+require_relative "application"
+require "./lib/core_ext/array"
+require "./lib/core_ext/string"
 
 # Initialize the Rails application.
 Rails.application.initialize!

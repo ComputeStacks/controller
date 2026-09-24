@@ -1,7 +1,7 @@
 <% content_for :breadcrumb do %>
   <div class="row has-breadcrumb">
     <ol class="breadcrumb">
-      <li><%= link_to t('obj.images'), container_images_path %></li>
+      <li><%= link_to t("obj.images"), container_images_path %></li>
       <li><%= link_to @image.label, container_image_path(@image) %></li>
       <li class="active">Add Volume</li>
     </ol>
@@ -9,16 +9,50 @@
 <% end %>
 
 <div class="row">
-  <div class="<%= @volume.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>">
+  <div
+    class="<%= @volume.errors.count.zero? ? 'col-lg-8 col-lg-offset-2 col-md-12' : 'col-sm-8' %>"
+  >
     <%= form_for @volume, url: container_image_volumes_path(@image), method: :post do |f| %>
       <div class="panel panel-default">
-        <%= render partial: 'container_images/volume_params/form', locals: { f: f } %>
+        <%= render partial: "container_images/volume_params/form", locals: { f: f } %>
+
+<%# Cascading writes a volume into other tenants' already-deployed services, so it is
+    admin-only. This template is shared by the admin and non-admin volume_params
+    controllers; before, the non-admin controller rendered the checkbox and then silently
+    discarded it. %>
+        <% if current_user.is_admin? %>
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="checkbox">
+                  <%= f.label :cascade_changes do %>
+                    <%= f.check_box :cascade_changes %>
+                    <%= t "volumes.form.cascade" %>
+                  <% end %>
+                  <span class="help-block">
+                    <%= t "volumes.form.cascade_help" %>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
         <div class="panel-footer">
-          <%= link_to t('actions.cancel'), container_image_path(@volume.container_image), class: 'btn btn-default', style: 'margin-right: 10px;' %>
-          <%= submit_tag t('actions.create'), class: 'btn btn-success pull-right' %>
+          <%= link_to t("actions.cancel"),
+          container_image_path(@volume.container_image),
+          class: "btn btn-default",
+          style: "margin-right: 10px;" %>
+          <%= submit_tag t("actions.create"), class: "btn btn-success pull-right" %>
         </div>
       </div>
     <% end %>
   </div>
-  <%= render partial: 'application/model_errors', locals: { errors: @volume.errors, obj: 'Volume' } unless @volume.errors.count.zero? %>
+  <%= unless @volume.errors.count.zero?
+    render partial: "application/model_errors",
+    locals: {
+      errors: @volume.errors,
+      obj: "Volume",
+    }
+  end %>
 </div>

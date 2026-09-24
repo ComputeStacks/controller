@@ -1,12 +1,12 @@
-collection @images, root: 'data', object_root: false
+collection @images, root: "data", object_root: false
 attributes :id
 
 node :name do |i|
-  %Q(#{table_image_icon(i)} <a href="/container_images/#{i.id}">#{i.label}</a>)
+  %(#{table_image_icon(i)} <a href="/container_images/#{i.id}">#{i.label}</a>)
 end
 
 node :image do |i|
-  i.container_registry ? %Q(<a href="/container_registry/#{i.container_registry.id}">#{i.container_registry.label}</a>) : i.registry_image_path
+  i.container_registry ? %(<a href="/container_registry/#{i.container_registry.id}">#{i.container_registry.label}</a>) : i.registry_image_path
 end
 
 node :button_group do |i|

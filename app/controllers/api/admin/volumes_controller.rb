@@ -1,7 +1,6 @@
 ##
 # # Volumes
 class Api::Admin::VolumesController < Api::Admin::ApplicationController
-
   before_action :load_user
 
   ##
@@ -28,6 +27,7 @@ class Api::Admin::VolumesController < Api::Admin::ApplicationController
   #   * `detached_at`: DateTime - when the volume was detached from the service
   #   * `subscription_id`: Integer
   #   * `enable_sftp`: Boolean
+  #   * `awaiting_mount`: Boolean - true while the volume exists but no container has mounted it yet (it mounts at the service's next rebuild; backups are suppressed until then)
   #   * `borg_enabled`: Boolean - Are backups enabled?
   #   * `borg_freq`: String - Cron syntax
   #   * `borg_strategy`: String - file or mysql
@@ -86,6 +86,7 @@ class Api::Admin::VolumesController < Api::Admin::ApplicationController
   #   * `detached_at`: DateTime - when the volume was detached from the service
   #   * `subscription_id`: Integer
   #   * `enable_sftp`: Boolean
+  #   * `awaiting_mount`: Boolean - true while the volume exists but no container has mounted it yet (it mounts at the service's next rebuild; backups are suppressed until then)
   #   * `borg_enabled`: Boolean - Are backups enabled?
   #   * `borg_freq`: String - Cron syntax
   #   * `borg_strategy`: String - file or mysql
@@ -127,9 +128,7 @@ class Api::Admin::VolumesController < Api::Admin::ApplicationController
   def load_user
     if params[:user_id]
       @user = User.find_by(id: params[:user_id])
-      return api_obj_missing if @user.nil?
+      api_obj_missing if @user.nil?
     end
   end
-
 end
-

@@ -36,11 +36,42 @@
 #   @return [Array<AlertNotification>]
 #
 class Deployment::Sftp < ApplicationRecord
+  ##
+  # What an SFTP container costs a node, in cores and MB.
+  #
+  # These are the figures the node ACTUALLY enforces -- #runtime_payload below builds the
+  # Docker HostConfig's NanoCPUs and Memory from them, which is why they are constants
+  # here rather than literals down there. An SFTP container has no cpu/memory columns of
+  # its own, so unlike Deployment::Container there is nothing per-row to sum.
+  #
+  # Three different figures for this used to be scattered around: the runtime payload's
+  # 1 core / 1024 MB, Location#allocated_resources' 0.5 core / 512 MB, and the node-pick
+  # in ProvisionServices::SftpProvisioner's 1 core / 512 MB. The enforced one wins, and
+  # all three now read these constants.
+  ALLOCATED_CPU = 1      # cores
+  ALLOCATED_MEMORY = 1024 # MB
+
+  ##
+  # Committed cpu/memory across a set of SFTP containers. Mirrors
+  # Deployment::Container.allocated_resources so the two can be added together.
+  #
+  # Trashed rows are excluded here rather than at each call site: this answers "what is
+  # this node committed to run", and a container awaiting the reaper is not. Every other
+  # consumer in the codebase filters them the same way (NodeWorkers::HealthCheckWorker,
+  # ProvisionServices::SftpProvisioner).
+  #
+  # @param scope [ActiveRecord::Relation]
+  # @return [Hash] {cpu: Numeric, memory: Integer}
+  def self.allocated_resources(scope = all)
+    qty = scope.active.count
+    {cpu: ALLOCATED_CPU * qty, memory: ALLOCATED_MEMORY * qty}
+  end
 
   include Auditable
   include Authorization::Container
   include Containerized
   include Containers::ContainerNetworking
+  include Containers::CloudShell
   include Containers::PowerManager
   include Containers::StateManager
   include Containers::SshVolumes
@@ -62,25 +93,24 @@ class Deployment::Sftp < ApplicationRecord
   has_one :region, through: :node
   has_one :location, through: :region
 
-  has_many :ingress_rules, class_name: 'Network::IngressRule', foreign_key: 'sftp_container_id', dependent: :destroy
-  has_one :ip_address, dependent: :destroy, class_name: 'Network::Cidr', foreign_key: 'sftp_container_id'
+  has_many :ingress_rules, class_name: "Network::IngressRule", foreign_key: "sftp_container_id", dependent: :destroy
+  has_one :ip_address, dependent: :destroy, class_name: "Network::Cidr", foreign_key: "sftp_container_id"
   has_one :network, through: :ip_address
 
   # @return [Array<EventLog>]
-  has_and_belongs_to_many :event_logs, foreign_key: 'deployment_sftp_id'
+  has_and_belongs_to_many :event_logs, foreign_key: "deployment_sftp_id"
 
   # @return [Array<EventLogDatum>]
   has_many :event_details, through: :event_logs
 
-  has_many :alert_notifications, dependent: :destroy, foreign_key: 'sftp_container_id'
+  has_many :alert_notifications, dependent: :destroy, foreign_key: "sftp_container_id"
 
-  has_many :ssh_host_keys, class_name: 'Deployment::SftpHostKey', dependent: :destroy, foreign_key: 'sftp_container_id'
+  has_many :ssh_host_keys, class_name: "Deployment::SftpHostKey", dependent: :destroy, foreign_key: "sftp_container_id"
 
   before_save :set_pass
-  after_update :update_pw_auth!
-
   after_create :setup_ingress_rule!
   after_create :generate_certificates!
+  after_update :update_pw_auth!
 
   after_create_commit :init_metadata!
 
@@ -99,7 +129,7 @@ class Deployment::Sftp < ApplicationRecord
   def service_files_path(service)
     "/home/sftpuser/apps/#{service.name}"
   rescue => e
-    ExceptionAlertService.new(e, 'e3b6be943aa98978').perform
+    ExceptionAlertService.new(e, "e3b6be943aa98978").perform
     # Make sure no matter what, we're always returning some kind of directory path!
     "/tmp"
   end
@@ -110,7 +140,7 @@ class Deployment::Sftp < ApplicationRecord
 
   # Helper since we really only have 1 rule
   def ingress_rule
-    ingress_rules.find_by proto: 'tcp'
+    ingress_rules.find_by proto: "tcp"
   end
 
   def lb_proxy_name
@@ -130,7 +160,6 @@ class Deployment::Sftp < ApplicationRecord
   end
 
   def reset_password!
-
   end
 
   def password
@@ -143,8 +172,8 @@ class Deployment::Sftp < ApplicationRecord
   end
 
   def image_exists?
-    return true if Docker::Image.exist?(self.image, {}, node.client)
-    result = Docker::Image.create({'fromImage' => self.image}, nil, self.node.client)
+    return true if Docker::Image.exist?(image, {}, node.client)
+    result = Docker::Image.create({"fromImage" => image}, nil, node.client)
     result.nil? ? false : true
   rescue
     false
@@ -153,23 +182,23 @@ class Deployment::Sftp < ApplicationRecord
   ##
   # Remove the container and remove port forwarding
   def delete_now!(audit)
-    c = self.docker_client
+    c = docker_client
     return true if c.nil?
     c.stop
     c.delete
   rescue => e
-    return true if e.message =~ /already in progress/
-    ExceptionAlertService.new(e, '8d81bcafa05a4391').perform
+    return true if /already in progress/.match?(e.message)
+    ExceptionAlertService.new(e, "8d81bcafa05a4391").perform
     SystemEvent.create!(
-      message: "Error deleting SFTP container: #{self.name}",
-      log_level: 'warn',
+      message: "Error deleting SFTP container: #{name}",
+      log_level: "warn",
       data: {
-        'name' => self.name,
-        'node' => self.node&.id,
-        'error' => e.message
+        "name" => name,
+        "node" => node&.id,
+        "error" => e.message
       },
       audit: audit,
-      event_code: '8d81bcafa05a4391'
+      event_code: "8d81bcafa05a4391"
     )
     false
   else
@@ -179,7 +208,6 @@ class Deployment::Sftp < ApplicationRecord
   end
 
   def build_command
-
     # Generate ingress rule
     setup_ingress_rule! if ingress_rule.nil?
 
@@ -188,62 +216,62 @@ class Deployment::Sftp < ApplicationRecord
 
     return nil if deployment.nil?
 
-    loki_labels = ['container_name={{.Name}}']
+    loki_labels = ["container_name={{.Name}}"]
     loki_labels << "project_id=#{deployment.id}" if deployment
 
-    mem_value = (512 * 1048576).to_i
+    mem_value = (ALLOCATED_MEMORY * 1048576).to_i
 
     container = {
-      'name' => name,
-      'hostname' => name,
-      'Domainname' => 'service.internal',
-      'Image' => image,
-      'Cmd' => ["sftpuser:#{password}:1001:1001:::apps"],
-      'Env' => metadata_env_params.map { |k,v| "#{k}=#{v}" },
-      'ExposedPorts' => {},
-      'Labels' => {
-        'org.projectcalico.label.token' => deployment.token,
-        'org.projectcalico.label.service' => name,
-        'com.computestacks.deployment_id' => deployment.id.to_s,
-        'com.computestacks.image_name' => image,
-        'com.computestacks.role' => 'bastion'
+      "name" => name,
+      "hostname" => name,
+      "Domainname" => "service.internal",
+      "Image" => image,
+      "Cmd" => ["sftpuser:#{password}:1001:1001:::apps"],
+      "Env" => metadata_env_params.map { |k, v| "#{k}=#{v}" },
+      "ExposedPorts" => {},
+      "Labels" => {
+        "org.projectcalico.label.token" => deployment.token,
+        "org.projectcalico.label.service" => name,
+        "com.computestacks.deployment_id" => deployment.id.to_s,
+        "com.computestacks.image_name" => image,
+        "com.computestacks.role" => "bastion"
       },
-      'HostConfig' => {
-        'NetworkMode' => ip_address.network.name,
-        'VolumeDriver' => 'local',
-        'LogConfig' => log_driver_config,
-        'PortBindings' => {},
-        'Binds' => volume_binds,
-        'NanoCPUs' => (0.5 * 1e9).to_i, # 1/2 Core
-        'Memory' => mem_value,
-        'MemorySwap' => mem_value,
-        'Init' => true
+      "HostConfig" => {
+        "NetworkMode" => ip_address.network.name,
+        "VolumeDriver" => "local",
+        "LogConfig" => log_driver_config,
+        "PortBindings" => {},
+        "Binds" => volume_binds,
+        "NanoCPUs" => (ALLOCATED_CPU * 1e9).to_i,
+        "Memory" => mem_value,
+        "MemorySwap" => mem_value,
+        "Init" => true
       },
-      'NetworkingConfig' => {
-        'EndpointsConfig' => {
+      "NetworkingConfig" => {
+        "EndpointsConfig" => {
           ip_address.network.name => {
-            'IPAMConfig' => {
-              'IPv4Address' => local_ip
+            "IPAMConfig" => {
+              "IPv4Address" => local_ip
             }
           }
         }
       }
     }
-    container['HostConfig']['ExtraHosts'] = ["metadata.internal:#{node.primary_ip}"]
+    container["HostConfig"]["ExtraHosts"] = ["metadata.internal:#{node.primary_ip}"]
     container
   rescue ActiveRecord::RecordNotFound
     # Can happen if the SFTP container goes away during loading.
-    return nil
+    nil
   end
 
   def attached_to(quick = true)
     services = []
-    self.volumes.each do |vol|
-      next if vol['service'].nil?
-      if quick
-        services << deployment.services.select(:id, :name).find_by(name: vol['service'])
+    volumes.each do |vol|
+      next if vol["service"].nil?
+      services << if quick
+        deployment.services.select(:id, :name).find_by(name: vol["service"])
       else
-        services << deployment.services.find_by(name: vol['service'])
+        deployment.services.find_by(name: vol["service"])
       end
     end
     services
@@ -253,7 +281,7 @@ class Deployment::Sftp < ApplicationRecord
 
   def set_pass
     if password.blank?
-      self.password = SecureRandom.urlsafe_base64(10).gsub("_", "").gsub("-", "")
+      self.password = SecureRandom.urlsafe_base64(10).delete("_").delete("-")
     end
   end
 
@@ -261,7 +289,7 @@ class Deployment::Sftp < ApplicationRecord
     if ingress_rule.nil?
       ir = ingress_rules.new(
         external_access: true,
-        proto: 'tcp',
+        proto: "tcp",
         port: 22,
         tcp_lb: false,
         skip_metadata_refresh: true,
@@ -269,13 +297,13 @@ class Deployment::Sftp < ApplicationRecord
       )
       unless ir.save
         l = event_logs.create!(
-          status: 'alert',
+          status: "alert",
           notice: true,
-          locale: 'deployment.errors.fatal',
-          event_code: 'bdfb866183aec7cb',
-          state_reason: 'Error tcp adding ingress rule'
+          locale: "deployment.errors.fatal",
+          event_code: "bdfb866183aec7cb",
+          state_reason: "Error tcp adding ingress rule"
         )
-        l.event_details.create!(data: ir.errors.full_messages.join(" "), event_code: 'bdfb866183aec7cb')
+        l.event_details.create!(data: ir.errors.full_messages.join(" "), event_code: "bdfb866183aec7cb")
         l.deployments << deployment if deployment
         l.users << user if user
         return nil
@@ -283,10 +311,10 @@ class Deployment::Sftp < ApplicationRecord
     end
     ##
     # Add MOSH udp port. We will just mirror the nat port assigned to the tcp port.
-    unless ingress_rules.where(proto: 'udp').exists?
+    unless ingress_rules.where(proto: "udp").exists?
       mosh = ingress_rules.new(
         external_access: true,
-        proto: 'udp',
+        proto: "udp",
         port: ingress_rule.port_nat,
         port_nat: ingress_rule.port_nat,
         tcp_lb: false,
@@ -295,26 +323,26 @@ class Deployment::Sftp < ApplicationRecord
       )
       unless mosh.save
         l = event_logs.create!(
-          status: 'alert',
+          status: "alert",
           notice: true,
-          locale: 'deployment.errors.fatal',
-          event_code: 'ab92ad0c522620b2',
-          state_reason: 'Error adding udp ingress rule'
+          locale: "deployment.errors.fatal",
+          event_code: "ab92ad0c522620b2",
+          state_reason: "Error adding udp ingress rule"
         )
-        l.event_details.create!(data: mosh.errors.full_messages.join(" "), event_code: 'ab92ad0c522620b2')
+        l.event_details.create!(data: mosh.errors.full_messages.join(" "), event_code: "ab92ad0c522620b2")
         l.deployments << deployment if deployment
         l.users << user if user
-        return nil
+        nil
       end
     end
   end
 
   def generate_certificates!
     unless ssh_host_keys.rsa.exists?
-      ssh_host_keys.create!(algo: 'rsa')
+      ssh_host_keys.create!(algo: "rsa")
     end
     unless ssh_host_keys.ed25519.exists?
-      ssh_host_keys.create!(algo: 'ed25519')
+      ssh_host_keys.create!(algo: "ed25519")
     end
   end
 
@@ -325,8 +353,7 @@ class Deployment::Sftp < ApplicationRecord
   def update_pw_auth!
     if pw_auth_previously_changed? && current_audit
       init_metadata!
-      PowerCycleContainerService.new(self, 'restart', current_audit).perform
+      PowerCycleContainerService.new(self, "restart", current_audit).perform
     end
   end
-
 end

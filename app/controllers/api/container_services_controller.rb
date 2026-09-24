@@ -1,18 +1,16 @@
 ##
 # Container Services API
 class Api::ContainerServicesController < Api::ApplicationController
+  api_scope read: :project_read, update: :project_write, destroy: :project_write
 
-  before_action -> { doorkeeper_authorize! :projects_read }, only: %i[index show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :projects_write }, only: %i[update create destroy], unless: :current_user
-
-  before_action :load_service, except: %i[ index create ]
+  before_action :load_service, except: %i[index create]
 
   ##
   # List all container services
   #
   # `GET /api/container_services`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `container_services`: Array
   #     * `id`: Integer
@@ -84,7 +82,7 @@ class Api::ContainerServicesController < Api::ApplicationController
   #
   # `GET /api/container_services/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `container_service`: Object
   #     * `id`: Integer
@@ -136,20 +134,24 @@ class Api::ContainerServicesController < Api::ApplicationController
   #         * `logs`: String (url)
   #         * `products`: String (url)
   #
-  def show; end
+  def show
+  end
 
   ##
   # Update a container service
   #
   # `PATCH /api/container_services/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `container_service`: Object
-  #     * `name`: String
-  #     * `scale`: Integer
-  #     * `package_id`: Integer
+  #     * `label`: String
+  #     * `command`: String | Command override.
+  #     * `tag_list`: String
   #     * `master_domain_id`: Integer | ID of domain that you want to be default.
+  #     * `shm_size`: Integer | Shared-memory (/dev/shm) size in bytes; 0 = use the image
+  #       default (64MB). Capped at the service's memory limit. A container rebuild
+  #       (`PUT /api/container_services/{id}/power/rebuild`) is required to apply the change.
   #
   def update
     if @service.update(current_user.is_admin ? admin_service_params : container_service_params)
@@ -166,16 +168,16 @@ class Api::ContainerServicesController < Api::ApplicationController
   #
   # `DELETE /api/container_services/{id}`
   #
-  #  **OAuth AuthorizationRequired**: `projects_write`
+  #  **OAuth AuthorizationRequired**: `project_write`
   #
   def destroy
-    audit = Audit.create_from_object!(@service, 'deleted', request.remote_ip, current_user)
+    audit = Audit.create_from_object!(@service, "deleted", request.remote_ip, current_user)
     event = EventLog.create!(
-      locale: 'service.trash',
-      locale_keys: { label: @service.name },
-      event_code: '859369ca114615bb',
+      locale: "service.trash",
+      locale_keys: {label: @service.name},
+      event_code: "859369ca114615bb",
       audit: audit,
-      status: 'pending'
+      status: "pending"
     )
     event.container_services << @service
     ContainerServiceWorkers::TrashServiceWorker.perform_async @service.global_id, event.global_id
@@ -183,7 +185,6 @@ class Api::ContainerServicesController < Api::ApplicationController
       format.json { render json: {}, status: :accepted }
       format.xml { render xml: {}, status: :accepted }
     end
-
   end
 
   private
@@ -192,12 +193,12 @@ class Api::ContainerServicesController < Api::ApplicationController
     if current_api_version < 51
       params.permit(:name, :scale, :package_id, {resources: [:cpu, :memory]})
     else
-      params.require(:container_service).permit(:label, :command, :tag_list, :master_domain_id)
+      params.require(:container_service).permit(:label, :command, :tag_list, :master_domain_id, :shm_size)
     end
   end
 
   def admin_service_params
-    params.require(:container_service).permit(:label, :command, :tag_list, :override_autoremove, :master_domain_id)
+    params.require(:container_service).permit(:label, :command, :tag_list, :override_autoremove, :master_domain_id, :shm_size)
   end
 
   def load_service  # :doc:
@@ -205,5 +206,4 @@ class Api::ContainerServicesController < Api::ApplicationController
     return api_obj_missing if @service.nil?
     @service.current_user = current_user
   end
-
 end

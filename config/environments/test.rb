@@ -16,11 +16,11 @@ Rails.application.configure do
   # Configure public file server for tests with Cache-Control for performance.
   config.public_file_server.enabled = true
   config.public_file_server.headers = {
-    'Cache-Control' => "public, max-age=#{1.hour.to_i}"
+    "Cache-Control" => "public, max-age=#{1.hour.to_i}"
   }
 
   # Show full error reports and disable caching.
-  config.consider_all_requests_local       = true
+  config.consider_all_requests_local = true
   config.action_controller.perform_caching = false
   config.cache_store = :null_store
 
@@ -50,6 +50,8 @@ Rails.application.configure do
   # ActionMailer::Base.deliveries array.
   config.action_mailer.delivery_method = :test
 
+  config.active_job.queue_adapter = :test
+
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
 
@@ -57,8 +59,8 @@ Rails.application.configure do
   # config.action_view.raise_on_missing_translations = true
   # config.cache_store = :redis_store, "redis://127.0.0.1:6379/9/cache", { expires_in: 1.minute }
   config.cache_store = :redis_cache_store, {
-    url: "redis://#{ENV['REDIS_HOST'].blank? ? 'localhost' : ENV['REDIS_HOST']}:#{ENV['REDIS_PORT'].blank? ? '6379' : ENV['REDIS_PORT']}/7",
+    url: "redis://#{ENV["REDIS_HOST"].presence || "localhost"}:#{ENV["REDIS_PORT"].presence || "6379"}/7",
     expires_in: 10.minutes
   }
-  config.action_mailer.default_url_options = { host: "127.0.0.1" }
+  config.action_mailer.default_url_options = {host: "127.0.0.1"}
 end

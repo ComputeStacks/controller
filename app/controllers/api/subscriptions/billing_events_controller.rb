@@ -1,8 +1,7 @@
 ##
 # Billing Events API
 class Api::Subscriptions::BillingEventsController < Api::Subscriptions::BaseController
-
-  before_action :load_billing_event, except: %i[ index ]
+  before_action :load_billing_event, except: %i[index]
 
   ##
   # List Events
@@ -50,7 +49,8 @@ class Api::Subscriptions::BillingEventsController < Api::Subscriptions::BaseCont
   #     * `source_product`: Object<Product>
   #     * `destination_product`: Object<Product>
   #
-  def show; end
+  def show
+  end
 
   private
 
@@ -58,5 +58,4 @@ class Api::Subscriptions::BillingEventsController < Api::Subscriptions::BaseCont
     @billing_event = current_user.billing_events.find_by(id: params[:id])
     api_obj_missing(["Unknown Billing Event"]) if @billing_event.nil?
   end
-
 end

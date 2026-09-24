@@ -1,13 +1,12 @@
 ##
 # List Project Events
 class Api::Projects::EventsController < Api::Projects::BaseController
-
   ##
   # List all events
   #
   # `GET /api/projects/{project-id}/events`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `event_log`: Array
   #     * `id`: Integer
@@ -33,8 +32,7 @@ class Api::Projects::EventsController < Api::Projects::BaseController
   def index
     @events = paginate @deployment.event_logs.sorted
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/event_logs/index' }
+      format.any(:json, :xml) { render template: "api/event_logs/index" }
     end
   end
-
 end

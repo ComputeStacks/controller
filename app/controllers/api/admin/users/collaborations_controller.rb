@@ -1,6 +1,5 @@
 # User Collaborations
 class Api::Admin::Users::CollaborationsController < Api::Admin::Users::BaseController
-
   before_action :find_collab, except: :index
 
   ##
@@ -67,7 +66,8 @@ class Api::Admin::Users::CollaborationsController < Api::Admin::Users::BaseContr
   #     * `email`: String
   #     * `full_name`: String
   #
-  def show; end
+  def show
+  end
 
   ##
   # Activate Collaboration
@@ -104,30 +104,25 @@ class Api::Admin::Users::CollaborationsController < Api::Admin::Users::BaseContr
 
   def find_collab
     # params[:id] = ID-model
-    id = params[:id].split('-')[0].to_i
-    collab_model = params[:id].split('-')[1]
-    allowed_models = %w(project image registry zone)
+    id = params[:id].split("-")[0].to_i
+    collab_model = params[:id].split("-")[1]
+    allowed_models = %w[project image registry zone]
     @collab = if allowed_models.include?(collab_model) && id > 0
-                case collab_model
-                when 'project'
-                  DeploymentCollaborator.find_for_user @user, id: id
-                when 'image'
-                  ContainerImageCollaborator.find_for_user @user, id: id
-                when 'registry'
-                  ContainerRegistryCollaborator.find_for_user @user, id: id
-                when 'zone'
-                  Dns::ZoneCollaborator.find_for_user @user, id: id
-                else
-                  nil
-                end
-              else
-                nil
-              end
+      case collab_model
+      when "project"
+        DeploymentCollaborator.find_for_user @user, id: id
+      when "image"
+        ContainerImageCollaborator.find_for_user @user, id: id
+      when "registry"
+        ContainerRegistryCollaborator.find_for_user @user, id: id
+      when "zone"
+        Dns::ZoneCollaborator.find_for_user @user, id: id
+      end
+    end
     api_obj_missing if @collab.nil?
   end
 
   def collab_params
     params.require(:collaboration).permit(:active)
   end
-
 end

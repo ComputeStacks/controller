@@ -1,14 +1,13 @@
 class Admin::ContainerImages::ImageRelationshipsController < Admin::ContainerImages::BaseController
-
   def new
-    if @container.user.nil?
-      @containers = ContainerImage.where(user: nil).order(:name)
+    @containers = if @container.user.nil?
+      ContainerImage.where(user: nil).order(:name)
     else
-      @containers = ContainerImage.where('user_id is null OR user_id = ?', @container.user.id).order(:name)
+      ContainerImage.where("user_id is null OR user_id = ?", @container.user.id).order(:name)
     end
     @container_dependencies = @container.dependencies
     @container_roles = @container.dependencies.pluck(:role)
-    render template: 'container_images/image_relationships/new'
+    render template: "container_images/image_relationships/new"
   end
 
   def edit
@@ -33,13 +32,16 @@ class Admin::ContainerImages::ImageRelationshipsController < Admin::ContainerIma
   end
 
   def destroy
-    c = @container.dependencies.find_by(id: params[:id])
+    c = @container.dependency_parents.find_by(id: params[:id])
     if c.nil?
       redirect_to helpers.container_image_path(@container), alert: "Unknown dependent container."
       return false
     end
-    @container.dependencies.delete(c)
-    redirect_to helpers.container_image_path(@container), notice: "Removed container."
+    if c.destroy
+      flash[:notice] = "Removed container"
+    else
+      flash[:alert] = "Error removing dependency: #{c.errors.full_messages.to_sentence}"
+    end
+    redirect_to helpers.container_image_path(@container)
   end
-
 end

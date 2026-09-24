@@ -1,5 +1,4 @@
 module Admin::ProductsHelper
-
   def edit_admin_product_path(product)
     admin_product_path(product) + "/edit"
   end
@@ -28,10 +27,10 @@ module Admin::ProductsHelper
 
   def product_options_for_select
     [
-      %w(Image image),
+      %w[Image image],
       ["Metered Resource", "resource"],
-      %w(Package package),
-      %w(Addon addon)
+      %w[Package package],
+      %w[Addon addon]
     ].sort
   end
 
@@ -43,5 +42,4 @@ module Admin::ProductsHelper
     end
     link_array.join(", ").html_safe
   end
-
 end

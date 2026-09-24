@@ -1,7 +1,6 @@
 ##
 # Image Ingerss Parameters
 class Api::ContainerImages::IngressParamsController < Api::ContainerImages::BaseController
-
   before_action :find_ingress_rule, only: [:show, :update, :destroy]
 
   ##
@@ -46,7 +45,8 @@ class Api::ContainerImages::IngressParamsController < Api::ContainerImages::Base
   #     * `load_balancer_id`: Integer
   #     * `internal_load_balancer_id`: Integer
   #
-  def show; end
+  def show
+  end
 
   ##
   # Update an ingress param
@@ -120,6 +120,4 @@ class Api::ContainerImages::IngressParamsController < Api::ContainerImages::Base
   def ingress_params
     params.require(:ingress_param).permit(:port, :proto, :backend_ssl, :external_access, :tcp_proxy_opt)
   end
-
-
 end

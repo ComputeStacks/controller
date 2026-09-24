@@ -1,10 +1,11 @@
 class Admin::ContainersController < Admin::ApplicationController
+  before_action :load_container, only: %w[show update]
 
-  before_action :load_container, only: %w(show update)
+  def show
+  end
 
-  def show; end
-
-  def update; end
+  def update
+  end
 
   private
 
@@ -13,5 +14,4 @@ class Admin::ContainersController < Admin::ApplicationController
     return(redirect_to("/admin/deployments", alert: "Unknown Container")) if @container.nil?
     @deployment = @container.deployment
   end
-
 end

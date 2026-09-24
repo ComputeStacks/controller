@@ -1,7 +1,6 @@
 ##
 # List All DNS Zonesx
 class Api::Admin::ZonesController < Api::Admin::ApplicationController
-
   before_action :load_user
 
   ##
@@ -34,8 +33,7 @@ class Api::Admin::ZonesController < Api::Admin::ApplicationController
   def load_user
     if params[:user_id]
       @user = User.find_by(id: params[:user_id])
-      return api_obj_missing if @user.nil?
+      api_obj_missing if @user.nil?
     end
   end
-
 end

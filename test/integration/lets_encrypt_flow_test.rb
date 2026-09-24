@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 ##
 # ACME integration testing for ContainerDomains
@@ -8,19 +8,20 @@ require 'test_helper'
 # * [LetsEncrypt Staging Server](https://letsencrypt.org/docs/staging-environment/)
 #
 class LetsEncryptFlowTest < ActionDispatch::IntegrationTest
+  setup { requires_external_infra! } # needs ACME + PowerDNS
 
-  test 'can enable lets encrypt on a domain' do
+  test "can enable lets encrypt on a domain" do
     Sidekiq::Testing.inline! do
       # Create the domain and enable Lets Encrypt
       Deployment::ContainerDomain.create!(
-        domain: 'csdevserver.local', # 127.0.0.1
+        domain: "csdevserver.local", # 127.0.0.1
         le_enabled: true,
         enabled: true,
         ingress_rule: network_ingress_rules(:wordpress_web_http),
         user: users(:admin)
       )
     end
-    domain = Deployment::ContainerDomain.find_by(domain: 'csdevserver.local')
+    domain = Deployment::ContainerDomain.find_by(domain: "csdevserver.local")
     refute domain.nil?
     refute_nil domain.le_ready_checked
 
@@ -52,7 +53,7 @@ class LetsEncryptFlowTest < ActionDispatch::IntegrationTest
 
     # Ensure when we add a new domain, we can re-generate our lets_encrypt certificate
     new_domain = Deployment::ContainerDomain.create!(
-      domain: 'foobardev.net',
+      domain: "foobardev.net",
       le_enabled: true,
       le_ready: true,
       le_ready_checked: Time.now,
@@ -88,5 +89,4 @@ class LetsEncryptFlowTest < ActionDispatch::IntegrationTest
 
     assert_nil LetsEncrypt.find_by(id: le_id)
   end
-
 end

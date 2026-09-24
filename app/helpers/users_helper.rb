@@ -1,5 +1,4 @@
 module UsersHelper
-
   ##
   # Determine a user's location by their IP Address
   def country_by_ip(remote_ip, format = "code")
@@ -15,19 +14,16 @@ module UsersHelper
       else
         country = "United States"
       end
-    else
-      if remote_ip != "127.0.0.1"
-        country = geoip.country(remote_ip).country_code2
-        if country == "--"
-          country = "US"
-        end
-      else
+    elsif remote_ip != "127.0.0.1"
+      country = geoip.country(remote_ip).country_code2
+      if country == "--"
         country = "US"
       end
+    else
+      country = "US"
     end
     country
   rescue
-    format == 'code' ? 'US' : 'United States'
+    (format == "code") ? "US" : "United States"
   end
-
 end

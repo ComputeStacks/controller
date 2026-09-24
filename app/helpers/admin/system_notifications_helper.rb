@@ -1,3 +1,2 @@
 module Admin::SystemNotificationsHelper
-
 end

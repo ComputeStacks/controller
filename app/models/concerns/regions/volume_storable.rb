@@ -38,6 +38,5 @@ module Regions
         usage
       end
     end
-
   end
 end

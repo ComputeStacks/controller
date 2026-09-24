@@ -4,13 +4,11 @@ module Authorization
     include Authorization::Generic
 
     class_methods do
-
       # @param [User] current_user
       # @return [Array<Dns::Zone>]
       def find_all_for(current_user)
         where("dns_zones.user_id = ? OR (dns_zone_collaborators.active = true AND dns_zone_collaborators.user_id = ?)", current_user.id, current_user.id).joins("LEFT JOIN dns_zone_collaborators ON dns_zones.id = dns_zone_collaborators.dns_zone_id").distinct
       end
-
     end
 
     # @param [User] current_user
@@ -33,6 +31,5 @@ module Authorization
     def system_can_update?
       saved_state.blank?
     end
-
   end
 end

@@ -1,6 +1,5 @@
 # LogClient Loki for log aggregation
 class LogClient < ApplicationRecord
-
   has_many :regions # Used to determine endpoint to pull logs from, not for container log settings.
 
   ##
@@ -17,14 +16,14 @@ class LogClient < ApplicationRecord
   def query(q = {})
     return [] if q.empty?
     result = []
-    rsp = call('query_range', q)
-    return result unless rsp['status'] == 'success'
-    return result unless rsp['data']['resultType'] == 'streams'
-    rsp['data']['result'].each do |context|
-      context['values'].each do |log|
+    rsp = call("query_range", q)
+    return result unless rsp["status"] == "success"
+    return result unless rsp["data"]["resultType"] == "streams"
+    rsp["data"]["result"].each do |context|
+      context["values"].each do |log|
         result << [
-          (log[0].to_i  / 1e9),
-          context['stream']['container_name'],
+          (log[0].to_i / 1e9),
+          context["stream"]["container_name"],
           log[1]
         ]
       end
@@ -40,10 +39,9 @@ class LogClient < ApplicationRecord
   # path = query_range
   def call(path, q)
     if username && password
-      HTTParty.get("#{endpoint}/loki/api/v1/#{path}", query: q, format: :json, basic_auth: { username: username, password: password })
+      HTTParty.get("#{endpoint}/loki/api/v1/#{path}", query: q, format: :json, basic_auth: {username: username, password: password})
     else
       HTTParty.get("#{endpoint}/loki/api/v1/#{path}", query: q, format: :json)
     end
   end
-
 end

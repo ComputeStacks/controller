@@ -1,5 +1,4 @@
 class ContainerImages::CustomHostEntriesController < ContainerImages::BaseController
-
   include RescueResponder
 
   before_action :find_entry, only: [:edit, :update, :destroy]
@@ -12,7 +11,8 @@ class ContainerImages::CustomHostEntriesController < ContainerImages::BaseContro
     @entry = @image.host_entries.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def create
     @entry = @image.host_entries.new entry_params
@@ -36,7 +36,7 @@ class ContainerImages::CustomHostEntriesController < ContainerImages::BaseContro
     if @entry.destroy
       flash[:success] = "Entry destroyed"
     else
-      flash[:alert] = "Error deleting: #{@entry.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error deleting: #{@entry.errors.full_messages.join(" ")}"
     end
     redirect_to "/container_images/#{@image.id}"
   end
@@ -51,5 +51,4 @@ class ContainerImages::CustomHostEntriesController < ContainerImages::BaseContro
     @entry = @image.host_entries.find params[:id]
     @entry.current_user = current_user
   end
-
 end

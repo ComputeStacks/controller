@@ -190,7 +190,6 @@
 #   @return [Boolean]
 #
 class User < ApplicationRecord
-
   # Do not place below any other items. We need this defined first.
   belongs_to :user_group
   before_validation :set_user_group
@@ -207,34 +206,32 @@ class User < ApplicationRecord
   include Users::LegacyRemote
   include Users::OtpStorable
 
-
   scope :sorted, -> { order "lower(users.lname), lower(users.fname)" }
   scope :by_last_name, -> { order "lower(lname)" }
 
-  scope :with_active_subscriptions, -> { select( "lower(users.lname), lower(users.fname), users.*" ).where(subscriptions: { active: true }).joins(:subscriptions).distinct }
+  scope :with_active_subscriptions, -> { select("lower(users.lname), lower(users.fname), users.*").where(subscriptions: {active: true}).joins(:subscriptions).distinct }
   scope :cpanel, -> { where("labels::jsonb ? 'cpanel'") }
   scope :admins, -> { where is_admin: true }
 
   has_many :audits, dependent: :destroy
-  has_many :event_logs, -> { distinct}, through: :audits
+  has_many :event_logs, -> { distinct }, through: :audits
 
   has_many :container_images, dependent: :destroy
   has_many :container_registries, dependent: :destroy
 
-  has_many :container_registry_collaborators, -> { where("container_registry_collaborators.active = true") }, foreign_key: 'user_id'
+  has_many :container_registry_collaborators, -> { where("container_registry_collaborators.active = true") }, foreign_key: "user_id"
   has_many :registry_collaborations, through: :container_registry_collaborators, source: :container_registry
 
   has_many :deployments, dependent: :destroy
 
-  has_many :deployment_collaborators, -> { where("deployment_collaborators.active = true") }, foreign_key: 'user_id'
+  has_many :deployment_collaborators, -> { where("deployment_collaborators.active = true") }, foreign_key: "user_id"
   has_many :project_collaborations, through: :deployment_collaborators, source: :deployment
   has_many :service_collaborations, through: :deployment_collaborators, source: :container_services
   # This is different from `image_collaborations`. These are images related to a project this user is collaborating on.
   has_many :project_image_collaborations, through: :deployment_collaborators, source: :container_images
 
-
-  has_many :dns_zones, class_name: 'Dns::Zone', dependent: :destroy
-  has_many :domain_collaborators, -> { where("dns_zone_collaborators.active = true") }, class_name: 'Dns::ZoneCollaborator', foreign_key: 'user_id'
+  has_many :dns_zones, class_name: "Dns::Zone", dependent: :destroy
+  has_many :domain_collaborators, -> { where("dns_zone_collaborators.active = true") }, class_name: "Dns::ZoneCollaborator", foreign_key: "user_id"
   has_many :domain_collaborations, through: :domain_collaborators, source: :dns_zone
 
   has_and_belongs_to_many :features
@@ -245,18 +242,18 @@ class User < ApplicationRecord
   has_many :orders, dependent: :destroy
   has_and_belongs_to_many :regions
 
-  has_many :security_keys, class_name: 'User::SecurityKey', dependent: :destroy
+  has_many :security_keys, class_name: "User::SecurityKey", dependent: :destroy
 
   has_many :container_services, through: :deployments, source: :services
 
   has_many :deployed_images, through: :container_services, source: :container_image
 
-  has_many :container_image_collaborators, -> { where("container_image_collaborators.active = true") }, foreign_key: 'user_id'
+  has_many :container_image_collaborators, -> { where("container_image_collaborators.active = true") }, foreign_key: "user_id"
   has_many :image_collaborations, through: :container_image_collaborators, source: :container_image
 
   has_many :sftp_containers, through: :deployments
   has_many :volumes, dependent: :destroy
-  has_many :container_domains, class_name: 'Deployment::ContainerDomain', dependent: :destroy
+  has_many :container_domains, class_name: "Deployment::ContainerDomain", dependent: :destroy
   has_many :load_balancers, -> { distinct }, through: :container_services
 
   has_many :deployed_containers, through: :deployments
@@ -266,7 +263,7 @@ class User < ApplicationRecord
   # Notification settings, user level.
   has_many :user_notifications, dependent: :destroy
 
-  has_many :ssh_keys, class_name: 'UserSshKey', dependent: :destroy
+  has_many :ssh_keys, class_name: "UserSshKey", dependent: :destroy
 
   # has_and_belongs_to_many :event_logs
 
@@ -284,7 +281,7 @@ class User < ApplicationRecord
 
   # Ensure all currencies are in the format: 'USD'
   before_validation(on: [:create, :update]) do
-    self.currency = self.currency.upcase if self.currency
+    self.currency = currency.upcase if currency
   end
 
   before_save :combine_labels
@@ -297,7 +294,7 @@ class User < ApplicationRecord
   validates_with UserValidator
 
   # After commit process. Order is important!
-  after_commit :user_webooks, on: %i[ create update ] # Webooks + Billing remote
+  after_commit :user_webooks, on: %i[create update] # Webooks + Billing remote
 
   before_create :set_defaults
   before_destroy :safe_to_destroy?, prepend: true
@@ -312,7 +309,7 @@ class User < ApplicationRecord
   end
 
   def resource_name
-    full_name.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+    full_name.strip.downcase.gsub(/[^a-z0-9\s]/i, "").tr(" ", "_")[0..10]
   end
 
   def avatar_url(size = 80)
@@ -320,7 +317,7 @@ class User < ApplicationRecord
   end
 
   def tz
-    timezone.to_s == "" ? "UTC" : timezone
+    (timezone.to_s == "") ? "UTC" : timezone
   end
 
   def full_name
@@ -332,7 +329,7 @@ class User < ApplicationRecord
   end
 
   def is_service_account?
-    labels['kind'] == 'service_account'
+    labels["kind"] == "service_account"
   end
 
   def send_devise_notification(notification, *args)
@@ -354,7 +351,7 @@ class User < ApplicationRecord
   #
   def self.search_by(q)
     result = []
-    raw_data = ActiveRecord::Base.connection.execute(%Q(
+    raw_data = ActiveRecord::Base.connection.execute(%(
       SELECT *
       FROM (
         SELECT id,email,fname,lname,fname || ' ' || lname AS fullname
@@ -363,7 +360,7 @@ class User < ApplicationRecord
       WHERE lower(email) ~ '#{q}' OR lower(fname) ~ '#{q}' OR lower(lname) ~ '#{q}' OR lower(fullname) ~ '#{q}'
     ))
     raw_data.each do |i|
-      u = User.find_by(id: i['id'])
+      u = User.find_by(id: i["id"])
       result << u unless u.nil? || result.include?(u)
     end
     result
@@ -386,11 +383,11 @@ class User < ApplicationRecord
   #
   def user_webooks
     watched_attr = Set[
-        'fname', 'lname', 'email', 'encrypted_password', 'currency',
-        'is_admin', 'api_key', 'country', 'city',
-        'state', 'address1', 'address2', 'zip'
+      "fname", "lname", "email", "encrypted_password", "currency",
+      "is_admin", "api_key", "country", "city",
+      "state", "address1", "address2", "zip"
     ]
-    have_attr = self.previous_changes.keys.to_set
+    have_attr = previous_changes.keys.to_set
     if watched_attr.intersect?(have_attr) && !is_support_admin?
       WebHookJob.perform_later(self) unless Setting.webhook_users.value.blank?
     end
@@ -398,29 +395,29 @@ class User < ApplicationRecord
 
   def user_address
     if Setting.billing_address && !is_support_admin?
-      errors.add(:country, 'must be present') if self.country.to_s.blank?
-      if self.state.to_s.blank? && %w(US CA).include?(self.country.to_s)
-        errors.add(:state, 'must be present')
+      errors.add(:country, "must be present") if country.to_s.blank?
+      if state.to_s.blank? && %w[US CA].include?(country.to_s)
+        errors.add(:state, "must be present")
       end
-      errors.add(:address1, 'must be present') if self.address1.to_s.blank?
-      errors.add(:city, 'must be present') if self.city.to_s.blank?
+      errors.add(:address1, "must be present") if address1.to_s.blank?
+      errors.add(:city, "must be present") if city.to_s.blank?
       if Setting.billing_phone
-        if self.phone.blank?
-          errors.add(:phone, 'must be present')
-        elsif self.phone.length < 7 || self.phone.length > 16
-          errors.add(:phone, 'must be between 8 and 15 digits')
+        if phone.blank?
+          errors.add(:phone, "must be present")
+        elsif phone.length < 7 || phone.length > 16
+          errors.add(:phone, "must be between 8 and 15 digits")
         end
       end
-    else
-      self.country = "US" if self.country.blank?
+    elsif country.blank?
+      self.country = "US"
     end
   end
 
   def set_defaults
-    if self.token.nil?
+    if token.nil?
       self.token = SecureRandom.uuid
     end
-    if self.gen_sso_creds
+    if gen_sso_creds
       self.auth_token = SecureRandom.urlsafe_base64(24)
       self.auth_token_exp = 10.minutes.from_now
     end
@@ -428,13 +425,13 @@ class User < ApplicationRecord
   end
 
   def safe_to_destroy?
-    errors.add(:base, 'Unable to delete an admin. Please remove the admin role first.') if is_admin
+    errors.add(:base, "Unable to delete an admin. Please remove the admin role first.") if is_admin
     errors.add(:base, "Please delete all Deployments first") unless deployments.empty?
     errors.add(:base, "Please remove all Volumes first") unless volumes.empty?
   end
 
   def set_user_group
-    if self.user_group.nil?
+    if user_group.nil?
       default_group = UserGroup.find_by(is_default: true)
       self.user_group = default_group if default_group
     end
@@ -457,7 +454,7 @@ class User < ApplicationRecord
   ##
   # Insert top level key into existing labels hash
   def combine_labels
-    if merge_labels && merge_labels.kind_of?(Hash)
+    if merge_labels && merge_labels.is_a?(Hash)
       merge_labels.each_key do |i|
         labels[i] = merge_labels[i]
       end
@@ -467,7 +464,7 @@ class User < ApplicationRecord
   def try_selected_email!
     return if requested_email.blank?
     return if email == requested_email
-    self.skip_confirmation!
+    skip_confirmation!
     if User.where(email: requested_email).exists?
       suffix = "@#{Setting.app_name.parameterize}.local"
       choice_one = "#{fname.downcase}.#{lname.downcase}#{suffix}"
@@ -481,7 +478,7 @@ class User < ApplicationRecord
   def check_current_password
     return if current_password.blank?
     unless valid_password? current_password
-      errors.add(:base, 'current password is invalid')
+      errors.add(:base, "current password is invalid")
     end
   end
 
@@ -513,5 +510,4 @@ class User < ApplicationRecord
       i.destroy
     end
   end
-
 end

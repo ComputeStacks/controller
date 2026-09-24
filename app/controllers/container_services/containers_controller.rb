@@ -1,5 +1,4 @@
 class ContainerServices::ContainersController < ContainerServices::BaseController
-
   before_action :load_container, except: :index
 
   def index
@@ -14,15 +13,14 @@ class ContainerServices::ContainersController < ContainerServices::BaseControlle
   private
 
   def load_container
-     @container = @service.containers.find_by(id: params[:id])
-     if @container.nil?
+    @container = @service.containers.find_by(id: params[:id])
+    if @container.nil?
       if request.xhr?
-        render plain: I18n.t('crud.unknown', resource: I18n.t('obj.container'))
+        render plain: I18n.t("crud.unknown", resource: I18n.t("obj.container"))
       else
-        redirect_to @service_base_url, alert: I18n.t('crud.unknown', resource: I18n.t('obj.container'))
+        redirect_to @service_base_url, alert: I18n.t("crud.unknown", resource: I18n.t("obj.container"))
       end
-      return false
+      false
     end
   end
-
 end

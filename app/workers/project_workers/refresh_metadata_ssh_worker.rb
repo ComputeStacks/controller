@@ -3,9 +3,9 @@ module ProjectWorkers
     include Sidekiq::Worker
 
     sidekiq_options retry: false,
-                    lock: :until_executed,
-                    on_conflict: :reject,
-                    lock_args_method: ->(args) { [ args.first ] } # We want to restrict by project, dont care about audit id!
+      lock: :until_executed,
+      on_conflict: :reject,
+      lock_args_method: ->(args) { [args.first] } # We want to restrict by project, dont care about audit id!
 
     def perform(project_id, audit_id)
       project = Deployment.find_by id: project_id
@@ -16,6 +16,5 @@ module ProjectWorkers
         SftpServices::ReloadSshKeysService.new(i, audit).perform
       end
     end
-
   end
 end

@@ -26,15 +26,14 @@
 #   @return [DateTime]
 #
 class ContainerImage::SettingParam < ApplicationRecord
-
   include Auditable
 
-  scope :sorted, -> { order( Arel.sql('lower(name)') ) }
+  scope :sorted, -> { order(Arel.sql("lower(name)")) }
 
   belongs_to :container_image
   has_many :dependent_params, class_name: "ContainerService::SettingConfig", foreign_key: "container_image_setting_param_id", dependent: :nullify
 
-  validates :param_type, inclusion: { in: %w(password static) }
+  validates :param_type, inclusion: {in: %w[password static]}
   validates :name, presence: true
 
   before_validation :set_label
@@ -45,13 +44,12 @@ class ContainerImage::SettingParam < ApplicationRecord
 
   def resource_name
     return "null" if label.blank?
-    label.strip.downcase.gsub(/[^a-z0-9\s]/i,'').gsub(" ","_")[0..10]
+    label.strip.downcase.gsub(/[^a-z0-9\s]/i, "").tr(" ", "_")[0..10]
   end
 
   private
 
   def set_label
-    self.label = self.name if self.label.blank?
+    self.label = name if label.blank?
   end
-
 end

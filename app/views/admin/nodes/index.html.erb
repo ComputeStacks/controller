@@ -6,5 +6,5 @@
       </div>
     </div>
   <% end %>
-  <%= render partial: "admin/nodes/list", locals: { nodes: @nodes } unless @nodes.empty? %>
+  <%= render partial: "admin/nodes/list", locals: { nodes: @nodes, metrics: @metrics } unless @nodes.empty? %>
 </div>

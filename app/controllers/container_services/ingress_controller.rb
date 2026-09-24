@@ -1,5 +1,4 @@
 class ContainerServices::IngressController < ContainerServices::BaseController
-
   include RescueResponder
 
   before_action :find_ingress_rule, except: %i[index new create]
@@ -19,14 +18,15 @@ class ContainerServices::IngressController < ContainerServices::BaseController
     @ingress = @service.ingress_rules.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def create
     @ingress = @service.ingress_rules.new(ingress_params)
     @ingress.region = @service.region
     if @ingress.save
       flash[:success] = "updated"
-      if params[:return_to] == 'service'
+      if params[:return_to] == "service"
         redirect_to helpers.container_service_path(@service)
       else
         redirect_to "/container_services/#{@service.id}/ingress"
@@ -39,7 +39,7 @@ class ContainerServices::IngressController < ContainerServices::BaseController
   def update
     if @ingress.update(ingress_params)
       flash[:success] = "updated"
-      if params[:return_to] == 'service'
+      if params[:return_to] == "service"
         redirect_to helpers.container_service_path(@service)
       else
         redirect_to "/container_services/#{@service.id}/ingress"
@@ -53,7 +53,7 @@ class ContainerServices::IngressController < ContainerServices::BaseController
     if @ingress.destroy
       flash[:success] = "Rule deleted"
     else
-      flash[:alert] = "Error! #{@ingress.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error! #{@ingress.errors.full_messages.join(" ")}"
     end
     redirect_to "/container_services/#{@service.id}/ingress"
   end
@@ -66,11 +66,10 @@ class ContainerServices::IngressController < ContainerServices::BaseController
   end
 
   def ingress_params
-    params.require(:network_ingress_rule).permit(:proto, :port, :external_access, :tcp_proxy_opt, :backend_ssl, :restrict_cf, :tcp_lb)
+    params.require(:network_ingress_rule).permit(:proto, :port, :external_access, :tcp_proxy_opt, :backend_ssl, :restrict_bunny, :restrict_cf, :tcp_lb)
   end
 
   def not_found_responder
     redirect_to helpers.container_service_path(@service)
   end
-
 end

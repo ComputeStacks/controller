@@ -1,7 +1,7 @@
 <% content_for :breadcrumb do %>
   <div class="row has-breadcrumb">
     <ol class="breadcrumb">
-      <li><%= link_to 'Regions', '/admin/locations' %></li>
+      <li><%= link_to "Regions", "/admin/locations" %></li>
       <li class="active"><%= @region.name %></li>
     </ol>
   </div>
@@ -10,16 +10,52 @@
 <div class="row">
   <div class="col-md-8 col-xs-6"><p class="lead"><%= @region.name %></p></div>
   <div class="col-md-4 col-xs-6 text-right">
+
     <% if @region.can_migrate_network_driver? %>
-      <%= link_to 'Migrate Network Driver', "#{admin_region_url(@region)}/network_migrate", method: :post, data: { confirm: 'Are you sure? This will rebuild all containers.' }, class: 'btn btn-warning' %>
+      <%= link_to "Migrate Network Driver",
+      "#{admin_region_url(@region)}/network_migrate",
+      method: :post,
+      data: {
+        confirm: @region.ipv6_egress? ?
+          "Are you sure? This will rebuild all containers. IPv6 Egress is enabled on this zone, so this will also convert every existing project in it to dual-stack." :
+          "Are you sure? This will rebuild all containers.",
+      },
+      class: "btn btn-warning" %>
     <% end %>
-    <%= link_to icon('fa-solid', 'wrench'), edit_admin_region_url(@region), class: 'btn btn-default' %>
-    <%= link_to icon('fa-solid', 'trash'), admin_region_url(@region), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
+
+    <%= link_to "Rebuild Container Networks",
+    admin_region_rebuild_networks_path(@region),
+    method: :post,
+    data: {
+      confirm: @region.ipv6_egress? ?
+        "Are you sure? This will rebuild all containers. IPv6 Egress is enabled on this zone, so this will also convert every existing project in it to dual-stack." :
+        "Are you sure? This will rebuild all containers.",
+    },
+    class: "btn btn-warning" %>
+
+    <%= link_to icon("fa-solid", "wrench"),
+    edit_admin_region_url(@region),
+    class: "btn btn-default" %>
+
+    <%= link_to icon("fa-solid", "trash"),
+    admin_region_url(@region),
+    method: :delete,
+    data: {
+      confirm: "Are you sure?",
+    },
+    class: "btn btn-danger" %>
   </div>
 </div>
-<br />
+<br/>
 <div class="row">
-  <div class="col-xs-12 remote-resource refresh" data-url="/admin/regions/<%= @region.id %>/nodes">
-    <p class="text-center"><%= icon('fa-solid fa-spin', 'rotate') %></p>
+  <%# No `refresh`: this block re-rendered the whole node list every 6.5s, and
+      each render issues a Prometheus read per metric per node -- a standing load
+      against the metrics server for as long as a tab stayed open. Loads once per
+      page view now, like the dashboard's zone rows. %>
+  <div
+    class="col-xs-12 remote-resource"
+    data-url="/admin/regions/<%= @region.id %>/nodes"
+  >
+    <p class="text-center"><%= icon("fa-solid fa-spin", "rotate") %></p>
   </div>
 </div>

@@ -1,5 +1,4 @@
 class ContainerImages::ImageVariantsController < ContainerImages::BaseController
-
   include RescueResponder
 
   before_action :find_variant, only: [:edit, :update, :destroy, :show]
@@ -20,7 +19,8 @@ class ContainerImages::ImageVariantsController < ContainerImages::BaseController
     @variant = @image.image_variants.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def create
     @variant = @image.image_variants.new variant_params
@@ -40,12 +40,11 @@ class ContainerImages::ImageVariantsController < ContainerImages::BaseController
     end
   end
 
-
   def destroy
     if @variant.destroy
       flash[:success] = "Variant removed"
     else
-      flash[:alert] = "Error deleting variant: #{@variant.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error deleting variant: #{@variant.errors.full_messages.join(" ")}"
     end
     redirect_to "/container_images/#{@image.id}"
   end
@@ -72,5 +71,4 @@ class ContainerImages::ImageVariantsController < ContainerImages::BaseController
   def not_found_responder
     redirect_to "/container_images", alert: "Unknown Collection"
   end
-
 end

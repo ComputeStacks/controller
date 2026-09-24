@@ -12,7 +12,7 @@ module ContainerImages
     def registry_image_available?
       container_image.registry_image_client.tag_available?(registry_image_tag)
     rescue => e
-      ExceptionAlertService.new(e, '4aff131c93ac3aaf').perform
+      ExceptionAlertService.new(e, "4aff131c93ac3aaf").perform
       false
     end
 
@@ -21,6 +21,5 @@ module ContainerImages
     def update_tag_validation!
       ImageWorkers::ValidateTagWorker.perform_async global_id
     end
-
   end
 end

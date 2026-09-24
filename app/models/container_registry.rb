@@ -50,7 +50,6 @@
 #   @return [Array<User>]
 #
 class ContainerRegistry < ApplicationRecord
-
   include Auditable
   include Authorization::ContainerRegistry
   include MockRegistry
@@ -113,26 +112,26 @@ class ContainerRegistry < ApplicationRecord
     begin
       client_images = registry_client.images
     rescue => e # Usually due to connection issues
-      ExceptionAlertService.new(e, '7ce472ad3e09868c').perform
+      ExceptionAlertService.new(e, "7ce472ad3e09868c").perform
       SystemEvent.create!(
         message: "Container Registry Error",
-        log_level: 'warn',
+        log_level: "warn",
         data: {
-          'registry' => {
-            'id' => self.id,
-            'user' => self.user&.email
+          "registry" => {
+            "id" => id,
+            "user" => user&.email
           },
-          'error' => e.message
+          "error" => e.message
         },
-        event_code: '7ce472ad3e09868c'
+        event_code: "7ce472ad3e09868c"
       )
       return []
     end
     client_images.each do |i|
       next if i.tags.nil?
-      next if i.tags['tags'].nil? || i.tags['tags'].empty? # dont show images with no tags, this means it's an empty repository.
+      next if i.tags["tags"].nil? || i.tags["tags"].empty? # dont show images with no tags, this means it's an empty repository.
       image = {image: i.image_name, tags: []}
-      i.tags['tags'].each do |tag|
+      i.tags["tags"].each do |tag|
         container = nil
         container_check = container_image_provider.container_images.where("container_images.registry_image_path = ? AND container_image_image_variants.registry_image_tag = ?", i.image_name, tag).joins(:image_variants)
         container_check = container_check.first
@@ -156,128 +155,126 @@ class ContainerRegistry < ApplicationRecord
 
   def deploy!
     return mock_deploy! if Rails.env.test?
-    update status: 'deploying'
+    update status: "deploying"
     container = docker_client
     if container.created?
-      update status: 'deployed'
+      update status: "deployed"
       return true
     end
     if name.blank? # Extra safety around blank paths..
-      update status: 'error'
+      update status: "error"
       return false
     end
-    container.client.exec!("mkdir -p /computestacks-mnt/#{self.name}/{auth,data}")
-    container.exec!('htpasswd', "-Bbn admin #{registry_password} > /computestacks-mnt/#{self.name}/auth/htpasswd")
+    container.client.exec!("mkdir -p /computestacks-mnt/#{name}/{auth,data}")
+    container.exec!("htpasswd", "-Bbn admin #{registry_password} > /computestacks-mnt/#{name}/auth/htpasswd")
     container.create!
-    update status: 'deployed'
+    update status: "deployed"
   rescue => e
-    ExceptionAlertService.new(e, '38db2d60875dcdf7').perform
+    ExceptionAlertService.new(e, "38db2d60875dcdf7").perform
     SystemEvent.create!(
       message: "Container Registry Error",
-      log_level: 'warn',
+      log_level: "warn",
       data: {
-        'registry' => {
-          'id' => self.id,
-          'user' => self.user&.email
+        "registry" => {
+          "id" => id,
+          "user" => user&.email
         },
-        'error' => e.message
+        "error" => e.message
       },
-      event_code: '38db2d60875dcdf7'
+      event_code: "38db2d60875dcdf7"
     )
-    update_column :status, 'error'
+    update_column :status, "error"
   end
 
   # TODO: Look at adding 'REGISTRY_HTTP_SECRET'
   def docker_client
-    set_port! if self.port.zero?
+    set_port! if port.zero?
     container_env = [
-      ['REGISTRY_AUTH', 'htpasswd'],
-      ['REGISTRY_AUTH_HTPASSWD_PATH', '/auth/htpasswd'],
-      ['REGISTRY_AUTH_HTPASSWD_REALM', "'Registry Realm'"],
-      ['REGISTRY_STORAGE_DELETE_ENABLED', 'true']
+      ["REGISTRY_AUTH", "htpasswd"],
+      ["REGISTRY_AUTH_HTPASSWD_PATH", "/auth/htpasswd"],
+      ["REGISTRY_AUTH_HTPASSWD_REALM", "'Registry Realm'"],
+      ["REGISTRY_STORAGE_DELETE_ENABLED", "true"]
     ]
-    if Setting.registry_selinux
+    volumes = if Setting.registry_selinux
       # Add :Z for SELinux
-      volumes = [
-        ["/computestacks-mnt/#{self.name}/auth", '/auth:Z'],
-        ["/computestacks-mnt/#{self.name}/data",'/var/lib/registry:Z']
+      [
+        ["/computestacks-mnt/#{name}/auth", "/auth:Z"],
+        ["/computestacks-mnt/#{name}/data", "/var/lib/registry:Z"]
       ]
     else
-      volumes = [
-        ["/computestacks-mnt/#{self.name}/auth", '/auth'],
-        ["/computestacks-mnt/#{self.name}/data",'/var/lib/registry']
+      [
+        ["/computestacks-mnt/#{name}/auth", "/auth"],
+        ["/computestacks-mnt/#{name}/data", "/var/lib/registry"]
       ]
     end
-    if Feature.check('updated_cr_cert')
-      container_env << ['REGISTRY_HTTP_TLS_CERTIFICATE', "/certs/fullchain.pem"]
-      container_env << ['REGISTRY_HTTP_TLS_KEY', "/certs/privkey.pem"]
-      volumes << ["/opt/container_registry/ssl/", "/certs#{Setting.registry_selinux ? ':z' : ''}"]
-    else # Legacy way of dealing with ContainerRegistry Certificates
-      if Setting.computestacks_cr_le.value.nil?
-        container_env << ['REGISTRY_HTTP_TLS_CERTIFICATE', '/certs/cert.cer']
-        container_env << ['REGISTRY_HTTP_TLS_KEY', '/certs/key.pem']
-        if Setting.registry_selinux
-          volumes << ['/etc/ssl/container-registry', '/certs:z']
-        else
-          volumes << ['/etc/ssl/container-registry', '/certs']
-        end
+    if Feature.check("updated_cr_cert")
+      container_env << ["REGISTRY_HTTP_TLS_CERTIFICATE", "/certs/fullchain.pem"]
+      container_env << ["REGISTRY_HTTP_TLS_KEY", "/certs/privkey.pem"]
+      volumes << ["/opt/container_registry/ssl/", "/certs#{Setting.registry_selinux ? ":z" : ""}"]
+    elsif Setting.computestacks_cr_le.value.nil? # Legacy way of dealing with ContainerRegistry Certificates
+      container_env << ["REGISTRY_HTTP_TLS_CERTIFICATE", "/certs/cert.cer"]
+      container_env << ["REGISTRY_HTTP_TLS_KEY", "/certs/key.pem"]
+      volumes << if Setting.registry_selinux
+        ["/etc/ssl/container-registry", "/certs:z"]
       else
-        container_env << ['REGISTRY_HTTP_TLS_CERTIFICATE', "/certs/live/#{Setting.computestacks_cr_le.value}/fullchain.pem"]
-        container_env << ['REGISTRY_HTTP_TLS_KEY', "/certs/live/#{Setting.computestacks_cr_le.value}/privkey.pem"]
-        if Setting.registry_selinux
-          volumes << ["/etc/letsencrypt", '/certs:z']
-        else
-          volumes << ["/etc/letsencrypt", '/certs']
-        end
+        ["/etc/ssl/container-registry", "/certs"]
+      end
+    else
+      container_env << ["REGISTRY_HTTP_TLS_CERTIFICATE", "/certs/live/#{Setting.computestacks_cr_le.value}/fullchain.pem"]
+      container_env << ["REGISTRY_HTTP_TLS_KEY", "/certs/live/#{Setting.computestacks_cr_le.value}/privkey.pem"]
+      volumes << if Setting.registry_selinux
+        ["/etc/letsencrypt", "/certs:z"]
+      else
+        ["/etc/letsencrypt", "/certs"]
       end
     end
-    ports = [[self.port, 5000]]
+    ports = [[port, 5000]]
     options = {
-      :env => container_env,
-      :volumes => volumes,
-      :port_map => ports,
-      :restart_policy => "always"
+      env: container_env,
+      volumes: volumes,
+      port_map: ports,
+      restart_policy: "always"
     }
-    params = {image_url: "cmptstks/registry:latest", settings: options, node: {key: "#{Rails.root}/#{ENV['CS_SSH_KEY']}"}}
+    params = {image_url: "cmptstks/registry:latest", settings: options, node: {key: Rails.root.join(ENV["CS_SSH_KEY"].to_s).to_s}}
     ssh_port = Setting.registry_ssh_port
-    DockerSSH::Container.new(self.name, "ssh://#{Setting.registry_node}:#{ssh_port}", params)
+    DockerSSH::Container.new(name, "ssh://#{Setting.registry_node}:#{ssh_port}", params)
   rescue => e
-    ExceptionAlertService.new(e, '50da83a1ddcb0233').perform
+    ExceptionAlertService.new(e, "50da83a1ddcb0233").perform
     SystemEvent.create!(
       message: "Container Registry Connect Error",
-      log_level: 'warn',
+      log_level: "warn",
       data: {
-        'registry' => {
-          'id' => self.id,
-          'user' => self.user&.email
+        "registry" => {
+          "id" => id,
+          "user" => user&.email
         },
-        'error' => e.message
+        "error" => e.message
       },
-      event_code: '50da83a1ddcb0233'
+      event_code: "50da83a1ddcb0233"
     )
     nil
   end
 
   def registry_client
-    c = DockerRegistry::Client.new(Setting.registry_base_url, self.port, {
-      username: 'admin',
+    c = DockerRegistry::Client.new(Setting.registry_base_url, port, {
+      username: "admin",
       password: registry_password
     })
     c.insecure_ssl = true unless Rails.env.production?
     DockerRegistry::Repo.new(c)
   rescue => e
-    ExceptionAlertService.new(e, 'eb77377c9ad9bcca').perform
+    ExceptionAlertService.new(e, "eb77377c9ad9bcca").perform
     SystemEvent.create!(
       message: "Container Registry Auth Error",
-      log_level: 'warn',
+      log_level: "warn",
       data: {
-        'registry' => {
-          'id' => self.id,
-          'user' => self.user&.email
+        "registry" => {
+          "id" => id,
+          "user" => user&.email
         },
-        'error' => e.message
+        "error" => e.message
       },
-      event_code: 'eb77377c9ad9bcca'
+      event_code: "eb77377c9ad9bcca"
     )
     nil
   end
@@ -285,10 +282,10 @@ class ContainerRegistry < ApplicationRecord
   def set_port!
     ports_in_use = ContainerRegistry.all.pluck(:port)
     p = Rails.env.production? ? 25000 : 45000
-    while ports_in_use.include?(p) && p < 50000 do
+    while ports_in_use.include?(p) && p < 50000
       p += 1
     end
-    p > 49999 ? false : update(port: p)
+    (p > 49999) ? false : update(port: p)
   end
 
   def content_variables
@@ -305,12 +302,12 @@ class ContainerRegistry < ApplicationRecord
     return true if docker_client.nil?
     docker_client.stop
     docker_client.destroy
-    docker_client.client.exec!("rm -rf /computestacks-mnt/#{self.name}") unless self.name.blank?
+    docker_client.client.exec!("rm -rf /computestacks-mnt/#{name}") unless name.blank?
   end
 
   def post_create
-    #port = rand(5000..20000)
-    self.update({
+    # port = rand(5000..20000)
+    update({
       name: NamesGenerator.name(id),
       port: 0,
       label: label.blank? ? name : label
@@ -322,14 +319,12 @@ class ContainerRegistry < ApplicationRecord
   end
 
   def update_provider
-
     if container_image_provider.nil?
       ContainerImageProvider.create!(
-                              name: name,
-                              is_default: false,
-                              hostname: "#{Setting.registry_base_url}:#{port}",
-                              container_registry_id: id
-
+        name: name,
+        is_default: false,
+        hostname: "#{Setting.registry_base_url}:#{port}",
+        container_registry_id: id
       )
     else
       container_image_provider.update(
@@ -337,12 +332,11 @@ class ContainerRegistry < ApplicationRecord
         hostname: "#{Setting.registry_base_url}:#{port}"
       )
     end
-
   end
 
   def generate_password
     if registry_password.blank?
-      self.registry_password = SecureRandom.urlsafe_base64(7).gsub("_","").gsub("-","")
+      self.registry_password = SecureRandom.urlsafe_base64(7).delete("_").delete("-")
     end
   end
 
@@ -355,9 +349,8 @@ class ContainerRegistry < ApplicationRecord
     container_registry_collaborators.each do |i|
       i.current_user = user_performer
       unless i.destroy
-        errors.add(:base, %Q(Error deleting collaborator #{i.id} - #{i.errors.full_messages.join("\n")}))
+        errors.add(:base, %(Error deleting collaborator #{i.id} - #{i.errors.full_messages.join("\n")}))
       end
     end
   end
-
 end

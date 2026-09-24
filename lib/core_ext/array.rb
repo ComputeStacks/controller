@@ -1,5 +1,4 @@
 class Array
-
   # Average contents of array
   #
   # source: https://github.com/rails-camp/ruby-coding-exercises/blob/solutions/january/14.rb

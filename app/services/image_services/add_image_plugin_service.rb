@@ -13,12 +13,11 @@ module ImageServices
   #   @return [Array]
   #
   class AddImagePluginService
-
     attr_accessor :image,
-                  :plugin,
-                  :cascade,
-                  :current_user,
-                  :errors
+      :plugin,
+      :cascade,
+      :current_user,
+      :errors
 
     # @param [ContainerImage] image
     # @param [ContainerImagePlugin] plugin
@@ -38,7 +37,7 @@ module ImageServices
       if image.update add_plugin_id: plugin.id
         cascade_plugin! if cascade
       else
-        self.errors << image.errors.full_messages.join(", ")
+        errors << image.errors.full_messages.join(", ")
       end
       errors.empty?
     end
@@ -81,7 +80,7 @@ module ImageServices
           is_optional: plugin.is_optional
         )
         unless p.save
-          self.errors << "Error creating plugin for service: #{s.id} | #{p.errors.full_messages.join(", ")}"
+          errors << "Error creating plugin for service: #{s.id} | #{p.errors.full_messages.join(", ")}"
         end
       end
       errors.empty?
@@ -95,9 +94,8 @@ module ImageServices
       sp = subscription.add_product! plugin.product
       return true if sp.errors.empty?
 
-      self.errors << "Error saving subscription product for service : #{service.id} | #{sp.errors.full_messages.join(", ")}"
+      errors << "Error saving subscription product for service : #{service.id} | #{sp.errors.full_messages.join(", ")}"
       false
     end
-
   end
 end

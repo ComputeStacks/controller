@@ -1,5 +1,4 @@
 class ContainerImages::IngressParamsController < ContainerImages::BaseController
-
   include RescueResponder
 
   before_action :find_ingress_rule, only: [:edit, :update, :destroy]
@@ -8,7 +7,8 @@ class ContainerImages::IngressParamsController < ContainerImages::BaseController
     @ingress = @image.ingress_params.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     if @ingress.update(ingress_params)
@@ -33,7 +33,7 @@ class ContainerImages::IngressParamsController < ContainerImages::BaseController
     if @ingress.destroy
       flash[:success] = "#{name} deleted."
     else
-      flash[:alert] = "Error: #{@ingress.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error: #{@ingress.errors.full_messages.join(" ")}"
     end
     redirect_to helpers.container_image_path(@image)
   end
@@ -52,6 +52,4 @@ class ContainerImages::IngressParamsController < ContainerImages::BaseController
   def not_found_responder
     redirect_to "/container_images/#{@image.id}", alert: "Ingress Rule Not Found"
   end
-
-
 end

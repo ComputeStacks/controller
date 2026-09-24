@@ -1,18 +1,16 @@
 ##
 # Projects API
 class Api::ProjectsController < Api::ApplicationController
+  api_scope read: :project_read, update: :project_write, destroy: :project_write
 
-  before_action -> { doorkeeper_authorize! :projects_read }, only: %i[index show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :projects_write }, only: %i[update destroy], unless: :current_user
-
-  before_action :load_deployment, except: %i[ index create ]
+  before_action :load_deployment, except: %i[index create]
 
   ##
   # List Projects
   #
   # `GET /api/projects`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `projects`: Array
   #     * `id`: Integer
@@ -40,7 +38,7 @@ class Api::ProjectsController < Api::ApplicationController
   #
   # `GET /api/projects/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `project`: Object
   #     * `id`: Integer
@@ -58,14 +56,15 @@ class Api::ProjectsController < Api::ApplicationController
   #         * `icons`: Array
   #         * `image_names`: Array
 
-  def show; end
+  def show
+  end
 
   ##
   # Update Project
   #
   # `PATCH /api/projects/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `project`: Object
   #     * `name`: String
@@ -80,23 +79,23 @@ class Api::ProjectsController < Api::ApplicationController
   #
   # `DELETE /api/projects/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   def destroy
-    audit = Audit.create_from_object!(@deployment, 'deleted', request.remote_ip, current_user)
+    audit = Audit.create_from_object!(@deployment, "deleted", request.remote_ip, current_user)
     event = EventLog.create!(
-      locale: 'deployment.trash',
-      locale_keys: { project: @deployment.name },
-      event_code: '20cd984da4da8963',
+      locale: "deployment.trash",
+      locale_keys: {project: @deployment.name},
+      event_code: "20cd984da4da8963",
       audit: audit,
-      status: 'pending'
+      status: "pending"
     )
     @deployment.mark_trashed!
     event.deployments << @deployment
     ProjectWorkers::TrashProjectWorker.perform_async @deployment.global_id, event.global_id
     api_obj_destroyed
   rescue => e
-    return api_fatal_error(e, '337f9ab41ca0a9a7')
+    api_fatal_error(e, "337f9ab41ca0a9a7")
   end
 
   private
@@ -107,7 +106,6 @@ class Api::ProjectsController < Api::ApplicationController
 
   def load_deployment
     @deployment = Deployment.find_for current_user, id: params[:id]
-    return api_obj_missing if @deployment.nil?
+    api_obj_missing if @deployment.nil?
   end
-
 end

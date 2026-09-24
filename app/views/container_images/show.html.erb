@@ -136,5 +136,17 @@
       <% end %>
     </div>
 
+    <%# Admin only: this page also serves non-admin image owners, and the event_logs list
+        partial links to /admin/ URLs. Without this panel a volume cascade reports into an
+        EventLog that is surfaced nowhere on the image it belongs to. %>
+    <% if current_user.is_admin? %>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <strong><%= t "container_images.show.events" %></strong>
+        </div>
+        <%= render partial: "admin/event_logs/list", locals: {logs: @container.event_logs.order(id: :desc).limit(15), root_path: "/admin/event_logs"} %>
+      </div>
+    <% end %>
+
   </div>
 </div>

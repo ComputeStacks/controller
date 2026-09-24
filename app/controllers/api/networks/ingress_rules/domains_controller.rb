@@ -1,7 +1,7 @@
 ##
 # List Domain Ingress Rules
 class Api::Networks::IngressRules::DomainsController < Api::Networks::IngressRules::BaseController
-
+  api_scope index: :project_read
 
   ##
   # List domains for this ingress rule
@@ -13,8 +13,7 @@ class Api::Networks::IngressRules::DomainsController < Api::Networks::IngressRul
   def index
     @domains = paginate @ingress_rule.container_domains
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/domains/index' }
+      format.any(:json, :xml) { render template: "api/domains/index" }
     end
   end
-
 end

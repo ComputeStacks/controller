@@ -1,17 +1,18 @@
 attributes :id,
-           :port,
-           :port_nat,
-           :proto,
-           :external_access,
-           :backend_ssl,
-           :tcp_proxy_opt,
-           :redirect_ssl,
-           :restrict_cf,
-           :tcp_lb,
-           :created_at,
-           :region_id,
-           :container_service_id,
-           :updated_at
+  :port,
+  :port_nat,
+  :proto,
+  :external_access,
+  :backend_ssl,
+  :tcp_proxy_opt,
+  :redirect_ssl,
+  :restrict_cf,
+  :restrict_bunny,
+  :tcp_lb,
+  :created_at,
+  :region_id,
+  :container_service_id,
+  :updated_at
 
 node :load_balancer_rule_id do |i|
   i.load_balancer_rule&.id

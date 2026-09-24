@@ -20,13 +20,12 @@ module ProjectServices
   # @!attribute current_audit
   #   @return [Audit]
   class CloneProjectService
-
     attr_accessor :project,
-                  :order_session,
-                  :errors,
-                  :event,
-                  :current_audit,
-                  :user
+      :order_session,
+      :errors,
+      :event,
+      :current_audit,
+      :user
 
     # @param [Deployment] project
     # @param [Audit] audit
@@ -57,11 +56,11 @@ module ProjectServices
       project.services.each do |i|
         vols = []
         i.volume_maps.each do |vm|
-          vol_action = 'clone'
+          vol_action = "clone"
           vol_source = vm.volume.csrn
           unless vm.is_owner
             if vm.volume.template
-              vol_action = 'mount'
+              vol_action = "mount"
               vol_source = vm.volume.template.csrn
             else
               event.event_details.create!(
@@ -74,7 +73,7 @@ module ProjectServices
             action: vol_action, source: vol_source, mount_path: vm.mount_path, mount_ro: vm.mount_ro
           }
         end
-        order_session.add_image i.image_variant, { volume_overrides: vols, source: i.csrn }
+        order_session.add_image i.image_variant, {volume_overrides: vols, source: i.csrn}
       end
       # The previous should already have all dependencies. However, if the image has a new dependency, this will make
       # sure the order won't fail due to missing dependencies.
@@ -89,15 +88,14 @@ module ProjectServices
 
     def create_event!
       self.event = EventLog.create!(
-        locale: 'project.clone',
+        locale: "project.clone",
         locale_keys: {
           project: project.name
         },
         audit: current_audit,
-        event_code: 'a3f3bb0ada9d90b9'
+        event_code: "a3f3bb0ada9d90b9"
       )
       event.deployments << project
     end
-
   end
 end

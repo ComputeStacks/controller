@@ -1,6 +1,5 @@
 module Deployments
   module ProjectNotificationsHelper
-
     # Are there any available rules that we can add to this project?
     #
     # @param [Deployment] project
@@ -15,12 +14,10 @@ module Deployments
     # @param [Deployment::NotificationRule] alert
     def available_project_notifications(project, alert = nil)
       if alert.nil?
-        UserNotification.available_alerts - project.notification_rules.select( Arel.sql(%Q(DISTINCT alert_name) )).pluck(:alert_name)
+        UserNotification.available_alerts - project.notification_rules.select(Arel.sql(%(DISTINCT alert_name))).pluck(:alert_name)
       else
-        UserNotification.available_alerts - project.notification_rules.select( Arel.sql(%Q(DISTINCT alert_name) )).where.not(id: alert.id).pluck(:alert_name)
+        UserNotification.available_alerts - project.notification_rules.select(Arel.sql(%(DISTINCT alert_name))).where.not(id: alert.id).pluck(:alert_name)
       end
     end
-
-
   end
 end

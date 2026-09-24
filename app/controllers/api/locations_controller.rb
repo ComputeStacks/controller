@@ -2,10 +2,9 @@
 # Locations API
 #
 class Api::LocationsController < Api::ApplicationController
+  api_scope read: :project_read
 
-  before_action -> { doorkeeper_authorize! :project_read }, unless: :current_user
-
-  before_action :find_location, except: %w(index)
+  before_action :find_location, except: %w[index]
 
   ##
   # List Locations
@@ -39,13 +38,13 @@ class Api::LocationsController < Api::ApplicationController
   #         * `id`: Integer
   #         * `name`: String
   #
-  def show; end
+  def show
+  end
 
   private
 
   def find_location
     @location = Location.find_by(id: params[:id])
-    return api_obj_missing if @location.nil?
+    api_obj_missing if @location.nil?
   end
-
 end

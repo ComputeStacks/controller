@@ -1,6 +1,5 @@
 module ContainerImages
   module ImageRelationshipHelper
-
     # @param [ContainerImage] image
     def container_image_relationships_path(image)
       return container_images_path if image.nil?
@@ -41,6 +40,5 @@ module ContainerImages
       end
       links.join(" | ").html_safe
     end
-
   end
 end

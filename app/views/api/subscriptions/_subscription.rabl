@@ -2,7 +2,7 @@ attributes :id, :label, :external_id, :active, :run_rate, :created_at, :updated_
 child :subscription_products, object_root: false do
   attributes :id, :external_id, :start_on, :active, :phase_type, :created_at, :updated_at
   node :product do |p|
-    partial 'api/products/product', object: p.product
+    partial "api/products/product", object: p.product
   end
   child :billing_resource do
     attributes :id, :billing_plan_id, :external_id

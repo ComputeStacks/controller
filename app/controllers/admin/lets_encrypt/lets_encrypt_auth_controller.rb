@@ -1,5 +1,4 @@
 class Admin::LetsEncrypt::LetsEncryptAuthController < Admin::ApplicationController
-
   before_action :load_lets_encrypt
   before_action :load_auth
 
@@ -14,7 +13,7 @@ class Admin::LetsEncrypt::LetsEncryptAuthController < Admin::ApplicationControll
     @lets_encrypt = ::LetsEncrypt.find_by(id: params[:lets_encrypt_id])
     if @lets_encrypt.nil?
       rediret_to "/admin/lets_encrypt", alert: "Unknown LetsEncrypt."
-      return false
+      false
     end
   end
 
@@ -22,8 +21,7 @@ class Admin::LetsEncrypt::LetsEncryptAuthController < Admin::ApplicationControll
     @auth = LetsEncryptAuth.find_by(id: params[:id])
     if @auth.nil?
       redirect_to "/admin/lets_encrypt/#{@lets_encrypt.id}", alert: "Unknown Auth"
-      return false
+      false
     end
   end
-
 end

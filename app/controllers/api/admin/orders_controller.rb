@@ -1,8 +1,7 @@
 ##
 # Order
 class Api::Admin::OrdersController < Api::Admin::ApplicationController
-
-  before_action :find_order, except: %i[ index create ]
+  before_action :find_order, except: %i[index create]
 
   ##
   # List Orders
@@ -11,18 +10,16 @@ class Api::Admin::OrdersController < Api::Admin::ApplicationController
   # `GET users/:user_id/orders(/filter/:filter)`
   #
   def index
-    if params[:filter] && %w(open processing cancelled completed).include?(params[:filter])
+    @orders = if params[:filter] && %w[open processing cancelled completed].include?(params[:filter])
       if params[:user_id]
-        @orders = paginate Order.where(status: params[:filter]).order(created_at: :desc)
+        paginate Order.where(status: params[:filter]).order(created_at: :desc)
       else
-        @orders = paginate Order.where(user_id: params[:user_id], status: params[:filter]).order(created_at: :desc)
+        paginate Order.where(user_id: params[:user_id], status: params[:filter]).order(created_at: :desc)
       end
+    elsif params[:user_id]
+      paginate Order.where(user_id: params[:user_id]).order(created_at: :desc)
     else
-      if params[:user_id]
-        @orders = paginate Order.where(user_id: params[:user_id]).order(created_at: :desc)
-      else
-        @orders = paginate Order.all.order(created_at: :desc)
-      end
+      paginate Order.all.order(created_at: :desc)
     end
     respond_to :json, :xml
   end
@@ -52,13 +49,12 @@ class Api::Admin::OrdersController < Api::Admin::ApplicationController
   end
 
   def find_order
-    if params[:find_by_external_id]
-      @order = Order.find_by(external_id: params[:id])
+    @order = if params[:find_by_external_id]
+      Order.find_by(external_id: params[:id])
     else
-      @order = Order.find_by(id: params[:id])
+      Order.find_by(id: params[:id])
     end
     return api_obj_missing if @order.nil?
     @order.current_user = current_user
   end
-
 end

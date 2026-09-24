@@ -1,9 +1,7 @@
 ##
 # User SSH Keys
 class Api::Users::SshKeysController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :profile_read }, only: %i[ index show ], unless: :current_user
-  before_action -> { doorkeeper_authorize! :profile_update }, only: %i[ create destroy ], unless: :current_user
+  api_scope read: :profile_read, write: :profile_update
 
   before_action :find_key, only: %i[show destroy]
 
@@ -37,7 +35,8 @@ class Api::Users::SshKeysController < Api::ApplicationController
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   ##
   # Create SSH Key
@@ -51,7 +50,7 @@ class Api::Users::SshKeysController < Api::ApplicationController
   #
   def create
     @ssh_key = current_user.ssh_keys.new ssh_key_params
-    @ssh_key.current_audit = Audit.create_from_object! current_user, 'updated', request.remote_ip, current_user
+    @ssh_key.current_audit = Audit.create_from_object! current_user, "updated", request.remote_ip, current_user
     @ssh_key.save
     return api_obj_error(@ssh_key.errors.full_messages) unless @ssh_key.errors.empty?
     render action: :show, status: :created
@@ -65,7 +64,7 @@ class Api::Users::SshKeysController < Api::ApplicationController
   # **OAuth AuthorizationRequired**: `profile_update`
   #
   def destroy
-    @ssh_key.current_audit = Audit.create_from_object! current_user, 'deleted', request.remote_ip, current_user
+    @ssh_key.current_audit = Audit.create_from_object! current_user, "deleted", request.remote_ip, current_user
     return api_obj_error(@ssh_key.errors.full_messages) unless @ssh_key.destroy
     render status: :accepted
   end
@@ -79,5 +78,4 @@ class Api::Users::SshKeysController < Api::ApplicationController
   def find_key
     @ssh_key = current_user.ssh_keys.find params[:id]
   end
-
 end

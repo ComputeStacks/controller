@@ -1,7 +1,6 @@
-require 'test_helper'
+require "test_helper"
 
 class Api::Admin::Locations::Regions::Nodes::MaintenanceControllerTest < ActionDispatch::IntegrationTest
-
   include ApiTestControllerBase
 
   # test 'can list all' do

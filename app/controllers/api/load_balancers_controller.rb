@@ -1,8 +1,7 @@
 ##
 # LoadBalancer API
 class Api::LoadBalancersController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :projects_read }, unless: :current_user
+  api_scope read: :project_read
 
   before_action :find_load_balancer, only: %i[show]
 
@@ -11,7 +10,7 @@ class Api::LoadBalancersController < Api::ApplicationController
   #
   # `GET /api/load_balancers`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `load_balancers`: Array
   #     * `id`: Integer
@@ -30,7 +29,7 @@ class Api::LoadBalancersController < Api::ApplicationController
   #
   # `GET /api/load_balancers/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `load_balancer`: Object
   #     * `id`: Integer
@@ -40,13 +39,13 @@ class Api::LoadBalancersController < Api::ApplicationController
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   private
 
   def find_load_balancer
     @load_balancer = current_user.load_balancers.find_by(id: params[:id])
-    return api_obj_missing if @load_balancer.nil?
+    api_obj_missing if @load_balancer.nil?
   end
-
 end

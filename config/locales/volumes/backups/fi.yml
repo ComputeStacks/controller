@@ -5,6 +5,12 @@ fi:
       restore:
         title_html: '<i class="fa-solid fa-rotate"></i> Palauta'
         confirm: Oletko varma? Toiminto ylikirjoittaa tämänhetkiset tiedot ja uudelleenkäynnistää tähän liittyvät kontit.
+      download:
+        ready_html: '<i class="fa-solid fa-download"></i> Lataa'
+        preparing_html: '<i class="fa-solid fa-rotate fa-spin"></i> Valmistellaan…'
+        request_html: '<i class="fa-solid fa-download"></i> Pyydä latausta'
+        expires: Linkki vanhenee
+        failed: Edellinen lataus epäonnistui — yritä uudelleen
       name: Varmuuskopion nimi
       title: Backups
       size:

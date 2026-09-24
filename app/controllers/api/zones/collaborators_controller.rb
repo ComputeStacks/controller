@@ -1,7 +1,8 @@
 # DNS Zone Collaborators
 class Api::Zones::CollaboratorsController < Api::Zones::BaseController
-
-  before_action -> { doorkeeper_authorize! :dns_write }, unless: :current_user
+  # `dns_write` on reads as well: who may reach a DNS zone is privileged
+  # information, so listing collaborators requires write access to the zone.
+  api_scope index: :dns_write, show: :dns_write, create: :dns_write, destroy: :dns_write
 
   before_action :verify_admin
   before_action :find_collab, only: %i[show destroy]
@@ -21,7 +22,7 @@ class Api::Zones::CollaboratorsController < Api::Zones::BaseController
   def index
     @collaborators = @zone.dns_zone_collaborators
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/index_type' }
+      format.any(:json, :xml) { render template: "api/collaborations/index_type" }
     end
   end
 
@@ -46,7 +47,7 @@ class Api::Zones::CollaboratorsController < Api::Zones::BaseController
   #
   def show
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/show' }
+      format.any(:json, :xml) { render template: "api/collaborations/show" }
     end
   end
 
@@ -62,7 +63,7 @@ class Api::Zones::CollaboratorsController < Api::Zones::BaseController
     @collab = @zone.dns_zone_collaborators.new user_email: collaborator_params[:user_email], current_user: current_user
     return api_obj_error(@collab.errors.full_messages) unless @collab.save
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/show', status: :created }
+      format.any(:json, :xml) { render template: "api/collaborations/show", status: :created }
     end
   end
 
@@ -94,5 +95,4 @@ class Api::Zones::CollaboratorsController < Api::Zones::BaseController
   def collaborator_params
     params.require(:collaborator).permit(:user_email)
   end
-
 end

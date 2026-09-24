@@ -1,7 +1,6 @@
 ##
 # Admin Image Collections
 class Api::Admin::ImageCollectionsController < Api::Admin::ApplicationController
-
   before_action :find_collection, only: %i[update destroy]
 
   ##
@@ -9,7 +8,7 @@ class Api::Admin::ImageCollectionsController < Api::Admin::ApplicationController
   #
   # `POST /api/admin/image_collections`
   #
-  # **OAuth Authorization Required**: `images_write`
+  # **OAuth Authorization Required**: `admin_write`
   #
   # * `image_collection`: Object
   #     * `label`: String
@@ -34,7 +33,7 @@ class Api::Admin::ImageCollectionsController < Api::Admin::ApplicationController
   #
   # `PATCH /api/admin/image_collections/{id}`
   #
-  # **OAuth Authorization Required**: `images_write`
+  # **OAuth Authorization Required**: `admin_write`
   #
   # * `image_collection`: Object
   #     * `label`: String
@@ -55,7 +54,7 @@ class Api::Admin::ImageCollectionsController < Api::Admin::ApplicationController
   ##
   # Delete Image Collection
   #
-  # **OAuth Authorization Required**: `images_write`
+  # **OAuth Authorization Required**: `admin_write`
   #
   # `DELETE /api/admin/image_collections/{id}`
   #
@@ -79,5 +78,4 @@ class Api::Admin::ImageCollectionsController < Api::Admin::ApplicationController
     return api_obj_missing if @collection.nil?
     @collection.current_user = current_user
   end
-
 end

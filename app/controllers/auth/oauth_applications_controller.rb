@@ -1,5 +1,4 @@
 class Auth::OauthApplicationsController < Doorkeeper::ApplicationsController
-
   include BelcoWidget
   include EnforceSecondFactor
   include LogPayload
@@ -13,11 +12,11 @@ class Auth::OauthApplicationsController < Doorkeeper::ApplicationsController
   before_action :load_owner, only: %i[show]
 
   def index
-    if current_user.is_admin
+    @applications = if current_user.is_admin
       # While admins can modify ALL applications, restrict the listing to just public and their applications
-      @applications = Doorkeeper::Application.where("owner_id is null OR owner_id = ?", current_user.id).ordered_by(:created_at)
+      Doorkeeper::Application.where("owner_id is null OR owner_id = ?", current_user.id).ordered_by(:created_at)
     else
-      @applications = current_user.oauth_applications.ordered_by(:created_at)
+      current_user.oauth_applications.ordered_by(:created_at)
     end
   end
 
@@ -43,7 +42,7 @@ class Auth::OauthApplicationsController < Doorkeeper::ApplicationsController
         format.json do
           errors = @application.errors.full_messages
 
-          render json: { errors: errors }, status: :unprocessable_entity
+          render json: {errors: errors}, status: :unprocessable_entity
         end
       end
     end
@@ -52,22 +51,22 @@ class Auth::OauthApplicationsController < Doorkeeper::ApplicationsController
   private
 
   def set_application
-    if current_user.is_admin
-      @application = Doorkeeper::Application.find_by(id: params[:id])
+    @application = if current_user.is_admin
+      Doorkeeper::Application.find_by(id: params[:id])
     else
-      @application = current_user.oauth_applications.find_by(id: params[:id])
+      current_user.oauth_applications.find_by(id: params[:id])
     end
     if @application.nil?
-      return redirect_to action: :index, alert: "Unknown application"
+      redirect_to action: :index, alert: "Unknown application"
     end
   end
 
   def load_owner
     @owner = if @application.owner_id.blank?
-               nil
-             else
-               User.find_by(id: @application.owner_id)
-             end
+      nil
+    else
+      User.find_by(id: @application.owner_id)
+    end
   end
 
   def application_params
@@ -81,5 +80,4 @@ class Auth::OauthApplicationsController < Doorkeeper::ApplicationsController
       )
     end
   end
-
 end

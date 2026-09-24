@@ -1,13 +1,13 @@
 class Admin::Deployments::ServicesController < Admin::Deployments::BaseController
-
-  before_action :find_service, only: %w(show)
+  before_action :find_service, only: %w[show]
 
   def index
     @services = @deployment.services.sorted
     render(template: "admin/deployments/services/index", layout: false) if request.xhr?
   end
 
-  def show; end
+  def show
+  end
 
   private
 
@@ -17,7 +17,6 @@ class Admin::Deployments::ServicesController < Admin::Deployments::BaseControlle
 
   def find_service
     @service = @deployment.services.find_by(id: params[:id])
-    return(redirect_to("/admin/deployments/#{@deployment.id}", alert: "Unknown service.")) if @service.nil?
+    redirect_to("/admin/deployments/#{@deployment.id}", alert: "Unknown service.") if @service.nil?
   end
-
 end

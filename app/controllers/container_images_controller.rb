@@ -1,5 +1,4 @@
 class ContainerImagesController < AuthController
-
   before_action :load_image, only: %i[show]
   before_action :load_protected_image, only: %i[edit update destroy]
   before_action :require_administer, only: :destroy
@@ -20,18 +19,18 @@ class ContainerImagesController < AuthController
     if @container.update(current_user.is_admin ? admin_container_params : container_params)
       redirect_to helpers.container_image_path(@container), notice: "Successfully updated container."
     else
-      flash[:alert] = @container.errors.full_messages.join('. ')
+      flash[:alert] = @container.errors.full_messages.join(". ")
       if params.dig(:container_image, :variant_pos)
         redirect_to "/container_images/#{@container.id}"
       else
-        render template: 'container_images/edit'
+        render template: "container_images/edit"
       end
     end
   end
 
   def show
     if request.xhr?
-      render template: 'container_images/show/tag_validator', layout: false
+      render template: "container_images/show/tag_validator", layout: false
     end
   end
 
@@ -61,12 +60,12 @@ class ContainerImagesController < AuthController
       end
     end
 
-    @container = current_user.container_images.new(
+    @container ||= current_user.container_images.new(
       current_user: current_user,
       registry_image_tag: "latest",
       can_scale: true,
-      container_image_provider: ContainerImageProvider.find_default&.first,
-    ) unless @container
+      container_image_provider: ContainerImageProvider.find_default&.first
+    )
   end
 
   def create
@@ -76,7 +75,7 @@ class ContainerImagesController < AuthController
     if @container.save
       redirect_to helpers.container_image_path(@container)
     else
-      render template: 'container_images/new'
+      render template: "container_images/new"
     end
   end
 
@@ -84,7 +83,7 @@ class ContainerImagesController < AuthController
     if @container.destroy
       flash[:notice] = "Successfully deleted image."
     else
-      flash[:alert] = @container.errors.full_messages.join('. ')
+      flash[:alert] = @container.errors.full_messages.join(". ")
     end
     redirect_to "/container_images"
   end
@@ -139,5 +138,4 @@ class ContainerImagesController < AuthController
       redirect_to "/container_images/#{@container.id}", alert: "Permission denied"
     end
   end
-
 end

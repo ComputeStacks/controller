@@ -19,6 +19,5 @@ module Users
     def totp_enabled?
       !otp_secret_enc.blank?
     end
-
   end
 end

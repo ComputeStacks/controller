@@ -1,6 +1,5 @@
 # Legacy base controller
 class Admin::Dns::BaseController < Admin::ApplicationController
-
   before_action :dns_enabled?
   before_action :load_dns_driver
   before_action :find_zone
@@ -8,8 +7,8 @@ class Admin::Dns::BaseController < Admin::ApplicationController
   private
 
   def dns_enabled?
-    return if Feature.check('dns', current_user)
-    redirect_to('/admin/dashboard', alert: I18n.t('common.feature_disabled', resource: 'DNS'))
+    return if Feature.check("dns", current_user)
+    redirect_to("/admin/dashboard", alert: I18n.t("common.feature_disabled", resource: "DNS"))
   end
 
   def load_dns_driver
@@ -22,10 +21,9 @@ class Admin::Dns::BaseController < Admin::ApplicationController
     if @zone.nil?
       respond_to do |format|
         format.json { head :unauthorized }
-        format.xml {  head :unauthorized }
+        format.xml { head :unauthorized }
         format.html { redirect_to("/admin/dns", alert: "Unknown zone") }
       end
     end
   end
-
 end

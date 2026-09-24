@@ -2,8 +2,7 @@
 # # Billing Resources
 #
 class Api::Admin::BillingPlans::BillingResourcesController < Api::Admin::BillingPlans::BaseController
-
-  before_action :find_billing_resource, except: %i[ index create ]
+  before_action :find_billing_resource, except: %i[index create]
 
   ##
   # List All Billing Resources
@@ -98,7 +97,6 @@ class Api::Admin::BillingPlans::BillingResourcesController < Api::Admin::Billing
 
   def find_billing_resource
     @billing_resource = @billing_plan.billing_resources.find_by(id: params[:id])
-    return api_obj_missing if @billing_resource.nil?
+    api_obj_missing if @billing_resource.nil?
   end
-
 end

@@ -15,7 +15,7 @@ module ContainerServices
         new_node = current_base_node(r, exclude_node)
         # Verify the cache is not stale with an offline node.
         if new_node.online? && !new_node.under_evacuation?
-          Rails.cache.delete("#{self.name}_#{r.id}_node")
+          Rails.cache.delete("#{name}_#{r.id}_node")
           new_node = current_base_node(r, exclude_node)
         end
       else
@@ -51,7 +51,7 @@ module ContainerServices
     #
     # @param [Region] r
     def current_base_node(r, exclude_node = nil)
-      Rails.cache.fetch("#{self.name}_#{r.id}_node", expires_in: 6.hours) do
+      Rails.cache.fetch("#{name}_#{r.id}_node", expires_in: 6.hours) do
         base_node = nil
         containers.each do |i|
           next if i.node.nil?
@@ -63,6 +63,5 @@ module ContainerServices
         base_node.nil? ? r.find_node(package, exclude_node) : base_node
       end
     end
-
   end
 end

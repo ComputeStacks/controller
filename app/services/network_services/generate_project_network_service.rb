@@ -1,9 +1,8 @@
 module NetworkServices
   class GenerateProjectNetworkService
-
     attr_reader :event,
-                :region,
-                :project
+      :region,
+      :project
 
     attr_accessor :network
 
@@ -61,15 +60,19 @@ module NetworkServices
 
       unless network.update(deployment: project, name: "net-#{@project.token}", label: "net-#{@project.token}")
         @event.event_details.create!(
-          data: "Failed to allocate network #{n.name}\n\n#{n.errors.full_messages.join(',')}",
+          data: "Failed to allocate network #{network.name}\n\n#{network.errors.full_messages.join(",")}",
           event_code: "5c01346cba94202e"
         )
         return false
       end
-      # Provision on node
+      # Provision on node.
+      #
+      # Return the result. This used to discard it and answer `true` unconditionally, so a
+      # network that failed to reach the node still reported success: ProcessOrderService
+      # carried on, built every container, and each one failed to start with "network ...
+      # not found". The customer saw a fatal error per container instead of one clear
+      # "Failed to build project network", and the order left containers behind.
       NetworkServices::CreateBridgeNetworkService.new(network, event).perform
-      true
     end
-
   end
 end

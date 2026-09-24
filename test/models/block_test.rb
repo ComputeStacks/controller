@@ -1,7 +1,6 @@
-require 'test_helper'
+require "test_helper"
 
 class BlockTest < ActiveSupport::TestCase
-
   test "should not create block without title" do
     block = Block.new
     assert_not block.save
@@ -18,5 +17,4 @@ class BlockTest < ActiveSupport::TestCase
   test "lookup by locale" do
     assert Block.where("block_contents.locale = 'en'").joins(:block_contents).exists?
   end
-
 end

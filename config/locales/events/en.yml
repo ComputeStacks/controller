@@ -61,13 +61,15 @@ en:
         errors:
           fatal: "Fatal error during provisioning."
           missing_loadbalancer: "Unable to find load balancer."
+      image:
+        cascade_volume: "[%{image}] Cascading volume change."
       lets_encrypt:
-        generate: "Generated LetsEncrypt for %{common_name}"
-        renew: "Renewing LetsEncrypt for %{common_name}"
-        validate: "Validating domain %{domain} for LetsEncrypt"
+        generate: "Generated Certificate for %{common_name}"
+        renew: "Renewing Certificate for %{common_name}"
+        validate: "Validating domain %{domain} for SSL Certificate"
       load_balancers:
         validate_domain: "Validating domain %{domain} for Load Balancer %{load_balancer}"
-        generate_lets_encrypt: "LetsEncrypt setup for Load Balancer %{load_balancer}"
+        generate_lets_encrypt: "Certificate setup for Load Balancer %{load_balancer}"
       node:
         images:
           pull: "[%{node}] Updating local images"
@@ -87,6 +89,7 @@ en:
         clone: "[%{project}] Clone Project"
       region:
         network: "[%{region}] Changing Network Driver"
+        rebuild_networks: "Rebuilding network interfaces for %{region}."
       service:
         addons: "[%{label}] Updating service addons."
         autoscale: "[%{label}] AutoScaling Service"
@@ -118,6 +121,7 @@ en:
         imported: "Imported volume %{volume}"
       volume:
         backup: Performing volume backup
+        download: Preparing backup download
         delete: Removing volume
         imported: "Imported volume %{volume}"
         restore: Performing volume restore

@@ -1,5 +1,4 @@
 class Admin::ProductsController < Admin::ApplicationController
-
   before_action :load_product, only: [:show, :edit, :update, :destroy]
 
   def index
@@ -17,7 +16,8 @@ class Admin::ProductsController < Admin::ApplicationController
     @product = Product.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def create
     @product = Product.new(product_params)
@@ -33,31 +33,31 @@ class Admin::ProductsController < Admin::ApplicationController
         if @package.save
           redirect_to "/admin/products/#{@product.id}/billing_packages/#{@package.id}/edit"
         else
-          render template: 'admin/products/billing_packages/new'
+          render template: "admin/products/billing_packages/new"
         end
       else
-        redirect_to "/admin/products", notice: 'Product created.'
+        redirect_to "/admin/products", notice: "Product created."
       end
     else
-      render template: 'admin/products/new'
+      render template: "admin/products/new"
     end
   end
 
   def update
     if @product.update(product_params)
-      redirect_to "/admin/products", notice: 'Product updated.'
+      redirect_to "/admin/products", notice: "Product updated."
     else
-      render template: 'admin/products/edit'
+      render template: "admin/products/edit"
     end
   end
 
   def destroy
     if @product.subscription_products.empty? && @product.destroy
-      flash[:notice] = 'Product deleted'
+      flash[:notice] = "Product deleted"
     elsif !@product.subscription_products.empty?
       flash[:alert] = "Error! This product is being used by subscriptions."
     else
-      flash[:alert] = "Error! #{@product.errors.full_messages.join(' ')}"
+      flash[:alert] = "Error! #{@product.errors.full_messages.join(" ")}"
     end
     redirect_to "/admin/products"
   end
@@ -71,11 +71,10 @@ class Admin::ProductsController < Admin::ApplicationController
   def load_product
     @product = Product.find_by(id: params[:id])
     if @product.nil?
-      redirect_to "/admin/products", alert: 'Unknown Product.'
+      redirect_to "/admin/products", alert: "Unknown Product."
       return false
     end
     @product.current_user = current_user
     @base_url = "/admin/products/#{@product.id}-#{@product.name.parameterize}"
   end
-
 end

@@ -1,18 +1,16 @@
 ##
 # Project Domains API
 class Api::DomainsController < Api::ApplicationController
+  api_scope read: :project_read, write: :project_write
 
-  before_action -> { doorkeeper_authorize! :projects_read }, only: %i[index show], unless: :current_user
-  before_action -> { doorkeeper_authorize! :projects_write }, only: %i[update create destroy], unless: :current_user
-
-  before_action :load_domain, except: %i[ index create ]
+  before_action :load_domain, except: %i[index create]
 
   ##
   # List all domains
   #
   # `GET /api/domains`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `domains`: Array
   #     * `id`: Integer
@@ -36,7 +34,7 @@ class Api::DomainsController < Api::ApplicationController
   #
   # `GET /api/domains/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_read`
+  # **OAuth AuthorizationRequired**: `project_read`
   #
   # * `domain`: Object
   #     * `id`: Integer
@@ -53,27 +51,31 @@ class Api::DomainsController < Api::ApplicationController
   #     * `links`: Hash
   #         * `container_service`: String (url)
   #
-  def show; end
+  def show
+  end
 
   ##
   # Create Domain
   #
   # `POST /api/domains`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `domain`: Object
   #     * `domain`: String
   #     * `le_enabled`: Boolean
   #     * `make_primary`: Boolean
-  #     * `heder_hsts`: Boolean
+  #     * `header_hsts`: Boolean
+  #     * `hsts_include_subdomains`: Boolean
+  #     * `hsts_preload`: Boolean
+  #     * `header_frame_options`: Boolean
   #     * `ingress_rule_id`: Integer
   #     * `make_primary`: Boolean
   #
   def create
     @domain = current_user.container_domains.new(domain_params)
     @domain.current_user = current_user
-    return api_obj_error(['missing domain route']) if @domain.ingress_rule.nil?
+    return api_obj_error(["missing domain route"]) if @domain.ingress_rule.nil?
     return api_obj_error(@domain.errors.full_messages) unless @domain.save
 
     # Make primary
@@ -83,7 +85,7 @@ class Api::DomainsController < Api::ApplicationController
       format.any(:json, :xml) { render action: :show }
     end
   rescue => e
-    return api_fatal_error(e, '2e2abaf920847b09')
+    api_fatal_error(e, "2e2abaf920847b09")
   end
 
   ##
@@ -91,12 +93,15 @@ class Api::DomainsController < Api::ApplicationController
   #
   # `PATCH /api/domains/{id}`
   #
-  # **OAuth AuthorizationRequired**: `projects_write`
+  # **OAuth AuthorizationRequired**: `project_write`
   #
   # * `domain`: Object
   #     * `domain`: String
   #     * `le_enabled`: Boolean
-  #     * `heder_hsts`: Boolean
+  #     * `header_hsts`: Boolean
+  #     * `hsts_include_subdomains`: Boolean
+  #     * `hsts_preload`: Boolean
+  #     * `header_frame_options`: Boolean
   #     * `force_https`: Boolean
   #     * `ingress_rule_id`: Integer
   #
@@ -107,7 +112,7 @@ class Api::DomainsController < Api::ApplicationController
       format.any(:json, :xml) { render action: :show }
     end
   rescue => e
-    return api_fatal_error(e, '78c6da0cad97261d')
+    api_fatal_error(e, "78c6da0cad97261d")
   end
 
   ##
@@ -127,14 +132,14 @@ class Api::DomainsController < Api::ApplicationController
       end
     end
   rescue => e
-    return api_fatal_error(e, 'b392ad8e9fd57404')
+    api_fatal_error(e, "b392ad8e9fd57404")
   end
 
   private
 
   def domain_params
     params.require(:domain).permit(
-      :domain, :le_enabled, :ingress_rule_id, :header_hsts, :make_primary, :force_https
+      :domain, :le_enabled, :ingress_rule_id, :header_hsts, :hsts_include_subdomains, :hsts_preload, :header_frame_options, :make_primary, :force_https
     )
   end
 
@@ -143,5 +148,4 @@ class Api::DomainsController < Api::ApplicationController
     return api_obj_missing if @domain.nil?
     @domain.current_user = current_user
   end
-
 end

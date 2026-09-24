@@ -1,5 +1,4 @@
 class ContainerServices::ConnectController < ContainerServices::BaseController
-
-  def index; end
-
+  def index
+  end
 end

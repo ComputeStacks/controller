@@ -20,7 +20,6 @@
 #   @return [User]
 #
 class UserSshKey < ApplicationRecord
-
   include Auditable
   include SshPublicKey
 
@@ -50,5 +49,4 @@ class UserSshKey < ApplicationRecord
       ProjectWorkers::RefreshMetadataSshWorker.perform_async d.id, current_audit.id
     end
   end
-
 end

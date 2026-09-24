@@ -8,6 +8,8 @@ de:
       mount_path: Mount Pfad
       mount_path_help: Wohin mounten im Container
       destroy: Zeitplan für das Löschen von Volumes
+      cascade: Dieses Volume auf bestehenden bereitgestellten Diensten anlegen?
+      cascade_help: "Container binden es beim nächsten Neuaufbau ein — es wird jetzt nichts neu gestartet. Alles, was an diesem Pfad bereits im Container gespeichert ist, wird durch das neue leere Volume verborgen, sobald es eingebunden wird."
       backups:
         title: Volume Backup Einstellungen
         enabled: Backups aktiviert

@@ -115,7 +115,7 @@ module Projects
           # Ensure pass auth is updated.
           SftpServices::MetadataSshHostKeys.new(i).perform
         else
-          errors.add(:base, "Error updating sftp container #{i.id}: #{i.errors.full_messages.join(', ')}")
+          errors.add(:base, "Error updating sftp container #{i.id}: #{i.errors.full_messages.join(", ")}")
           return rollback_new_owner!(sub_state)
         end
       end
@@ -124,7 +124,6 @@ module Projects
       ProjectWorkers::RefreshMetadataSshWorker.perform_async id, current_audit&.id
 
       ProjectServices::MetadataSshKeys.new(self).perform
-
     end
 
     def rollback_new_owner!(data = [])
@@ -159,6 +158,5 @@ module Projects
       end
       throw(:abort)
     end
-
   end
 end

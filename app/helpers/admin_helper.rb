@@ -1,10 +1,9 @@
 module AdminHelper
-
   def admin_user_email_link(email)
-    email_split = email.split('@')
+    email_split = email.split("@")
     account = email_split.first
     domain = email_split.last
-    return email if %w(outlook.com gmail.com ymail.com yahoo.com hotmail.com protonmail.com icloud.com me.com hotmail.com computestacks.com).include?(domain)
+    return email if %w[outlook.com gmail.com ymail.com yahoo.com hotmail.com protonmail.com icloud.com me.com hotmail.com computestacks.com].include?(domain)
     "#{account}@<a href='http://#{domain}' target='_blank'>#{domain}</a>"
   end
 
@@ -19,19 +18,18 @@ module AdminHelper
   # end
 
   def admin_nav_is_containers?
-    return true if request.path =~ /volumes/
-    return true if request.path =~ /\/admin\/containers/
-    return true if request.path =~ /\/admin\/sftp/
-    return true if request.path =~ /\/admin\/container_domains/
-    return true if request.path =~ /\/admin\/deployments/
-    return true if request.path =~ /\/admin\/volumes/
+    return true if /volumes/.match?(request.path)
+    return true if /\/admin\/containers/.match?(request.path)
+    return true if /\/admin\/sftp/.match?(request.path)
+    return true if /\/admin\/container_domains/.match?(request.path)
+    return true if /\/admin\/deployments/.match?(request.path)
+    return true if /\/admin\/volumes/.match?(request.path)
     false
   end
 
   def admin_nav_is_images?
-    return true if request.path =~ /\/admin\/container_images/
-    return true if request.path =~ /\/admin\/container_registry/
+    return true if /\/admin\/container_images/.match?(request.path)
+    return true if /\/admin\/container_registry/.match?(request.path)
     false
   end
-
 end

@@ -1,5 +1,4 @@
 class Admin::AlertNotificationsController < Admin::ApplicationController
-
   include RescueResponder
 
   before_action :find_alert_notification, only: %i[show update]
@@ -16,14 +15,14 @@ class Admin::AlertNotificationsController < Admin::ApplicationController
 
   def show
     if request.xhr?
-      render template: 'admin/alert_notifications/show', layout: false
+      render template: "admin/alert_notifications/show", layout: false
     end
   end
 
   def update
     @alert.resolve = true
     unless @alert.save
-      flash[:alert] = "#{@alert.errors.full_messages.join(' ')}"
+      flash[:alert] = "#{@alert.errors.full_messages.join(" ")}"
     end
     redirect_to "/admin/alert_notifications"
   end
@@ -46,5 +45,4 @@ class Admin::AlertNotificationsController < Admin::ApplicationController
   def not_found_responder
     redirect_to "/admin/alert_notifications", alert: "Unknown Alert"
   end
-
 end

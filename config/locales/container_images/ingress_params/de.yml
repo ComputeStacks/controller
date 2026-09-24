@@ -39,6 +39,9 @@ de:
         restrict_cf: "Externe Verbindungen nur auf CloudFlare beschränken?"
         restrict_cf_help_html: "Dadurch wird der gesamte Datentransfer blockiert, der nicht von CloudFlare stammt. Dies gilt nur für den globalen Load Balancer (Public Network)."
 
+        restrict_bunny: "Externe Verbindungen nur auf Bunny CDN beschränken?"
+        restrict_bunny_help_html: "Dadurch wird der gesamte Datentransfer blockiert, der nicht von Bunny CDN stammt. Dies gilt nur für den globalen Load Balancer (Public Network). Kann nicht mit der CloudFlare-Beschränkung kombiniert werden."
+
         # Use iptables or HAProxy to manage external access to a tcp service
         # if disabled, we create an iptable nat rule
         tcp_lb: "Enable TCP Load Balancing"

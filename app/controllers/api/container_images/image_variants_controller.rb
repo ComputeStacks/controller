@@ -1,7 +1,6 @@
 ##
 # Container Image Variants
 class Api::ContainerImages::ImageVariantsController < Api::ContainerImages::BaseController
-
   before_action :find_variant, only: %i[update destroy]
 
   ##
@@ -88,5 +87,4 @@ class Api::ContainerImages::ImageVariantsController < Api::ContainerImages::Base
       :rollback_migrate
     )
   end
-
 end

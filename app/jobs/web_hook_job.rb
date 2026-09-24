@@ -17,8 +17,8 @@ class WebHookJob < ApplicationJob
     else
       return false
     end
-    if setting.value =~ URI::regexp
-      data = Rabl::Renderer.new(template, obj, { format: :json }).render if data.blank?
+    if setting.value&.match?(URI::DEFAULT_PARSER.make_regexp)
+      data = Rabl::Renderer.new(template, obj, {format: :json}).render if data.blank?
       WebHookService.new(setting, data).perform
     end
   rescue HTTP::ConnectionError => e
@@ -28,6 +28,6 @@ class WebHookJob < ApplicationJob
       event_code: "5a5cac710536c1a3"
     )
   rescue => e
-    ExceptionAlertService.new(e, '244f99e153d92fe5').perform
+    ExceptionAlertService.new(e, "244f99e153d92fe5").perform
   end
 end

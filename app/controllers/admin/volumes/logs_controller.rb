@@ -1,5 +1,4 @@
 class Admin::Volumes::LogsController < Admin::Volumes::BaseController
-
   def index
     if request.xhr?
       @logs = @volume.event_logs.where("created_at > ?", 1.week.ago).sorted.limit(5)
@@ -17,5 +16,4 @@ class Admin::Volumes::LogsController < Admin::Volumes::BaseController
     end
     @subscribers = @log.subscribers(current_user)
   end
-
 end

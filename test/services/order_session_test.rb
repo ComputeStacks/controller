@@ -1,12 +1,11 @@
-require 'test_helper'
+require "test_helper"
 
 class OrderSessionTest < ActiveSupport::TestCase
-
   setup do
     @order_session = OrderSession.new users(:admin)
   end
 
-  test 'can add images' do
+  test "can add images" do
     @order_session.add_image container_image_image_variants(:wordpress_default)
     assert_includes @order_session.images.map { |i| i[:image_id] }, container_images(:wordpress).id
 
@@ -14,15 +13,14 @@ class OrderSessionTest < ActiveSupport::TestCase
     assert_includes @order_session.images.map { |i| i[:image_id] }, container_images(:mariadb).id
   end
 
-  test 'can find existing order' do
+  test "can find existing order" do
     assert_equal OrderSession.new(users(:admin), @order_session.id).id, @order_session.id
   end
 
-  test 'can generate valid order' do
+  test "can generate valid order" do
     @order_session.add_image container_image_image_variants(:elasticsearch_default)
     order_data = @order_session.to_order
     refute_empty order_data[:containers]
     assert_includes order_data[:containers].map { |i| i[:image_id] }, container_images(:elasticsearch).id
   end
-
 end

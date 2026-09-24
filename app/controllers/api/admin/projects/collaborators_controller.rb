@@ -1,6 +1,5 @@
 # Project Collaborators
 class Api::Admin::Projects::CollaboratorsController < Api::Admin::Projects::BaseController
-
   before_action :find_collab, only: %i[show destroy]
 
   ##
@@ -18,7 +17,7 @@ class Api::Admin::Projects::CollaboratorsController < Api::Admin::Projects::Base
   def index
     @collaborators = @deployment.deployment_collaborators.sorted
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/index_type' }
+      format.any(:json, :xml) { render template: "api/collaborations/index_type" }
     end
   end
 
@@ -43,7 +42,7 @@ class Api::Admin::Projects::CollaboratorsController < Api::Admin::Projects::Base
   #
   def show
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/show' }
+      format.any(:json, :xml) { render template: "api/collaborations/show" }
     end
   end
 
@@ -61,7 +60,7 @@ class Api::Admin::Projects::CollaboratorsController < Api::Admin::Projects::Base
     @collab.skip_confirmation = true if collaborator_params[:skip_confirmation]
     return api_obj_error(@collab.errors.full_messages) unless @collab.save
     respond_to do |format|
-      format.any(:json, :xml) { render template: 'api/collaborations/show', status: :created }
+      format.any(:json, :xml) { render template: "api/collaborations/show", status: :created }
     end
   end
 
@@ -86,5 +85,4 @@ class Api::Admin::Projects::CollaboratorsController < Api::Admin::Projects::Base
   def collaborator_params
     params.require(:collaborator).permit(:user_email, :skip_confirmation)
   end
-
 end

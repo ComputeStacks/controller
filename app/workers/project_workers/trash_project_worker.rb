@@ -12,19 +12,18 @@ module ProjectWorkers
       if ProjectServices::TrashProject.new(project, event).perform
         event.done!
       else
-        event.fail! 'Fatal error destroying project'
+        event.fail! "Fatal error destroying project"
       end
-
     rescue => e
       user = nil
       if defined?(event) && event
         event.event_details.create!(
           data: e.message,
-          event_code: '108e3566f4cc9f43'
+          event_code: "108e3566f4cc9f43"
         )
         event.fail! e.message
       end
-      ExceptionAlertService.new(e, '108e3566f4cc9f43', user).perform
+      ExceptionAlertService.new(e, "108e3566f4cc9f43", user).perform
     end
   end
 end

@@ -1,5 +1,4 @@
 class Admin::Deployments::EventsController < Admin::Deployments::BaseController
-
   def index
     if request.xhr?
       @logs = @deployment.event_logs.sorted.limit(3)
@@ -17,5 +16,4 @@ class Admin::Deployments::EventsController < Admin::Deployments::BaseController
     end
     @subscribers = @log.subscribers(current_user)
   end
-
 end

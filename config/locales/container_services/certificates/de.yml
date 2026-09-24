@@ -12,10 +12,10 @@ de:
         privkey: Privater Schlüssel
       none:
         custom: Keine benutzerdefinierten Zertifikate gefunden.
-        le: Kein LetsEncrypt Zertifikate gefunden.
+        le: Kein Automatische SSL-Zertifikate gefunden.
       verify_domain: DNS verifizieren
       le:
-        title: Kostenlose LetsEncrypt-Zertifikate
+        title: Automatische kostenlose SSL-Zertifikate
         action: Kostenloses SSL einrichten
       custom:
         title: Benutzerdefinierte SSL-Zertifikate

@@ -33,6 +33,9 @@ nginx_default:
   le_enabled: false
   enabled: true
   user: admin
+  hsts_include_subdomains: true
+  hsts_preload: true
+  header_frame_options: true
 user_nginx_default:
   domain: "photo-faker593.a.cs.local"
   system_domain: true
@@ -45,5 +48,16 @@ pma_default:
   system_domain: true
   ingress_rule: pma_http
   le_enabled: false
+  enabled: true
+  user: admin
+# Intentionally http-only (system_domain: false, le off, force_https off) so force_ssl? is false.
+# Exercises the http-frontend use_backend (non-redirect) branch and proves the https-only
+# edge behaviors (Location rewrite) are correctly absent for plain-http tenants.
+plain_http_only:
+  domain: "plain-http999.a.cs.local"
+  system_domain: false
+  ingress_rule: nginx_http
+  le_enabled: false
+  force_https: false
   enabled: true
   user: admin

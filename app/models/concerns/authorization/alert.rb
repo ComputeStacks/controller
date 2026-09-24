@@ -16,6 +16,5 @@ module Authorization
       end
       false
     end
-
   end
 end

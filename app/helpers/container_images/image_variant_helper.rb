@@ -1,6 +1,5 @@
 module ContainerImages
   module ImageVariantHelper
-
     def container_image_variants_path(image)
       return container_images_path if image.nil?
       "#{container_image_path(image)}/image_variants"
@@ -22,18 +21,17 @@ module ContainerImages
     end
 
     def image_variant_valid_tag_label(variant)
-      %Q(<span class="label label-success">#{image_variant_valid_tag_icon(variant)}</span>).html_safe
+      %(<span class="label label-success">#{image_variant_valid_tag_icon(variant)}</span>).html_safe
     end
 
     def image_variant_valid_tag_icon(variant)
       if variant.validated_tag && variant.validated_tag_updated
-        icon('fa-solid', 'check')
+        icon("fa-solid", "check")
       elsif variant.validated_tag_updated
-        icon('fa-solid', 'ban')
+        icon("fa-solid", "ban")
       else
-        icon('fa-solid fa-spin', 'rotate')
+        icon("fa-solid fa-spin", "rotate")
       end
     end
-
   end
 end

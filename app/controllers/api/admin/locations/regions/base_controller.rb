@@ -1,5 +1,4 @@
 class Api::Admin::Locations::Regions::BaseController < Api::Admin::Locations::BaseController
-
   # noinspection RubyResolve
   before_action :find_region
 
@@ -10,5 +9,4 @@ class Api::Admin::Locations::Regions::BaseController < Api::Admin::Locations::Ba
     return api_obj_missing if @region.nil?
     @region.current_user = current_user
   end
-
 end

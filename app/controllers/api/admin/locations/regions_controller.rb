@@ -1,8 +1,7 @@
 ##
 # # Regions
 class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseController
-
-  before_action :find_region, except: %i[ index create ]
+  before_action :find_region, except: %i[index create]
 
   ##
   # List All Regions
@@ -29,7 +28,9 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
   #     * `ulimit_nofile_soft`: Integer (0 = unlimited)
   #     * `ulimit_nofile_hard`: Integer (0 = unlimited)
   #     * `disable_oom`: Boolean (default: false) Disable OomKiller. Warning, process may freeze and require manual intervention.
+  #     * `ipv6_egress`: Boolean (default: false) Egress-only IPv6 for containers. Applies to project networks created after enabling; requires the node to have working upstream IPv6. Unsetting does not remove IPv6 from networks that already have it.
   #     * `acme_server`: String | Should be in the form <ip:port> for accessing the controller from the node, ideally over private ip.
+  #     * `guac_url`: String
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
@@ -63,7 +64,9 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
   #     * `ulimit_nofile_soft`: Integer (0 = unlimited)
   #     * `ulimit_nofile_hard`: Integer (0 = unlimited)
   #     * `disable_oom`: Boolean (default: false) Disable OomKiller. Warning, process may freeze and require manual intervention.
+  #     * `ipv6_egress`: Boolean (default: false) Egress-only IPv6 for containers. Applies to project networks created after enabling; requires the node to have working upstream IPv6. Unsetting does not remove IPv6 from networks that already have it.
   #     * `acme_server`: String
+  #     * `guac_url`: String
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
@@ -96,7 +99,10 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
   #     * `ulimit_nofile_soft`: Integer (0 = unlimited)
   #     * `ulimit_nofile_hard`: Integer (0 = unlimited)
   #     * `acme_server`: String
+  #     * `guac_url`: String
+  #     * `guac_key`: String
   #     * `disable_oom`: Boolean (default: false) Disable OomKiller. Warning, process may freeze and require manual intervention.
+  #     * `ipv6_egress`: Boolean (default: false) Egress-only IPv6 for containers. Applies to project networks created after enabling; requires the node to have working upstream IPv6. Unsetting does not remove IPv6 from networks that already have it.
   #
   def update
     return api_obj_error(@region.errors.full_messages) unless @region.update(region_update_params)
@@ -128,7 +134,10 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
   #     * `ulimit_nofile_soft`: Integer (0 = unlimited)
   #     * `ulimit_nofile_hard`: Integer (0 = unlimited)
   #     * `acme_server`: String
+  #     * `guac_url`: String
+  #     * `guac_key`: String
   #     * `disable_oom`: Boolean (default: false) Disable OomKiller. Warning, process may freeze and require manual intervention.
+  #     * `ipv6_egress`: Boolean (default: false) Egress-only IPv6 for containers. Applies to project networks created after enabling; requires the node to have working upstream IPv6. Unsetting does not remove IPv6 from networks that already have it.
   #
   def create
     @region = @location.regions.new region_create_params
@@ -157,7 +166,8 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
     params.require(:region).permit(
       :name, :active, :fill_to, :metric_client_id, :loki_endpoint, :log_client_id, :loki_retries, :loki_batch_size,
       :volume_backend, :nfs_remote_host, :nfs_remote_path, :offline_window, :failure_count, :nfs_controller_ip,
-      :ulimit_nofile_soft, :ulimit_nofile_hard, :pids_limit, :disable_oom, :acme_server
+      :ulimit_nofile_soft, :ulimit_nofile_hard, :pids_limit, :disable_oom, :acme_server,
+      :guac_url, :guac_key, :ipv6_egress
     )
   end
 
@@ -165,7 +175,8 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
     params.require(:region).permit(
       :active, :fill_to, :metric_client_id, :loki_endpoint, :log_client_id, :loki_retries, :loki_batch_size,
       :volume_backend, :nfs_remote_host, :nfs_remote_path, :offline_window, :failure_count, :nfs_controller_ip,
-      :ulimit_nofile_soft, :ulimit_nofile_hard, :pids_limit, :disable_oom, :acme_server
+      :ulimit_nofile_soft, :ulimit_nofile_hard, :pids_limit, :disable_oom, :acme_server,
+      :guac_url, :guac_key, :ipv6_egress
     )
   end
 
@@ -174,5 +185,4 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
     return api_obj_missing if @region.nil?
     @region.current_user = current_user
   end
-
 end

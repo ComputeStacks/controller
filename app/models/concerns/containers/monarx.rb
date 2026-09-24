@@ -3,9 +3,7 @@ module Containers
     extend ActiveSupport::Concern
 
     included do
-
       after_destroy :clean_monarx_cache
-
     end
 
     private
@@ -16,6 +14,5 @@ module Containers
       Rails.cache.delete "monarx_url_#{service.name}"
       Rails.cache.delete "monarx_agentid_#{service.name}"
     end
-
   end
 end

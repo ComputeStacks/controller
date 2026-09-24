@@ -1,9 +1,7 @@
 ##
 # # Locations
 class Api::Admin::LocationsController < Api::Admin::ApplicationController
-
-  before_action :find_location, except: %i[ index create ]
-
+  before_action :find_location, except: %i[index create]
 
   ##
   # List All Locations
@@ -97,6 +95,4 @@ class Api::Admin::LocationsController < Api::Admin::ApplicationController
     return api_obj_missing if @location.nil?
     @location.current_user = current_user
   end
-
-
 end

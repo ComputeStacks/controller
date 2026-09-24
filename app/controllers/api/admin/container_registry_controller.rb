@@ -1,7 +1,6 @@
 ##
 # Container Registry
 class Api::Admin::ContainerRegistryController < Api::Admin::ApplicationController
-
   before_action :load_registry, except: [:index, :create]
 
   # List all Registries
@@ -40,7 +39,8 @@ class Api::Admin::ContainerRegistryController < Api::Admin::ApplicationControlle
   #   * `created_at`: DateTime
   #   * `updated_at`: DateTime
 
-  def show; end
+  def show
+  end
 
   # Update Container Registry
   #
@@ -61,7 +61,7 @@ class Api::Admin::ContainerRegistryController < Api::Admin::ApplicationControlle
       end
     end
   rescue => e
-    return api_fatal_error(e, '491d8878e76f6f8c')
+    api_fatal_error(e, "491d8878e76f6f8c")
   end
 
   # Create Container Registry
@@ -85,7 +85,7 @@ class Api::Admin::ContainerRegistryController < Api::Admin::ApplicationControlle
       end
     end
   rescue => e
-    return api_fatal_error(e, 'ac39278afd586653')
+    api_fatal_error(e, "ac39278afd586653")
   end
 
   # Delete Container Registry
@@ -99,8 +99,8 @@ class Api::Admin::ContainerRegistryController < Api::Admin::ApplicationControlle
           format.json { render json: {}, status: :accepted }
           format.xml { render xml: {}, status: :accepted }
         else
-          format.json { render json: { errors: @registry.errors.full_messages }, status: :bad_request }
-          format.xml { render xml: { errors: @registry.errors.full_messages }, status: :bad_request }
+          format.json { render json: {errors: @registry.errors.full_messages}, status: :bad_request }
+          format.xml { render xml: {errors: @registry.errors.full_messages}, status: :bad_request }
         end
       else
         format.json { render json: {errors: ["Error! There are deployed containers using this registry."]}, status: :bad_request }
@@ -108,7 +108,7 @@ class Api::Admin::ContainerRegistryController < Api::Admin::ApplicationControlle
       end
     end
   rescue => e
-    return api_fatal_error(e, 'b32af383f7088db8')
+    api_fatal_error(e, "b32af383f7088db8")
   end
 
   private
@@ -121,5 +121,4 @@ class Api::Admin::ContainerRegistryController < Api::Admin::ApplicationControlle
     @registry = ContainerRegistry.find params[:id]
     @registry.current_user = current_user
   end
-
 end

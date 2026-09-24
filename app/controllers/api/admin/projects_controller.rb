@@ -1,8 +1,7 @@
 ##
 # # Projects
 class Api::Admin::ProjectsController < Api::Admin::ApplicationController
-
-  before_action :find_project, except: %i[ index ]
+  before_action :find_project, except: %i[index]
 
   ##
   # List All Projects
@@ -91,7 +90,7 @@ class Api::Admin::ProjectsController < Api::Admin::ApplicationController
   #   * `migrate_image_owner`: Boolean - (default: false)
 
   def update
-    audit = Audit.create_from_object!(@deployment, 'updated', request.remote_ip, current_user)
+    audit = Audit.create_from_object!(@deployment, "updated", request.remote_ip, current_user)
     @deployment.current_audit = audit
     return api_obj_error(@deployment.errors.full_messages) unless @deployment.update(project_params)
     respond_to do |f|
@@ -107,7 +106,6 @@ class Api::Admin::ProjectsController < Api::Admin::ApplicationController
 
   def find_project
     @deployment = Deployment.find_by id: params[:id]
-    return api_obj_missing if @deployment.nil?
+    api_obj_missing if @deployment.nil?
   end
-
 end

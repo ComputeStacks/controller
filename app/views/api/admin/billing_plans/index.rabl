@@ -1,4 +1,4 @@
-collection @billing_plans, object_root: false, root: 'billing_plans'
+collection @billing_plans, object_root: false, root: "billing_plans"
 attributes :id, :name, :created_at, :updated_at
 child :user_groups, object_root: false do
   attributes :id, :name, :created_at, :updated_at

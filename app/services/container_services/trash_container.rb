@@ -15,10 +15,9 @@ module ContainerServices
   # @!attribute fail_counter
   #   @return [Integer]
   class TrashContainer
-
     attr_accessor :container,
-                  :fail_counter,
-                  :event
+      :fail_counter,
+      :event
 
     def initialize(container, event)
       self.container = container # Could be either Container or Sftp
@@ -35,10 +34,10 @@ module ContainerServices
       end
       trash_container
     rescue => e
-      ExceptionAlertService.new(e, 'e2811a0537359044', event.audit&.user).perform
+      ExceptionAlertService.new(e, "e2811a0537359044", event.audit&.user).perform
       event.event_details.create!(
         data: "Fatal error!\n\n#{e.message}",
-        event_code: '83f412d78229f3a5'
+        event_code: "83f412d78229f3a5"
       )
       false
     end
@@ -58,13 +57,13 @@ module ContainerServices
         trash_container
       else
         event.event_details.create!(
-          data: "Failed to destroy #{container.is_a?(Deployment::Container) ? 'container' : 'sftp container'} #{container.name}: #{e.message}",
-          event_code: '3085231e621c2b16'
+          data: "Failed to destroy #{container.is_a?(Deployment::Container) ? "container" : "sftp container"} #{container.name}: #{e.message}",
+          event_code: "3085231e621c2b16"
         )
-        return false
+        false
       end
     rescue Docker::Error::NotFoundError => err
-      ExceptionAlertService.new(err, '48247877795d5c7e', event.audit&.user).perform
+      ExceptionAlertService.new(err, "48247877795d5c7e", event.audit&.user).perform
       trash_local_container!
     end
 
@@ -76,13 +75,13 @@ module ContainerServices
       if container.destroy
         event.event_details.create!(
           data: "Successfully destroyed container: #{container.name}",
-          event_code: '21cdb02746c1cdea'
+          event_code: "21cdb02746c1cdea"
         )
         true
       else
         event.event_details.create!(
-          data: "Error deleting container: #{container.name}\n\n#{container.errors.full_messages.join(' ')}",
-          event_code: 'e3046634f010d0ce'
+          data: "Error deleting container: #{container.name}\n\n#{container.errors.full_messages.join(" ")}",
+          event_code: "e3046634f010d0ce"
         )
         false
       end
@@ -94,6 +93,5 @@ module ContainerServices
         i.destroy
       end
     end
-
   end
 end

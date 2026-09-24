@@ -33,6 +33,7 @@ fi:
             write_latency: Node %{node} has unusual disk write latency
             full: Node %{node} is out of disk space
             full_soon: Node %{node} will be out of disk in 4 hours
+          rebuild_networks: "Rebuilding network interfaces for %{node}."
         notifications:
           processing: "Processing notifications for %{name}"
         prom:
@@ -61,13 +62,15 @@ fi:
         errors:
           fatal: "Käyttöönotossa tapahtui virhe."
           missing_loadbalancer: "Kuormantasaajaa ei löydetty."
+      image:
+        cascade_volume: "[%{image}] Cascading volume change."
       lets_encrypt:
-        generate: "Generated LetsEncrypt for %{common_name}"
-        renew: "Renewing LetsEncrypt for %{common_name}"
-        validate: "Validating domain %{domain} for LetsEncrypt"
+        generate: "Generated Certificate for %{common_name}"
+        renew: "Renewing Certificate for %{common_name}"
+        validate: "Validating domain %{domain} for SSL Certificate"
       load_balancers:
         validate_domain: "Validating domain %{domain} for Load Balancer %{load_balancer}"
-        generate_lets_encrypt: "LetsEncrypt setup for Load Balancer %{load_balancer}"
+        generate_lets_encrypt: "Certificate setup for Load Balancer %{load_balancer}"
       node:
         images:
           pull: "[%{node}] Updating local images"
@@ -87,6 +90,7 @@ fi:
         clone: "[%{project}] Clone Project"
       region:
         network: "[%{region}] Changing Network Driver"
+        rebuild_networks: "Rebuilding network interfaces for %{region}."
       service:
         addons: "[%{label}] Updating service addons."
         autoscale: "[%{label}] AutoScaling Service"
@@ -116,6 +120,7 @@ fi:
         imported: "Imported volume %{volume}"
       volume:
         backup: Suoritetaan tallennustilan varmuuskopiointi
+        download: Valmistellaan varmuuskopion latausta
         delete: "Poistetaan tallennustila %{volume}"
         imported: "Tuotu tallennustila %{volume}"
         restore: Suoritetaan tallennustilan palautus

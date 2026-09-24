@@ -2,9 +2,8 @@ module UtilityServices
   ##
   # Transmit Saved Profiles
   class TransmitExporterService
-
     attr_accessor :user,
-                  :deployment
+      :deployment
 
     def intialize
       self.user = nil
@@ -49,9 +48,9 @@ module UtilityServices
             "localPlaces" => [],
             "fileListEncoding" => 4,
             "username" => "sftpuser",
-            "remotePath" => %Q(/home/sftpuser/apps/#{service.name}/#{vol.label}),
+            "remotePath" => %(/home/sftpuser/apps/#{service.name}/#{vol.label}),
             "remotePlaces" => [],
-            "name" => %Q([#{service.deployment.name}] #{multiple_vols ? "#{service.label}-#{vol.label}" : service.label}),
+            "name" => %([#{service.deployment.name}] #{multiple_vols ? "#{service.label}-#{vol.label}" : service.label}),
             "port" => sftp.public_port
           }
           server["password"] = sftp.password if sftp.pw_auth
@@ -67,6 +66,5 @@ module UtilityServices
         }
       }.to_json
     end
-
   end
 end

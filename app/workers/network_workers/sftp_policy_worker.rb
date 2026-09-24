@@ -2,7 +2,7 @@ module NetworkWorkers
   class SftpPolicyWorker
     include Sidekiq::Worker
 
-    sidekiq_options retry: 4, queue: 'dep_critical'
+    sidekiq_options retry: 4, queue: "dep_critical"
 
     def perform(sftp_container_id)
       service = Deployment::Sftp.find_by id: sftp_container_id
@@ -17,24 +17,24 @@ module NetworkWorkers
         policy = service.calico_policy
       rescue DockerSSH::ConnectionFailed => e # Don't alert to our bug system!
         event = EventLog.create!(
-          locale: 'deployment.errors.fatal',
-          status: 'alert',
+          locale: "deployment.errors.fatal",
+          status: "alert",
           notice: true,
           event_code: "7019641092d663b6"
         )
-        event.event_details.create!(data: "Fatal error applying service policy: #{e.message}", event_code: '7019641092d663b6')
+        event.event_details.create!(data: "Fatal error applying service policy: #{e.message}", event_code: "7019641092d663b6")
         event.container_services << service
         event.deployments << service.deployment
         return
       rescue => e # capture any errors from generating the policy
-        ExceptionAlertService.new(e, '93547ab0b3ce1bd3').perform
+        ExceptionAlertService.new(e, "93547ab0b3ce1bd3").perform
         event = EventLog.create!(
-          locale: 'deployment.errors.fatal',
-          status: 'alert',
+          locale: "deployment.errors.fatal",
+          status: "alert",
           notice: true,
           event_code: "93547ab0b3ce1bd3"
         )
-        event.event_details.create!(data: "Fatal error applying service policy: #{e.message}", event_code: '93547ab0b3ce1bd3')
+        event.event_details.create!(data: "Fatal error applying service policy: #{e.message}", event_code: "93547ab0b3ce1bd3")
         event.container_services << service
         event.deployments << service.deployment
         return

@@ -1,6 +1,7 @@
 # https://doorkeeper.gitbook.io/guides/ruby-on-rails/getting-started
 
 # frozen_string_literal: true
+
 #
 # Original Source: https://github.com/doorkeeper-gem/doorkeeper/blob/45b6ce568523a5e2f2cdc9c3ed60254d7891f8dc/lib/generators/doorkeeper/templates/initializer.rb
 
@@ -19,8 +20,6 @@ Doorkeeper.configure do
     if resource && auth.valid_password?(params[:password])
       sign_in(:user, resource)
       resource
-    else
-      nil
     end
   end
 
@@ -40,7 +39,7 @@ Doorkeeper.configure do
   # `scopes` - the requested scopes (see Doorkeeper::OAuth::Scopes)
   #
   use_refresh_token do |context|
-    context.grant_type == 'authorization_code'
+    context.grant_type == "authorization_code"
   end
 
   # Provide support for an owner to be assigned to each registered application (disabled by default)
@@ -57,18 +56,18 @@ Doorkeeper.configure do
   #
   default_scopes :public
   optional_scopes :admin_read,
-                  :admin_write,
-                  :dns_read,
-                  :dns_write,
-                  :images_read,
-                  :images_write,
-                  :order_read,
-                  :order_write,
-                  :profile_update,
-                  :profile_read,
-                  :project_read,
-                  :project_write,
-                  :register # Can only be added to an oauth application by an administrator.
+    :admin_write,
+    :dns_read,
+    :dns_write,
+    :images_read,
+    :images_write,
+    :order_read,
+    :order_write,
+    :profile_update,
+    :profile_read,
+    :project_read,
+    :project_write,
+    :register # Can only be added to an oauth application by an administrator.
 
   # Define scopes_by_grant_type to restrict only certain scopes for grant_type
   # By default, all the scopes will be available for all the grant types.

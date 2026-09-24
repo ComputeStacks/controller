@@ -2,12 +2,11 @@ module ProvisionServices
   # Provision private load balancers for a given service
   #
   class IngressControllerProvisioner
-
     attr_accessor :service,
-                  :load_balancers, # The ones we are creating here
-                  :project,
-                  :event,
-                  :errors
+      :load_balancers, # The ones we are creating here
+      :project,
+      :event,
+      :errors
 
     def initialize(service, event)
       self.service = service
@@ -21,7 +20,7 @@ module ProvisionServices
       return false unless valid?
 
       # Ensure it's not already provisioned!
-      return true if project.services.where("labels @> ?", { load_balancer_for: service.id }.to_json).exists?
+      return true if project.services.where("labels @> ?", {load_balancer_for: service.id}.to_json).exists?
 
       # 1. Determine which load balancers we need to provision
       requests = []
@@ -59,7 +58,7 @@ module ProvisionServices
         memory: 1024,
         region: service.region,
         command: image.command,
-        labels: { load_balancer_for: service.id }
+        labels: {load_balancer_for: service.id}
       )
 
       unless lb_service.save
@@ -93,6 +92,5 @@ module ProvisionServices
       return false if event.nil?
       true
     end
-
   end
 end

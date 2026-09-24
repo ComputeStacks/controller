@@ -12,14 +12,21 @@ fi:
       breadcrumb:
         new: Lisää verkkotunnus
         routing: Domain Routing
-      enable_le_html: '<a href="%{link}">Klikkaa tästä</a> ottaaksesi käyttöön LetsEncrypt sertifikaatit nykyisillä verkkotunnuksilla.'
+      enable_le_html: '<a href="%{link}">Klikkaa tästä</a> ottaaksesi käyttöön Automatic SSL sertifikaatit nykyisillä verkkotunnuksilla.'
       form:
         enabled: "Käytössä?"
         enabled_help:
           system: "Järjestelmän verkkotunnukset voidaan vain sallia tai estää. Muut toiminnot eivät ole mahdollisia."
           user: "Rastin poistaminen tästä laatikosta pysäyttää verkkotunnuksen reitityksen konttiin välittömästi."
-        le: Ota käyttöön LetsEncrypt ilmainen SSL
+        le: Enable Automatic Free SSL
         hsts: Enable HSTS Header
         hsts_help: This will add the HSTS header to the load balancer. Only works with SSL connections.
-        # For LetsEncrypt, we will automatically enable this. This is the message they will see in that situation.
-        hsts_auto_help: Automatically enabled for domains with LetsEncrypt enabled.
+        hsts_auto_help: Automatically enabled for domains with automatic ssl enabled.
+        hsts_group: HTTP Strict Transport Security (HSTS)
+        hsts_group_help: The "includeSubDomains" and "preload" options only take effect while "Enable HSTS Header" is checked.
+        hsts_include_subdomains: HSTS includeSubDomains
+        hsts_include_subdomains_help: Requires the HSTS header. Applies HSTS to all subdomains — only enable once every subdomain serves HTTPS.
+        hsts_preload: HSTS preload
+        hsts_preload_help: Requires includeSubDomains. Marks the domain for browser HSTS preload lists.
+        frame_options: 'X-Frame-Options: SAMEORIGIN'
+        frame_options_help: Prevents other websites from embedding this domain in a frame (clickjacking protection).

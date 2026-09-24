@@ -13,7 +13,7 @@ module RegionWorkers
       errors = []
       status = []
 
-      region.deployments.where(private_network: { id: nil }).includes(:private_network).each do |project|
+      region.deployments.where(private_network: {id: nil}).includes(:private_network).each do |project|
         s = ProjectServices::MigrateNetworkService.new(project, event)
         s.reload_lb = false
         if s.perform
@@ -26,10 +26,12 @@ module RegionWorkers
         end
       end
 
-      event.event_details.create!(
-        data: status.join("\n"),
-        event_code: "66f4aeff7c356ea6"
-      ) unless status.empty?
+      unless status.empty?
+        event.event_details.create!(
+          data: status.join("\n"),
+          event_code: "66f4aeff7c356ea6"
+        )
+      end
 
       # Reload the LB regardless of status
       LoadBalancerServices::DeployConfigService.new(region).perform
@@ -46,7 +48,7 @@ module RegionWorkers
     rescue ActiveRecord::RecordNotFound
       nil
     rescue => e
-      ExceptionAlertService.new(e, '3a0d4599b944bdf7').perform
+      ExceptionAlertService.new(e, "3a0d4599b944bdf7").perform
       if defined?(event) && event
         event.event_details.create!(
           data: "Fatal Error: #{e.message}",

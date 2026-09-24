@@ -96,5 +96,6 @@
   </div>
   <%= yield(:footer) %>
   <%= render partial: 'layouts/plugins/belco' if Setting.belco_enabled? && current_user %>
+  <%= render partial: "layouts/plugins/dixa" if Setting.dixa_enabled? && current_user %>
 </body>
 </html>

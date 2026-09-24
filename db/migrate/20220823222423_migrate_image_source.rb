@@ -1,7 +1,6 @@
 class MigrateImageSource < ActiveRecord::Migration[7.0]
   def up
-
-    result = ActiveRecord::Base.connection.execute(%Q(select * from container_images))
+    result = ActiveRecord::Base.connection.execute(%(select * from container_images))
 
     result.each do |item|
       ContainerImage::ImageVariant.create!(
@@ -13,6 +12,5 @@ class MigrateImageSource < ActiveRecord::Migration[7.0]
         is_default: true
       )
     end
-
   end
 end

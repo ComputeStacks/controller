@@ -1,5 +1,4 @@
 class Admin::Users::ContainerServicesController < Admin::Users::ApplicationController
-
   def index
     if request.xhr?
       @services = @user.container_services.sorted
@@ -10,7 +9,5 @@ class Admin::Users::ContainerServicesController < Admin::Users::ApplicationContr
     else
       @services = @user.container_services.sorted.paginate per_page: 30, page: params[:page]
     end
-
   end
-
 end

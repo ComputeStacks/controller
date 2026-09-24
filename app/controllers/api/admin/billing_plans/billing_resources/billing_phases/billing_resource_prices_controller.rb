@@ -1,9 +1,8 @@
 ##
 # Billing Resource Price
 class Api::Admin::BillingPlans::BillingResources::BillingPhases::BillingResourcePricesController < Api::Admin::BillingPlans::BaseController
-
   before_action :find_parents
-  before_action :find_price, except: %i[ index create ]
+  before_action :find_price, except: %i[index create]
 
   ##
   # List All Prices
@@ -64,7 +63,7 @@ class Api::Admin::BillingPlans::BillingResources::BillingPhases::BillingResource
   #     * `region_ids`: Array<Integer>
 
   def update
-    if params.dig('billing_resource_price', 'max_qty').blank?
+    if params.dig("billing_resource_price", "max_qty").blank?
       params[:billing_resource_price].delete(:max_qty)
       @price.max_qty = nil
     end
@@ -86,7 +85,7 @@ class Api::Admin::BillingPlans::BillingResources::BillingPhases::BillingResource
   #     * `region_ids`: Array<Integer>
 
   def create
-    if params.dig('billing_resource_price', 'max_qty').blank?
+    if params.dig("billing_resource_price", "max_qty").blank?
       params[:billing_resource_price].delete(:max_qty)
     end
     @price = @billing_phase.prices.new(price_params)
@@ -116,18 +115,15 @@ class Api::Admin::BillingPlans::BillingResources::BillingPhases::BillingResource
     @billing_resource = @billing_plan.billing_resources.find_by(id: params[:billing_resource_id])
     return api_obj_missing if @billing_resource.nil?
     @billing_phase = @billing_resource.billing_phases.find_by(id: params[:billing_phase_id])
-    return api_obj_missing if @billing_phase.nil?
+    api_obj_missing if @billing_phase.nil?
   end
 
   def find_price
     @price = @billing_phase.prices.find_by(id: params[:id])
-    return api_obj_missing if @price.nil?
+    api_obj_missing if @price.nil?
   end
 
   def price_params
     params.require(:billing_resource_price).permit(:currency, :max_qty, :price, {region_ids: []})
   end
-
-
-
 end

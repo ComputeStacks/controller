@@ -1,10 +1,7 @@
 module Admin::SettingsHelper
-
-
   def setting_billing_module_list
-    [ %w(None none), %w(WHMCS Whmcs) ]
+    [%w[None none], %w[WHMCS Whmcs]]
   end
-
 
   def settings_license_header(p1, p2)
     return "panel-danger" if p2 != "Active"
@@ -13,32 +10,30 @@ module Admin::SettingsHelper
   end
 
   def normalize_setting_group(group)
-    group.split('_').map { |i| i.capitalize }.join(' ')
+    return "ACME Certificates" if group == "acme"
+    group.split("_").map { |i| i.capitalize }.join(" ")
   rescue # quick fallback to original group name
     group
   end
 
-  # TODO: This is pretty ugly...needs a refactor.
   def normalize_setting_title(name)
-    return 'Container Registry Certificate Name' if name == 'cr_le'
-    return 'Enable LetsEncrypt' if name == 'le'
-    return '1 Certificate per Domain' if name == 'le_single_domain'
-    return 'Certificates per LE Account' if name == 'le_domains_per_account'
-    return 'DNS Validation Waiting Period' if name == 'le_dns_sleep'
-    return 'Enable Job' if name == 'le_auto'
-    name.split('_').map do |i|
-      %w(id url smtp).include?(i.downcase) ? i.upcase : i.downcase.capitalize
-    end.join(' ')
+    return "Container Registry Certificate Name" if name == "cr_le"
+    return "Enable ACME" if name == "le"
+    return "DNS Validation Waiting Period" if name == "le_dns_sleep"
+    return "Enable Job" if name == "le_auto"
+    name.split("_").map do |i|
+      %w[acme id url smtp].include?(i.downcase) ? i.upcase : i.downcase.capitalize
+    end.join(" ")
   rescue # quick fallback to original name
     name
   end
 
   def admin_setting_value(setting)
-    return tag.i(nil, class: 'fa-solid fa-ellipsis') if setting.value.blank?
+    return tag.i(nil, class: "fa-solid fa-ellipsis") if setting.value.blank?
     if setting.encrypted?
-      return setting.decrypted_value.blank? ? tag.i(nil, class: 'fa-solid fa-ellipsis') : '[ENCRYPTED]'
+      return setting.decrypted_value.blank? ? tag.i(nil, class: "fa-solid fa-ellipsis") : "[ENCRYPTED]"
     end
-    return setting.value == 't' ? 'Yes' : 'No' if %w(t f).include?(setting.value)
+    return (setting.value == "t") ? "Yes" : "No" if %w[t f].include?(setting.value)
     truncate setting.value, length: 35
   end
 
@@ -49,7 +44,7 @@ module Admin::SettingsHelper
   def settings_avail_vars(setting)
     case setting.name
     when "ssh_motd"
-      %w(project_name region availability_zone)
+      %w[project_name region availability_zone]
     else
       []
     end
@@ -57,9 +52,8 @@ module Admin::SettingsHelper
 
   def settings_form_cols(setting)
     if settings_avail_vars(setting).empty? && setting.errors.empty?
-      return 'col-lg-8 col-lg-offset-2 col-md-12'
+      return "col-lg-8 col-lg-offset-2 col-md-12"
     end
-    'col-sm-8'
+    "col-sm-8"
   end
-
 end

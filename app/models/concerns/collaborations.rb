@@ -2,7 +2,6 @@ module Collaborations
   extend ActiveSupport::Concern
 
   included do
-
     scope :sorted, -> { order("lower(users.lname)").joins(:collaborator) }
     scope :active, -> { where(active: true) }
 
@@ -21,11 +20,9 @@ module Collaborations
 
     validate :ensure_active_user
     validate :ensure_not_owner
-
   end
 
   class_methods do
-
     def find_all_for_user(current_user)
       return where("2 = 3") if current_user.nil?
       where user_id: current_user.id
@@ -37,7 +34,6 @@ module Collaborations
       return nil if resource.nil?
       resource
     end
-
   end
 
   def is_resource_owner?(current_user)
@@ -69,24 +65,23 @@ module Collaborations
 
   def ensure_active_user
     return if collaborator.nil?
-    errors.add(:collaborator, 'exists, but has not confirmed their account.') unless collaborator.confirmed?
-    errors.add(:collaborator, 'exists, but is currently suspended.') unless collaborator.active
+    errors.add(:collaborator, "exists, but has not confirmed their account.") unless collaborator.confirmed?
+    errors.add(:collaborator, "exists, but is currently suspended.") unless collaborator.active
   end
 
   def user_can_perform?
     if current_user.nil?
-      errors.add(:base, 'missing current_user, permission denied')
+      errors.add(:base, "missing current_user, permission denied")
       throw :abort
     else
       return if can_administer?(current_user)
-      errors.add(:base, 'permission denied')
+      errors.add(:base, "permission denied")
       throw :abort
     end
   end
 
   def ensure_not_owner
     return if resource_owner.nil? || collaborator.nil?
-    errors.add(:collaborator, 'is the resource owner') if resource_owner == collaborator
+    errors.add(:collaborator, "is the resource owner") if resource_owner == collaborator
   end
-
 end

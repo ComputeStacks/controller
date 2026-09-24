@@ -1,13 +1,17 @@
 class Admin::NodesController < Admin::ApplicationController
-
-  before_action :load_node, except: %w(index new create)
+  before_action :load_node, except: %w[index new create]
 
   def index
-    @nodes = Node.sorted
+    # panel_metrics_for preloads what its threads need regardless; loading it
+    # with the relation just does it in one query per association rather than
+    # per page of nodes.
+    @nodes = Node.sorted.includes(:region, :metric_client)
+    @metrics = Node.panel_metrics_for(@nodes)
   end
 
   def show
     if request.xhr?
+      @metrics = Node.panel_metrics_for([@node])
       render template: "admin/nodes/index/metrics_overview", layout: false
     else
       redirect_to "/admin/regions/#{@node.region.id}"
@@ -23,12 +27,13 @@ class Admin::NodesController < Admin::ApplicationController
     @node.active = true
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     maint_mode = ActiveRecord::Type::Boolean.new.cast params[:node][:maintenance]
     unless maint_mode == @node.maintenance
-      audit = Audit.create_from_object!(@node, 'updated', request.remote_ip, current_user)
+      audit = Audit.create_from_object!(@node, "updated", request.remote_ip, current_user)
       if maint_mode
         @node.update(
           maintenance: true,
@@ -41,7 +46,7 @@ class Admin::NodesController < Admin::ApplicationController
         @node.update(
           maintenance: false,
           maintenance_updated: Time.now,
-          job_status: 'idle'
+          job_status: "idle"
         )
       end
     end
@@ -66,7 +71,7 @@ class Admin::NodesController < Admin::ApplicationController
     if @node.destroy
       redirect_to "/admin/regions/#{@node.region_id}", notice: "#{@node.label} successfully deleted."
     else
-      redirect_to "/admin/regions/#{@node.region_id}", alert: "#{@node.errors.full_messages.join(', ')}"
+      redirect_to "/admin/regions/#{@node.region_id}", alert: "#{@node.errors.full_messages.join(", ")}"
     end
   end
 
@@ -74,10 +79,10 @@ class Admin::NodesController < Admin::ApplicationController
 
   def node_params
     params.require(:node).permit(
-        :label, :hostname, :primary_ip, :active,
-        :public_ip, :region_id, :port_begin, :port_end,
-        :volume_device, :block_write_bps, :block_read_bps,
-        :block_write_iops, :block_read_iops
+      :label, :hostname, :primary_ip, :agent_host, :active,
+      :public_ip, :region_id, :port_begin, :port_end,
+      :volume_device, :block_write_bps, :block_read_bps,
+      :block_write_iops, :block_read_iops
     )
   end
 
@@ -90,5 +95,4 @@ class Admin::NodesController < Admin::ApplicationController
     @region = @node.region
     @node.current_user = current_user
   end
-
 end

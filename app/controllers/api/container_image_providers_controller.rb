@@ -4,8 +4,7 @@
 # Providers for Container Images.
 #
 class Api::ContainerImageProvidersController < Api::ApplicationController
-
-  before_action -> { doorkeeper_authorize! :images_read }, unless: :current_user
+  api_scope read: :images_read
 
   before_action :find_provider, only: :show
 
@@ -82,7 +81,8 @@ class Api::ContainerImageProvidersController < Api::ApplicationController
   #     * `updated_at`: DateTime
   #     * `created_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   private
 
@@ -90,5 +90,4 @@ class Api::ContainerImageProvidersController < Api::ApplicationController
     @provider = ContainerImageProvider.where("id = ? AND container_registry_id is null", params[:id])
     api_obj_missing if @provider.nil?
   end
-
 end

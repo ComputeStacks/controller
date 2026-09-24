@@ -31,9 +31,9 @@ module ContainerServices
     # @see Containers::ContainerVariables#var_lookup
     #
     def init_link!
-      current_links = self.service_resources
+      current_links = service_resources
       matches_fulfilled = true
-      self.container_image.dependencies.each do |i|
+      container_image.dependencies.each do |i|
         is_met = false
         # Make sure we're not already linked
         current_links.each do |c|
@@ -44,13 +44,13 @@ module ContainerServices
         end
         unless is_met
           matched = nil
-          self.deployment.services.order(created_at: :desc).each do |dc|
+          deployment.services.order(created_at: :desc).each do |dc|
             if dc.container_image.id == i.id || dc.container_image.role == i.role
               matched = dc
             end
           end
           if matched
-            self.service_resources << matched
+            service_resources << matched
           else
             matches_fulfilled = false
             break
@@ -79,28 +79,28 @@ module ContainerServices
           skip_metadata_refresh: true
         )
         case i.param_type
-        when 'static'
-          sp.value = additional_params.dig(sp.name, 'value') ? additional_params[sp.name]['value'] : i.value
-        when 'password'
+        when "static"
+          sp.value = additional_params.dig(sp.name, "value") ? additional_params[sp.name]["value"] : i.value
+        when "password"
           pw = nil
-          if additional_params.dig(sp.name, 'value')
-            pw = additional_params[sp.name]['value']
+          if additional_params.dig(sp.name, "value")
+            pw = additional_params[sp.name]["value"]
           else
-            pw = SecureRandom.urlsafe_base64(10).gsub("_", "").gsub("-", "")
-            pw = pw + SecureRandom.random_number(100).to_s if pw.scan(/\d+/).first.nil?
+            pw = SecureRandom.urlsafe_base64(10).delete("_").delete("-")
+            pw += SecureRandom.random_number(100).to_s if pw.scan(/\d+/).first.nil?
           end
           sp.value = Secret.encrypt!(pw)
         else
           event.event_details.create!(
             data: "Unknown param type: #{i.param_type} for service #{name} (#{id})",
-            event_code: 'f5e9a5643bafba5f'
+            event_code: "f5e9a5643bafba5f"
           )
           event.container_services << self unless event.container_services.include?(self)
           event.deployments << deployment if deployment && !event.deployments.include?(deployment)
           next
         end
         unless sp.save
-          event.event_details.create!(data: "Failed to generate setting for service: #{i.name}: #{sp.errors.full_messages.join(' ')}", event_code: 'ec75f3a877a0d0e3')
+          event.event_details.create!(data: "Failed to generate setting for service: #{i.name}: #{sp.errors.full_messages.join(" ")}", event_code: "ec75f3a877a0d0e3")
           event.container_services << self unless event.container_services.include?(self)
           event.deployments << deployment if deployment && !event.deployments.include?(deployment)
           success = false
@@ -108,9 +108,9 @@ module ContainerServices
       end
       success
     rescue => e
-      ExceptionAlertService.new(e, '236c68aa2e763842').perform
+      ExceptionAlertService.new(e, "236c68aa2e763842").perform
       if event
-        event.event_details.create!(data: "Error building setting config for service: #{name}\n\n #{e.message}", event_code: '236c68aa2e763842')
+        event.event_details.create!(data: "Error building setting config for service: #{name}\n\n #{e.message}", event_code: "236c68aa2e763842")
         event.container_services << self unless event.container_services.include?(self)
         event.deployments << deployment if deployment && !event.deployments.include?(deployment)
       end
@@ -131,8 +131,8 @@ module ContainerServices
         )
         unless ep.save
           event.event_details.create!(
-            data: "Failed to generate environmental config for service: #{i.name}: #{ep.errors.full_messages.join(' ')}",
-            event_code: '079899a441dae3f7'
+            data: "Failed to generate environmental config for service: #{i.name}: #{ep.errors.full_messages.join(" ")}",
+            event_code: "079899a441dae3f7"
           )
           event.container_services << self unless event.container_services.include?(self)
           event.deployments << deployment if deployment && !event.deployments.include?(deployment)
@@ -141,9 +141,9 @@ module ContainerServices
       end
       success
     rescue => e
-      ExceptionAlertService.new(e, '6423245e9105c964').perform
+      ExceptionAlertService.new(e, "6423245e9105c964").perform
       if event
-        event.event_details.create!(data: "Error building environment config for service: #{name}\n\n #{e.message}", event_code: '6423245e9105c964')
+        event.event_details.create!(data: "Error building environment config for service: #{name}\n\n #{e.message}", event_code: "6423245e9105c964")
         event.container_services << self unless event.container_services.include?(self)
         event.deployments << deployment if deployment && !event.deployments.include?(deployment)
       end
@@ -157,7 +157,7 @@ module ContainerServices
     # @param [EventLog] event
     def gen_cloned_config!(source, event)
       success = true
-      source.env_params.where(param_type: 'static').each do |i|
+      source.env_params.where(param_type: "static").each do |i|
         ep = env_params.new(
           name: i.name,
           label: i.label,
@@ -168,8 +168,8 @@ module ContainerServices
         )
         unless ep.save
           event.event_details.create!(
-            data: "Failed to generate cloned environmental config for service: #{i.name}: #{ep.errors.full_messages.join(' ')}",
-            event_code: '1be81a3f6c609cbd'
+            data: "Failed to generate cloned environmental config for service: #{i.name}: #{ep.errors.full_messages.join(" ")}",
+            event_code: "1be81a3f6c609cbd"
           )
           event.container_services << self unless event.container_services.include?(self)
           event.deployments << deployment if deployment && !event.deployments.include?(deployment)
@@ -178,9 +178,9 @@ module ContainerServices
       end
       success
     rescue => e
-      ExceptionAlertService.new(e, '74a0bde929159a9c').perform
+      ExceptionAlertService.new(e, "74a0bde929159a9c").perform
       if event
-        event.event_details.create!(data: "Error building cloned environment config for service: #{name}\n\n #{e.message}", event_code: '74a0bde929159a9c')
+        event.event_details.create!(data: "Error building cloned environment config for service: #{name}\n\n #{e.message}", event_code: "74a0bde929159a9c")
         event.container_services << self unless event.container_services.include?(self)
         event.deployments << deployment if deployment && !event.deployments.include?(deployment)
       end
@@ -204,10 +204,10 @@ module ContainerServices
           region: region
         )
         if i.load_balancer_rule
-          lb_service = deployment.services.load_balancers.where("labels @> ?", {load_balancer_for: self.id}.to_json).first
+          lb_service = deployment.services.load_balancers.where("labels @> ?", {load_balancer_for: id}.to_json).first
           lb_ingress_rule = lb_service.nil? ? nil : lb_service.ingress_rules.where(parent_param: i.load_balancer_rule).first
           if lb_ingress_rule.nil?
-            event.event_details.create!(data: "Failed to find internal load balancer for service: #{name}: Expected to find image (#{i.load_balancer_rule.container_image&.id})#{i.load_balancer_rule.container_image&.label}", event_code: 'bbe10febfb44f848')
+            event.event_details.create!(data: "Failed to find internal load balancer for service: #{name}: Expected to find image (#{i.load_balancer_rule.container_image&.id})#{i.load_balancer_rule.container_image&.label}", event_code: "bbe10febfb44f848")
             event.container_services << self unless event.container_services.include?(self)
             event.deployments << deployment if deployment && !event.deployments.include?(deployment)
             next
@@ -216,7 +216,7 @@ module ContainerServices
         end
 
         unless pp.save
-          event.event_details.create!(data: "Failed to generate ingress rule for service: #{name}: #{pp.errors.full_messages.join(' ')}", event_code: '89e4a3e0d2fe439f')
+          event.event_details.create!(data: "Failed to generate ingress rule for service: #{name}: #{pp.errors.full_messages.join(" ")}", event_code: "89e4a3e0d2fe439f")
           event.container_services << self unless event.container_services.include?(self)
           event.deployments << deployment if deployment && !event.deployments.include?(deployment)
           success = false
@@ -224,9 +224,9 @@ module ContainerServices
       end
       success
     rescue => e
-      ExceptionAlertService.new(e, '2480e9fa50103cd4').perform
+      ExceptionAlertService.new(e, "2480e9fa50103cd4").perform
       if event
-        event.event_details.create!(data: "Error building ingress rules for service: #{name}\n\n #{e.message}", event_code: '2480e9fa50103cd4')
+        event.event_details.create!(data: "Error building ingress rules for service: #{name}\n\n #{e.message}", event_code: "2480e9fa50103cd4")
         event.container_services << self unless event.container_services.include?(self)
         event.deployments << deployment if deployment && !event.deployments.include?(deployment)
       end

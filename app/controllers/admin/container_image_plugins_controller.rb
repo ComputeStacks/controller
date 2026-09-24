@@ -1,5 +1,4 @@
 class Admin::ContainerImagePluginsController < Admin::ApplicationController
-
   include RescueResponder
 
   before_action :find_products, only: %i[new edit update create]
@@ -9,13 +8,15 @@ class Admin::ContainerImagePluginsController < Admin::ApplicationController
     @plugins = ContainerImagePlugin.all
   end
 
-  def show; end
+  def show
+  end
 
   def new
     @plugin = ContainerImagePlugin.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def create
     @plugin = ContainerImagePlugin.new plugin_params
@@ -62,5 +63,4 @@ class Admin::ContainerImagePluginsController < Admin::ApplicationController
   def not_found_responder
     redirect_to "/admin/container_image_plugins", alert: "Unknown Plugin"
   end
-
 end

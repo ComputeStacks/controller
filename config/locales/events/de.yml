@@ -61,13 +61,15 @@ de:
         errors:
           fatal: "Schwerwiegender Fehler bei der Bereitstellung."
           missing_loadbalancer: "Load Balancer kann nicht gefunden werden."
+      image:
+        cascade_volume: "[%{image}] Cascading volume change."
       lets_encrypt:
-        generate: "Generiertes LetsEncrypt für %{common_name}"
-        renew: "Erneuern von LetsEncrypt für %{common_name}"
-        validate: "Validierung der Domain %{domain} für LetsEncrypt"
+        generate: "Generiertes Certificate für %{common_name}"
+        renew: "Erneuern von Certificate für %{common_name}"
+        validate: "Validierung der Domain %{domain} für SSL Certificate"
       load_balancers:
         validate_domain: "Validierung der Domain %{domain} für Load Balancer %{load_balancer}"
-        generate_lets_encrypt: "LetsEncrypt Einrichtung für Load Balancer %{load_balancer}"
+        generate_lets_encrypt: "Certificate Einrichtung für Load Balancer %{load_balancer}"
       node:
         images:
           pull: "[%{node}] aktualisiert lokale Images"
@@ -87,6 +89,7 @@ de:
         clone: "[%{project}] Clone Project"
       region:
         network: "[%{region}] Changing Network Driver"
+        rebuild_networks: "Rebuilding network interfaces for %{region}."
       service:
         addons: "[%{label}] Updating service addons."
         autoscale: "[%{label}] AutoScaling Dienst."
@@ -116,6 +119,7 @@ de:
         imported: "Importiertes Volume %{volume}"
       volume:
         backup: Durchführen einer Volume Sicherung
+        download: Vorbereiten des Sicherungs-Downloads
         delete: Entferne Volume
         imported: "Importiertes Volume %{volume}"
         restore: Wiederherstellung Volume

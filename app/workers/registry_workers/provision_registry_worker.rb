@@ -10,6 +10,5 @@ module RegistryWorkers
 
       registry.deploy!
     end
-
   end
 end

@@ -1,18 +1,14 @@
-require 'test_helper'
+require "test_helper"
 
 class VolumeTest < ActiveSupport::TestCase
-
-  test 'can list all owned volumes' do
-
+  test "can list all owned volumes" do
     v = Volume.where.not(user: nil).first
     u = v.user
 
     assert_includes Volume.find_all_for(u), v
-
   end
 
-  test 'can list collaborated volumes' do
-
+  test "can list collaborated volumes" do
     v = volumes :wordpress_web
     u = users :user
 
@@ -29,7 +25,5 @@ class VolumeTest < ActiveSupport::TestCase
     assert_includes Volume.find_all_for(u), v
 
     v.deployment.deployment_collaborators.delete_all
-
   end
-
 end

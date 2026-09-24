@@ -1,30 +1,25 @@
-require 'test_helper'
+require "test_helper"
 
 class ContainerImageTest < ActiveSupport::TestCase
-
   test "can list images" do
-
     image = ContainerImage.where.not(user: nil).first
     u = image.user
 
     assert_includes ContainerImage.find_all_for(u), image
-
   end
 
-  test 'can list public images' do
-
+  test "can list public images" do
     u = users(:user)
 
     assert_empty ContainerImage.find_all_for u
     refute_empty ContainerImage.find_all_for u, true
-
   end
 
   test "can clone image" do
     user = User.find_by(is_admin: true) # Grab an admin user!
     assert_not_nil user
 
-    parent_image = ContainerImage.find_by(name: 'wordpress')
+    parent_image = ContainerImage.find_by(name: "wordpress")
     assert_not_nil parent_image
 
     new_image = parent_image.dup
@@ -43,13 +38,10 @@ class ContainerImageTest < ActiveSupport::TestCase
     assert new_image.env_params.count == parent_image.env_params.count
   end
 
-  test 'test image authorization' do
-
+  test "test image authorization" do
     wp = container_images :wordpress
     u = users :user
     assert wp.can_view? u
     refute wp.can_edit? u
-
   end
-
 end

@@ -2,7 +2,7 @@ module RegionWorkers
   class VolumeUsageWorker
     include Sidekiq::Worker
 
-    sidekiq_options retry: 1, queue: 'low'
+    sidekiq_options retry: 1, queue: "low"
 
     def perform(region_id = nil)
       if region_id.nil?
@@ -28,8 +28,8 @@ module RegionWorkers
       ##
       # For non-local volumes, we also need to calculate usage for
       # locally-created, imported volumes.
-      unless region.volume_backend == 'local'
-        region.volumes.where(volume_backend: 'local').each do |vol|
+      unless region.volume_backend == "local"
+        region.volumes.where(volume_backend: "local").each do |vol|
           size = vol.volume_client.usage
           next if size.nil?
           size_in_gb = size / KILOBYTE_TO_GB
@@ -39,8 +39,6 @@ module RegionWorkers
           )
         end
       end
-
     end
-
   end
 end

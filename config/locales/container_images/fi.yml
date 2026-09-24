@@ -52,6 +52,7 @@ fi:
     edit:
       breadcrumb: Muokkaa kuvaa
     show:
+      events: Recent Events
       overview:
         title: Yleiskatsaus
         free: Ilmainen kuva?

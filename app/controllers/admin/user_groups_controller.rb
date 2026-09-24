@@ -1,7 +1,6 @@
 class Admin::UserGroupsController < Admin::ApplicationController
-
-  before_action :find_group, only: %w(show edit update destroy)
-  before_action :load_locations, only: %w(new edit update create destroy)
+  before_action :find_group, only: %w[show edit update destroy]
+  before_action :load_locations, only: %w[new edit update create destroy]
 
   def index
     @groups = UserGroup.all
@@ -11,7 +10,8 @@ class Admin::UserGroupsController < Admin::ApplicationController
     redirect_to "/admin/user_groups/#{@group.id}/edit"
   end
 
-  def edit; end
+  def edit
+  end
 
   def new
     if params[:clone]
@@ -29,7 +29,7 @@ class Admin::UserGroupsController < Admin::ApplicationController
     if @group.update(group_params)
       redirect_to "/admin/user_groups"
     else
-      render template: 'admin/user_groups/edit'
+      render template: "admin/user_groups/edit"
     end
   end
 
@@ -39,7 +39,7 @@ class Admin::UserGroupsController < Admin::ApplicationController
     if @group.save
       redirect_to "/admin/user_groups"
     else
-      render template: 'admin/user_groups/new'
+      render template: "admin/user_groups/new"
     end
   end
 
@@ -51,7 +51,7 @@ class Admin::UserGroupsController < Admin::ApplicationController
     if @group.destroy
       redirect_to "/admin/user_groups"
     else
-      redirect_to "/admin/user_groups", alert: @group.errors.full_messages.join(' ')
+      redirect_to "/admin/user_groups", alert: @group.errors.full_messages.join(" ")
     end
   end
 
@@ -61,14 +61,14 @@ class Admin::UserGroupsController < Admin::ApplicationController
     params.require(:user_group).permit(
       :name, :is_default, :billing_plan_id, :q_containers,
       :allow_local_volume, :q_cr, :q_images, :bill_offline,
-      :bill_suspended, :remove_stopped, { region_ids: [] }
+      :bill_suspended, :remove_stopped, {region_ids: []}
     )
   end
 
   def find_group
     @group = UserGroup.find_by(id: params[:id])
     if @group.nil?
-      redirect_to "/admin/user_groups", alert: 'Unknown Group'
+      redirect_to "/admin/user_groups", alert: "Unknown Group"
       return false
     end
     @group.current_user = current_user
@@ -77,5 +77,4 @@ class Admin::UserGroupsController < Admin::ApplicationController
   def load_locations
     @locations = Location.sorted
   end
-
 end

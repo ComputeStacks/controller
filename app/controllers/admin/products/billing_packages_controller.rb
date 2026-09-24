@@ -1,5 +1,4 @@
 class Admin::Products::BillingPackagesController < Admin::ApplicationController
-
   before_action :load_product
   before_action :load_package, only: [:edit, :show, :update]
 
@@ -11,22 +10,23 @@ class Admin::Products::BillingPackagesController < Admin::ApplicationController
     @package = @product.build_package
   end
 
-  def edit; end
+  def edit
+  end
 
   def create
     @package = @product.build_package(package_params)
     if @package.save
-      redirect_to @base_url, notice: 'Package Created'
+      redirect_to @base_url, notice: "Package Created"
     else
-      render template: 'admin/products/billing_packages/new'
+      render template: "admin/products/billing_packages/new"
     end
   end
 
   def update
     if @package.update(package_params)
-      redirect_to @base_url, notice: 'Package Updated'
+      redirect_to @base_url, notice: "Package Updated"
     else
-      render template: 'admin/products/billing_packages/edit'
+      render template: "admin/products/billing_packages/edit"
     end
   end
 
@@ -43,7 +43,7 @@ class Admin::Products::BillingPackagesController < Admin::ApplicationController
   def load_product
     @product = Product.find_by(id: params[:product_id])
     if @product.nil?
-      redirect_to "/admin/products", alert: 'Unknown Product'
+      redirect_to "/admin/products", alert: "Unknown Product"
       return false
     end
     @base_url = "/admin/products"
@@ -52,9 +52,8 @@ class Admin::Products::BillingPackagesController < Admin::ApplicationController
   def load_package
     @package = @product.package # Only 1 package per product.
     if @package.nil?
-      redirect_to @base_url, alert: 'Unknown Package'
-      return false
+      redirect_to @base_url, alert: "Unknown Package"
+      false
     end
   end
-
 end

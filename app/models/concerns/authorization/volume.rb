@@ -4,12 +4,10 @@ module Authorization
     include Authorization::Generic
 
     class_methods do
-
       # @return [Array<Volume>]
       def find_all_for(current_user)
         where("volumes.user_id = ? OR deployments.user_id = ? OR (deployment_collaborators.active = true AND deployment_collaborators.user_id = ?)", current_user.id, current_user.id, current_user.id).joins(:container_services, "LEFT JOIN deployments ON deployments.id = deployment_container_services.deployment_id", "LEFT JOIN deployment_collaborators ON deployments.id = deployment_collaborators.deployment_id").distinct
       end
-
     end
 
     # @return [Boolean]
@@ -26,6 +24,5 @@ module Authorization
       end
       cv
     end
-
   end
 end

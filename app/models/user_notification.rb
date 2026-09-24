@@ -21,10 +21,8 @@
 #   @return [Array]
 #
 class UserNotification < ApplicationRecord
-
   include Auditable
   include Notifications::Common
 
   belongs_to :user
-
 end

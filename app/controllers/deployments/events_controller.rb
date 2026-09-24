@@ -1,10 +1,9 @@
 class Deployments::EventsController < Deployments::BaseController
-
   def index
     if request.xhr?
       @logs = @deployment.event_logs.sorted.paginate page: params[:page], per_page: 25
       @root_path = "/deployments/#{@deployment.token}/events"
-      render template: 'event_logs/list', layout: false
+      render template: "event_logs/list", layout: false
     end
   end
 
@@ -19,11 +18,13 @@ class Deployments::EventsController < Deployments::BaseController
 
   def last_event
     @last_event = @deployment.last_event
-    @active_events = @deployment.event_logs.running.count
+    # `active`, not `running`: a clone's umbrella event is created pending and a queued
+    # backup/restore child event sits pending until the agent picks it up, so counting only
+    # `running` reads as "nothing is happening" while work is very much outstanding.
+    @active_events = @deployment.event_logs.active.count
     respond_to do |format|
-      format.html { render template: 'deployments/events/last_event', layout: false }
+      format.html { render template: "deployments/events/last_event", layout: false }
       format.json { render json: @last_event }
     end
   end
-
 end

@@ -1,5 +1,4 @@
 class OrdersController < AuthController
-
   before_action :find_order, except: %i[index new]
   before_action :load_order_session, only: %i[show update destroy]
 
@@ -14,12 +13,10 @@ class OrdersController < AuthController
   def show
     if request.xhr?
       render template: "orders/order_state", layout: false
-    else
-      if @order.success? && @order.provision_event&.success? && @order.deployment
-        redirect_to "/deployments/#{@order.deployment.token}"
-      elsif @order.cancelled?
-        redirect_to "/deployments"
-      end
+    elsif @order.success? && @order.provision_event&.success? && @order.deployment
+      redirect_to "/deployments/#{@order.deployment.token}"
+    elsif @order.cancelled?
+      redirect_to "/deployments"
     end
   end
 
@@ -40,7 +37,7 @@ class OrdersController < AuthController
       audit = @order.audits.create!(
         user: current_user,
         ip_addr: request.remote_ip,
-        event: 'updated'
+        event: "updated"
       )
       ProcessOrderWorker.perform_async @order.global_id, audit.global_id
     end
@@ -78,5 +75,4 @@ class OrdersController < AuthController
       end
     end
   end
-
 end

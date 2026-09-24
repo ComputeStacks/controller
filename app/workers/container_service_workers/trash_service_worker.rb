@@ -17,23 +17,21 @@ module ContainerServiceWorkers
         ProjectWorkers::SftpInitWorker.perform_async project.global_id, event_id
         ProjectServices::StoreMetadata.new(project).perform
       else
-        event.fail! 'Error deleting service'
+        event.fail! "Error deleting service"
       end
-
     rescue ActiveRecord::RecordNotFound
-      return # Silently fail
+      nil # Silently fail
     rescue => e
       user = nil
       if defined?(event) && event
         event.event_details.create!(
           data: e.message,
-          event_code: '70cde3ba6c2c9a57'
+          event_code: "70cde3ba6c2c9a57"
         )
         event.fail! e.message
         user = event.audit&.user
       end
-      ExceptionAlertService.new(e, '70cde3ba6c2c9a57', user).perform
+      ExceptionAlertService.new(e, "70cde3ba6c2c9a57", user).perform
     end
-
   end
 end

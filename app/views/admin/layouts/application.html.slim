@@ -93,7 +93,7 @@ html
                 li class=(request.path =~ /blocks/ ? 'active' : '')
                   = link_to "Content Blocks", "/admin/blocks"
                 li class=(controller.class == Admin::LetsEncryptController ? 'active' : '')
-                  = link_to 'Lets Encrypt', '/admin/lets_encrypt'
+                  = link_to 'ACME', '/admin/lets_encrypt'
                 li.divider role="separator"
                 li class=(request.path =~ /alert_notifications/ ? 'active' : '')
                   = link_to "Alerts", "/admin/alert_notifications"

@@ -1,14 +1,14 @@
 namespace :containers do
   desc "MySQL Container"
   task mariadb: :environment do
-    mysql = ContainerImage.find_by(name: 'mysql')
+    mysql = ContainerImage.find_by(name: "mysql")
     if mysql.nil?
       dhprovider = ContainerImageProvider.find_by(name: "DockerHub")
       mysql = ContainerImage.create!(
-        name: 'mysql',
-        label: 'MySQL',
-        role: 'mysql',
-        category: 'database',
+        name: "mysql",
+        label: "MySQL",
+        role: "mysql",
+        category: "database",
         can_scale: false,
         container_image_provider: dhprovider,
         registry_image_path: "mysql",
@@ -47,28 +47,28 @@ namespace :containers do
       )
 
       mysql.setting_params.create!(
-        name: 'mysql_password',
-        label: 'Root Password',
-        param_type: 'password'
+        name: "mysql_password",
+        label: "Root Password",
+        param_type: "password"
       )
       mysql.env_params.create!(
-        name: 'MYSQL_ROOT_PASSWORD',
-        label: 'MYSQL_ROOT_PASSWORD',
-        param_type: 'variable',
-        env_value: 'build.settings.mysql_password'
+        name: "MYSQL_ROOT_PASSWORD",
+        label: "MYSQL_ROOT_PASSWORD",
+        param_type: "variable",
+        env_value: "build.settings.mysql_password"
       )
       mysql.ingress_params.create!(
         port: 3306,
-        proto: 'tcp',
+        proto: "tcp",
         external_access: false
       )
       mysql.volumes.create!(
-        label: 'mysql',
-        mount_path: '/var/lib/mysql',
+        label: "mysql",
+        mount_path: "/var/lib/mysql",
         enable_sftp: false,
         borg_enabled: true,
-        borg_freq: '@daily',
-        borg_strategy: 'mysql',
+        borg_freq: "@daily",
+        borg_strategy: "mysql",
         borg_keep_hourly: 1,
         borg_keep_daily: 7,
         borg_keep_weekly: 4,

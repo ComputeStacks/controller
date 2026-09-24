@@ -1,6 +1,5 @@
 class Admin::NetworksController < Admin::ApplicationController
-
-  before_action :find_network, except: %w(index new create)
+  before_action :find_network, except: %w[index new create]
 
   def index
     @networks = Network.active.sorted.paginate page: params[:page], per_page: 30
@@ -13,13 +12,14 @@ class Admin::NetworksController < Admin::ApplicationController
   def new
     @network = Network.new
     @network.subnet = IPAddr.new "192.168.0.0/21"
-    @network.network_driver = 'bridge'
+    @network.network_driver = "bridge"
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
-    if network_params[:subnet].split(':').count > 1
+    if network_params[:subnet].split(":").count > 1
       params[:node].delete(:subnet) # Just don't update it
     end
     if @network.update(network_params)
@@ -30,8 +30,8 @@ class Admin::NetworksController < Admin::ApplicationController
   end
 
   def create
-    if network_params[:subnet].split(':').count > 1
-      redirect_to '/admin/networks/new', alert: "Network must be IPv4."
+    if network_params[:subnet].split(":").count > 1
+      redirect_to "/admin/networks/new", alert: "Network must be IPv4."
       return false
     end
     @network = Network.new(network_params)

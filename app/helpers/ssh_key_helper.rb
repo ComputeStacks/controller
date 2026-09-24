@@ -1,5 +1,4 @@
 module SshKeyHelper
-
   def ssh_key_algo_badge(k)
     case k.public_key.algo
     when "ssh-ed25519"
@@ -10,5 +9,4 @@ module SshKeyHelper
   rescue
     ""
   end
-
 end

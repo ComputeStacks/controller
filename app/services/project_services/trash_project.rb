@@ -1,9 +1,8 @@
 module ProjectServices
   class TrashProject
-
     attr_accessor :project,
-                  :event,
-                  :user
+      :event,
+      :user
 
     def initialize(project, event)
       self.project = project
@@ -18,7 +17,7 @@ module ProjectServices
     def perform
       return false unless valid?
       ActiveRecord::Base.uncached do
-        clean_consul_policy!
+        clean_metadata_tenant!
         if project.private_network
           # Immediately remove our link to it
           project.private_network.update deployment_id: nil
@@ -60,9 +59,11 @@ module ProjectServices
       end
     end
 
-    def clean_consul_policy!
+    def clean_metadata_tenant!
       project.regions.all.each do |i|
-        ProjectServices::CleanMetadata.new(project, i).perform
+        Agent::Client.new(project, region: i).deprovision_tenant!
+      rescue Agent::Client::NotReady
+        next
       end
     end
 
@@ -82,16 +83,5 @@ module ProjectServices
       end
       success
     end
-
-    # def success?
-    #   project.deployed_containers.empty? && !event.event_details.where( EventLog.arel_table[:created_at].gt(5.minutes.ago) ).where( Arel.sql( %Q(event_code IN ('#{failed_event_codes.join("','")}')) ) ).exists?
-    # end
-
-    # def failed_event_codes
-    #   [
-    #     '83f412d78229f3a5' # Failed to delete container
-    #   ]
-    # end
-
   end
 end

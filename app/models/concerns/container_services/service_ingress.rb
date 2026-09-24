@@ -3,9 +3,9 @@ module ContainerServices
     extend ActiveSupport::Concern
 
     included do
-      has_many :ingress_rules, class_name: 'Network::IngressRule', dependent: :destroy
+      has_many :ingress_rules, class_name: "Network::IngressRule", dependent: :destroy
       has_many :domains, through: :ingress_rules, source: :container_domains
-      has_many :load_balanced_rules, class_name: 'Network::IngressRule', dependent: :destroy
+      has_many :load_balanced_rules, class_name: "Network::IngressRule", dependent: :destroy
 
       belongs_to :load_balancer, optional: true
 
@@ -37,7 +37,7 @@ module ContainerServices
       pub = []
       if load_balancer
         pub << load_balancer.public_ip
-        load_balancer.ipaddrs.where(role: 'public').each do |i|
+        load_balancer.ipaddrs.where(role: "public").each do |i|
           addr = i.ip_addr.to_s
           pub << addr unless pub.include?(addr)
         end
@@ -50,7 +50,7 @@ module ContainerServices
     def allow_custom_domains?
       return false if is_load_balancer
       return false if container_image.service_container?
-      ingress_rules.where(proto: 'http').exists?
+      ingress_rules.where(proto: "http").exists?
     end
 
     def lb_tcp_ingress_rules
@@ -76,6 +76,5 @@ module ContainerServices
         )
       )
     end
-
   end
 end

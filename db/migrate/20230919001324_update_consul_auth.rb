@@ -1,21 +1,9 @@
 class UpdateConsulAuth < ActiveRecord::Migration[7.0]
+  # No-op. This was a one-time Consul ACL-policy data migration. Consul was retired in the
+  # v3.0.0 cs-agent cutover (the Diplomat gem and Region#consul_config were removed), so the
+  # original body no longer resolves. It has already run on every existing database, and fresh
+  # environments load db/schema.rb rather than replaying migrations — the body is neutralized
+  # only to keep a from-empty `rails db:migrate` from raising NameError.
   def change
-
-    ##
-    # Ensure we have the new bastion config loaded
-    Setting.computestacks_bastion_image
-
-    ##
-    # Add write permission to all existing keys
-    Deployment.all.each do |project|
-      d = {
-        'ID' => project.consul_policy_id,
-        'Name' => "proj-#{project.token}",
-        'Description' => "MetaData Policy for Project #{project.name}",
-        'Rules' => %Q(key_prefix "projects/#{project.token}/" { policy = "read" } key_prefix "projects/#{project.token}/db/" { policy = "write" })
-      }
-      Diplomat::Policy.update d, project.region.consul_config
-    end
-
   end
 end

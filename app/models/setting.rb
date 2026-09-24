@@ -7,15 +7,14 @@
 # value:text
 #
 class Setting < ApplicationRecord
-
   include Auditable
 
   scope :sorted, -> { order(:category, :name) }
-  scope :display_list, -> { where(Arel.sql %Q(category is not null AND category != 'general')) }
-  scope :general_settings, -> { where category: 'general' }
+  scope :display_list, -> { where(Arel.sql(%(category is not null AND category != 'general'))) }
+  scope :general_settings, -> { where category: "general" }
 
   # Exclude certain categories from being visible in the demo
-  scope :excluded_for_demo, -> { where(Arel.sql %Q(category is not null and category not in ('general','mail','belco','google_analytics','container_registry') )) }
+  scope :excluded_for_demo, -> { where(Arel.sql(%(category is not null and category not in ('general','mail','belco','google_analytics','container_registry') ))) }
 
   validates :name, uniqueness: true
 
@@ -36,18 +35,17 @@ class Setting < ApplicationRecord
   # Toggle the current value
   def toggle_val!
     return false unless is_boolean?
-    value == 'f' ? update(value: 't') : update(value: 'f')
+    (value == "f") ? update(value: "t") : update(value: "f")
   end
 
   class << self
-
     def enable_signup_form?
-      s = Setting.find_by(name: 'signup_form')
+      s = Setting.find_by(name: "signup_form")
       if s.nil?
         s = Setting.create!(
-          name: 'signup_form',
-          category: 'general',
-          description: 'Turn on Registration form',
+          name: "signup_form",
+          category: "general",
+          description: "Turn on Registration form",
           value: true
         )
       end
@@ -60,82 +58,82 @@ class Setting < ApplicationRecord
     #
     def billing_module
       result = {
-        'klass' => 'none',
-        'params' => {},
-        'hooks' => []
+        "klass" => "none",
+        "params" => {},
+        "hooks" => []
       }
       settings = []
-      mod = Setting.find_by(name: 'billing_module')
+      mod = Setting.find_by(name: "billing_module")
       if mod.nil?
         mod = Setting.create!(
-          name: 'billing_module',
-          category: 'billing_module',
-          description: 'Billing Integration',
+          name: "billing_module",
+          category: "billing_module",
+          description: "Billing Integration",
           value: nil,
           encrypted: false
         )
       end
-      if mod.value.blank? || mod.value.downcase == 'none'
+      if mod.value.blank? || mod.value.downcase == "none"
         # Load default settings
         config = {}
         key_namespace = "none"
       else
-        result['klass'] = mod.value
+        result["klass"] = mod.value
 
-        if mod.value == 'Whmcs' && enable_signup_form?
-          Setting.find_by(name: 'signup_form').update_column :value, false
+        if mod.value == "Whmcs" && enable_signup_form?
+          Setting.find_by(name: "signup_form").update_column :value, false
         end
 
         begin
           config = eval(mod.value).config
         rescue
           # Invalid Class Name
-          mod.update value: 'none'
+          mod.update value: "none"
         end
         full_config = eval(mod.value).settings
         key_namespace = mod.value.parameterize
         full_config.each do |i|
           key_name = "#{key_namespace}_#{i[:name]}"
-          s = Setting.find_by(name: key_name, category: 'billing_module')
+          s = Setting.find_by(name: key_name, category: "billing_module")
           if s.nil?
             desc = i[:label]
             desc = "#{desc} | #{i[:description]}" unless i[:description].blank?
             setting_value = if config[i[:name]].nil?
-                              i[:default].blank? ? nil : i[:default]
-                            else
-                              config[i[:name]]
-                            end
+              i[:default].presence
+            else
+              config[i[:name]]
+            end
             s = Setting.create!(
               name: key_name,
-              category: 'billing_module',
+              category: "billing_module",
               description: desc,
               value: setting_value,
-              encrypted: i[:field_type] == 'password'
+              encrypted: i[:field_type] == "password"
             )
           end
           settings << s
         end
       end
-      result['params'] = settings
+      result["params"] = settings
       result
     end
 
     def billing_module_connected?
       bm = billing_module
-      return nil if bm['klass'] == 'none'
+      return nil if bm["klass"] == "none"
       bm = Setting.billing_module
-      bm_settings_hash = bm['params'].inject({}) do |h, i|
-        config_key = i.name.gsub("#{bm['klass'].parameterize}_", '')
+      bm_settings_hash = bm["params"].inject({}) do |h, i|
+        config_key = i.name.gsub("#{bm["klass"].parameterize}_", "")
         h.merge(config_key.to_sym => i.decrypted_value)
       end
-      eval("#{bm['klass']}").configure(bm_settings_hash)
-      eval("#{bm['klass']}").test_connection!
+      eval("#{bm["klass"]}").configure(bm_settings_hash)
+      eval("#{bm["klass"]}").test_connection!
     end
 
     # Currently only supports our whmcs module
     # eventually this should dynamically load hooks from the module
     def billing_hooks
-      return [] unless Setting.billing_module['klass'] == 'Whmcs'
+      return [] unless Setting.billing_module["klass"] == "Whmcs"
       %i[
         process_usage
         user_created
@@ -145,45 +143,45 @@ class Setting < ApplicationRecord
 
     def call_billing_hook(hook, data)
       bm = Setting.billing_module
-      bm_settings_hash = bm['params'].inject({}) do |h, i|
-        config_key = i.name.gsub("#{bm['klass'].parameterize}_", '')
+      bm_settings_hash = bm["params"].inject({}) do |h, i|
+        config_key = i.name.gsub("#{bm["klass"].parameterize}_", "")
         h.merge(config_key.to_sym => i.decrypted_value)
       end
-      eval("#{bm['klass']}").configure(bm_settings_hash)
-      h = eval("#{bm['klass']}::Hooks.new")
+      eval("#{bm["klass"]}").configure(bm_settings_hash)
+      h = eval("#{bm["klass"]}::Hooks.new")
       result = h.send(hook, data)
       unless result
         SystemEvent.create!(
           message: "BillingHook Error: #{hook}",
-          log_level: 'warn',
+          log_level: "warn",
           data: {
-            'error' => h.errors
+            "error" => h.errors
           },
-          event_code: 'c8790faff43099b1'
+          event_code: "c8790faff43099b1"
         )
       end
       result
     rescue => e
-      ExceptionAlertService.new(e, 'e648b51c1ebbf4db').perform
+      ExceptionAlertService.new(e, "e648b51c1ebbf4db").perform
       SystemEvent.create!(
         message: "BillingHook Fatal Error",
-        log_level: 'warn',
+        log_level: "warn",
         data: {
-          'hook' => hook.to_s,
-          'error' => e.message.to_s
+          "hook" => hook.to_s,
+          "error" => e.message.to_s
         },
-        event_code: 'e648b51c1ebbf4db'
+        event_code: "e648b51c1ebbf4db"
       )
       false
     end
 
     def billing_address
-      s = Setting.find_by(name: 'billing_address')
+      s = Setting.find_by(name: "billing_address")
       if s.nil?
         s = Setting.create!(
-          name: 'billing_address',
-          category: 'billing',
-          description: 'Enables or Disables Address fields during user registration',
+          name: "billing_address",
+          category: "billing",
+          description: "Enables or Disables Address fields during user registration",
           value: false,
           encrypted: false
         )
@@ -192,12 +190,12 @@ class Setting < ApplicationRecord
     end
 
     def billing_phone
-      s = Setting.find_by(name: 'billing_phone')
+      s = Setting.find_by(name: "billing_phone")
       if s.nil?
         s = Setting.create!(
-          name: 'billing_phone',
-          category: 'billing',
-          description: 'Enables or Disables phone number field during user registration',
+          name: "billing_phone",
+          category: "billing",
+          description: "Enables or Disables phone number field during user registration",
           value: false,
           encrypted: false
         )
@@ -208,12 +206,12 @@ class Setting < ApplicationRecord
     ##
     # =Billing Event Webhook
     def webhook_billing_event
-      s = Setting.find_by(name: 'webhook_billing_event')
+      s = Setting.find_by(name: "webhook_billing_event")
       if s.nil?
         s = Setting.create!(
-          name: 'webhook_billing_event',
-          category: 'webhooks',
-          description: 'Webhook triggered whenever a billing even takes place.',
+          name: "webhook_billing_event",
+          category: "webhooks",
+          description: "Webhook triggered whenever a billing even takes place.",
           value: nil, # URL of endpoint
           encrypted: false
         )
@@ -224,12 +222,12 @@ class Setting < ApplicationRecord
     ##
     # Billing Usage Web Hook
     def webhook_billing_usage
-      s = Setting.find_by(name: 'webhook_billing_usage')
+      s = Setting.find_by(name: "webhook_billing_usage")
       if s.nil?
         s = Setting.create!(
-          name: 'webhook_billing_usage',
-          category: 'webhooks',
-          description: 'Webhook for capturing billing usage (1 per month)',
+          name: "webhook_billing_usage",
+          category: "webhooks",
+          description: "Webhook for capturing billing usage (1 per month)",
           value: nil, # URL of endpoint
           encrypted: false
         )
@@ -243,12 +241,12 @@ class Setting < ApplicationRecord
     # Records all changes.
     #
     def webhook_users
-      s = Setting.find_by(name: 'webhook_users')
+      s = Setting.find_by(name: "webhook_users")
       if s.nil?
         s = Setting.create!(
-          name: 'webhook_users',
-          category: 'webhooks',
-          description: 'Webhook triggered whenever a user is created, updated, or deleted.',
+          name: "webhook_users",
+          category: "webhooks",
+          description: "Webhook triggered whenever a user is created, updated, or deleted.",
           value: nil, # URL of endpoint
           encrypted: false
         )
@@ -259,13 +257,13 @@ class Setting < ApplicationRecord
     ##
     # General
     def general_support_line
-      s = Setting.find_by(name: 'general_support')
+      s = Setting.find_by(name: "general_support")
       if s.nil?
         s = Setting.create!(
-          name: 'general_support',
-          category: 'general',
+          name: "general_support",
+          category: "general",
           description: "Generic email support address.",
-          value: 'change@me.com',
+          value: "change@me.com",
           encrypted: false
         )
       end
@@ -273,124 +271,140 @@ class Setting < ApplicationRecord
     end
 
     def company_name
-      s = Setting.find_by(name: 'company_name')
+      s = Setting.find_by(name: "company_name")
       if s.nil?
         s = Setting.create!(
-          name: 'company_name',
+          name: "company_name",
           description: "Company Name",
-          category: 'general',
-          value: 'ComputeStacks'
+          category: "general",
+          value: "ComputeStacks"
         )
       end
       s.value
     end
 
     def hostname
-      s = Setting.find_by(name: 'hostname', category: 'general')
-      s = Setting.create!(name: 'hostname', category: 'general', description: 'Main site URL.', value: 'portal.example.com') if s.nil?
+      s = Setting.find_by(name: "hostname", category: "general")
+      s = Setting.create!(name: "hostname", category: "general", description: "Main site URL.", value: "portal.example.com") if s.nil?
       s.value
     end
 
     def app_name
-      s = Setting.find_by(name: 'app_name', category: 'general')
-      s = Setting.create!(name: 'app_name', category: 'general', description: 'Name of app used in browser and emails', value: 'ComputeStacks') if s.nil?
+      s = Setting.find_by(name: "app_name", category: "general")
+      s = Setting.create!(name: "app_name", category: "general", description: "Name of app used in browser and emails", value: "ComputeStacks") if s.nil?
       s.value
     end
 
     ##
     # Belco
     def belco_enabled?
-      s = Setting.find_by(name: 'belco', category: 'belco')
-      s = Setting.create!(name: 'belco', description: 'Enable Belco.IO Integration?', category: 'belco', value: false) if s.nil?
+      s = Setting.find_by(name: "belco", category: "belco")
+      s = Setting.create!(name: "belco", description: "Enable Belco.IO Integration?", category: "belco", value: false) if s.nil?
       ActiveRecord::Type::Boolean.new.cast s.value
     end
 
     def belco_api_key
-      s = Setting.find_by(name: 'belco_api_key', category: 'belco')
-      Setting.create!(name: 'belco_api_key', description: 'Belco API ID', category: 'belco', value: nil) if s.nil?
+      s = Setting.find_by(name: "belco_api_key", category: "belco")
+      Setting.create!(name: "belco_api_key", description: "Belco API ID", category: "belco", value: nil) if s.nil?
       s.nil? ? nil : s.value
     end
 
     def belco_shared_secret
-      s = Setting.find_by(name: 'belco_shared_secret', category: 'belco')
-      Setting.create!(name: 'belco_shared_secret', description: 'Belco API Secret', category: 'belco', encrypted: true, value: nil) if s.nil?
+      s = Setting.find_by(name: "belco_shared_secret", category: "belco")
+      Setting.create!(name: "belco_shared_secret", description: "Belco API Secret", category: "belco", encrypted: true, value: nil) if s.nil?
       s.nil? ? nil : s.decrypted_value
+    end
+
+    ##
+    # Dixa
+    def dixa_enabled?
+      s = Setting.find_by(name: "dixa", category: "dixa")
+      s = Setting.create!(name: "dixa", description: "Enable Dixa Integration?", category: "dixa", value: false) if s.nil?
+      ActiveRecord::Type::Boolean.new.cast s.value
+    end
+
+    def dixa_api_key
+      s = Setting.find_by(name: "dixa_api_key", category: "dixa")
+      Setting.create!(name: "dixa_api_key", description: "Dixa Messenger Token", category: "dixa", value: nil) if s.nil?
+      s.nil? ? nil : s.value
     end
 
     ##
     # Google Analytics
     def google_analytics_enabled?
-      s = Setting.find_by(name: 'google_analytics', category: 'google_analytics')
-      s = Setting.create!(name: 'google_analytics', description: 'Enable Google Analytics?', category: 'google_analytics', value: false) if s.nil?
+      s = Setting.find_by(name: "google_analytics", category: "google_analytics")
+      s = Setting.create!(name: "google_analytics", description: "Enable Google Analytics?", category: "google_analytics", value: false) if s.nil?
       ActiveRecord::Type::Boolean.new.cast s.value
     end
 
     def google_analytics
-      s = Setting.find_by(name: 'google_analytics_id', category: 'google_analytics')
-      Setting.create!(name: 'google_analytics_id', description: 'Google Analytics ID', category: 'google_analytics', value: nil) if s.nil?
+      s = Setting.find_by(name: "google_analytics_id", category: "google_analytics")
+      Setting.create!(name: "google_analytics_id", description: "Google Analytics ID", category: "google_analytics", value: nil) if s.nil?
       s.nil? ? nil : s.value
     end
 
     ##
     # Branding
     def branding_img_admin
-      s = Setting.find_by(name: 'branding_img_admin', category: 'branding')
-      s = Setting.create!(name: 'branding_img_admin', category: 'branding', description: "filename for admin logo") if s.nil?
-      s.nil? || s.value.blank? ? nil : s.value
+      s = Setting.find_by(name: "branding_img_admin", category: "branding")
+      s = Setting.create!(name: "branding_img_admin", category: "branding", description: "filename for admin logo") if s.nil?
+      (s.nil? || s.value.blank?) ? nil : s.value
     end
 
     def branding_img_app
-      s = Setting.find_by(name: 'branding_img_app', category: 'branding')
-      s = Setting.create!(name: 'branding_img_app', category: 'branding', description: "filename for admin logo") if s.nil?
-      s.nil? || s.value.blank? ? nil : s.value
+      s = Setting.find_by(name: "branding_img_app", category: "branding")
+      s = Setting.create!(name: "branding_img_app", category: "branding", description: "filename for admin logo") if s.nil?
+      (s.nil? || s.value.blank?) ? nil : s.value
     end
 
     def branding_img_login
-      s = Setting.find_by(name: 'branding_img_login', category: 'branding')
-      s = Setting.create!(name: 'branding_img_login', category: 'branding', description: "filename for admin logo", value: 'logo-login.png') if s.nil?
-      s.nil? || s.value.blank? ? nil : s.value
+      s = Setting.find_by(name: "branding_img_login", category: "branding")
+      s = Setting.create!(name: "branding_img_login", category: "branding", description: "filename for admin logo", value: "logo-login.png") if s.nil?
+      (s.nil? || s.value.blank?) ? nil : s.value
     end
 
     def branding_email_logo
-      s = Setting.find_by(name: 'branding_email_logo', category: 'branding')
-      s = Setting.create!(name: 'branding_email_logo', category: 'branding', description: "URL for the image, or data:image/png value.", value: '') if s.nil?
-      s.nil? || s.value.blank? ? nil : s.value
+      s = Setting.find_by(name: "branding_email_logo", category: "branding")
+      s = Setting.create!(name: "branding_email_logo", category: "branding", description: "URL for the image, or data:image/png value.", value: "") if s.nil?
+      (s.nil? || s.value.blank?) ? nil : s.value
     end
 
     def ssh_motd
-      s = Setting.find_by(name: 'ssh_motd', category: 'branding')
-      s = Setting.create!(
-        name: 'ssh_motd',
-        category: 'branding',
-        description: 'Welcome message displayed when connecting to the ssh container',
-        value: %Q(SSH Bastion\r\n\r\n     Project: {{ project_name }}\r\n      Region: {{ region }}\r\n          AZ: {{ availability_zone }}\r\n\r\nInstalled tools: composer, git, node, npm, mysql-cli, psql, wp-cli, yarn.\r\n\r\n)
-      ) if s.nil?
+      s = Setting.find_by(name: "ssh_motd", category: "branding")
+      if s.nil?
+        s = Setting.create!(
+          name: "ssh_motd",
+          category: "branding",
+          description: "Welcome message displayed when connecting to the ssh container",
+          value: %(SSH Bastion\r\n\r\n     Project: {{ project_name }}\r\n      Region: {{ region }}\r\n          AZ: {{ availability_zone }}\r\n\r\nInstalled tools: composer, git, node, npm, mysql-cli, psql, wp-cli, yarn.\r\n\r\n)
+        )
+      end
       s.value
     end
 
     ##
     # Registry Host
     def registry_node
-      s = Setting.find_by(name: 'registry_node', category: 'container_registry')
-      s = Setting.create!(name: 'registry_node', description: 'Registry Server IP Address', category: 'container_registry') if s.nil?
+      s = Setting.find_by(name: "registry_node", category: "container_registry")
+      s = Setting.create!(name: "registry_node", description: "Registry Server IP Address", category: "container_registry") if s.nil?
       s.value
     end
 
     def registry_base_url
-      s = Setting.find_by(name: 'registry_base_url', category: 'container_registry')
-      s = Setting.create!(name: 'registry_base_url', description: 'Base URL', category: 'container_registry') if s.nil?
+      s = Setting.find_by(name: "registry_base_url", category: "container_registry")
+      s = Setting.create!(name: "registry_base_url", description: "Base URL", category: "container_registry") if s.nil?
       s.value
     end
 
     def registry_ssh_port
-      s = Setting.find_by(name: 'registry_ssh_port', category: 'container_registry')
-      s = Setting.create!(name: 'registry_ssh_port', description: 'SSH Port', category: 'container_registry', value: '22') if s.nil?
+      s = Setting.find_by(name: "registry_ssh_port", category: "container_registry")
+      s = Setting.create!(name: "registry_ssh_port", description: "SSH Port", category: "container_registry", value: "22") if s.nil?
       s.value
     end
 
     def registry_selinux
-      s = Setting.find_by(name: 'registry_selinux', category: 'container_registry')
-      s = Setting.create!(name: 'registry_selinux', description: 'Registry server uses selinux?', category: 'container_registry', value: true) if s.nil?
+      s = Setting.find_by(name: "registry_selinux", category: "container_registry")
+      s = Setting.create!(name: "registry_selinux", description: "Registry server uses selinux?", category: "container_registry", value: true) if s.nil?
       ActiveRecord::Type::Boolean.new.cast s.value
     end
 
@@ -407,14 +421,14 @@ class Setting < ApplicationRecord
 
     # Whether or not CR uses lets encrypt. And if so, what domain.
     def computestacks_cr_le
-      s = Setting.find_by(name: 'cr_le', category: 'computestacks')
-      s.update_column(:category, 'container_registry') if s
-      s = Setting.find_by(name: 'cr_le', category: 'container_registry') if s.nil?
+      s = Setting.find_by(name: "cr_le", category: "computestacks")
+      s.update_column(:category, "container_registry") if s
+      s = Setting.find_by(name: "cr_le", category: "container_registry") if s.nil?
       if s.nil?
         s = Setting.create!(
-          name: 'cr_le',
-          category: 'container_registry',
-          description: 'Use LetsEncrypt for Container Registry. Value should be the domain used.',
+          name: "cr_le",
+          category: "container_registry",
+          description: "Use ACME for Container Registry. Value should be the domain used.",
           value: nil, # cr.mydomain.net
           encrypted: false
         )
@@ -425,27 +439,27 @@ class Setting < ApplicationRecord
     ##
     # ComputeStacks Bastion Image
     def computestacks_bastion_image
-      s = Setting.find_by(name: 'cs_bastion_image', category: 'computestacks')
+      s = Setting.find_by(name: "cs_bastion_image", category: "computestacks")
       if s.nil?
         s = Setting.create!(
-          name: 'cs_bastion_image',
-          category: 'computestacks',
-          description: 'ComputeStacks Bastion Image',
-          value: 'ghcr.io/computestacks/cs-docker-bastion:v2',
+          name: "cs_bastion_image",
+          category: "computestacks",
+          description: "ComputeStacks Bastion Image",
+          value: "ghcr.io/computestacks/cs-docker-bastion:v2",
           encrypted: false
         )
       end
       s.value
     end
 
-    # LetsEncrypt
+    # ACME
     def le
-      s = Setting.find_by(name: 'le', category: 'lets_encrypt')
+      s = Setting.find_by(name: "le", category: "acme")
       if s.nil?
         s = Setting.create!(
-          name: 'le',
-          category: 'lets_encrypt',
-          description: 'Enable or Disable Lets Encrypt',
+          name: "le",
+          category: "acme",
+          description: "Enable or Disable ACME certificates",
           value: true,
           encrypted: false
         )
@@ -456,12 +470,12 @@ class Setting < ApplicationRecord
     # Quick way to temporarily disable certificate generation.
     # It will still schedule the job, but won't run it
     def le_auto_enabled?
-      s = Setting.find_by(name: 'le_auto', category: 'lets_encrypt')
+      s = Setting.find_by(name: "le_auto", category: "acme")
       if s.nil?
         s = Setting.create!(
-          name: 'le_auto',
-          category: 'lets_encrypt',
-          description: 'Enable Lets Encrypt Scheduled Job',
+          name: "le_auto",
+          category: "acme",
+          description: "Enable ACME Scheduled Job",
           value: true,
           encrypted: false
         )
@@ -470,50 +484,79 @@ class Setting < ApplicationRecord
     end
 
     # @return [Integer]
-    def le_domains_per_account
-      s = Setting.find_by(name: 'le_domains_per_account', category: 'lets_encrypt')
-      if s.nil?
-        s = Setting.create!(
-          name: 'le_domains_per_account',
-          category: 'lets_encrypt',
-          description: 'How many certificates to place under a single LE Account? 150 min.',
-          value: "300",
-          encrypted: false
-        )
-      end
-      (s.value.blank? || s.value.to_i < 150) ? 150 : s.value.to_i
-    end
-
-    # @return [Boolean]
-    def le_single_domain?
-      s = Setting.find_by(name: 'le_single_domain', category: 'lets_encrypt')
-      if s.nil?
-        s = Setting.create!(
-          name: 'le_single_domain',
-          category: 'lets_encrypt',
-          description: 'Use 1 domain per certificate, rather than combining. Please note https://letsencrypt.org/docs/rate-limits',
-          value: false,
-          encrypted: false
-        )
-      end
-      ActiveRecord::Type::Boolean.new.cast s.value
-    end
-
-    # @return [Integer]
     def le_dns_sleep
-      s = Setting.find_by(name: 'le_dns_sleep', category: 'lets_encrypt')
+      s = Setting.find_by(name: "le_dns_sleep", category: "acme")
       if s.nil?
         s = Setting.create!(
-          name: 'le_dns_sleep',
-          category: 'lets_encrypt',
-          description: 'How long to wait (in seconds) before verifying DNS with wildcard certificates. Min 2, Max 90.',
+          name: "le_dns_sleep",
+          category: "acme",
+          description: "How long to wait (in seconds) before verifying DNS with wildcard certificates. Min 2, Max 90.",
           value: "10",
           encrypted: false
         )
       end
       v = s.value.to_i
       return 2 if v < 2
-      v > 90 ? 90 : v
+      (v > 90) ? 90 : v
+    end
+
+    ##
+    # Custom ACME Server
+
+    def acme_directory
+      s = Setting.find_by name: "acme_directory", category: "acme"
+      if s.nil?
+        s = Setting.create!(
+          name: "acme_directory",
+          category: "acme",
+          description: "Default Acme directory. Does not affect current certificates until renewal.",
+          value: "https://acme-v02.api.letsencrypt.org/directory",
+          encrypted: false
+        )
+      end
+      s.value
+    end
+
+    def acme_email
+      s = Setting.find_by name: "acme_email", category: "acme"
+      if s.nil?
+        s = Setting.create!(
+          name: "acme_email",
+          category: "acme",
+          description: "Acme registration email",
+          value: "noreply@example.acme",
+          encrypted: false
+        )
+      end
+      s.value
+    end
+
+    def acme_kid
+      s = Setting.find_by name: "acme_kid", category: "acme"
+      if s.nil?
+        s = Setting.create!(
+          name: "acme_kid",
+          category: "acme",
+          description: "Acme EAB KID value",
+          value: "",
+          encrypted: true
+        )
+      end
+      s.value.blank? ? nil : Secret.decrypt!(s.value)
+    end
+
+    def acme_hmac_key
+      s = Setting.find_by name: "acme_hmac_key", category: "acme"
+      if s.nil?
+        s = Setting.create!(
+          name: "acme_hmac_key",
+          category: "acme",
+          description: "Acme EAB HMAC key value",
+          value: "",
+          encrypted: true
+        )
+      end
+      s.value.blank? ? nil : Secret.decrypt!(s.value)
     end
 
     def monarx_init!
@@ -524,21 +567,19 @@ class Setting < ApplicationRecord
       monarx_api_secret
       monarx_enterprise_id
 
-      unless ContainerImagePlugin.where(name: 'monarx').exists?
-        ContainerImagePlugin.create! name: 'monarx', active: false
+      unless ContainerImagePlugin.where(name: "monarx").exists?
+        ContainerImagePlugin.create! name: "monarx", active: false
       end
-
     end
 
-
     def monarx_enabled?
-      s = Setting.find_by name: 'monarx_active', category: 'plugins'
+      s = Setting.find_by name: "monarx_active", category: "plugins"
       if s.nil?
         s = Setting.create!(
-          name: 'monarx_active',
-          category: 'plugins',
-          description: 'Enable Monarx',
-          value: 'f',
+          name: "monarx_active",
+          category: "plugins",
+          description: "Enable Monarx",
+          value: "f",
           encrypted: false
         )
       end
@@ -546,11 +587,11 @@ class Setting < ApplicationRecord
     end
 
     def monarx_api_key
-      s = Setting.find_by name: 'monarx_api_key', category: 'plugins'
+      s = Setting.find_by name: "monarx_api_key", category: "plugins"
       if s.nil?
         s = Setting.create!(
-          name: 'monarx_api_key',
-          category: 'plugins',
+          name: "monarx_api_key",
+          category: "plugins",
           description: "Monarx API Key",
           value: "",
           encrypted: true
@@ -560,11 +601,11 @@ class Setting < ApplicationRecord
     end
 
     def monarx_api_secret
-      s = Setting.find_by name: 'monarx_api_secret', category: 'plugins'
+      s = Setting.find_by name: "monarx_api_secret", category: "plugins"
       if s.nil?
         s = Setting.create!(
-          name: 'monarx_api_secret',
-          category: 'plugins',
+          name: "monarx_api_secret",
+          category: "plugins",
           description: "Monarx API Secret",
           value: "",
           encrypted: true
@@ -574,11 +615,11 @@ class Setting < ApplicationRecord
     end
 
     def monarx_agent_key
-      s = Setting.find_by name: 'monarx_agent_key', category: 'plugins'
+      s = Setting.find_by name: "monarx_agent_key", category: "plugins"
       if s.nil?
         s = Setting.create!(
-          name: 'monarx_agent_key',
-          category: 'plugins',
+          name: "monarx_agent_key",
+          category: "plugins",
           description: "Monarx Agent Key",
           value: "",
           encrypted: true
@@ -588,11 +629,11 @@ class Setting < ApplicationRecord
     end
 
     def monarx_agent_secret
-      s = Setting.find_by name: 'monarx_agent_secret', category: 'plugins'
+      s = Setting.find_by name: "monarx_agent_secret", category: "plugins"
       if s.nil?
         s = Setting.create!(
-          name: 'monarx_agent_secret',
-          category: 'plugins',
+          name: "monarx_agent_secret",
+          category: "plugins",
           description: "Monarx Agent Secret",
           value: "",
           encrypted: true
@@ -602,36 +643,36 @@ class Setting < ApplicationRecord
     end
 
     def monarx_enterprise_id
-      s = Setting.find_by name: 'monarx_enterprise_id', category: 'plugins'
+      s = Setting.find_by name: "monarx_enterprise_id", category: "plugins"
       if s.nil?
         s = Setting.create!(
-          name: 'monarx_enterprise_id',
-          category: 'plugins',
+          name: "monarx_enterprise_id",
+          category: "plugins",
           description: "Monarx Enterprise ID",
           value: "",
           encrypted: false
         )
       end
-      s.value.blank? ? nil : s.value
+      s.value.presence
     end
 
     ##
     # SMTP
     def smtp_init!
       smtp_from
-      s_server = Setting.find_by(name: 'smtp_server', category: 'mail')
-      Setting.create!(name: 'smtp_server', category: 'mail', description: 'SMTP Server', value: 'smtp.postmarkapp.com') if s_server.nil?
-      s_port = Setting.find_by(name: 'smtp_port', category: 'mail')
-      Setting.create!(name: 'smtp_port', category: 'mail', description: 'SMTP Port', value: '2525') if s_port.nil?
-      s_auth_username = Setting.find_by(name: 'smtp_username', category: 'mail')
-      Setting.create!(name: 'smtp_username', category: 'mail', description: 'SMTP Username', value: 'example') if s_auth_username.nil?
-      s_auth_password = Setting.find_by(name: 'smtp_password', category: 'mail')
-      Setting.create!(name: 'smtp_password', category: 'mail', description: 'SMTP Password', value: 'example', encrypted: true) if s_auth_password.nil?
+      s_server = Setting.find_by(name: "smtp_server", category: "mail")
+      Setting.create!(name: "smtp_server", category: "mail", description: "SMTP Server", value: "smtp.postmarkapp.com") if s_server.nil?
+      s_port = Setting.find_by(name: "smtp_port", category: "mail")
+      Setting.create!(name: "smtp_port", category: "mail", description: "SMTP Port", value: "2525") if s_port.nil?
+      s_auth_username = Setting.find_by(name: "smtp_username", category: "mail")
+      Setting.create!(name: "smtp_username", category: "mail", description: "SMTP Username", value: "example") if s_auth_username.nil?
+      s_auth_password = Setting.find_by(name: "smtp_password", category: "mail")
+      Setting.create!(name: "smtp_password", category: "mail", description: "SMTP Password", value: "example", encrypted: true) if s_auth_password.nil?
     end
 
     def smtp_from
-      s = Setting.find_by(name: 'smtp_from', category: 'mail')
-      s = Setting.create!(name: 'smtp_from', category: 'mail', description: 'From Address', value: 'noreply@example.com') if s.nil?
+      s = Setting.find_by(name: "smtp_from", category: "mail")
+      s = Setting.create!(name: "smtp_from", category: "mail", description: "From Address", value: "noreply@example.com") if s.nil?
       s.value
     end
 
@@ -640,25 +681,25 @@ class Setting < ApplicationRecord
     end
 
     def marketplace_username
-      s = Setting.find_by name: 'marketplace_username', category: 'plugins'
+      s = Setting.find_by name: "marketplace_username", category: "plugins"
       if s.nil?
         s = Setting.create!(
-          name: 'marketplace_username',
-          category: 'plugins',
+          name: "marketplace_username",
+          category: "plugins",
           description: "Username for Marketplace Plugins",
           value: "",
           encrypted: false
         )
       end
-      s.value.blank? ? nil : s.value
+      s.value.presence
     end
 
     def marketplace_password
-      s = Setting.find_by name: 'marketplace_password', category: 'plugins'
+      s = Setting.find_by name: "marketplace_password", category: "plugins"
       if s.nil?
         s = Setting.create!(
-          name: 'marketplace_password',
-          category: 'plugins',
+          name: "marketplace_password",
+          category: "plugins",
           description: "Password for Marketplace Plugins",
           value: "",
           encrypted: true
@@ -676,6 +717,10 @@ class Setting < ApplicationRecord
       # webhook_users
       #
       %w[
+        acme_directory
+        acme_email
+        acme_hmac_key
+        acme_kid
         app_name
         belco_enabled?
         belco_api_key
@@ -691,6 +736,8 @@ class Setting < ApplicationRecord
         company_name
         computestacks_bastion_image
         computestacks_cr_le
+        dixa_enabled?
+        dixa_api_key
         enable_signup_form?
         general_support_line
         google_analytics_enabled?
@@ -698,10 +745,7 @@ class Setting < ApplicationRecord
         hostname
         le
         le_auto_enabled?
-        le_domains_per_account
         le_dns_sleep
-        le_server
-        le_single_domain?
         monarx_init!
         registry_base_url
         registry_node
@@ -717,7 +761,6 @@ class Setting < ApplicationRecord
       end
       true
     end
-
   end
 
   private
@@ -725,19 +768,19 @@ class Setting < ApplicationRecord
   def set_value
     if encrypted && !value.blank?
       self.value = Secret.encrypt!(value)
-    elsif name == 'billing_module'
-      self.value = value.blank? ? 'none' : value.capitalize.strip
+    elsif name == "billing_module"
+      self.value = value.blank? ? "none" : value.capitalize.strip
     end
     # Remove leading HTTP(s).
-    self.value = value.gsub("http://", "").gsub("https://", "").strip if name == 'hostname'
+    self.value = value.gsub("http://", "").gsub("https://", "").strip if name == "hostname"
   end
 
   def check_billing_module
-    Setting.billing_module if name == 'billing_module'
+    Setting.billing_module if name == "billing_module"
   end
 
   def plugin_changes
-    return unless category == 'plugins'
+    return unless category == "plugins"
 
     # Monarx: Update visibility based on Settings.
     if name =~ /monarx/ && ContainerImagePlugin.monarx.exists?
@@ -746,7 +789,5 @@ class Setting < ApplicationRecord
         monarx_plugin.update active: monarx_plugin.monarx_available?
       end
     end
-
   end
-
 end

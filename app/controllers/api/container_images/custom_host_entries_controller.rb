@@ -1,7 +1,6 @@
 ##
 # Container Image Host Entry
 class Api::ContainerImages::CustomHostEntriesController < Api::ContainerImages::BaseController
-
   before_action :find_entry, only: [:show, :update, :destroy]
 
   ##
@@ -38,7 +37,8 @@ class Api::ContainerImages::CustomHostEntriesController < Api::ContainerImages::
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
-  def show; end
+  def show
+  end
 
   ##
   # Update Host Entry
@@ -106,5 +106,4 @@ class Api::ContainerImages::CustomHostEntriesController < Api::ContainerImages::
   def entry_params
     params.require(:host_entry).permit(:hostname, :source_image_id)
   end
-
 end

@@ -1,7 +1,6 @@
 ##
 # # Container Services
 class Api::Admin::ContainerServicesController < Api::Admin::ApplicationController
-
   ##
   # List All Container Services
   #
@@ -42,5 +41,4 @@ class Api::Admin::ContainerServicesController < Api::Admin::ApplicationControlle
     return api_obj_missing if @container_service.nil?
     respond_to :json, :xml
   end
-
 end

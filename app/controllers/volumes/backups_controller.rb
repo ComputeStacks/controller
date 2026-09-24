@@ -1,5 +1,4 @@
 class Volumes::BackupsController < Volumes::BaseController
-
   before_action :can_perform?, only: %i[create destroy]
 
   def index
@@ -15,7 +14,7 @@ class Volumes::BackupsController < Volumes::BaseController
   end
 
   def create
-    audit = Audit.create_from_object!(@volume, 'backup.create', request.remote_ip, current_user)
+    audit = Audit.create_from_object!(@volume, "backup.create", request.remote_ip, current_user)
     @volume.current_audit = audit
     if params[:name].length < 3
       redirect_to helpers.volume_path(@volume), alert: "Name too short, must be at least 3 characters."
@@ -23,11 +22,11 @@ class Volumes::BackupsController < Volumes::BaseController
     end
 
     event = @volume.event_logs.create!(
-      locale: 'volume.backup',
+      locale: "volume.backup",
       locale_keys: {},
-      status: 'pending',
+      status: "pending",
       audit: audit,
-      event_code: 'agent-ad28e9aa1933495f'
+      event_code: "agent-ad28e9aa1933495f"
     )
     event.deployments << @volume.deployment if @volume.deployment
     event.container_services << @volume.container_service
@@ -47,15 +46,19 @@ class Volumes::BackupsController < Volumes::BaseController
       redirect_to helpers.volume_path(@volume), alert: "Unknown backup."
       return false
     end
-    audit = Audit.create_from_object!(@volume, 'backup.delete', request.remote_ip, current_user)
+    if export_in_progress?(name)
+      redirect_to helpers.volume_path(@volume), alert: "Cannot delete a backup while its download is being prepared."
+      return false
+    end
+    audit = Audit.create_from_object!(@volume, "backup.delete", request.remote_ip, current_user)
     @volume.current_audit = audit
 
     event = @volume.event_logs.create!(
-      locale: 'backup.delete',
+      locale: "backup.delete",
       locale_keys: {},
-      status: 'pending',
+      status: "pending",
       audit: audit,
-      event_code: 'agent-1105683bb0f948c0'
+      event_code: "agent-1105683bb0f948c0"
     )
     event.deployments << @volume.deployment if @volume.deployment
     event.container_services << @volume.container_service
@@ -71,11 +74,23 @@ class Volumes::BackupsController < Volumes::BaseController
 
   private
 
-  def can_perform?
-    if @volume.operation_in_progress?
-      redirect_to helpers.volume_path(@volume), alert: "Unable to perform while another operation is in progress."
-      return false
-    end
+  def export_in_progress?(archive)
+    @volume.event_logs.active
+      .where(event_code: EventLog::BACKUP_EXPORT_EVENT_CODE)
+      .where("labels ->> 'archive' = ?", archive)
+      .exists?
   end
 
+  def can_perform?
+    # A volume awaiting its first mount exists on the node but no container has the bind
+    # yet, so backing it up would write a healthy-looking archive containing nothing.
+    if @volume.awaiting_mount?
+      redirect_to helpers.volume_path(@volume), alert: "This volume is not mounted by any container yet — it will be available after the service's next rebuild."
+      return false
+    end
+    if @volume.operation_in_progress?
+      redirect_to helpers.volume_path(@volume), alert: "Unable to perform while another operation is in progress."
+      false
+    end
+  end
 end

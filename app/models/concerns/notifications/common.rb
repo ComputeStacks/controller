@@ -3,14 +3,12 @@ module Notifications
     extend ActiveSupport::Concern
 
     included do
-
       scope :sorted, -> { order "label, notifier" }
 
       validates :label, presence: true
       validates :notifier, presence: true
       validates :value, presence: true
       validate :ensure_has_rules
-
     end
 
     class_methods do
@@ -27,13 +25,13 @@ module Notifications
       # * ContainerDestroyed
       #
       def available_alerts
-        %w(
+        %w[
           ContainerCpuUsage
           ContainerMemoryUsage
           ContainerBootFailed
           ContainerCreated
           ContainerDestroyed
-        )
+        ]
       end
     end
 
@@ -69,12 +67,12 @@ module Notifications
 
     def notifier_formatted_value
       case notifier
-      when 'slack'
-        value.blank? ? '...' : value.gsub("https://hooks.slack.com/services/", "")
-      when 'google'
-        value.blank? ? '...' : value.gsub("https://chat.googleapis.com/v1/spaces/", "").split("/")[0]
-      when 'matrix'
-        value.blank? ? '...' : value.split("/appservice-webhooks/api/v1/matrix/hook/")[0]
+      when "slack"
+        value.blank? ? "..." : value.gsub("https://hooks.slack.com/services/", "")
+      when "google"
+        value.blank? ? "..." : value.gsub("https://chat.googleapis.com/v1/spaces/", "").split("/")[0]
+      when "matrix"
+        value.blank? ? "..." : value.split("/appservice-webhooks/api/v1/matrix/hook/")[0]
       else
         value
       end
@@ -82,10 +80,10 @@ module Notifications
 
     def notifier_name
       case notifier
-      when 'google'
-        'Google Chat'
-      when 'msteams'
-        'Microsoft Teams'
+      when "google"
+        "Google Chat"
+      when "msteams"
+        "Microsoft Teams"
       else # email, slack, webhook
         notifier.capitalize
       end
@@ -95,24 +93,23 @@ module Notifications
 
     def ensure_has_rules
       if rules.nil? || rules.empty?
-        errors.add(:rules, 'must not be empty')
+        errors.add(:rules, "must not be empty")
       end
     end
 
     def notifier_resource
       case notifier
-      when 'email'
+      when "email"
         NotifierServices::EmailNotifier.new(value)
-      when 'keybase'
+      when "keybase"
         NotifierServices::KeybaseNotifier.new(value)
-      when 'matrix'
+      when "matrix"
         NotifierServices::MatrixNotifier.new(value)
-      when 'slack'
+      when "slack"
         NotifierServices::SlackNotifier.new(value)
       else # webhook, google, msteams
         NotifierServices::WebhookNotifier.new(value)
       end
     end
-
   end
 end

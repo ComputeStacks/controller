@@ -6,8 +6,7 @@ module SubscriptionWorkers
     def perform
       BillingUsageServices::AggregateUsageService.new.perform
     rescue => e
-      ExceptionAlertService.new(e, '5196b85ddda2f171').perform
+      ExceptionAlertService.new(e, "5196b85ddda2f171").perform
     end
-
   end
 end

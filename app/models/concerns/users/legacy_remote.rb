@@ -6,8 +6,7 @@ module Users
     extend ActiveSupport::Concern
 
     included do
-      has_many :auths, class_name: 'ProvisionDriver::UserAuth', dependent: :destroy
+      has_many :auths, class_name: "ProvisionDriver::UserAuth", dependent: :destroy
     end
-
   end
 end
