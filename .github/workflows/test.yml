@@ -10,11 +10,14 @@ on:
   push:
     branches: [main]
   pull_request:
+  # release.yml calls this so a tagged release runs the very same suite rather than a
+  # copy of it that can drift.
+  workflow_call:
   workflow_dispatch:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
@@ -59,6 +62,12 @@ jobs:
       # rejects anything shorter, and fixtures encrypt fields via Secret at load time.
       SECRET_KEY_BASE: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
       USER_AUTH_SECRET: "ci-test-user-auth-secret"
+      # The GitLab job inherits these from the controller image (the Dockerfile sets them
+      # as ENV); a bare runner does not, so they must be named here. Without CURRENCY,
+      # BillingResourcePrice writes a NULL currency and the fixtures blow up with a
+      # not-null violation on nearly every test.
+      LOCALE: en
+      CURRENCY: USD
       NODE_ENROLLMENT_TOKEN: "ci-test-node-enrollment-token"
       # nodes.yml sets primary_ip (NOT NULL) from DEV_VM_IP; also feeds the
       # load_balancers ext_ip and metric/log client endpoint fixtures.
@@ -66,7 +75,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1

@@ -1,0 +1,167 @@
+name: Release
+
+# Tag-triggered, and the only way a release is published. This repository receives
+# squashed release snapshots of an internal tree that has already been tested and
+# released there, so a tag here means "this is ready" -- run the suite once more, build
+# the image, and cut the GitHub Release from CHANGELOG.md, with no manual step.
+#
+# The tag must agree with VERSION; a mismatch fails before anything is published.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write # create the GitHub Release
+  packages: write # push to ghcr.io
+
+# Never publish two releases at once -- they would race for the :MAJOR / :MINOR / :latest
+# tags and the last writer would win regardless of version order.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  # Run the very same suite the push workflow runs, rather than a copy that can drift.
+  test:
+    uses: ./.github/workflows/test.yml
+
+  release:
+    needs: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    # The `secrets` context is NOT available in a step-level `if`, so the Docker Hub
+    # credentials are surfaced as env here -- `env` is available there -- and the login
+    # step keys off these rather than off secrets directly.
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # The image build runs `rails db:schema:load` and connects to redis, so the build
+    # needs both reachable. They are published on localhost and the build runs with
+    # host networking, which is what the Dockerfile's ARG defaults already point at.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: cstacks
+          POSTGRES_PASSWORD: cstacks
+          POSTGRES_DB: cstacks
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # VERSION is what the running app reports and what `rake version:check` compares
+      # against CHANGELOG.md. If the tag disagrees, the release would be labelled one
+      # thing and behave as another -- stop before anything is pushed.
+      - name: Check the tag matches VERSION
+        id: v
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          version="$(tr -d '[:space:]' < VERSION)"
+          if [ "${tag#v}" != "$version" ]; then
+            echo "::error::tag ${tag} does not match VERSION (${version})"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # A prerelease (v9.8.0-rc1) must not move :latest, :MAJOR or :MINOR -- those
+          # point at the newest STABLE release.
+          if [[ "$tag" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract release notes from CHANGELOG.md
+        run: ./script/changelog-extract.sh "${GITHUB_REF_NAME}" | tee /tmp/notes.md
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          buildkitd-flags: "--allow-insecure-entitlement network.host"
+          driver-opts: network=host
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Docker Hub is optional: if the credentials are not configured the release still
+      # publishes to ghcr.io rather than failing. Set DOCKERHUB_USERNAME +
+      # DOCKERHUB_TOKEN in repository secrets to enable it.
+      - name: Log in to Docker Hub
+        id: dockerhub
+        if: ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
+        uses: docker/login-action@v4
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
+      - name: Work out the image tags
+        id: tags
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+          PRERELEASE: ${{ steps.v.outputs.prerelease }}
+          DOCKERHUB: ${{ steps.dockerhub.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          major="${VERSION%%.*}"
+          minor="${VERSION%.*}"
+          registries="ghcr.io/computestacks/controller"
+          # A bare `[ ... ] && x=y` would abort the whole step under `set -e` whenever
+          # the test is false, which is the normal case when Docker Hub is unconfigured.
+          if [ "$DOCKERHUB" = "true" ]; then
+            registries="$registries cmptstks/controller"
+          fi
+          tags=""
+          for r in $registries; do
+            tags="${tags}${r}:${VERSION}"$'\n'
+            if [ "$PRERELEASE" != "true" ]; then
+              tags="${tags}${r}:${minor}"$'\n'
+              tags="${tags}${r}:${major}"$'\n'
+              tags="${tags}${r}:latest"$'\n'
+            fi
+          done
+          { echo "tags<<EOF"; printf '%s' "$tags"; echo "EOF"; } >> "$GITHUB_OUTPUT"
+          printf 'publishing:\n%s' "$tags"
+
+      - name: Build and push the image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          allow: network.host
+          network: host
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --repo "${{ github.repository }}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes-file /tmp/notes.md \
+            ${{ steps.v.outputs.prerelease == 'true' && '--prerelease' || '' }}
