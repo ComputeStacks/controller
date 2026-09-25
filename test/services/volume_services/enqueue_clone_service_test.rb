@@ -219,11 +219,13 @@ class VolumeServices::EnqueueCloneServiceTest < ActiveSupport::TestCase
   end
 
   test "an order retry re-arms a terminal row instead of silently skipping it" do
+    # Computed once: archive_name stamps the current second, so a second call can differ.
+    dead_archive = archive_name("dead")
     stale = make_clone_job(
       volume: @target,
       source_volume: @source,
       state: VolumeCloneJob::STATE_FAILED,
-      archive_name: archive_name("dead"),
+      archive_name: dead_archive,
       clone_label: "dead",
       owns_snapshot: true,
       backup_task_id: SecureRandom.uuid,
@@ -262,7 +264,7 @@ class VolumeServices::EnqueueCloneServiceTest < ActiveSupport::TestCase
     # customer's borg repo and the SystemEvent is the only thing left that names it.
     orphan = SystemEvent.where(event_code: CLONE_EVENT_CODES[:abandoned_snapshot]).last
     refute_nil orphan, "re-arming must record the snapshot it orphans"
-    assert_equal archive_name("dead"), orphan.data["archive"]
+    assert_equal dead_archive, orphan.data["archive"]
 
     # And the cleanup bookkeeping must be reset, or the NEW run's snapshot never gets
     # scheduled for deletion either (enter_terminal! skips it when snapshot_trashed_at is set).
