@@ -45,7 +45,11 @@
               <td>sftpuser</td>
             </tr>
             <tr>
-              <td>Password</td>
+              <td>
+                Password
+                <%# Kept outside td#sftp-password: "Show" replaces that whole cell. %>
+                <%= link_to "Rotate", "#{admin_sftp_path(@container)}/password", method: :post, class: 'pull-right', data: { confirm: "Generate a new SSH password? The SSH container will be rebuilt, which disconnects any open SSH, SFTP and cloud shell sessions." } %>
+              </td>
               <td id="sftp-password">
                 <%= link_to t('actions.show'), "#{admin_sftp_path(@container)}/password", class: "inline-remote-resource" %>
               </td>

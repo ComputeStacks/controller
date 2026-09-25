@@ -67,6 +67,17 @@ class Deployment::Sftp < ApplicationRecord
     {cpu: ALLOCATED_CPU * qty, memory: ALLOCATED_MEMORY * qty}
   end
 
+  ##
+  # A new random password for the bastion's `sftpuser`.
+  #
+  # Shared by #set_pass and SftpServices::RotatePasswordService so both mint passwords
+  # the same way.
+  #
+  # @return [String]
+  def self.generate_password
+    SecureRandom.urlsafe_base64(10).delete("_").delete("-")
+  end
+
   include Auditable
   include Authorization::Container
   include Containerized
@@ -157,9 +168,6 @@ class Deployment::Sftp < ApplicationRecord
 
   def image
     Setting.computestacks_bastion_image
-  end
-
-  def reset_password!
   end
 
   def password
@@ -281,7 +289,7 @@ class Deployment::Sftp < ApplicationRecord
 
   def set_pass
     if password.blank?
-      self.password = SecureRandom.urlsafe_base64(10).delete("_").delete("-")
+      self.password = self.class.generate_password
     end
   end
 

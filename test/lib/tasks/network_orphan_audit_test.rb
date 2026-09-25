@@ -209,7 +209,7 @@ class NetworkOrphanAuditTest < ActiveSupport::TestCase
 
     auditor = audit(listed: [])
 
-    missing_ids = auditor.missing.map { |(row, _)| row.id }
+    missing_ids = auditor.missing.map { |(row, _kind, _)| row.id }
     assert_includes missing_ids, @row.id
   end
 
@@ -219,7 +219,7 @@ class NetworkOrphanAuditTest < ActiveSupport::TestCase
 
     auditor = audit(listed: [present])
 
-    missing_ids = auditor.missing.map { |(row, _)| row.id }
+    missing_ids = auditor.missing.map { |(row, _kind, _)| row.id }
     assert_not_includes missing_ids, @row.id
   end
 
@@ -331,5 +331,53 @@ class NetworkOrphanAuditTest < ActiveSupport::TestCase
 
     assert_nothing_raised { auditor.perform }
     assert_match "netpreviousproject", @out.string
+  end
+
+  # 481 rows reported as "that project's containers cannot start" on the first production run,
+  # nearly all of them pointing at projects that had been deleted years earlier. A stale
+  # reference is a leftover, not an outage, and burying the handful of real ones under it makes
+  # the report worse than useless.
+  test "a row naming a deleted project is a stale reference, not a missing network" do
+    @row.update_columns(active: true, deployment_id: 999_999_999)
+
+    auditor = audit(listed: [])
+
+    assert_empty auditor.missing.select { |(row, _, _)| row.id == @row.id }
+    stale = auditor.stale.detect { |(row, _, _)| row.id == @row.id }
+    assert_not_nil stale
+    assert_equal :stale, stale[1]
+    assert_match "no longer exists", stale[2]
+  end
+
+  test "a row naming a project that still exists is the real outage" do
+    @row.update! active: true, deployment: deployments(:project_test)
+
+    auditor = audit(listed: [])
+
+    entry = auditor.missing.detect { |(row, _, _)| row.id == @row.id }
+    assert_not_nil entry
+    assert_equal :broken, entry[1]
+    assert_match "containers cannot start", entry[2]
+    assert_empty auditor.stale
+  end
+
+  test "a parked pool entry is reported as such rather than as a broken project" do
+    @row.update! active: true, deployment: nil
+
+    auditor = audit(listed: [])
+
+    entry = auditor.missing.detect { |(row, _, _)| row.id == @row.id }
+    assert_equal :parked, entry[1]
+  end
+
+  # A clustered region's child networks are not docker bridge networks and never appear on a
+  # node. Including them reports the whole region as broken.
+  test "a clustered network is not expected on a node at all" do
+    @row.update_columns(active: true, network_driver: "calico_docker")
+
+    auditor = audit(listed: [])
+
+    assert_empty auditor.missing.select { |(row, _, _)| row.id == @row.id }
+    assert_empty auditor.stale.select { |(row, _, _)| row.id == @row.id }
   end
 end

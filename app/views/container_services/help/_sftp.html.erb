@@ -36,7 +36,11 @@
             <td class="code-font-minimal">sftpuser</td>
           </tr>
           <tr>
-            <td><%= t 'common.password' %></td>
+            <td>
+              <%= t 'common.password' %>
+              <%# Kept outside td#sftp-password: "Show" replaces that whole cell. %>
+              <%= link_to("Rotate", sftp_password_path(i), method: :post, class: 'pull-right', data: { confirm: "Generate a new SSH password? The SSH container will be rebuilt, which disconnects any open SSH, SFTP and cloud shell sessions." }) if i.pw_auth %>
+            </td>
             <td id="sftp-password" class="code-font-minimal">
               <% if i.pw_auth %>
                 <%= link_to t('actions.show'), sftp_password_path(i), class: "inline-remote-resource" %>

@@ -127,10 +127,9 @@ class ProcessOrderServiceTest < ActiveSupport::TestCase
   # fail!. An unsaved Order can't do the last one.
   class FakeOrder
     attr_reader :failed
+    attr_accessor :deployment
 
     def current_event = nil
-
-    def deployment = nil
 
     def data = {}
 
@@ -190,5 +189,91 @@ class ProcessOrderServiceTest < ActiveSupport::TestCase
     assert_equal [true, nil], RecordingTrasher.seen,
       "the row must be parked, not pooled, until the node confirms the network is gone"
     assert_equal true, network.reload.active
+  end
+
+  # Production, 2026-09-04: a SECOND order against a project provisioned the day before failed,
+  # and six seconds later that project's private network row was detached -- while its three
+  # containers and its SFTP container carried on running. The project then had no network
+  # record at all, and PrivateNetCleanupWorker began considering a live customer's network for
+  # deletion every ten minutes, held off only by its addresses.
+  #
+  # An order against an existing project never allocates a network in the first place --
+  # GenerateProjectNetworkService returns early with "Project network already configured" --
+  # so there is nothing for the failure path to release.
+  test "an order against an existing project does not release the network it came in with" do
+    network = networks(:net_gen_1)
+    network.update! active: true, deployment: @project
+
+    order = FakeOrder.new
+    order.deployment = @project
+    service = ProcessOrderService.new(order)
+    service.project = @project
+    service.event = @event
+    service.errors = []
+
+    service.send(:release_network!)
+
+    network.reload
+    assert_equal @project.id, network.deployment_id, "a running project must keep its network"
+    assert_equal true, network.active
+  end
+
+  # ... but a network THIS order allocated is still released, whether the project is new or
+  # was created earlier without one.
+  test "a network this order allocated is released even when the project already existed" do
+    Network.where(deployment_id: @project.id).update_all(deployment_id: nil)
+    @project.reload
+
+    order = FakeOrder.new
+    order.deployment = @project # existed, but carried no network
+    service = ProcessOrderService.new(order)
+    service.project = @project
+    service.event = @event
+    service.errors = []
+
+    network = networks(:net_gen_1)
+    network.update! active: true, deployment: @project
+    # Deliberately NOT reloading the project: production does not. The has_one was read as nil
+    # when the service was built, and binding the row does not update that cached side.
+
+    Docker::Network.stub(:get, ->(*) { raise Docker::Error::NotFoundError }) do
+      service.send(:release_network!)
+    end
+
+    assert_nil network.reload.deployment_id
+  end
+
+  # The sequence production actually runs, which a `project.reload` in a test would hide.
+  #
+  # GenerateProjectNetworkService#perform reads `project.private_network` to decide whether to
+  # allocate at all -- caching nil on the project -- and then binds a row by setting the
+  # Network's belongs_to. There is no inverse_of, so the project's cached side still answers
+  # nil afterwards. Reading the association at failure time therefore finds nothing and
+  # releases nothing, on every failure before finalize! (which happens to reload).
+  test "a network allocated after the project's association was cached is still released" do
+    Network.where(deployment_id: @project.id).update_all(deployment_id: nil)
+    @project.reload
+
+    order = FakeOrder.new
+    order.deployment = @project
+    service = ProcessOrderService.new(order)
+    service.project = @project
+    service.event = @event
+    service.errors = []
+
+    # This is the read GenerateProjectNetworkService makes, and it caches nil.
+    assert_nil @project.private_network
+
+    network = networks(:net_gen_1)
+    network.update! active: false, deployment: @project
+    assert_nil @project.private_network, "the cached association still answers nil -- the bug"
+
+    Docker::Network.stub(:get, ->(*) { raise Docker::Error::NotFoundError }) do
+      service.send(:release_network!)
+    end
+
+    network.reload
+    assert_nil network.deployment_id, "the range this order allocated must not stay bound to a failed project"
+    assert_equal false, network.active
   end
 end

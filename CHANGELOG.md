@@ -1,5 +1,13 @@
 # Change Log
 
+## v9.7.9
+
+- [FEATURE] **A project's SSH password can now be replaced on demand.** A new "Rotate" link sits next to the password on the project's SFTP connection panel, shown while password login is enabled, and on the SFTP container's admin page, where it is always available. Either one generates a new password and rebuilds the SSH container, because the password is only applied when that container is created. The rebuild disconnects any open SSH, SFTP and cloud shell sessions — the link asks before going ahead — and the new password takes effect once the rebuild completes. Host keys are kept, so clients do not see a changed-key warning.
+
+    **The existing API endpoint, `POST /api/projects/{project-id}/bastions/{id}/reset_password`, now works.** It previously returned a server error whenever the rebuild could not be started, and it saved the new password before knowing whether it would run, so it could hand back a password the container never received. Project collaborators could not use it at all. It now checks first and leaves the password unchanged when the node is offline or another action is in progress on the container, returning the reason instead. It requires the `project_write` scope and returns the bastion with its new password.
+
+- [FIX] **A failed order no longer strips a running project of its private network.** An order placed against a project that already exists does not create a network — it uses the one the project has. If that order then failed for any reason, the failure handling released the project's network anyway. The containers carried on running, but the controller no longer had any record that the project had a network: anything that needed to know, such as adding a container or re-provisioning file access, saw none, and the routine cleanup began considering a live customer's network for deletion every ten minutes. The failure path now releases a network only when the same order created it.
+
 ## v9.7.8
 
 - [CHANGE] **The local development environment setup has been rebuilt.** It previously referenced a Vagrant box that was removed some time ago, and following it could no longer produce a working setup. Two scripts now do the work — one for a developer's own workstation, one for the separate VM that acts as the container node — and both can be re-run safely to pick up changes. `doc/development.md` replaces the old instructions and walks through the whole process, including the one-time loop where the node is installed before the controller exists to enroll it against.

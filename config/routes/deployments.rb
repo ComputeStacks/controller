@@ -96,6 +96,7 @@ Rails.application.routes.draw do
   resources :deployments do
     scope module: "deployments" do
       get "sftp/:id/password", to: "sftp#show"
+      post "sftp/:id/password", to: "sftp#rotate_password"
       get "services", to: "services#index"
       get "volume_clones", to: "volumes#clone_status"
       get "events/last_event" => "events#last_event"

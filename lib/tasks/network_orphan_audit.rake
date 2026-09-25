@@ -46,8 +46,12 @@
 #   (d) UNLABELLED -- docker networks we did not create (`bridge`, `host`, `none`, anything
 #       made by hand). Reported so the picture is complete. NEVER removed.
 #   (e) MISSING FROM NODE -- the mirror image: a row that claims to be on a node (it has a
-#       project, or is marked active) and is not there on any node in its region. A project in
-#       this state has containers that cannot start.
+#       project, or is marked active) and is not there on any node in its region. A row whose
+#       project still exists is a real outage -- those containers cannot start. A row with no
+#       project is just a parked pool entry whose removal was never confirmed.
+#   (f) STALE PROJECT REFERENCE -- names a project that has been deleted. `belongs_to
+#       :deployment, optional: true` has no foreign key, so these accumulate. Nothing is
+#       broken; they are split out because otherwise they bury the class (e) rows that matter.
 #
 # ONLY (a), (b) and (c) with ZERO attached containers are ever removed, and only under
 # REMOVE=1. A network with containers attached is live, whatever the database thinks, and
@@ -94,7 +98,7 @@ module NetworkOrphanAudit
     # them keeps the report readable.
     PREDEFINED = %w[bridge host none].freeze
 
-    attr_reader :renamed, :unknown, :unallocated, :unlabelled, :missing
+    attr_reader :renamed, :unknown, :unallocated, :unlabelled, :missing, :stale
     attr_reader :removed, :remove_failures
 
     # @param out [IO] where the report goes
@@ -126,6 +130,7 @@ module NetworkOrphanAudit
       @unallocated = []
       @unlabelled = []
       @missing = []
+      @stale = []
       @removed = []
       @remove_failures = []
 
@@ -275,6 +280,15 @@ module NetworkOrphanAudit
     #
     # Only regions where EVERY node responded are considered: a row whose region has a silent
     # node is unknowable, not missing.
+    #
+    # `bridged` matters: a clustered (calico) region's child networks are not docker bridge
+    # networks and never appear on a node, so including them would report an entire region as
+    # broken.
+    #
+    # The split on whether the Deployment still EXISTS matters more. A row pointing at a
+    # deleted project looks identical to one pointing at a live broken project, and only the
+    # second is an outage. `belongs_to :deployment, optional: true` with no foreign key, so
+    # stale pointers accumulate and would otherwise drown the real ones.
     def find_missing
       audited_region_ids = Node.where(id: @responded_node_ids).distinct.pluck(:region_id)
       audited_region_ids.reject! do |region_id|
@@ -283,17 +297,28 @@ module NetworkOrphanAudit
       return if audited_region_ids.empty?
 
       present = @observed.map(&:name).to_set
-      candidates = Network.where(region_id: audited_region_ids).where.not(parent_network_id: nil)
+      candidates = Network.bridged.where(region_id: audited_region_ids)
+        .where.not(parent_network_id: nil)
         .where("deployment_id IS NOT NULL OR active = ?", true)
+        .left_outer_joins(:deployment)
+        .select("networks.*, deployments.id AS live_deployment_id")
 
       candidates.find_each do |row|
         next if present.include?(row.name)
-        reason = if row.deployment_id
-          "allocated to project #{row.deployment_id} -- that project's containers cannot start; re-provision its network"
+
+        if row.deployment_id.nil?
+          @missing << [row, :parked,
+            "marked active but on no node -- a parked pool entry whose removal was never " \
+            "confirmed; the cleanup sweep returns it to the pool once a node confirms it gone"]
+        elsif row.live_deployment_id.nil?
+          @stale << [row, :stale,
+            "points at project #{row.deployment_id}, which no longer exists -- a leftover " \
+            "reference, not an outage; nothing is broken and no container is affected"]
         else
-          "marked active but on no node -- a parked pool entry whose removal was never confirmed; the cleanup sweep will return it to the pool"
+          @missing << [row, :broken,
+            "allocated to project #{row.deployment_id}, which still exists -- that project's " \
+            "containers cannot start; re-provision its network"]
         end
-        @missing << [row, reason]
       end
     end
 
@@ -314,6 +339,7 @@ module NetworkOrphanAudit
       report_unknown
       report_unallocated
       report_missing
+      report_stale
       report_unlabelled
     end
 
@@ -367,13 +393,31 @@ module NetworkOrphanAudit
     end
 
     def report_missing
-      say "(e) MISSING FROM NODE -- #{@missing.size} row(s)"
-      say "    The row says it is on a node and it is not. Only regions where every node"
-      say "    answered the sweep are considered here."
+      broken = @missing.count { |(_, kind, _)| kind == :broken }
+      say "(e) MISSING FROM NODE -- #{@missing.size} row(s), #{broken} of them a live project"
+      say "    The row says it is on a node and it is not. Only bridged networks, and only"
+      say "    regions where every node answered the sweep."
+      say "    A row whose project still exists is an outage. A parked pool entry is not."
       return say_none if @missing.empty?
 
-      each_capped(@missing) do |(row, reason)|
+      ordered = @missing.each_with_index.sort_by { |((_, kind, _), i)| [(kind == :broken) ? 0 : 1, i] }.map(&:first)
+      each_capped(ordered) do |(row, _kind, reason)|
         say "      row #{row.id}  #{row.name}  subnet=#{row.to_net}  region=#{row.region&.name}"
+        say "        #{reason}"
+      end
+      say ""
+    end
+
+    def report_stale
+      say "(f) STALE PROJECT REFERENCE -- #{@stale.size} row(s)"
+      say "    The row names a project that has been deleted. Nothing is broken and no"
+      say "    container is affected; the reference was simply never cleared. Left alone --"
+      say "    clearing deployment_id would return these to the allocation pool, which is a"
+      say "    decision about live address space, not a tidy-up."
+      return say_none if @stale.empty?
+
+      each_capped(@stale) do |(row, _kind, reason)|
+        say "      row #{row.id}  #{row.name}  subnet=#{row.to_net}  region=#{row.region&.name}  active=#{row.active}"
         say "        #{reason}"
       end
       say ""
@@ -426,7 +470,8 @@ module NetworkOrphanAudit
       say "  (b) unknown orphans   : #{@unknown.size} (#{removable(@unknown).size} removable)"
       say "  (c) unallocated       : #{@unallocated.size} (#{removable(@unallocated).size} removable)"
       say "  (d) unlabelled        : #{@unlabelled.size} (never removed)"
-      say "  (e) missing from node : #{@missing.size}"
+      say "  (e) missing from node : #{@missing.size} (#{@missing.count { |(_, k, _)| k == :broken }} a live project)"
+      say "  (f) stale reference   : #{@stale.size} (deleted projects; nothing broken)"
       if @failed_node_ids.any?
         say "  nodes that did not answer: #{@failed_node_ids.size} -- their regions were skipped for (e)"
       end
@@ -452,6 +497,8 @@ module NetworkOrphanAudit
     end
 
     def nothing_to_do?
+      # @stale deliberately excluded: a stale pointer is a leftover reference, not
+      # something to do. An install carrying hundreds of them is still fully reconciled.
       @renamed.empty? && @unknown.empty? && @unallocated.empty? && @missing.empty?
     end
 
@@ -497,10 +544,12 @@ end
 namespace :networks do
   desc "Audit docker networks on every online node against the database: reports renamed " \
        "orphans holding a live row's subnet (the cause of 403 Forbidden on network create), " \
-       "networks whose database row is gone, networks with no project, and rows that are " \
-       "missing from their node. REMOVE=1 deletes the orphans that have no containers " \
-       "attached. LIMIT=n caps each class's listing (default 25, 0 = all). Read-only " \
-       "without REMOVE=1."
+       "networks whose database row is gone, networks with no project, rows missing from " \
+       "their node (separating live projects, which is an outage, from parked pool entries), " \
+       "and rows naming a deleted project. REMOVE=1 deletes the orphans nothing is using -- " \
+       "attached endpoints, containers configured to use them including stopped ones, and " \
+       "allocated addresses all block it. LIMIT=n caps each class's listing (default 25, " \
+       "0 = all). Read-only without REMOVE=1."
   task audit_orphans: :environment do
     # ActiveModel cast, not truthiness: REMOVE=0 must mean off.
     remove = ActiveModel::Type::Boolean.new.cast(ENV["REMOVE"])

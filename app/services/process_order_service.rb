@@ -19,6 +19,24 @@ class ProcessOrderService
     end
     self.errors = []
 
+    ##
+    # The private network this project ALREADY had when the order arrived, if any.
+    #
+    # An order against an existing project does not allocate a network --
+    # NetworkServices::GenerateProjectNetworkService returns early with "Project network
+    # already configured, skipping". So the network is not this order's to release, and
+    # releasing it strips a running project of its network record: every later read of
+    # `project.private_network` answers nil, and the ten-minute cleanup sweep starts
+    # considering a live customer's network for deletion, held off only by its addresses.
+    #
+    # Seen in production on 2026-09-04: a second order against a project provisioned the day
+    # before failed, and six seconds later that project's network row was detached while its
+    # three containers and its SFTP container carried on running.
+    #
+    # nil when the project is new, or had no network yet -- in both of those cases this order
+    # allocated whatever is there now and must release it on failure.
+    @inherited_network_id = order.deployment&.private_network&.id
+
     ## Track what we've done.
     # result = {
     #   containers: [],
@@ -294,10 +312,24 @@ class ProcessOrderService
   # removal. Whatever it declines is picked up by the ten-minute
   # `NetworkWorkers::PrivateNetCleanupWorker` sweep instead.
   #
+  # Queried, NOT read through `project.private_network`. That `has_one` is loaded and cached
+  # as nil before the network exists -- `GenerateProjectNetworkService#perform` reads it to
+  # decide whether to allocate at all, and `@inherited_network_id` above reads it too -- and
+  # binding the row sets the `belongs_to` on the Network without touching the project's cached
+  # side (there is no `inverse_of` between them). So by failure time the association still
+  # answers nil for a network this order allocated minutes earlier, and every failure before
+  # `finalize!` (which happens to call `project.reload`) would release nothing: the row stays
+  # bound to a dead project, inactive, retried by nobody, and goes into the allocation pool
+  # with its docker network still on the node the moment the project is deleted.
+  #
   # Never raises: this runs on the failure path, including from `perform`'s `ensure`.
   def release_network!
-    net = project&.private_network
+    return if project.nil? || project.id.nil?
+
+    net = Network.find_by(deployment_id: project.id)
     return if net.nil?
+    # Not ours to release -- the project came in with it. See @inherited_network_id.
+    return if net.id == @inherited_network_id
 
     # `active: true` before the detach, deliberately. The allocation pool is "inactive AND no
     # deployment", so detaching a row that is already inactive -- which is exactly the state a

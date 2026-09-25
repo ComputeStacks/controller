@@ -1,5 +1,5 @@
 class Deployments::SftpController < Deployments::BaseController
-  before_action :find_sftp, only: %i[show update]
+  before_action :find_sftp, only: %i[show update rotate_password]
 
   def show
     if request.xhr?
@@ -30,6 +30,17 @@ class Deployments::SftpController < Deployments::BaseController
       head :created
     else
       redirect_back fallback_location: "/deployments/#{@deployment.token}", notice: "Password Auth has been updated"
+    end
+  end
+
+  # Replace the SSH password and rebuild the SSH container.
+  def rotate_password
+    audit = Audit.create_from_object! @sftp, "updated", request.remote_ip, current_user
+    service = SftpServices::RotatePasswordService.new(@sftp, audit)
+    if service.perform
+      redirect_back fallback_location: "/deployments/#{@deployment.token}", notice: "SSH password rotated. It takes effect once the SSH container rebuild completes."
+    else
+      redirect_back fallback_location: "/deployments/#{@deployment.token}", alert: service.errors.join(" ")
     end
   end
 
