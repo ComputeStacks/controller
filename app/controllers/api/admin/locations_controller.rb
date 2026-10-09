@@ -12,6 +12,8 @@ class Api::Admin::LocationsController < Api::Admin::ApplicationController
   #     * `id`: Integer
   #     * `name`: String
   #     * `fill_strategy`: String - `least` or `full`. `Full` will fill to the `fill_to` variable on the region (AZ).
+  #     * `maintenance_summary`: Object - as on a region, summed across this location's regions; each entry in `nodes` also carries `region_id`
+  #     * `pending_agent_syncs`: Object - as on a region, summed across this location's regions
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
 
@@ -29,6 +31,8 @@ class Api::Admin::LocationsController < Api::Admin::ApplicationController
   #     * `id`: Integer
   #     * `name`: String
   #     * `fill_strategy`: String - `least` or `full`. `Full` will fill to the `fill_to` variable on the region (AZ).
+  #     * `maintenance_summary`: Object - as on a region, summed across this location's regions; each entry in `nodes` also carries `region_id`
+  #     * `pending_agent_syncs`: Object - as on a region, summed across this location's regions
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
 

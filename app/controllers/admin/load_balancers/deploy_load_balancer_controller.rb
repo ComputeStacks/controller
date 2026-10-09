@@ -5,12 +5,13 @@ class Admin::LoadBalancers::DeployLoadBalancerController < Admin::ApplicationCon
     if @load_balancer.active?
       LoadBalancerServices::DeployConfigService.new(@load_balancer).perform
       flash[:notice] = "Load Balancer will be re-deployed shortly."
-    elsif !@load_balancer.has_shared_cert?
-      flash[:alert] = "Missing SSL Certificate, unable to deploy."
     elsif !@load_balancer.domain_valid
+      # Checked before the certificate: a valid domain is what triggers automatic SSL.
       flash[:alert] = "Domain is currently invalid, triggering validation job now. Please try deploying again in a few minutes."
       current_audit = Audit.create_from_object! @load_balancer, "updated", current_user.last_request_ip, current_user
       LoadBalancerWorkers::ValidateDomainWorker.perform_async @load_balancer.id, current_audit.id
+    elsif !@load_balancer.has_shared_cert?
+      flash[:alert] = "Missing SSL Certificate, unable to deploy."
     else
       flash[:alert] = "Fatal error has prevented this load balancer from deploying."
     end

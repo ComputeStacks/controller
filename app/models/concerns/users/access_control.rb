@@ -24,7 +24,8 @@ module Users
       has_many :oauth_applications, class_name: "Doorkeeper::Application", as: :owner
 
       before_destroy :clear_api_credentials!
-      after_update :toggle_user_state
+      # After commit: the power actions it queues must find their events in the DB.
+      after_update_commit :toggle_user_state
     end
 
     def suspend!

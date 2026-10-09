@@ -178,12 +178,12 @@ class AgentDatachannelBackfillTest < ActiveSupport::TestCase
   private
 
   def duplicate_node(label:, maintenance: false, disconnected: false)
-    attrs = @node.attributes.except("id", "created_at", "updated_at")
+    attrs = @node.attributes.except("id", "created_at", "updated_at", "maintenance")
     Node.create!(
       attrs.merge(
         "label" => label,
         "hostname" => "#{label}.example.com",
-        "maintenance" => maintenance,
+        "maintenance_requested" => maintenance,
         "disconnected" => disconnected,
         "datachannel_backfilled_at" => nil
       )

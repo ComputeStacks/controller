@@ -9,9 +9,15 @@ module ProjectServices
       self.deployment = deployment
     end
 
-    def perform
-      return false if deployment&.region.nil?
-      Agent::Client.new(deployment, region: deployment.region).put_managed("ssh_keys", data.to_json)
+    # @param record_drop [Boolean] false on replay (AgentWorkers::PendingSyncWorker)
+    # @param self_heal [Boolean] false on replay: never provision the tenant inline
+    def perform(record_drop: true, self_heal: true)
+      region = deployment&.region
+      return false if region.nil?
+      return false if Agent::TenantRegistry.deleting?(deployment.id)
+      Agent::PendingSync.track(record_drop:, region:, project: deployment, kind: "managed_ssh_keys") do
+        Agent::Client.new(deployment, region: region).put_managed("ssh_keys", data.to_json, self_heal:)
+      end
     rescue Agent::Client::NotReady
       false
     end

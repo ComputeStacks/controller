@@ -20,6 +20,16 @@ class Api::ProjectsController < Api::ApplicationController
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #     * `container_image_ids`: Array<Integer>
+  #     * `node_status`: Object - availability of the nodes running the project's containers and bastions
+  #       (nothing deployed yet: its availability zones' nodes). Read from stored state.
+  #         * `state`: String<online,maintenance,offline> - worst state among those nodes
+  #         * `since`: DateTime | null - when that state began
+  #         * `planned`: Boolean - true for maintenance, false for an unplanned outage
+  #         * `message`: String | null - operator's notice to customers; null while `online`
+  #         * `operations`: Object - what each action does in this state (see doc/maintenance.md)
+  #             * `power`: String<available,deferred,refused> - deferred runs when maintenance ends; latest request wins
+  #             * `backup`, `restore`, `export`, `scale`, `bastion_password_reset`: String<available,refused>
+  #             * `config_changes`: String<available,deferred> - deferred until the node reconnects
   #     * `links`: Hash
   #         * `services`: String (url)
   #         * `container_images`: String (url)
@@ -30,6 +40,7 @@ class Api::ProjectsController < Api::ApplicationController
 
   def index
     @deployments = paginate Deployment.find_all_for(current_user).sort_by_name
+      .preload(services: [{containers: :node}, {region: :nodes}], sftp_containers: :node)
     @images = ContainerImage.find_all_for(current_user, true)
   end
 
@@ -48,6 +59,16 @@ class Api::ProjectsController < Api::ApplicationController
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #     * `container_image_ids`: Array<Integer>
+  #     * `node_status`: Object - availability of the nodes running the project's containers and bastions
+  #       (nothing deployed yet: its availability zones' nodes). Read from stored state.
+  #         * `state`: String<online,maintenance,offline> - worst state among those nodes
+  #         * `since`: DateTime | null - when that state began
+  #         * `planned`: Boolean - true for maintenance, false for an unplanned outage
+  #         * `message`: String | null - operator's notice to customers; null while `online`
+  #         * `operations`: Object - what each action does in this state (see doc/maintenance.md)
+  #             * `power`: String<available,deferred,refused> - deferred runs when maintenance ends; latest request wins
+  #             * `backup`, `restore`, `export`, `scale`, `bastion_password_reset`: String<available,refused>
+  #             * `config_changes`: String<available,deferred> - deferred until the node reconnects
   #     * `links`: Hash
   #         * `services`: String (url)
   #         * `container_images`: String (url)

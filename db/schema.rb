@@ -10,10 +10,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_04_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_08_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
+
+  create_table "agent_pending_syncs", force: :cascade do |t|
+    t.bigint "region_id", null: false
+    t.bigint "project_id"
+    t.bigint "node_id"
+    t.string "kind", null: false
+    t.string "key", default: "", null: false
+    t.integer "generation", default: 0, null: false
+    t.integer "attempts", default: 0, null: false
+    t.text "last_error"
+    t.datetime "first_failed_at"
+    t.datetime "first_attempted_at"
+    t.datetime "last_attempt_at"
+    t.datetime "next_attempt_at"
+    t.datetime "dead_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "region_id, COALESCE(project_id, (0)::bigint), COALESCE(node_id, (0)::bigint), kind, key", name: "index_agent_pending_syncs_on_subject", unique: true
+    t.index ["next_attempt_at", "dead_at"], name: "index_agent_pending_syncs_on_next_attempt_at_and_dead_at"
+    t.index ["node_id"], name: "index_agent_pending_syncs_on_node_id"
+    t.index ["project_id"], name: "index_agent_pending_syncs_on_project_id"
+    t.index ["region_id"], name: "index_agent_pending_syncs_on_region_id"
+    t.check_constraint "kind::text = 'firewall'::text AND node_id IS NOT NULL AND project_id IS NULL OR kind::text <> 'firewall'::text AND project_id IS NOT NULL AND node_id IS NULL", name: "agent_pending_syncs_one_subject"
+  end
 
   create_table "agent_repositories", force: :cascade do |t|
     t.string "name", null: false
@@ -46,6 +70,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_04_000001) do
     t.index ["reconciled_status"], name: "index_agent_tasks_on_reconciled_status"
     t.index ["status"], name: "index_agent_tasks_on_status"
     t.index ["volume"], name: "index_agent_tasks_on_volume"
+  end
+
+  create_table "agent_tenants", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.bigint "region_id", null: false
+    t.datetime "provisioned_at"
+    t.datetime "deleting_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "region_id"], name: "index_agent_tenants_on_project_id_and_region_id", unique: true
+    t.index ["region_id"], name: "index_agent_tenants_on_region_id"
   end
 
   create_table "alert_notifications", force: :cascade do |t|
@@ -1041,7 +1076,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_04_000001) do
     t.integer "region_id"
     t.integer "port_begin", default: 10000, null: false
     t.integer "port_end", default: 50000, null: false
-    t.boolean "maintenance", default: false
     t.datetime "maintenance_updated", precision: nil
     t.string "job_status", default: "idle", null: false
     t.datetime "job_performed", precision: nil, default: "2018-05-12 18:22:20", null: false
@@ -1059,6 +1093,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_04_000001) do
     t.integer "cpu_cores"
     t.bigint "memory_mb"
     t.datetime "capacity_updated_at"
+    t.boolean "maintenance_requested", default: false, null: false
+    t.string "maintenance_reason"
+    t.bigint "maintenance_gen", default: 0, null: false
+    t.bigint "maintenance_override_gen"
+    t.jsonb "maintenance_holds", default: {}, null: false
+    t.bigint "maintenance_seq", default: 0, null: false
+    t.string "agent_instance_id"
+    t.jsonb "maintenance_status", default: {}, null: false
+    t.integer "maintenance_reconnect_attempts", default: 0, null: false
+    t.datetime "agent_maintenance_unsupported_at"
+    t.virtual "maintenance", type: :boolean, null: false, as: "(maintenance_requested OR COALESCE((jsonb_typeof((maintenance_holds -> 'local'::text)) = 'object'::text), false))", stored: true
+    t.text "customer_notice"
   end
 
   create_table "nodes_volumes", id: false, force: :cascade do |t|
@@ -1579,6 +1625,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_04_000001) do
     t.index ["volume_backend"], name: "index_volumes_on_volume_backend"
   end
 
+  add_foreign_key "agent_pending_syncs", "nodes", on_delete: :cascade
+  add_foreign_key "agent_pending_syncs", "regions", on_delete: :cascade
+  add_foreign_key "agent_tenants", "regions", on_delete: :cascade
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_grants", "users", column: "resource_owner_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"

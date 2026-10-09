@@ -226,7 +226,7 @@ class VolumeServices::AttachTemplateVolumeServiceTest < ActiveSupport::TestCase
   end
 
   test "does not try to verify the node side when the volume has no online node" do
-    nodes(:testone).update_columns(maintenance: true)
+    nodes(:testone).update_columns(maintenance_requested: true)
     driver = FakeDriver.new(provisioned: false)
 
     with_stubs(driver: driver) do

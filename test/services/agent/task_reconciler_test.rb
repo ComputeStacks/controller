@@ -203,6 +203,77 @@ class Agent::TaskReconcilerTest < ActiveSupport::TestCase
     assert event.reload.updated_at < 1.hour.ago # NOT touched → StaleEventWorker will reap it
   end
 
+  # --- heartbeat across maintenance ---------------------------------------------
+
+  # A stale event correlated to an already-reconciled task (so only the heartbeat acts).
+  def stale_event(status:, id:)
+    audit = make_audit
+    event = precreate_event(audit: audit)
+    event.update_columns(status: status, updated_at: 3.hours.ago)
+    make_task(id: id, audit_id: audit.id, status: status, reconciled_status: status)
+    event
+  end
+
+  def local_hold!(paused_since:, disconnected: false, maintenance_updated: nil)
+    @node.update_columns(
+      disconnected: disconnected,
+      maintenance_requested: false,
+      maintenance_updated: maintenance_updated,
+      maintenance_holds: {"paused" => true, "local" => {"since" => paused_since.to_i, "reason" => "kernel", "by" => "root"},
+                          "controller" => nil, "paused_since" => paused_since.to_i}
+    )
+    assert @node.reload.maintenance
+  end
+
+  test "heartbeat touches a pending event on an up node (maintenance keeps tasks pending)" do
+    event = stale_event(status: "pending", id: "p-up")
+    Agent::TaskReconciler.new.call
+    assert event.reload.updated_at > 1.hour.ago
+    assert_equal "pending", event.status
+  end
+
+  test "heartbeat touches pending AND running events of a node in maintenance, even disconnected" do
+    local_hold!(paused_since: 2.hours.ago, disconnected: true)
+    pending = stale_event(status: "pending", id: "m-pending")
+    running = stale_event(status: "running", id: "m-running")
+
+    Agent::TaskReconciler.new.call
+    assert pending.reload.updated_at > 1.hour.ago
+    assert running.reload.updated_at > 1.hour.ago
+  end
+
+  test "heartbeat stops 24 h after paused_since, so a forgotten node can't wedge forever" do
+    local_hold!(paused_since: 25.hours.ago)
+    event = stale_event(status: "pending", id: "m-old")
+
+    Agent::TaskReconciler.new.call
+    assert event.reload.updated_at < 2.hours.ago
+  end
+
+  test "heartbeat keys on paused_since, not an old maintenance_updated, for a fresh local hold" do
+    local_hold!(paused_since: 1.hour.ago, maintenance_updated: 3.days.ago)
+    event = stale_event(status: "running", id: "m-fresh")
+
+    Agent::TaskReconciler.new.call
+    assert event.reload.updated_at > 1.hour.ago
+  end
+
+  test "heartbeat falls back to maintenance_updated for a requested node the agent hasn't confirmed" do
+    @node.update_columns(maintenance_requested: true, maintenance_updated: 30.hours.ago, maintenance_holds: {})
+    event = stale_event(status: "running", id: "m-req")
+
+    Agent::TaskReconciler.new.call
+    assert event.reload.updated_at < 2.hours.ago
+  end
+
+  test "heartbeat skips a pending event on a disconnected node outside maintenance" do
+    @node.update_columns(disconnected: true)
+    event = stale_event(status: "pending", id: "p-down")
+
+    Agent::TaskReconciler.new.call
+    assert event.reload.updated_at < 2.hours.ago
+  end
+
   # callback: true for the same reason as the failed-task test above.
   test "drives a cancelled task to cancel! (not fail!), and still delivers the callback" do
     audit = make_audit

@@ -1,0 +1,56 @@
+<%#
+  Maintenance actions for the node edit page. Each one is its own request -- they
+  cannot live inside the node form -- and every change goes through
+  NodeServices::MaintenanceRequestService.
+%>
+<div class="panel panel-default" id="node-maintenance">
+  <div class="panel-heading">
+    <div class="panel-title">Maintenance</div>
+  </div>
+  <div class="panel-body">
+    <%= render partial: "admin/nodes/maintenance_status", locals: { node: @node } %>
+  </div>
+  <div class="panel-body">
+    <% if @node.maintenance_requested %>
+      <%= link_to "Release Controller Hold",
+        "/admin/nodes/#{@node.id}/maintenance",
+        method: :delete,
+        data: { confirm: "Release the controller's maintenance hold on #{@node.label}?" },
+        class: "btn btn-warning" %>
+    <% else %>
+      <%= form_tag "/admin/nodes/#{@node.id}/maintenance", method: :post, class: "form-inline" do %>
+        <div class="form-group">
+          <%= text_field_tag :reason, nil, class: "form-control", placeholder: "Reason (optional, internal)" %>
+        </div>
+        <div class="form-group">
+          <%= text_field_tag :customer_message, nil, class: "form-control", placeholder: "Message to customers (optional)" %>
+        </div>
+        <%= submit_tag "Enter Maintenance", class: "btn btn-warning",
+          data: { confirm: "Place #{@node.label} in maintenance?" } %>
+      <% end %>
+      <span class="help-block">The reason is internal and never shown to customers. The message to customers is shown to every customer with something in this availability zone, and to all API users via <code>/api/locations</code>, until the node is back online.</span>
+      <span class="help-block"><b>Warning:</b> The node stops taking new containers and the controller stops recovering or restarting its containers until maintenance ends. Backups and other background work on the node pause. In an AZ with clustered storage, containers are also migrated elsewhere in the AZ.</span>
+    <% end %>
+
+    <% if @node.maintenance_local_hold %>
+      <span class="help-block">
+        <b>Note:</b> The node is holding itself in maintenance (<code>cs-agent maintenance on</code>).
+        Releasing the controller hold will not take it out of maintenance; whoever placed that
+        hold should run <code>cs-agent maintenance off</code> on the node. If they can't, the
+        override below releases both holds.
+      </span>
+      <%= link_to "Override: Release All Holds",
+        "/admin/nodes/#{@node.id}/maintenance/release_all",
+        method: :post,
+        data: { confirm: "This releases the node's OWN maintenance hold as well as the controller's, without asking whoever placed it. Background work and container recovery resume immediately. Continue?" },
+        class: "btn btn-danger" %>
+    <% end %>
+
+    <% if @node.agent_token.present? %>
+      <%= link_to "Refresh from Agent",
+        "/admin/nodes/#{@node.id}/maintenance/refresh",
+        method: :post,
+        class: "btn btn-default pull-right" %>
+    <% end %>
+  </div>
+</div>

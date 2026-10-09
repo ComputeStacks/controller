@@ -72,8 +72,16 @@ class FakeAgentClient
     record(:deprovision_tenant!)
   end
 
-  def put_managed(path, body)
+  # The self_heal: flag is not part of the recorded call (so existing destructuring keeps
+  # working); read it back from #put_managed_self_heals.
+  def put_managed(path, body, self_heal: true)
+    put_managed_self_heals << self_heal
     record(:put_managed, path, body)
+  end
+
+  # @return [Array<Boolean>] the self_heal: value of every #put_managed call, in order
+  def put_managed_self_heals
+    @put_managed_self_heals ||= []
   end
 
   def get_db(path)

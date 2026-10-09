@@ -16,6 +16,7 @@ module ProjectServices
     # @return [Boolean]
     def perform
       return false unless valid?
+      destroyed = false
       ActiveRecord::Base.uncached do
         clean_metadata_tenant!
         if project.private_network
@@ -36,7 +37,11 @@ module ProjectServices
         trash_sftp_containers! # failure can be ignored
         return false unless trash_services!
         project.reload
-        return true if project.destroy
+        if project.destroy
+          destroyed = true
+          forget_metadata_tenant!
+          return true
+        end
       end
       event.event_details.create!(
         event_code: "8a1349f61c2a2dcb",
@@ -47,6 +52,10 @@ module ProjectServices
               end
       )
       false
+    ensure
+      # Every abort after the tombstone (a false return or an exception) leaves the
+      # project alive: it must not stay `deleting?`.
+      lift_metadata_tombstone! if @tombstoned && !destroyed
     end
 
     private
@@ -68,12 +77,56 @@ module ProjectServices
       end
     end
 
+    # Deprovision the project's agent tenant everywhere it may exist.
+    #
+    # 1. Tombstone FIRST, before any HTTP call: from here on nothing (live managed
+    #    writers, put_managed's self-heal, replay) may provision this tenant again.
+    # 2. Every region in (tenant registry ∪ project.regions ∪ sftp regions). The
+    #    registry covers regions the project no longer has services in.
+    # 3. A success drops its pending syncs there (the tombstone stays until the
+    #    project is destroyed); a failure is recorded as a pending `tenant_delete`
+    #    and replayed, even after the Project row is gone.
+    #
+    # #perform forgets the registry rows once the project is destroyed, or lifts the
+    # tombstone if the trash aborts.
     def clean_metadata_tenant!
-      project.regions.all.each do |i|
-        Agent::Client.new(project, region: i).deprovision_tenant!
-      rescue Agent::Client::NotReady
-        next
+      region_ids = metadata_tenant_region_ids
+      @tombstoned = true # set first: a tombstone! that raised partway is still lifted
+      Agent::TenantRegistry.tombstone!(project.id, region_ids)
+      Region.where(id: region_ids).each do |region|
+        error = nil
+        ok = begin
+          Agent::Client.for_project_id(project.id, region: region).deprovision_tenant!
+        rescue Agent::Client::NotReady => e
+          error = e
+          false
+        end
+        if ok
+          Agent::TenantRegistry.deprovisioned!(project.id, region.id)
+        else
+          Agent::PendingSync.record!(region: region, project: project.id, kind: "tenant_delete",
+            error: error || "agent did not accept the tenant deprovision")
+        end
       end
+    end
+
+    def forget_metadata_tenant!
+      Agent::TenantRegistry.forget!(project.id)
+    rescue => e
+      # The Project row is gone, so `deleting?` holds regardless.
+      ExceptionAlertService.new(e, "b2e61f0d9c4a7358").perform
+    end
+
+    def lift_metadata_tombstone!
+      Agent::TenantRegistry.lift_tombstone!(project.id)
+    rescue => e
+      ExceptionAlertService.new(e, "6d0a3c8e15f9b247").perform
+    end
+
+    # @return [Array<Integer>]
+    def metadata_tenant_region_ids
+      sftp_region_ids = Node.where(id: project.sftp_containers.select(:node_id)).distinct.pluck(:region_id)
+      (Agent::TenantRegistry.region_ids(project.id) + project.regions.pluck(:id) + sftp_region_ids).compact.uniq
     end
 
     def trash_sftp_containers!

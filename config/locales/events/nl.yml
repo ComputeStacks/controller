@@ -76,6 +76,10 @@ nl:
         maintenance:
           enable: "Enabling maintenance mode on node %{node}."
           disable: "Disabling maintenance mode on node %{node}."
+          requested: "Onderhoud door de controller aangevraagd voor node %{node}."
+          released: "Onderhoud door de controller opgeheven voor node %{node}."
+          override: "Onderhoud geforceerd opgeheven op node %{node}: alle blokkades worden opgeheven, ook die van de node zelf."
+          unsupported: "De agent op node %{node} ondersteunt de onderhouds-API nog niet (cs-agent < 3.4.0); onderhoud wordt daar niet afgedwongen."
         evacuating: "Evacuating node %{node}."
         ports:
           reload: "[%{node}] Reloading external ports."

@@ -75,7 +75,10 @@ Rails.application.routes.draw do
             scope module: "regions" do
               resources :nodes do
                 scope module: "nodes" do
-                  resources :maintenance
+                  post "maintenance/release_all", to: "maintenance_release_all#create"
+                  resource :maintenance, only: %i[create destroy], controller: "maintenance"
+                  # Older clients sent DELETE .../maintenance/{id}; the id is ignored.
+                  delete "maintenance/:id", to: "maintenance#destroy"
                 end
               end
             end

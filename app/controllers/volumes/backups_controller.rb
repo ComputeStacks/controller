@@ -34,8 +34,8 @@ class Volumes::BackupsController < Volumes::BaseController
     if @volume.create_backup!(params[:name])
       flash[:success] = "Backup will be created shortly"
     else
-      event.fail! "Fatal Error"
-      flash[:alert] = "Failed to create backup, check volume event logs."
+      event.fail!(@volume.dispatch_error || "Fatal Error")
+      flash[:alert] = @volume.dispatch_error || "Failed to create backup, check volume event logs."
     end
     redirect_to helpers.volume_path(@volume)
   end
@@ -66,8 +66,8 @@ class Volumes::BackupsController < Volumes::BaseController
     if @volume.delete_backup!(name)
       flash[:info] = "Backup will be deleted shortly."
     else
-      event.fail! "Fatal Error"
-      flash[:alert] = "Failed to destroy backup, check volume event logs."
+      event.fail!(@volume.dispatch_error || "Fatal Error")
+      flash[:alert] = @volume.dispatch_error || "Failed to destroy backup, check volume event logs."
     end
     redirect_to helpers.volume_path(@volume)
   end

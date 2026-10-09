@@ -71,6 +71,29 @@ class Dns::Zone < ApplicationRecord
   end
 
   class << self
+    ##
+    # Find the local zone that covers `fqdn` by walking its label suffixes,
+    # shortest first (2 labels, then 3, ... up to 5).
+    #
+    # Not named `find_for`: that is the authorization finder from Authorization::Generic.
+    #
+    # @param fqdn [String]
+    # @return [Dns::Zone, nil]
+    def find_covering(fqdn)
+      # Allow a few extra levels.
+      i = 2
+      count = 4
+      z = nil
+      loop do
+        tld = fqdn.split(".").last(i)
+        z = Dns::Zone.find_by(name: tld.join("."))
+        break unless z.nil?
+        break if i > count
+        i += 1
+      end
+      z
+    end
+
     def valid_domain?(name)
       has_dot = name.strip.split("").last == "."
       name = name.slice(0..-2) if has_dot

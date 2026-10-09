@@ -16,15 +16,25 @@ module Agent
   # practice). Prefer resolving via an explicitly-passed region (callers that
   # already hold it — e.g. ProcessOrderService — should pass it; deriving via
   # deployment.region is computed from deployed containers and is timing-
-  # sensitive). Fail fast (NotReady) if there is no online node or it has no
-  # admin token, rather than emitting an empty Bearer.
+  # sensitive). An online node is preferred; failing that, any node that is not
+  # disconnected (a node in maintenance still accepts tenant and managed writes).
+  # Fail fast (NotReady) if there is no such node or it has no admin token,
+  # rather than emitting an empty Bearer.
   class Client
     class NotReady < StandardError; end
 
     AGENT_PORT = 8500
     REQUEST_TIMEOUT = 10
 
+    # Optional changelog entity types this controller understands. The agent hides
+    # them from readers that don't advertise them.
+    CHANGELOG_TYPES = "node_maintenance"
+
     attr_reader :project, :node
+
+    # The `high_water` of the last #changelog response: the last seq that request
+    # scanned. nil before a call, or when the call failed.
+    attr_reader :last_high_water
 
     # Build a client scoped to a node for admin/node-level calls that aren't tied to
     # a project (e.g. the changelog pull). `project` is unused by those calls, so it
@@ -32,6 +42,30 @@ module Agent
     # @param node [Node]
     def self.for_node(node)
       new(nil, node: node)
+    end
+
+    # Stands in for a Deployment when only its id is known (see .for_project_id).
+    ProjectRef = Struct.new(:id)
+
+    # Build a client for a project that may no longer have a Project row -- a tenant
+    # deprovision replayed after the project was destroyed. Only id-addressed calls
+    # (#deprovision_tenant!) are valid on it; #provision_tenant! needs the real project.
+    # @param project_id [Integer]
+    # @param region [Region]
+    def self.for_project_id(project_id, region:)
+      new(ProjectRef.new(project_id.to_i), region: region)
+    end
+
+    # Within the block, transport errors (agent down, timeout) RAISE instead of folding
+    # into the caller's failure value. AgentWorkers::PendingSyncWorker replays through the
+    # ordinary live call sites, which all return a bare false, and needs to tell "the agent
+    # is unreachable" (stop this region's pass) from "the agent refused this write".
+    def self.raising_transport_errors
+      prev = Thread.current[:agent_client_raise_transport]
+      Thread.current[:agent_client_raise_transport] = true
+      yield
+    ensure
+      Thread.current[:agent_client_raise_transport] = prev
     end
 
     # @param [Deployment] project
@@ -45,9 +79,12 @@ module Agent
     # Provision (or re-provision) the tenant: inserts the agent's tenants row +
     # creates the per-project DB. Idempotent upsert. MUST run before any
     # managed/db write for this project. @return [Boolean]
+    # A success is recorded in the tenant registry (Agent::TenantRegistry).
     def provision_tenant!
       with_transport_rescue(false) do
-        admin_put("/v1/admin/tenants/#{project.id}", {token_hash: token_hash, status: "active"}).status.success?
+        ok = admin_put("/v1/admin/tenants/#{project.id}", {token_hash: token_hash, status: "active"}).status.success?
+        Agent::TenantRegistry.provisioned!(project.id, node.region_id) if ok
+        ok
       end
     end
 
@@ -63,14 +100,22 @@ module Agent
     # once and retry, so no call-site ordering can silently drop a managed write.
     # @param [String] path  e.g. "metadata", "ssh_keys", the sftp container name
     # @param [String] body  pre-serialized JSON
+    # @param [Boolean] self_heal  false (replay) never provisions inline: the missing
+    #   tenant is recorded as a pending `tenant` sync instead, so a tombstoned tenant is
+    #   never recreated (Agent::PendingSync.record! ignores it while the project is deleting).
     # @return [Boolean]
-    def put_managed(path, body)
+    def put_managed(path, body, self_heal: true)
       with_transport_rescue(false) do
         resp = admin_put_raw("/v1/admin/projects/#{project.id}/managed/#{path}", body)
         # TODO(verify V2): confirm the agent's exact "tenant not provisioned"
         # response. 404 is the documented expectation; 409 handled defensively.
         # Pin this once the agent contract is final so a real error isn't masked.
         if [404, 409].include?(resp.status.code)
+          unless self_heal
+            Agent::PendingSync.record!(region: node.region_id, project: project.id, kind: "tenant",
+              error: "managed write #{path}: tenant not provisioned (HTTP #{resp.status.code})")
+            next false
+          end
           provision_tenant!
           resp = admin_put_raw("/v1/admin/projects/#{project.id}/managed/#{path}", body)
         end
@@ -102,26 +147,67 @@ module Agent
     # @param since [Integer] cursor; return entries with seq > since
     # @param entity_type [String, nil] optional server-side filter
     # @param limit [Integer]
+    # Advertises `X-CS-Changelog-Types: node_maintenance`, so maintenance entries are
+    # included, and records the response's `high_water` in #last_high_water.
     # @return [Array<Hash>] entries (possibly empty)
     def changelog(since:, entity_type: nil, limit: 1000)
+      @last_high_water = nil
       q = {since: since, limit: limit}
       q[:entity_type] = entity_type if entity_type
-      resp = http.get("#{base_url}/v1/admin/changelog", params: q)
+      resp = http.headers("X-CS-Changelog-Types" => CHANGELOG_TYPES).get("#{base_url}/v1/admin/changelog", params: q)
       unless resp.status.success?
         report_changelog_error("HTTP #{resp.status.code}")
         return []
       end
       data = JSON.parse(resp.body.to_s)
-      data.is_a?(Hash) ? Array(data["entries"]) : []
+      return [] unless data.is_a?(Hash)
+      @last_high_water = Integer(data["high_water"], exception: false) if data.key?("high_water")
+      Array(data["entries"])
     rescue Errno::ECONNREFUSED, SocketError, HTTP::Error, JSON::ParserError => e
-      ExceptionAlertService.new(e, "eea8970123780d42").perform
+      # A node in maintenance is expected to be unreachable at times (rebooting, docker
+      # upgrade), so skip Sentry for it; the widened SystemEvent below still records it.
+      ExceptionAlertService.new(e, "eea8970123780d42").perform unless node.maintenance
       # Also raise a SystemEvent, not just a Sentry report. The heartbeat only pings Docker
       # on primary_ip, so when the agent rides a separate path (agent_host) a break in that
       # path leaves the node reporting online while projection silently stalls — cursor
       # frozen, tasks never reaching terminal states. Sentry alone is gated on
-      # SENTRY_CONFIGURED and invisible in the admin UI. Deduped 15 min per node.
+      # SENTRY_CONFIGURED and invisible in the admin UI. Deduped 15 min per node (2 h while
+      # the node is in maintenance).
       report_changelog_error("#{e.class}: #{e.message}")
       []
+    end
+
+    # --- Maintenance hold (agent >= 3.4) ---------------------------------------------
+    #
+    # Each returns `[status_code, body]`, body being the agent's maintenance Status (a
+    # Hash) or nil when it isn't JSON. 200 = applied; 409 = our gen is behind the agent's
+    # (body still carries the Status); 404 = the agent predates the maintenance API.
+    # Transport errors (Errno::ECONNREFUSED, SocketError, HTTP::Error incl. timeouts) are
+    # NOT rescued -- callers decide whether that is a retry or a silent miss.
+
+    # @param timeout [Integer] seconds
+    # @return [Array(Integer, Hash|nil)]
+    def get_maintenance(timeout: REQUEST_TIMEOUT)
+      maintenance_response(http(timeout).get("#{base_url}/v1/admin/maintenance"))
+    end
+
+    # Place (or keep) the controller hold. The agent requires a non-blank reason.
+    # @return [Array(Integer, Hash|nil)]
+    def put_maintenance(reason:, gen:)
+      maintenance_response(admin_put("/v1/admin/maintenance", {reason: reason, gen: gen}))
+    end
+
+    # Clear the controller hold; with all: true, the node's local hold too (override).
+    # @return [Array(Integer, Hash|nil)]
+    # local_since_max (unix seconds, with all only) makes the override conditional: the
+    # agent answers 412 and changes nothing when its local hold is newer than that.
+    def delete_maintenance(gen:, all: false, local_since_max: nil)
+      q = {gen: gen}
+      if all
+        q[:all] = 1
+        q[:local_since_max] = local_since_max if local_since_max
+      end
+      maintenance_response(http.delete("#{base_url}/v1/admin/maintenance", params: q))
     end
 
     # Diagnostic reachability check for this node's agent, for `rake test_connection:agent`.
@@ -247,6 +333,16 @@ module Agent
 
     private
 
+    def maintenance_response(resp)
+      body = begin
+        parsed = JSON.parse(resp.body.to_s)
+        parsed.is_a?(Hash) ? parsed : nil
+      rescue JSON::ParserError
+        nil
+      end
+      [resp.status.code, body]
+    end
+
     # A DOWN task aimed at a node whose desired-state hasn't been backfilled yet is dropped
     # (the sentinel is unset). Surface it, deduped to once per 15 min per node so the boot
     # window is observable without alert spam. (Mirrors report_changelog_error.)
@@ -261,7 +357,8 @@ module Agent
 
     # A persistently non-2xx changelog leaves the node's cursor un-advanced and the
     # channel silently stalled. Surface it as a SystemEvent, deduped to once per
-    # 15 min per node so a wedged node is observable without alert spam.
+    # 15 min per node so a wedged node is observable without alert spam. A node in
+    # maintenance is widened to 2 h: it is expected to drop off while it is worked on.
     def report_changelog_error(detail)
       Rails.logger.warn("agent changelog error node=#{node.id} #{detail}")
       # Node id in the message, not only in the data: labels carry no uniqueness constraint,
@@ -270,7 +367,8 @@ module Agent
       # primary signal that a node's configured agent host is wrong, and neither an "HTTP 404"
       # detail nor a read timeout says which address was dialed.
       msg = "cs-agent changelog error on #{node.label} [node #{node.id}] (#{detail})"
-      return if SystemEvent.where("message = ? AND created_at > ?", msg, 15.minutes.ago).exists?
+      window = node.maintenance ? 2.hours : 15.minutes
+      return if SystemEvent.where("message = ? AND created_at > ?", msg, window.ago).exists?
       SystemEvent.create!(message: msg, log_level: "warn",
         data: {"node_id" => node.id, "agent_address" => node.agent_address, "detail" => detail},
         event_code: "7dc84225816362c8")
@@ -282,6 +380,7 @@ module Agent
     def with_transport_rescue(failure)
       yield
     rescue Errno::ECONNREFUSED, SocketError, HTTP::Error => e
+      raise if Thread.current[:agent_client_raise_transport]
       ExceptionAlertService.new(e, "b7e3d9c1a4f60582").perform
       failure
     end
@@ -295,11 +394,15 @@ module Agent
       Digest::SHA256.hexdigest(project.consul_auth_key.to_s)
     end
 
+    # Prefer an online node; else any node that isn't disconnected -- a node in
+    # maintenance is reachable and accepts tenant/managed writes, and dropping them
+    # for the length of a maintenance window would lose them.
     # @return [Node]
     def resolve_node(region)
       region ||= project&.region
-      n = region&.nodes&.online&.first
-      raise NotReady, "no online node for project #{project&.id}" if n.nil?
+      nodes = region&.nodes
+      n = nodes&.online&.first || nodes&.where(disconnected: false)&.first
+      raise NotReady, "no reachable node for project #{project&.id}" if n.nil?
       raise NotReady, "node #{n.id} has no agent_token" if n.agent_token.blank?
       n
     end
@@ -308,8 +411,8 @@ module Agent
       "http://#{node.agent_address}:#{AGENT_PORT}"
     end
 
-    def http
-      HTTP.timeout(REQUEST_TIMEOUT).headers(
+    def http(timeout = REQUEST_TIMEOUT)
+      HTTP.timeout(timeout).headers(
         "Authorization" => "Bearer #{node.agent_token}",
         "Accept" => "application/json"
       )

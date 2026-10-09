@@ -8,10 +8,10 @@ class Api::ContainerServices::ContainersController < Api::ContainerServices::Bas
   #
   # **OAuth AuthorizationRequired**: `project_read`
   #
-  # * `containers`: Array<Service>
+  # * `containers`: Array<Container> | Each includes `node_status`; see `GET /api/containers/{id}`.
   #
   def index
-    @containers = @service.containers.sorted
+    @containers = @service.containers.sorted.preload(:node)
     respond_to do |format|
       format.any(:json, :xml) { render template: "api/containers/index" }
     end

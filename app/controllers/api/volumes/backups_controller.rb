@@ -50,6 +50,11 @@ class Api::Volumes::BackupsController < Api::Volumes::BaseController
   #     * `authorization`: String | Right side of authorization header. Example: `Bearer 12345` or `Token 12345`
   #     * `url`: String | fully qualified URL
   #
+  # If the volume's node is in maintenance or offline (or the volume has no node), the
+  # event is failed and the response is `409 Conflict` with `errors`, `code`
+  # (`node_maintenance` or `node_offline`) and `node_status`; any callback reports the
+  # failure. Other failures are `422 Unprocessable Entity` with `errors`.
+  #
   def create
     audit = Audit.create_from_object!(@volume, "backup.create", request.remote_ip, current_user)
     @volume.current_audit = audit
@@ -79,8 +84,12 @@ class Api::Volumes::BackupsController < Api::Volumes::BaseController
     end
 
     unless @volume.create_backup!(params[:name])
-      event.fail! "Fatal Error"
-      return api_obj_error(["Failed to create backup. Check volume event logs."])
+      event.fail!(@volume.dispatch_error || "Fatal Error", code: @volume.dispatch_error_code)
+      if @volume.dispatch_error_code
+        return api_node_unavailable([@volume.dispatch_error], code: @volume.dispatch_error_code,
+          node_status: Nodes::CustomerStatusPresenter.rollup(@volume.nodes))
+      end
+      return api_obj_error([@volume.dispatch_error || "Failed to create backup. Check volume event logs."])
     end
 
     respond_to do |format|
@@ -100,6 +109,11 @@ class Api::Volumes::BackupsController < Api::Volumes::BaseController
   # * `callback`: Object | optional webhook to call after event is finished
   #     * `authorization`: String | Right side of authorization header. Example: `Bearer 12345` or `Token 12345`
   #     * `url`: String | fully qualified URL
+  #
+  # If the volume's node is in maintenance or offline (or the volume has no node), the
+  # event is failed and the response is `409 Conflict` with `errors`, `code`
+  # (`node_maintenance` or `node_offline`) and `node_status`; any callback reports the
+  # failure. Other failures are `422 Unprocessable Entity` with `errors`.
   #
   def destroy
     name = Base64.decode64 params[:id]
@@ -133,8 +147,12 @@ class Api::Volumes::BackupsController < Api::Volumes::BaseController
     end
 
     unless @volume.delete_backup!(name)
-      event.fail! "Fatal Error"
-      return api_obj_error(["Failed to delete backup. Check volume event logs."])
+      event.fail!(@volume.dispatch_error || "Fatal Error", code: @volume.dispatch_error_code)
+      if @volume.dispatch_error_code
+        return api_node_unavailable([@volume.dispatch_error], code: @volume.dispatch_error_code,
+          node_status: Nodes::CustomerStatusPresenter.rollup(@volume.nodes))
+      end
+      return api_obj_error([@volume.dispatch_error || "Failed to delete backup. Check volume event logs."])
     end
 
     respond_to do |format|

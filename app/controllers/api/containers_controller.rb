@@ -22,6 +22,15 @@ class Api::ContainersController < Api::ApplicationController
   #         * `mem`: Decimal
   #     * `current_state`: String<migrating,starting,stopping,working,alert,resource_usage,online,offline,unhealthy>
   #     * `on_latest_image`: Boolean
+  #     * `node_status`: Object - availability of the node running this container. Read from stored state.
+  #         * `state`: String<online,maintenance,offline> - worst state among those nodes
+  #         * `since`: DateTime | null - when that state began
+  #         * `planned`: Boolean - true for maintenance, false for an unplanned outage
+  #         * `message`: String | null - operator's notice to customers; null while `online`
+  #         * `operations`: Object - what each action does in this state (see doc/maintenance.md)
+  #             * `power`: String<available,deferred,refused> - deferred runs when maintenance ends; latest request wins
+  #             * `backup`, `restore`, `export`, `scale`, `bastion_password_reset`: String<available,refused>
+  #             * `config_changes`: String<available,deferred> - deferred until the node reconnects
   #     * `local_ip`: String
   #     * `public_ip`: String
   #     * `created_at`: DateTime

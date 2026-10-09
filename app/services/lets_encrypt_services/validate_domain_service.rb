@@ -35,6 +35,8 @@ module LetsEncryptServices
     def perform
       is_valid = valid_ip?
 
+      is_valid = false unless valid_dns_alias?
+
       # is_valid = false unless valid_caa?
 
       is_valid = false unless valid_http?
@@ -58,6 +60,27 @@ module LetsEncryptServices
     end
 
     private
+
+    ##
+    # When the load balancer's domain is not hosted on our DNS and an ACME DNS
+    # alias zone is configured, the wildcard challenge must be delegated to us
+    # with `_acme-challenge.<domain> CNAME <alias>`.
+    def valid_dns_alias?
+      return true unless load_balancer&.acme_dns_alias_required?
+
+      check = LetsEncryptServices::DnsAliasCheckService.new(load_balancer, resolver: @dns)
+      return true if check.perform
+
+      event_code = case check.failure
+      when :missing_record then "076f360f9c009c74"
+      when :mismatch then "262b44b752382307"
+      else "ade04899aacfa684"
+      end
+      check.errors.each do |msg|
+        event.event_details.create!(data: msg, event_code: event_code)
+      end
+      false
+    end
 
     ##
     # Ensure that there are no redirects in place that would prevent the domain

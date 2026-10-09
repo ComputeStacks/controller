@@ -27,8 +27,8 @@ class Volumes::RestoreController < Volumes::BaseController
     if @volume.restore_backup!(name)
       flash[:success] = "Backup will be restored shortly. Follow volume event logs."
     else
-      event.fail! "Fatal error"
-      flash[:alert] = "Failed to restore backup, check volume event logs."
+      event.fail!(@volume.dispatch_error || "Fatal Error")
+      flash[:alert] = @volume.dispatch_error || "Failed to restore backup, check volume event logs."
     end
     redirect_to helpers.volume_path(@volume)
   end

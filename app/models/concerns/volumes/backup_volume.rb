@@ -2,12 +2,39 @@ module Volumes
   module BackupVolume
     extend ActiveSupport::Concern
 
+    # Why the last backup-family call returned false without reaching a node, or nil.
+    # Controllers use it as the event's failure reason instead of a bare "Fatal Error".
+    attr_reader :dispatch_error
+
+    # The machine-readable reason alongside #dispatch_error: "node_maintenance" or
+    # "node_offline" (also used when the volume has no node), or nil. The API answers 409
+    # with it.
+    attr_reader :dispatch_error_code
+
+    # Why a backup-family task can't be dispatched right now, or nil. A node in maintenance
+    # pauses task claiming, so refuse up front rather than queue a task that runs hours later.
+    def task_dispatch_blocker
+      task_dispatch_block&.first
+    end
+
+    # @return [Array(String, String), nil] the message and its code, or nil
+    def task_dispatch_block
+      candidates = nodes.to_a
+      return ["This volume is not assigned to a node.", "node_offline"] if candidates.empty?
+      return nil if candidates.any?(&:online?)
+      if candidates.any?(&:maintenance)
+        ["The node hosting this volume is in maintenance. Backups, restores and exports are paused until it ends.", "node_maintenance"]
+      else
+        ["The node hosting this volume is offline.", "node_offline"]
+      end
+    end
+
     # @param [String] snapshot_name
     # @param [String, nil] task_id pre-minted task id (see #dispatch_task!)
     def create_backup!(snapshot_name, task_id: nil)
       snapshot_name = snapshot_name.strip.tr(" ", "-").delete("$").delete("*")
       return false if name.blank?
-      return false if nodes.online.empty?
+      return refuse_dispatch! if task_dispatch_blocker
 
       snapshot_name = Zaru.sanitize!(snapshot_name)
       selected_node = active_node
@@ -18,7 +45,7 @@ module Volumes
 
     def delete_backup!(snapshot_name, task_id: nil)
       return false if snapshot_name.blank?
-      return false if nodes.online.empty?
+      return refuse_dispatch! if task_dispatch_blocker
 
       selected_node = active_node
       return false if selected_node.nil?
@@ -36,15 +63,7 @@ module Volumes
         end
         return false
       end
-      if nodes.online.empty?
-        if current_audit&.event_logs&.exists?
-          current_audit.event_logs.first.event_details.create!(
-            data: "[Snapshot Restore] Error: No online nodes found. | Total nodes: #{nodes.count} | Online nodes: #{nodes.online.count}",
-            event_code: "e747dac60227ea25"
-          )
-        end
-        return false
-      end
+      return refuse_dispatch!("e747dac60227ea25") if task_dispatch_blocker
       selected_node = active_node
       if selected_node.nil?
         if current_audit&.event_logs&.exists?
@@ -68,7 +87,7 @@ module Volumes
     # @return [String, false] the task id (jid) on success, false on failure.
     def export_backup!(snapshot_name, task_id: nil)
       return false if snapshot_name.blank?
-      return false if nodes.online.empty?
+      return refuse_dispatch! if task_dispatch_blocker
 
       selected_node = active_node
       return false if selected_node.nil?
@@ -77,6 +96,15 @@ module Volumes
     end
 
     private
+
+    # Record why we refused, on the audit's event when there is one, and return false.
+    def refuse_dispatch!(event_code = "c41d7e09a2b85f36")
+      @dispatch_error, @dispatch_error_code = task_dispatch_block
+      if current_audit&.event_logs&.exists?
+        current_audit.event_logs.first.event_details.create!(data: @dispatch_error, event_code: event_code)
+      end
+      false
+    end
 
     # Dispatch a backup-family task to the volume's node via the cs-agent DOWN endpoint.
     #

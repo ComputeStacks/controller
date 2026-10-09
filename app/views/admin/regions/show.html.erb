@@ -46,6 +46,43 @@
     class: "btn btn-danger" %>
   </div>
 </div>
+<%# Columns only: no agent calls, so this costs two queries however many nodes. %>
+<% maint_summary = Nodes::MaintenanceStatusPresenter.summary(@region.nodes) %>
+<% pending_syncs = Nodes::MaintenanceStatusPresenter.pending_agent_syncs([@region.id]) %>
+<% if maint_summary["nodes_in_maintenance"].positive? || maint_summary["nodes_with_warnings"].positive? || pending_syncs["pending"].positive? || pending_syncs["dead"].positive? %>
+  <div class="row" id="region-maintenance-summary">
+    <div class="col-xs-12">
+      <ul class="list-unstyled">
+        <% if maint_summary["nodes_in_maintenance"].positive? || maint_summary["nodes_with_warnings"].positive? %>
+          <li>
+            <b>Maintenance:</b>
+            <%= maint_summary["nodes_in_maintenance"] %> of <%= pluralize maint_summary["nodes_total"], "node" %> in maintenance,
+            <%= maint_summary["nodes_quiesced"] %> quiesced<% if maint_summary["nodes_with_warnings"].positive? %>,
+              <span class="text-danger"><%= maint_summary["nodes_with_warnings"] %> with warnings</span><% end %>.
+            <% maint_summary["nodes"].each do |n| %>
+              <%= link_to n["label"], "/admin/nodes/#{n["id"]}/edit" %>
+              <small class="text-muted">(<%= n["held_by"].join(" + ") %><%= ", since #{l n["since"], format: :short}" if n["since"] %>)</small>
+            <% end %>
+          </li>
+        <% end %>
+        <% if pending_syncs["pending"].positive? || pending_syncs["dead"].positive? %>
+          <li>
+            <b>Agent syncs:</b>
+            <%= pluralize pending_syncs["pending"], "agent sync" %> pending<% if pending_syncs["oldest_at"] %>
+              (oldest <%= time_ago_in_words pending_syncs["oldest_at"] %>)<% end %>,
+            <span class="<%= pending_syncs["dead"].positive? ? "text-danger" : "text-muted" %>"><%= pending_syncs["dead"] %> dead</span>
+            <% if pending_syncs["dead"].positive? %>
+              <%= link_to "Retry dead", "/admin/regions/#{@region.id}/retry_dead_agent_syncs",
+                method: :post,
+                data: {confirm: "Retry every dead agent sync in this availability zone?"},
+                class: "btn btn-xs btn-default" %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+<% end %>
 <br/>
 <div class="row">
   <%# No `refresh`: this block re-rendered the whole node list every 6.5s, and

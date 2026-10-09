@@ -22,7 +22,7 @@ class Deployments::SftpControllerTest < ActionDispatch::IntegrationTest
 
   test "rotation failure is reported and the password is kept" do
     old_password = @sftp.password
-    @sftp.node.update!(maintenance: true)
+    @sftp.node.update!(maintenance_requested: true)
 
     post "/deployments/#{@deployment.token}/sftp/#{@sftp.id}/password"
 

@@ -16,14 +16,26 @@
       <td><%= t 'obj.image' %></td>
       <td><%= container.container_image&.label %></td>
     </tr>
+    <%
+      # The node row is only shown to admins and on clustered storage; otherwise the
+      # node's status label (when not online) goes next to the region instead.
+      show_node = current_user.is_admin || container.region.has_clustered_storage?
+      node_state = Nodes::CustomerStatusPresenter.for_node(container.node)["state"]
+      node_label = if node_state == "online"
+        nil
+      else
+        content_tag(:span, t("node_status.label.#{node_state}"),
+          class: "label #{node_state == "maintenance" ? "label-warning" : "label-danger"}")
+      end
+    %>
     <tr>
       <td><%= t 'obj.region' %></td>
-      <td><%= container.location&.name %> (<%= container.region&.name %>)</td>
+      <td><%= container.location&.name %> (<%= container.region&.name %>)<% unless show_node %> <%= node_label %><% end %></td>
     </tr>
-    <% if current_user.is_admin || container.region.has_clustered_storage? %>
+    <% if show_node %>
       <tr>
         <td><%= t 'obj.node' %></td>
-        <td><%= container.node&.label %></td>
+        <td><%= container.node&.label %> <%= node_label %></td>
       </tr>
     <% end %>
   </table>

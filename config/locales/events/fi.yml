@@ -77,6 +77,10 @@ fi:
         maintenance:
           enable: "Noodi %{node} siirretään huoltotilaan."
           disable: "Noodi %{node} siirretään pois huoltotilasta."
+          requested: "Ohjaimen huoltotila pyydetty noodille %{node}."
+          released: "Ohjaimen huoltotila vapautettu noodilta %{node}."
+          override: "Huoltotilan ohitus noodilla %{node}: kaikki pidot vapautetaan, myös noodin oma."
+          unsupported: "Noodin %{node} agentti ei tue huoltotilan rajapintaa (cs-agent < 3.4.0); huoltotilaa ei valvota siellä."
         evacuating: "Evacuating node %{node}."
         ports:
           reload: "[%{node}] Reloading external ports."

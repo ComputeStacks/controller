@@ -8,13 +8,21 @@ module ProjectServices
       self.deployment = deployment
     end
 
-    def perform
-      return false if deployment&.region.nil?
+    # @param record_drop [Boolean] false on replay (AgentWorkers::PendingSyncWorker), which
+    #   does its own pending-sync bookkeeping
+    # @param self_heal [Boolean] false on replay: never provision the tenant inline
+    def perform(record_drop: true, self_heal: true)
+      region = deployment&.region
+      return false if region.nil?
+      # Never push for a project being trashed: the self-heal would recreate its tenant.
+      return false if Agent::TenantRegistry.deleting?(deployment.id)
       # Push the full overview (unchanged — we keep all data) to the node agent's
       # managed area instead of Consul KV. put_managed self-heals an unprovisioned
       # tenant. NotReady (no online node / no agent token) degrades to false,
-      # matching the prior region-nil guard.
-      Agent::Client.new(deployment, region: deployment.region).put_managed("metadata", overview.to_json)
+      # matching the prior region-nil guard. A drop is recorded for replay.
+      Agent::PendingSync.track(record_drop:, region:, project: deployment, kind: "managed_metadata") do
+        Agent::Client.new(deployment, region: region).put_managed("metadata", overview.to_json, self_heal:)
+      end
     rescue Agent::Client::NotReady
       false
     end

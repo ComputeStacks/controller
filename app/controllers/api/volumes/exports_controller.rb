@@ -18,6 +18,11 @@ class Api::Volumes::ExportsController < Api::Volumes::BaseController
   # The presigned URL is not returned here. Poll `GET /volumes/{volume-id}/backups`
   # (each archive carries an `export` object with `status`/`url`/`expires_at`) or
   # supply a `callback` to be notified when it is ready.
+  # If the volume's node is in maintenance or offline (or the volume has no node), the
+  # event is failed and the response is `409 Conflict` with `errors`, `code`
+  # (`node_maintenance` or `node_offline`) and `node_status`; any callback reports the
+  # failure. Other failures are `422 Unprocessable Entity` with `errors`.
+  #
   def create
     archive = decoded_archive
     return api_obj_error(["Missing backup name"]) if archive.blank?
@@ -49,8 +54,12 @@ class Api::Volumes::ExportsController < Api::Volumes::BaseController
 
     jid = @volume.export_backup!(archive)
     unless jid
-      event.fail! "Fatal Error"
-      return api_obj_error(["Failed to start export. Check volume event logs."])
+      event.fail!(@volume.dispatch_error || "Fatal Error", code: @volume.dispatch_error_code)
+      if @volume.dispatch_error_code
+        return api_node_unavailable([@volume.dispatch_error], code: @volume.dispatch_error_code,
+          node_status: Nodes::CustomerStatusPresenter.rollup(@volume.nodes))
+      end
+      return api_obj_error([@volume.dispatch_error || "Failed to start export. Check volume event logs."])
     end
     event.update(labels: event.labels.merge("task_id" => jid))
 

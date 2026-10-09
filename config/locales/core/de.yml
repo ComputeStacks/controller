@@ -122,3 +122,28 @@ de:
       title: "Fehler! Wir sind auf ein serverseitiges Problem gestoßen."
       message_html: "<p>Wir haben diesen Fehler erhalten und arbeiten bereits daran, ihn zu lösen.</p>"
       link_back: Zurück
+  # Customer-facing status of the node(s) behind a project, service or container.
+  # See Nodes::CustomerStatusPresenter.
+  node_status:
+    label:
+      online: Online
+      maintenance: Maintenance
+      offline: Offline
+    headline:
+      maintenance: The server running these containers is undergoing maintenance.
+      offline: The server running these containers is offline.
+    since: "since %{time}"
+    operations:
+      power_deferred: Start, stop and restart requests will run when maintenance ends.
+      power_refused: Start, stop and restart are unavailable until the server is back online.
+      paused: "%{list} are paused."
+      config_changes_deferred: Configuration changes will be applied once the server is back online.
+      names:
+        backup: backups
+        restore: restores
+        export: downloads
+        scale: new containers
+        bastion_password_reset: SFTP password resets
+    power:
+      deferred: The server is in maintenance. Your request will run when maintenance ends.
+      refused_offline: The server running this container is offline. Please try again once it is back online.

@@ -677,8 +677,16 @@ module Bootstrap
 
       attrs = entry.attrs(
         :ssh_port, :port_begin, :port_end, :volume_device,
-        :block_read_bps, :block_write_bps, :block_read_iops, :block_write_iops, :maintenance
+        :block_read_bps, :block_write_bps, :block_read_iops, :block_write_iops
       )
+      # The manifest's `maintenance` is the controller's request. Node#maintenance is a
+      # generated column (requested OR a node-placed hold) that Rails silently refuses to
+      # write. This only ever seeds a NEW node -- an existing one is drift-reported, never
+      # updated -- so it bypasses MaintenanceRequestService; the drift worker pushes the
+      # hold to the agent.
+      unless entry.value("maintenance").nil?
+        attrs["maintenance_requested"] = entry.flag("maintenance", false)
+      end
       attrs["primary_ip"] = primary_ip
       attrs["public_ip"] = entry.fetch!("public_ip")
       attrs["label"] = entry.value("label", hostname)
@@ -886,16 +894,18 @@ module Bootstrap
         end
 
         # Additive: linking the default group to a region it does not yet cover
-        # creates a link, it does not replace one.
-        case cfg.value("link_regions", "all").to_s
-        when "all"
-          Region.order(:id).each do |region|
-            writer.link!(group.regions, region, label: "UserGroup #{group.name}", detail: "Region #{region.name}")
-          end
-        when "none"
-          nil
+        # creates a link, it does not replace one. `new` limits that to the
+        # regions this run created, so attaching a region to a live controller
+        # cannot also link a region an operator deliberately left unlinked.
+        regions = case cfg.value("link_regions", "all").to_s
+        when "all" then Region.order(:id).to_a
+        when "new" then @new_regions
+        when "none" then []
         else
-          raise Error.new("must be `all` or `none`", path: cfg.child_path("link_regions"))
+          raise Error.new("must be `all`, `new` or `none`", path: cfg.child_path("link_regions"))
+        end
+        regions.each do |region|
+          writer.link!(group.regions, region, label: "UserGroup #{group.name}", detail: "Region #{region.name}")
         end
       end
     end

@@ -12,6 +12,10 @@ child region: :availability_zone do
   attributes :id, :name
 end
 
+node :node_status do |i|
+  Nodes::CustomerStatusPresenter.for_project(i)
+end
+
 node :links do |i|
   {
     services: "/api/projects/#{i.id}/services",

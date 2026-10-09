@@ -13,9 +13,12 @@ module Events
         true
       end
 
-      # Find stuck / stale jobs and cancel them
+      # Find stuck / stale jobs and cancel them. A power action parked for a node's
+      # maintenance (PowerCycleContainerService) waits as long as the maintenance does, up
+      # to a week.
       def clean_event_status!
-        where("updated_at < ? AND (status = 'running' OR status = 'pending')", 2.hours.ago).update_all(
+        where("updated_at < ? AND (status = 'running' OR status = 'pending')", 2.hours.ago)
+          .where("labels ->> 'deferred_node_id' IS NULL OR updated_at < ?", 7.days.ago).update_all(
           status: "cancelled",
           state_reason: "Cancelled by system",
           event_code: "d7ef6c0313fb1375"

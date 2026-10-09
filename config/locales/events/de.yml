@@ -76,6 +76,10 @@ de:
         maintenance:
           enable: "Aktivieren des Wartungsmodus auf dem Node %{node}."
           disable: "Deaktivieren des Wartungsmodus auf dem Node %{node}."
+          requested: "Wartungssperre des Controllers für Node %{node} angefordert."
+          released: "Wartungssperre des Controllers für Node %{node} aufgehoben."
+          override: "Wartungs-Override auf Node %{node}: alle Sperren werden aufgehoben, auch die des Nodes selbst."
+          unsupported: "Der Agent auf Node %{node} kennt die Wartungs-API noch nicht (cs-agent < 3.4.0); die Wartung wird dort nicht durchgesetzt."
         evacuating: "Evakuiere Node %{node}."
         ports:
           reload: "[%{node}] Externe Ports neu laden."

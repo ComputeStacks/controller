@@ -8,7 +8,7 @@ module Containers
       c = docker_client_with_event(event)
       return false if c.nil?
       if respond_to?(:subscription) && subscription
-        subscription.unpause! unless subscription.active
+        subscription.unpause! unless subscription.active || owner_suspended?
       end
       response = c.start
       power_cycle_response("on", response, event)
@@ -32,7 +32,7 @@ module Containers
       c = docker_client_with_event(event)
       return false if c.nil?
       if respond_to?(:subscription) && subscription
-        subscription.unpause! unless subscription.active
+        subscription.unpause! unless subscription.active || owner_suspended?
       end
       response = c.restart
       power_cycle_response("on", response, event)
@@ -42,6 +42,13 @@ module Containers
       c = docker_client_with_event(event, true)
       c&.delete
       true
+    end
+
+    # A suspended owner's billing stays paused, even when a start that was already queued
+    # before the suspension runs after it.
+    def owner_suspended?
+      owner = user
+      owner.present? && !owner.active
     end
 
     private

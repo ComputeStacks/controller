@@ -76,6 +76,10 @@ en:
         maintenance:
           enable: "Enabling maintenance mode on node %{node}."
           disable: "Disabling maintenance mode on node %{node}."
+          requested: "Controller maintenance hold requested on node %{node}."
+          released: "Controller maintenance hold released on node %{node}."
+          override: "Maintenance override on node %{node}: releasing all holds, including the node's own."
+          unsupported: "Agent on node %{node} predates the maintenance API (cs-agent < 3.4.0); maintenance is not enforced there."
         evacuating: "Evacuating node %{node}."
         ports:
           reload: "[%{node}] Reloading external ports."

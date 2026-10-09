@@ -31,6 +31,20 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
   #     * `ipv6_egress`: Boolean (default: false) Egress-only IPv6 for containers. Applies to project networks created after enabling; requires the node to have working upstream IPv6. Unsetting does not remove IPv6 from networks that already have it.
   #     * `acme_server`: String | Should be in the form <ip:port> for accessing the controller from the node, ideally over private ip.
   #     * `guac_url`: String
+  #     * `maintenance_summary`: Object
+  #         * `nodes_total`: Integer
+  #         * `nodes_in_maintenance`: Integer
+  #         * `nodes_quiesced`: Integer - in maintenance with no background work running
+  #         * `nodes_with_warnings`: Integer - see `maintenance_status.warnings` on the node
+  #         * `nodes`: Array - nodes in maintenance only
+  #             * `id`: Integer
+  #             * `label`: String
+  #             * `held_by`: Array<String> - `controller`, `node`, or both
+  #             * `since`: DateTime | null
+  #     * `pending_agent_syncs`: Object - agent writes that failed and are queued to be re-pushed
+  #         * `pending`: Integer
+  #         * `dead`: Integer - gave up retrying
+  #         * `oldest_at`: DateTime | null - first failure of the oldest pending one
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
@@ -67,6 +81,20 @@ class Api::Admin::Locations::RegionsController < Api::Admin::Locations::BaseCont
   #     * `ipv6_egress`: Boolean (default: false) Egress-only IPv6 for containers. Applies to project networks created after enabling; requires the node to have working upstream IPv6. Unsetting does not remove IPv6 from networks that already have it.
   #     * `acme_server`: String
   #     * `guac_url`: String
+  #     * `maintenance_summary`: Object
+  #         * `nodes_total`: Integer
+  #         * `nodes_in_maintenance`: Integer
+  #         * `nodes_quiesced`: Integer - in maintenance with no background work running
+  #         * `nodes_with_warnings`: Integer - see `maintenance_status.warnings` on the node
+  #         * `nodes`: Array - nodes in maintenance only
+  #             * `id`: Integer
+  #             * `label`: String
+  #             * `held_by`: Array<String> - `controller`, `node`, or both
+  #             * `since`: DateTime | null
+  #     * `pending_agent_syncs`: Object - agent writes that failed and are queued to be re-pushed
+  #         * `pending`: Integer
+  #         * `dead`: Integer - gave up retrying
+  #         * `oldest_at`: DateTime | null - first failure of the oldest pending one
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #

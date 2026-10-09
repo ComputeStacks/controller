@@ -21,8 +21,24 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
   #     * `disconnected_at`: DateTime
   #     * `public_ip`: String
   #     * `region_id`: Integer
-  #     * `maintenance`: Boolean
-  #     * `maintenance_updated`: DateTime
+  #     * `maintenance`: Boolean - effective maintenance: the controller's hold OR the node's own
+  #     * `maintenance_updated`: DateTime - when the controller hold last changed
+  #     * `maintenance_status`: Object - read from stored state; never calls the agent
+  #         * `effective`: Boolean - same as `maintenance`
+  #         * `requested`: Boolean - the controller hold
+  #         * `reason`: String - reason given with the controller hold
+  #         * `requested_at`: DateTime | null
+  #         * `gen`: Integer - generation of the controller hold
+  #         * `holds`: Object - as the agent last reported them (`since` in unix seconds)
+  #             * `controller`: Object | null - `since`, `reason`, `gen`
+  #             * `local`: Object | null - `since`, `reason`, `by` (`cs-agent maintenance on`)
+  #         * `paused_since`: DateTime | null
+  #         * `skipped_backups`: Integer
+  #         * `sample`: Object | null - `quiesce` (quiesced, busy, unknown), `running_count`, `pending`, `sampled_at` (unix seconds)
+  #         * `agent`: Object - `supported` (Boolean, agent >= 3.4), `observed_at`, `instance_id`
+  #         * `running`: Array - work running on the node at the last status check (`id`, `kind`, `volume`, `started_at`)
+  #         * `pending`: Integer
+  #         * `warnings`: Array<String> - any of `mismatch`, `stale_hold`, `unsupported_agent`, `status_stale`, `override_pending`
   #     * `job_status`: String
   #     * `ssh_port`: Integer
   #     * `volume_device`: String
@@ -30,6 +46,9 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
   #     * `block_read_bps`: Integer (0 = unlimited)
   #     * `block_read_ios`: Integer (0 = unlimited)
   #     * `block_write_iops`: Integer (0 = unlimited)
+  #     * `customer_notice`: String | null - message shown to customers while the node is not online
+  #     * `customer_status`: Object - what customers see for this node, as `node_status`
+  #       on the customer API (`state`, `since`, `planned`, `message`, `operations`)
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
@@ -56,8 +75,24 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
   #     * `disconnected_at`: DateTime
   #     * `public_ip`: String
   #     * `region_id`: Integer
-  #     * `maintenance`: Boolean
-  #     * `maintenance_updated`: DateTime
+  #     * `maintenance`: Boolean - effective maintenance: the controller's hold OR the node's own
+  #     * `maintenance_updated`: DateTime - when the controller hold last changed
+  #     * `maintenance_status`: Object - read from stored state; never calls the agent
+  #         * `effective`: Boolean - same as `maintenance`
+  #         * `requested`: Boolean - the controller hold
+  #         * `reason`: String - reason given with the controller hold
+  #         * `requested_at`: DateTime | null
+  #         * `gen`: Integer - generation of the controller hold
+  #         * `holds`: Object - as the agent last reported them (`since` in unix seconds)
+  #             * `controller`: Object | null - `since`, `reason`, `gen`
+  #             * `local`: Object | null - `since`, `reason`, `by` (`cs-agent maintenance on`)
+  #         * `paused_since`: DateTime | null
+  #         * `skipped_backups`: Integer
+  #         * `sample`: Object | null - `quiesce` (quiesced, busy, unknown), `running_count`, `pending`, `sampled_at` (unix seconds)
+  #         * `agent`: Object - `supported` (Boolean, agent >= 3.4), `observed_at`, `instance_id`
+  #         * `running`: Array - work running on the node at the last status check (`id`, `kind`, `volume`, `started_at`)
+  #         * `pending`: Integer
+  #         * `warnings`: Array<String> - any of `mismatch`, `stale_hold`, `unsupported_agent`, `status_stale`, `override_pending`
   #     * `job_status`: String
   #     * `ssh_port`: Integer
   #     * `volume_device`: String
@@ -65,6 +100,9 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
   #     * `block_read_bps`: Integer (0 = unlimited)
   #     * `block_read_ios`: Integer (0 = unlimited)
   #     * `block_write_iops`: Integer (0 = unlimited)
+  #     * `customer_notice`: String | null - message shown to customers while the node is not online
+  #     * `customer_status`: Object - what customers see for this node, as `node_status`
+  #       on the customer API (`state`, `since`, `planned`, `message`, `operations`)
   #     * `created_at`: DateTime
   #     * `updated_at`: DateTime
   #
@@ -92,8 +130,22 @@ class Api::Admin::Locations::Regions::NodesController < Api::Admin::Locations::R
   #     * `block_read_bps`: Integer (0 = unlimited)
   #     * `block_read_ios`: Integer (0 = unlimited)
   #     * `block_write_iops`: Integer (0 = unlimited)
+  #     * `customer_notice`: String (optional) - message to customers with something on this
+  #       node, shown in the portal and as `node_status.message` on the API. Plain text.
+  #       Can only be set while the node is in maintenance or offline (`422` otherwise); blank
+  #       clears it, and it clears itself when the node is back online. Applied before the
+  #       other fields, and audited.
   #
   def update
+    if params[:node].respond_to?(:key?) && params[:node].key?(:customer_notice)
+      notice = NodeServices::CustomerNoticeService.new(
+        @node,
+        notice: params[:node][:customer_notice],
+        actor: current_user,
+        remote_ip: request.remote_ip
+      )
+      return api_obj_error(notice.errors) unless notice.perform
+    end
     return api_obj_error(@node.errors.full_messages) unless @node.update(node_update_params)
     respond_to do |format|
       format.any(:json, :xml) { render action: :show, status: :ok }

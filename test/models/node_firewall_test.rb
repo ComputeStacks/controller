@@ -44,8 +44,10 @@ class NodeFirewallTest < ActiveSupport::TestCase
   end
 
   test "update_iptable_config! no longer accepts a trigger_reload argument" do
-    # The Consul reload trigger is gone (the agent reconciles on PUT); the method is arity 0.
-    assert_equal 0, @node.method(:update_iptable_config!).arity
+    # The Consul reload trigger is gone (the agent reconciles on PUT): no positional
+    # parameters, only the record_drop: keyword replay uses.
+    params = @node.method(:update_iptable_config!).parameters
+    assert_equal [[:key, :record_drop]], params
   end
 
   ##

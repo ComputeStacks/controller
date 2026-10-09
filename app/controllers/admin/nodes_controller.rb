@@ -31,25 +31,7 @@ class Admin::NodesController < Admin::ApplicationController
   end
 
   def update
-    maint_mode = ActiveRecord::Type::Boolean.new.cast params[:node][:maintenance]
-    unless maint_mode == @node.maintenance
-      audit = Audit.create_from_object!(@node, "updated", request.remote_ip, current_user)
-      if maint_mode
-        @node.update(
-          maintenance: true,
-          maintenance_updated: Time.now
-        )
-        if @node.region.has_clustered_storage?
-          NodeWorkers::EvacuateNodeWorker.perform_async @node.global_id, audit.global_id
-        end
-      else
-        @node.update(
-          maintenance: false,
-          maintenance_updated: Time.now,
-          job_status: "idle"
-        )
-      end
-    end
+    # Maintenance is not part of this form: see Admin::Nodes::MaintenanceController.
     if @node.update(node_params)
       redirect_to "/admin/regions/#{@node.region_id}", notice: "#{@node.label} successfully updated."
     else

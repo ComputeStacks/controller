@@ -29,6 +29,9 @@ module Agent
   class TaskReconciler
     MAX_TEARDOWN_REISSUES = 3
 
+    # How long after entering maintenance a node's task events are still heartbeated.
+    MAINTENANCE_HEARTBEAT_WINDOW = 24.hours
+
     # task.name -> EventLog locale (the four backup-family flows; matches the retired
     # csevent locales — see handoff §7 / the api/volumes/*_controller pre-created events).
     LOCALE = {
@@ -108,19 +111,33 @@ module Agent
       # "pending" → the event exists (pending); nothing to drive yet.
     end
 
-    # Touch the correlated event of every active task WHOSE NODE IS ONLINE so
+    # Touch the correlated event of every active task WHOSE NODE IS UP so
     # StaleEventWorker can't fail a legitimately long backup/restore/clone. Node liveness
     # (not task `updated_at`) is the right bound: the agent only emits a task changelog row
     # on a status transition, so `updated_at` goes stale mid-backup — but as long as the
     # node is up the agent WILL report the terminal state, so the event should stay alive.
     # When the node goes offline the touch stops and StaleEventWorker reaps the event,
     # clearing operation_in_progress? (no permanent zombie wedge).
+    #
+    # Pending events are touched too: maintenance deliberately keeps tasks pending, and
+    # EventLog.clean_event_status! cancels pending events left untouched for 2 h. A node
+    # in maintenance is kept alive whether or not it answers, but only for
+    # MAINTENANCE_HEARTBEAT_WINDOW after it entered maintenance -- after that the touch
+    # stops so a forgotten node can't wedge operation_in_progress? forever.
     def heartbeat_active
       AgentTask.active.includes(:node).find_each do |task|
-        next unless task.node&.online?
+        next unless task.node && heartbeat_node?(task.node)
         event = correlated_event(task)
-        event.touch if event&.running?
+        event.touch if event&.active?
       end
+    end
+
+    # @param node [Node]
+    # @return [Boolean]
+    def heartbeat_node?(node)
+      return !node.disconnected unless node.maintenance
+      since = node.maintenance_since
+      since.present? && since > MAINTENANCE_HEARTBEAT_WINDOW.ago
     end
 
     # @return [EventLog, nil] the event for this task — by task_id label (stable), else the

@@ -13,6 +13,8 @@
     <%= form_for @node, url: "/admin/nodes/#{@node.id}" do |f| %>
       <div class="panel panel-default"><%= render partial: 'admin/nodes/form', locals: { f: f } %></div>
     <% end %>
+    <%= render partial: 'admin/nodes/maintenance' if @node.persisted? %>
+    <%= render partial: 'admin/nodes/customer_notice' if @node.persisted? %>
   </div>
   <%= render partial: 'admin/nodes/errors' unless @node.errors.count.zero? %>
 </div>

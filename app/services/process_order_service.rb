@@ -194,7 +194,11 @@ class ProcessOrderService
       return false
     end
     begin
-      Agent::Client.new(project, region: region).provision_tenant!
+      # A false return or NotReady is recorded as a pending `tenant` sync and replayed by
+      # AgentWorkers::PendingSyncWorker.
+      Agent::PendingSync.track(record_drop: true, region: region, project: project, kind: "tenant") do
+        Agent::Client.new(project, region: region).provision_tenant!
+      end
     rescue Agent::Client::NotReady => e
       # Non-fatal: the managed-blob writers self-heal provisioning on first write.
       # Record it on the event rather than in `errors` — by this point every

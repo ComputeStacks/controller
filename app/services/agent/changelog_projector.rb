@@ -6,12 +6,20 @@ module Agent
   # `Node#changelog_acked` is the durable watermark reported back to the agent (drives
   # its prune). Both advance monotonically; ack is reported strictly after projection.
   #
-  # v3.0.0 entity set = { task, volume, firewall_rule, repository, action_request }.
+  # v3.0.0 entity set = { task, volume, firewall_rule, repository, action_request }, plus
+  # (v3.4.0, only because #changelog advertises it) node_maintenance.
   #   - `action_request` → container_action_requests (first-seen-wins; the pilot path).
   #   - `task`           → agent_tasks (snapshot-upsert by id; reacted by TaskReconciler).
   #   - `repository`     → agent_repositories (snapshot-upsert by name; backs repo_info).
   #   - `volume`/`firewall_rule` → NO-OP: pure echoes of our own DOWN PUTs (we own that
   #     state; reacting would be a no-op). Projected nowhere on purpose.
+  #   - `node_maintenance` → the node's maintenance holds (Nodes::MaintenanceProjection),
+  #     newest entry only, keyed on the ENTRY's seq (the payload carries none). It is
+  #     projected before the ack: the agent's `maintenance on --wait` treats the ack as
+  #     the controller having seen its hold.
+  #
+  # The cursor advances to the response's `high_water` (the last seq the agent scanned)
+  # when nothing halted, so rows the agent skipped for us don't make us re-scan them.
   #
   # Projection is a blind, idempotent upsert; we act on state transitions in the
   # projection (TaskReconciler / ContainerActionServices::Sweep), never off re-reading
@@ -31,7 +39,7 @@ module Agent
   class ChangelogProjector
     PULL_LIMIT = 1000
     MAX_PARAMS_BYTES = 16_384
-    KNOWN_TYPES = %w[task volume firewall_rule repository action_request].freeze
+    KNOWN_TYPES = %w[task volume firewall_rule repository action_request node_maintenance].freeze
     ADVISORY_LOCK_CLASS = 0x63730001 # arbitrary constant namespace for the per-node lock
 
     # @param node [Node]
@@ -51,8 +59,13 @@ module Agent
     private
 
     def project
-      entries = Agent::Client.for_node(@node).changelog(since: @node.changelog_cursor, limit: PULL_LIMIT)
-      return flush_ack if entries.empty? # steady state; still flush a pending ack
+      client = Agent::Client.for_node(@node)
+      entries = client.changelog(since: @node.changelog_cursor, limit: PULL_LIMIT)
+      high_water = client.last_high_water.to_i
+      if entries.empty? # steady state; still flush a pending ack
+        advance_cursor(high_water) if high_water > @node.changelog_cursor
+        return flush_ack
+      end
 
       sorted = entries.sort_by { |e| e["seq"].to_i }
 
@@ -64,13 +77,14 @@ module Agent
       project_action_requests(projectable.select { |e| e["entity_type"] == "action_request" })
       project_tasks(projectable.select { |e| e["entity_type"] == "task" })
       project_repositories(projectable.select { |e| e["entity_type"] == "repository" })
+      project_node_maintenance(projectable.select { |e| e["entity_type"] == "node_maintenance" })
       # volume / firewall_rule: intentional no-op (echoes).
 
       safe_seq =
         if halt_idx
           projectable.map { |e| e["seq"].to_i }.max || @node.changelog_cursor
         else
-          sorted.map { |e| e["seq"].to_i }.max
+          [sorted.map { |e| e["seq"].to_i }.max, high_water].max
         end
 
       advance_cursor(safe_seq)
@@ -85,6 +99,8 @@ module Agent
     def projectable?(entry)
       type = entry["entity_type"]
       return false unless KNOWN_TYPES.include?(type)
+      # A full snapshot; its seq orders it against the Status bodies we also apply.
+      return entry["seq"].present? && entry["payload"].is_a?(Hash) if type == "node_maintenance"
       return true if entry["op"] == "delete" # tombstone (no payload) — handled per type
 
       case type
@@ -216,6 +232,15 @@ module Agent
         created_at: now,
         updated_at: now
       }
+    end
+
+    # --- node_maintenance (full snapshot; newest wins) -----------------------------
+
+    def project_node_maintenance(entries)
+      latest = entries.max_by { |e| e["seq"].to_i }
+      return if latest.nil?
+
+      Nodes::MaintenanceProjection.apply_snapshot(@node, latest["payload"], seq: latest["seq"].to_i)
     end
 
     # --- cursor + ack --------------------------------------------------------------

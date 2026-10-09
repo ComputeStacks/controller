@@ -187,10 +187,20 @@
         <label>Enable Automatic SSL Certificate</label>
         <%= f.check_box :le, class: "form-control" %>
         <span class="help-block"><b>Note:</b>
-          You must have your domain configured in ComputeStacks using our DNS
-          provider.You will need an A record, plus a wildcard CNAME record
-          pointing back to the original A record. This must match the subdomain
-          set above.</span>
+          You will need an A record, plus a wildcard CNAME record pointing back
+          to the original A record. This must match the subdomain set above.
+          The wildcard certificate is validated over DNS, so either the domain
+          must be hosted in ComputeStacks using our DNS provider, or (when a
+          DNS Alias Zone is configured under ACME settings) the domain must
+          delegate its validation to us with a single CNAME record.</span>
+        <% if @load_balancer.acme_dns_alias.present? %>
+          <span class="help-block">
+            <b>DNS alias:</b> only needed if <code><%= @load_balancer.domain %></code>
+            is not hosted on our DNS. Add this record at your DNS provider:<br/>
+            <code><%= "_acme-challenge.#{@load_balancer.domain}. CNAME #{@load_balancer.acme_dns_alias}." %></code><br/>
+            Then click <b>Deploy</b> (the rotate button on the load balancer list) to re-validate the domain.
+          </span>
+        <% end %>
       </div>
     </div>
   </div>

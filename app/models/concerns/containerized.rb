@@ -122,11 +122,12 @@ module Containerized
       return false
     end
     unless node.online?
+      reason = node.maintenance ? "Node is in maintenance" : "Node is offline"
       event.event_details.create!(
-        data: "Node is offline",
+        data: reason,
         event_code: "4bea557d3255b1af"
       )
-      event.fail! "Node is offline"
+      event.fail! reason
       return false
     end
     true

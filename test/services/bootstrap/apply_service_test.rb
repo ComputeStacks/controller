@@ -526,6 +526,25 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
     assert_not_includes @io.string, "[readdress]"
   end
 
+  test "a node's manifest maintenance seeds the controller request on create and only drift-reports after" do
+    held = greenfield_manifest
+    held["locations"][0]["regions"][0]["nodes"][0]["maintenance"] = true
+    apply!(held)
+
+    node = Node.find_by(hostname: "node1001")
+    assert node.maintenance_requested, @io.string
+    assert node.maintenance, "the generated column follows the request"
+
+    released = greenfield_manifest
+    released["locations"][0]["regions"][0]["nodes"][0]["maintenance"] = false
+    @io = StringIO.new
+    recorder = apply!(released)
+
+    assert node.reload.maintenance_requested, "an existing node is never rewritten"
+    assert_equal 1, recorder.warned, @io.string
+    assert_match(/maintenance_requested: database true, manifest false/, @io.string)
+  end
+
   test "a node's agent_host is set on an existing node under UPDATE_ADDRESSES" do
     apply!(greenfield_manifest)
     assert_nil Node.find_by(hostname: "node1001").agent_host
@@ -938,6 +957,61 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
     assert_equal driver_before.id, ProductModule.find_by(name: "dns").primary.id
     assert_equal zones_before, Dns::Zone.order(:id).pluck(:id, :name)
     assert_includes UserGroup.find_by(is_default: true).regions, new_region
+  end
+
+  test "link_regions new links only the regions this run created" do
+    apply!(greenfield_manifest)
+    # an operator has deliberately taken the first region off the default group
+    group = UserGroup.find_by(is_default: true)
+    first_region = Region.find_by(name: "ams-005")
+    group.regions.delete(first_region)
+
+    @io = StringIO.new
+    manifest = attach_manifest
+    manifest["user_group"] = {"link_regions" => "new"}
+    apply!(manifest)
+
+    new_region = Region.find_by(name: "fra-002")
+    assert_includes group.reload.regions, new_region
+    assert_not_includes group.regions, first_region
+    assert_no_match(/Region ams-005/, @io.string)
+  end
+
+  test "link_regions new links nothing when the run creates no region" do
+    apply!(greenfield_manifest)
+    manifest = attach_manifest
+    manifest["user_group"] = {"link_regions" => "new"}
+    apply!(manifest)
+    group = UserGroup.find_by(is_default: true)
+    group.regions.delete(Region.find_by(name: "fra-002"))
+
+    @io = StringIO.new
+    apply!(manifest)
+
+    assert_not_includes group.reload.regions, Region.find_by(name: "fra-002")
+  end
+
+  test "DRY_RUN previews the links link_regions new would add" do
+    apply!(greenfield_manifest)
+    group = UserGroup.find_by(is_default: true)
+    group.regions.delete(Region.find_by(name: "ams-005"))
+
+    @io = StringIO.new
+    manifest = attach_manifest
+    manifest["user_group"] = {"link_regions" => "new"}
+    apply!(manifest, dry_run: true)
+
+    assert_nil Region.find_by(name: "fra-002")
+    assert_empty group.reload.regions
+    assert_match(/Region fra-002/, @io.string.lines.grep(/UserGroup/).join)
+    assert_no_match(/Region ams-005/, @io.string)
+  end
+
+  test "an unknown link_regions mode is refused" do
+    manifest = greenfield_manifest
+    manifest["user_group"] = {"link_regions" => "some"}
+    error = assert_raises(Bootstrap::Error) { apply!(manifest) }
+    assert_match(/`all`, `new` or `none`/, error.message)
   end
 
   test "region-specific pricing is not widened to a new region" do

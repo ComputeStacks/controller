@@ -57,6 +57,33 @@
           </b>
         </li>
       </ul>
+      <% maint = node_maintenance_status(node) %>
+      <% if maint.effective? || maint.warnings? %>
+        <hr />
+        <ul class="list-unstyled">
+          <% if maint.effective? %>
+            <li>
+              Maintenance
+              <b class="pull-right"><%= maint.held_by_text %></b>
+            </li>
+            <% if maint.quiesce_text %>
+              <li>
+                Background Work
+                <b class="pull-right"><%= maint.quiesce_text %></b>
+              </li>
+            <% end %>
+            <% if maint.skipped_backups.positive? %>
+              <li>
+                Skipped Backups
+                <b class="pull-right"><%= maint.skipped_backups %></b>
+              </li>
+            <% end %>
+          <% end %>
+          <% maint.warning_labels.each do |code, label| %>
+            <li><span class="label label-danger" data-warning="<%= code %>"><%= label %></span></li>
+          <% end %>
+        </ul>
+      <% end %>
       <hr />
       <ul class="list-unstyled">
         <%= render partial: "admin/nodes/index/metrics_overview", locals: { node: node, metrics: metrics[node.id] } %>

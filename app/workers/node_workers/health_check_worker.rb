@@ -113,13 +113,13 @@ module NodeWorkers
               ContainerWorkers::RecoverContainerWorker.perform_async i.global_id
             else
               audit = Audit.create_from_object!(i, "updated", "127.0.0.1")
-              PowerCycleContainerService.new(i, "rebuild", audit).perform
+              PowerCycleContainerService.new(i, "rebuild", audit).tap { |s| s.supersede = false }.perform
             end
           end
         when "running"
           unless i.active?
             audit = Audit.create_from_object!(i, "updated", "127.0.0.1")
-            PowerCycleContainerService.new(i, "stop", audit).perform
+            PowerCycleContainerService.new(i, "stop", audit).tap { |s| s.supersede = false }.perform
           end
         else
           next

@@ -56,10 +56,40 @@ class VolumeAgentDatachannelTest < ActiveSupport::TestCase
     refute desired.key?(:last_backup), "last_backup must not be sent DOWN (agent ignores it)"
   end
 
-  test "update_consul! early-returns true (no PUT) when there is no online node" do
+  # Was a fake success (true, nothing PUT): UpdateDesiredStateWorker then never retried.
+  test "update_consul! returns false (no PUT) when no node is reachable, so the push is retried" do
     @node.update_columns(disconnected: true)
-    with_fake { assert_equal true, @volume.update_consul! }
+    with_fake { assert_equal false, @volume.update_consul! }
     assert_empty @fake.calls
+  end
+
+  test "update_consul! still PUTs to a node in maintenance, naming it as the backup node" do
+    @node.update_columns(maintenance_requested: true)
+    assert @node.reload.maintenance
+    with_fake { assert_equal true, @volume.update_consul! }
+    _, _project_id, _name, desired = @fake.calls_of(:put_volume).first
+    assert_equal @node.hostname, desired[:node], "an empty node: unassigns the volume's backups agent-side"
+  end
+
+  test "consul_select_node prefers an online node, then any node that is not disconnected" do
+    assert_equal @node.hostname, @volume.send(:consul_select_node)
+    @node.update_columns(maintenance_requested: true)
+    assert_equal @node.hostname, @volume.reload.send(:consul_select_node)
+    @node.update_columns(disconnected: true)
+    assert_equal "", @volume.reload.send(:consul_select_node)
+  end
+
+  test "consul_select_node for a volume without containers falls back to a maintenance node" do
+    detached = nil
+    with_fake do
+      detached = Volume.create!(label: "detached", region: regions(:regionone), user: users(:admin))
+      detached.nodes << @node
+    end
+    @node.update_columns(maintenance_requested: true)
+    assert_equal @node.hostname, detached.reload.send(:consul_select_node)
+    @node.update_columns(disconnected: true)
+    assert_equal "", detached.reload.send(:consul_select_node)
+    with_fake { assert_equal false, detached.update_consul! }
   end
 
   test "a detached volume uses the sentinel 0 in the URL path, task body, and config" do
@@ -133,5 +163,28 @@ class VolumeAgentDatachannelTest < ActiveSupport::TestCase
     refusing = FakeAgentClient.new(create_task: false)
     result = with_fake(refusing) { @volume.create_backup!("snap") }
     assert_equal false, result
+  end
+
+  test "backup-family calls refuse with a maintenance reason, without contacting the node" do
+    @node.update_columns(maintenance_requested: true)
+    with_fake do
+      refute @volume.create_backup!("snap")
+      refute @volume.delete_backup!("snap")
+      refute @volume.restore_backup!("snap")
+      refute @volume.export_backup!("snap")
+    end
+    assert_match(/in maintenance/, @volume.dispatch_error)
+    assert_empty @fake.calls_of(:create_task)
+    assert_empty @fake.calls_of(:put_volume)
+  end
+
+  test "a refusal is recorded on the audit's event" do
+    @node.update_columns(disconnected: true)
+    audit = Audit.create_from_object!(@volume, "backup.create", "127.0.0.1", users(:admin))
+    event = audit.event_logs.create!(locale: "volume.backup", status: "pending", event_code: "agent-ad28e9aa1933495f")
+    @volume.current_audit = audit
+    with_fake { refute @volume.create_backup!("snap") }
+    assert_equal "The node hosting this volume is offline.", @volume.dispatch_error
+    assert_equal [@volume.dispatch_error], event.event_details.pluck(:data)
   end
 end

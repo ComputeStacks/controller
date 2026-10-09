@@ -24,6 +24,7 @@
           <th>Availability Zone</th>
           <th>Primary IP</th>
           <th>Public IP</th>
+          <th>Maintenance</th>
           <th>Created</th>
         </tr>
       </thead>
@@ -34,6 +35,17 @@
             <td><%= link_to i.region.name, admin_region_url(i.region) %></td>
             <td><%= i.primary_ip %></td>
             <td><%= i.public_ip %></td>
+            <td>
+              <% maint = Nodes::MaintenanceStatusPresenter.new(i) %>
+              <% if maint.effective? %>
+                <span class="label label-warning"><%= maint.held_by.join(" + ").presence || "pending" %></span>
+                <% if maint.warnings? %><span class="label label-danger" title="<%= maint.warning_labels.map(&:last).join("; ") %>"><%= pluralize maint.warnings.size, "warning" %></span><% end %>
+              <% elsif maint.warnings? %>
+                <span class="label label-danger" title="<%= maint.warning_labels.map(&:last).join("; ") %>"><%= pluralize maint.warnings.size, "warning" %></span>
+              <% else %>
+                <span class="text-muted">&mdash;</span>
+              <% end %>
+            </td>
             <td><%= l i.created_at, format: :short %></td>
           </tr>
         <% end %>

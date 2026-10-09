@@ -174,11 +174,15 @@ module Volumes
     # Push (upsert) this volume's desired-state to its node's cs-agent. Replaces the old
     # Consul `volumes/<name>` KV write. Idempotent — the agent begins/continues scheduling
     # backups from it. Node/volume labels are cosmetic; addressing goes through for_node.
+    #
+    # A node in maintenance still accepts the write, so it is selected too (see
+    # consul_select_node). With nodes present but none reachable this returns FALSE, so
+    # VolumeWorkers::UpdateDesiredStateWorker retries instead of reporting a success that
+    # never reached the agent.
     def update_consul!
       return true if nodes.empty?
-      return true if nodes.online.empty?
       node = active_node
-      return true if node.nil?
+      return false if node.nil?
       # Agent::Client#put_volume is transport-tolerant (returns false, never raises).
       Agent::Client.for_node(node).put_volume(agent_project_id.to_s, name, default_consul_data)
     end
@@ -274,20 +278,19 @@ module Volumes
       }
     end
 
-    # Determine which node should initiate backups
+    # Determine which node should initiate backups.
+    #
+    # Prefers an online node, then any node that isn't disconnected: a node in maintenance
+    # still runs the volume, and sending `node: ""` for it would unassign its backups
+    # agent-side for the length of the maintenance window.
     def consul_select_node
       if container_service.nil? || containers.empty?
-        return "" if nodes.online.empty?
-        nodes.online.first.hostname
+        n = nodes.online.first || nodes.where(disconnected: false).first
       else
-        n = nil
-        containers.each do |c|
-          next if c.node.nil?
-          n = c.node if c.node.online?
-          break unless n.nil?
-        end
-        n.nil? ? "" : n.hostname
+        candidates = containers.filter_map(&:node)
+        n = candidates.detect(&:online?) || candidates.detect { |c| !c.disconnected }
       end
+      n.nil? ? "" : n.hostname
     end
   end
 end

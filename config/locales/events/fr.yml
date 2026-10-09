@@ -76,6 +76,10 @@ fr:
         maintenance:
           enable: "Enabling maintenance mode on node %{node}."
           disable: "Disabling maintenance mode on node %{node}."
+          requested: "Mise en maintenance demandée par le contrôleur pour le nœud %{node}."
+          released: "Maintenance du contrôleur levée pour le nœud %{node}."
+          override: "Forçage de la maintenance sur le nœud %{node} : toutes les mises en maintenance sont levées, y compris celle du nœud."
+          unsupported: "L'agent du nœud %{node} ne prend pas en charge l'API de maintenance (cs-agent < 3.4.0) ; la maintenance n'y est pas appliquée."
         evacuating: "Evacuating node %{node}."
         ports:
           reload: "[%{node}] Reloading external ports."

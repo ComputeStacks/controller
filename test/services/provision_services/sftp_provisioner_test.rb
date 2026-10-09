@@ -202,7 +202,8 @@ class SftpProvisionerTest < ActiveSupport::TestCase
   end
 
   ##
-  # Reproduce RegionMigratorService#migrate_volumes: the volumes move, the containers --
+  # Reproduce a region migration's volume move (the since-removed region migrator did
+  # exactly this): the volumes move, the containers --
   # and the SFTP container -- do not. `regions` derives from the volumes, so the zone the
   # SFTP container actually lives in is never iterated.
   #

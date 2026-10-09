@@ -17,6 +17,18 @@ module Clockwork
     AgentWorkers::ChangelogPollWorker.perform_async
   end
 
+  # Projects each node's maintenance status and repairs drift between the controller's
+  # request and the hold the agent holds (backstop for PushMaintenanceWorker).
+  every(2.minutes, "agent.maintenance_drift") do
+    AgentWorkers::MaintenanceDriftWorker.perform_async
+  end
+
+  # Re-pushes agent writes that were dropped (agent_pending_syncs): firewall rules,
+  # tenant (de)provisioning and the managed metadata blobs.
+  every(1.minute, "agent.pending_sync") do
+    AgentWorkers::PendingSyncWorker.perform_async
+  end
+
   every(15.seconds, "agent.action_sweep") do
     AgentWorkers::ActionSweepWorker.perform_async
   end

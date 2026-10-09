@@ -8,12 +8,19 @@ module SftpServices
       self.sftp = sftp
     end
 
-    def perform
-      return false if sftp.region.nil?
+    # @param record_drop [Boolean] false on replay (AgentWorkers::PendingSyncWorker)
+    # @param self_heal [Boolean] false on replay: never provision the tenant inline
+    def perform(record_drop: true, self_heal: true)
+      region = sftp.region
+      return false if region.nil? || sftp.deployment_id.nil?
+      return false if Agent::TenantRegistry.deleting?(sftp.deployment_id)
       # Per-SFTP-container host-keys blob, keyed by the container name (== the
       # container's HOSTNAME, which init_bastion.rb reads). One node per region,
       # so resolving via the region targets the SFTP container's own node.
-      Agent::Client.new(sftp.deployment, region: sftp.region).put_managed(sftp.name, data.to_json)
+      Agent::PendingSync.track(record_drop:, region:, project: sftp.deployment_id,
+        kind: "managed_sftp_host_keys", key: sftp.name) do
+        Agent::Client.new(sftp.deployment, region: region).put_managed(sftp.name, data.to_json, self_heal:)
+      end
     rescue Agent::Client::NotReady
       false
     end

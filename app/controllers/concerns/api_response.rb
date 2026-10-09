@@ -44,6 +44,26 @@ module ApiResponse
     end
   end
 
+  ##
+  # =Refused because of the node's state
+  #
+  # 409 Conflict: the request is valid, but the node behind it is in maintenance or
+  # offline. The client can retry once `node_status.state` is `online` again.
+  #
+  # ==Accepts:
+  # * +e+: An array of errors
+  # * +code+: String | `node_maintenance` or `node_offline`
+  # * +node_status+: Hash | see Nodes::CustomerStatusPresenter
+  #
+  def api_node_unavailable(e, code:, node_status:)
+    e = [e] unless e.is_a?(Array)
+    body = {errors: e, code: code, node_status: node_status}
+    respond_to do |format|
+      format.json { render json: body, status: :conflict }
+      format.xml { render xml: body, status: :conflict }
+    end
+  end
+
   def api_obj_destroyed
     respond_to do |f|
       f.json { render json: {}, status: :accepted }

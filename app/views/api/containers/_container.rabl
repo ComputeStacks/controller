@@ -21,6 +21,10 @@ node :ingress_rules, &:api_ingress_rules
 
 node :on_latest_image, &:latest_image?
 
+node :node_status do |i|
+  Nodes::CustomerStatusPresenter.for_node(i.node)
+end
+
 node :links do |i|
   {
     container_service: "/api/container_services/#{i.container_service_id}",

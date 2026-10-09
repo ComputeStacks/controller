@@ -1,0 +1,44 @@
+<%#
+  Customer-facing banner for the node(s) behind a project, service or container.
+
+  locals:
+    status: a Nodes::CustomerStatusPresenter hash (for_project / for_service / for_node)
+
+  Renders nothing while online. The message is the admin-set customer notice: plain text,
+  escaped, not localized. The internal maintenance reason is never shown here.
+%>
+<% state = status && status["state"] %>
+<% if state.present? && state != "online" %>
+  <%
+    ops = status["operations"] || {}
+    lines = []
+    case ops["power"]
+    when "deferred" then lines << t("node_status.operations.power_deferred")
+    when "refused" then lines << t("node_status.operations.power_refused")
+    end
+    paused = %w[backup restore export scale bastion_password_reset].select { |op| ops[op] == "refused" }
+    if paused.any?
+      lines << t("node_status.operations.paused", list: paused.map { |op| t("node_status.operations.names.#{op}") }.to_sentence).upcase_first
+    end
+    lines << t("node_status.operations.config_changes_deferred") if ops["config_changes"] == "deferred"
+  %>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="alert <%= state == "maintenance" ? "alert-warning" : "alert-danger" %> node-status-banner" role="alert">
+        <strong>
+          <%= icon "fa-solid", (state == "maintenance" ? "screwdriver-wrench" : "triangle-exclamation") %>
+          <%= t "node_status.headline.#{state}" %>
+        </strong>
+        <% if status["since"].present? %>
+          <small>(<%= t "node_status.since", time: l(status["since"].in_time_zone(Time.zone), format: :long) %>)</small>
+        <% end %>
+        <% if lines.any? %>
+          <div><%= lines.join(" ") %></div>
+        <% end %>
+        <% if status["message"].present? %>
+          <div style="margin-top:5px;"><%= status["message"] %></div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

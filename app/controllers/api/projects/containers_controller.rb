@@ -8,10 +8,10 @@ class Api::Projects::ContainersController < Api::Projects::BaseController
   #
   # **OAuth AuthorizationRequired**: `project_read`
   #
-  # * `containers`: Array<Container>
+  # * `containers`: Array<Container> | Each includes `node_status`; see `GET /api/containers/{id}`.
   #
   def index
-    @containers = paginate @deployment.deployed_containers.sorted
+    @containers = paginate @deployment.deployed_containers.sorted.preload(:node)
     respond_to do |format|
       format.any(:json, :xml) { render template: "api/containers/index" }
     end

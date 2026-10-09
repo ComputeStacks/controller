@@ -20,6 +20,7 @@ module Admin::SettingsHelper
     return "Container Registry Certificate Name" if name == "cr_le"
     return "Enable ACME" if name == "le"
     return "DNS Validation Waiting Period" if name == "le_dns_sleep"
+    return "DNS Alias Zone" if name == "le_dns_alias_zone"
     return "Enable Job" if name == "le_auto"
     name.split("_").map do |i|
       %w[acme id url smtp].include?(i.downcase) ? i.upcase : i.downcase.capitalize

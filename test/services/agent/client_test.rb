@@ -1,5 +1,6 @@
 require "test_helper"
 require "webmock"
+require "minitest/mock"
 
 class Agent::ClientTest < ActiveSupport::TestCase
   # Scope WebMock to THIS test only — enabling it process-wide (via
@@ -336,5 +337,121 @@ class Agent::ClientTest < ActiveSupport::TestCase
     @node.datachannel_backfilled_at = Time.current
     stub_request(:post, "#{@base}/v1/admin/tasks").to_raise(HTTP::ConnectionError)
     assert_equal false, Agent::Client.for_node(@node).create_task({id: "abc-123", name: "volume.backup"})
+  end
+
+  # --- resolve_node: online first, else any non-disconnected node --------------------
+
+  test "resolve_node falls back to a node in maintenance that is not disconnected" do
+    node = nodes(:testone)
+    node.update_columns(disconnected: false, maintenance_requested: true)
+    assert_not node.reload.online?
+    assert_equal node, Agent::Client.new(@project, region: regions(:regionone)).node
+  end
+
+  test "resolve_node prefers an online node over one in maintenance" do
+    other = nodes(:testone).dup.tap do |n|
+      n.label = n.hostname = "test02"
+      n.agent_token = "other-bearer"
+      n.save!
+    end
+    # Hold the lower id, so a plain .first would pick it.
+    held, online = [nodes(:testone), other].sort_by(&:id)
+    held.update_columns(maintenance_requested: true)
+    assert_equal online, Agent::Client.new(@project, region: regions(:regionone)).node
+  end
+
+  test "resolve_node refuses a disconnected node in maintenance" do
+    nodes(:testone).update_columns(disconnected: true, maintenance_requested: true)
+    assert_raises(Agent::Client::NotReady) { Agent::Client.new(@project, region: regions(:regionone)) }
+  end
+
+  # --- changelog: maintenance advertisement + high_water ----------------------------
+
+  test "changelog advertises node_maintenance and records high_water" do
+    stub = stub_request(:get, "#{@base}/v1/admin/changelog").with(query: hash_including("since" => "0"),
+      headers: {"X-CS-Changelog-Types" => "node_maintenance"})
+      .to_return(status: 200, body: {entries: [], high_water: 42}.to_json)
+    client = Agent::Client.for_node(@node)
+    assert_equal [], client.changelog(since: 0)
+    assert_requested stub
+    assert_equal 42, client.last_high_water
+  end
+
+  test "last_high_water is nil when the call fails or the agent sends none" do
+    client = Agent::Client.for_node(@node)
+    stub_request(:get, "#{@base}/v1/admin/changelog").with(query: hash_including("since" => "0"))
+      .to_return(status: 200, body: {entries: []}.to_json)
+    client.changelog(since: 0)
+    assert_nil client.last_high_water
+
+    WebMock.reset!
+    stub_request(:get, "#{@base}/v1/admin/changelog").with(query: hash_including("since" => "0")).to_return(status: 500)
+    client.changelog(since: 0)
+    assert_nil client.last_high_water
+  end
+
+  # A node in maintenance is expected to drop off: no Sentry, and a 2 h dedupe.
+  test "changelog failure on a node in maintenance skips Sentry and dedupes for 2 h" do
+    node = nodes(:testone)
+    node.update_columns(primary_ip: "10.50.0.9", agent_host: nil, maintenance_requested: true)
+    node.reload
+    stub_request(:get, "#{@base}/v1/admin/changelog").with(query: hash_including("since" => "0")).to_raise(HTTP::ConnectionError)
+
+    alerted = false
+    ExceptionAlertService.stub(:new, ->(*) { alerted = true; Struct.new(:perform).new(nil) }) do
+      assert_difference -> { SystemEvent.where(event_code: "7dc84225816362c8").count }, 1 do
+        Agent::Client.for_node(node).changelog(since: 0)
+      end
+    end
+    refute alerted
+
+    SystemEvent.where(event_code: "7dc84225816362c8").update_all(created_at: 1.hour.ago)
+    assert_no_difference -> { SystemEvent.where(event_code: "7dc84225816362c8").count } do
+      Agent::Client.for_node(node).changelog(since: 0)
+    end
+
+    # Outside maintenance the window is the usual 15 min.
+    node.update_columns(maintenance_requested: false)
+    assert_difference -> { SystemEvent.where(event_code: "7dc84225816362c8").count }, 1 do
+      Agent::Client.for_node(node.reload).changelog(since: 0)
+    end
+  end
+
+  # --- maintenance hold endpoints -----------------------------------------------------
+
+  test "get_maintenance returns the status code and parsed Status body" do
+    stub_request(:get, "#{@base}/v1/admin/maintenance").with(headers: {"Authorization" => "Bearer node-admin-bearer"})
+      .to_return(status: 200, body: {paused: false, seq: 3}.to_json)
+    assert_equal [200, {"paused" => false, "seq" => 3}], Agent::Client.for_node(@node).get_maintenance
+  end
+
+  test "put_maintenance sends reason and gen; a 409 still returns the body" do
+    stub_request(:put, "#{@base}/v1/admin/maintenance").with(body: {reason: "kernel", gen: 4}.to_json)
+      .to_return(status: 409, body: {controller_gen: 9}.to_json)
+    assert_equal [409, {"controller_gen" => 9}], Agent::Client.for_node(@node).put_maintenance(reason: "kernel", gen: 4)
+  end
+
+  test "delete_maintenance sends gen, and all=1 only when asked" do
+    plain = stub_request(:delete, "#{@base}/v1/admin/maintenance").with(query: {"gen" => "4"}).to_return(status: 200, body: "{}")
+    all = stub_request(:delete, "#{@base}/v1/admin/maintenance").with(query: {"gen" => "5", "all" => "1"}).to_return(status: 200, body: "{}")
+    guarded = stub_request(:delete, "#{@base}/v1/admin/maintenance").with(query: {"gen" => "6", "all" => "1", "local_since_max" => "1760000000"}).to_return(status: 412, body: "{}")
+    Agent::Client.for_node(@node).delete_maintenance(gen: 4)
+    Agent::Client.for_node(@node).delete_maintenance(gen: 5, all: true)
+    assert_equal [412, {}], Agent::Client.for_node(@node).delete_maintenance(gen: 6, all: true, local_since_max: 1_760_000_000)
+    # local_since_max is meaningless without all=1, and the agent would 400 it.
+    Agent::Client.for_node(@node).delete_maintenance(gen: 4, local_since_max: 1_760_000_000)
+    assert_requested plain, times: 2
+    assert_requested all
+    assert_requested guarded
+  end
+
+  test "maintenance calls return a nil body for a non-JSON answer (an old agent's 404)" do
+    stub_request(:get, "#{@base}/v1/admin/maintenance").to_return(status: 404, body: "404 page not found")
+    assert_equal [404, nil], Agent::Client.for_node(@node).get_maintenance
+  end
+
+  test "maintenance calls raise on transport errors" do
+    stub_request(:get, "#{@base}/v1/admin/maintenance").to_raise(HTTP::ConnectionError)
+    assert_raises(HTTP::ConnectionError) { Agent::Client.for_node(@node).get_maintenance }
   end
 end

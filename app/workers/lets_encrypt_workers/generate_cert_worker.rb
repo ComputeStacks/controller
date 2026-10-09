@@ -71,12 +71,33 @@ module LetsEncryptWorkers
           auth_challenge = auth.dns
           primary_domain = auth_request.dns_zone
           if primary_domain.nil?
+            alias_zone = Setting.le_dns_alias_zone
+            reason = if alias_zone.blank?
+              "No local zone file found, and no DNS alias zone is configured."
+            elsif auth_request.dns_alias.present?
+              "No local zone file found, and the DNS alias zone #{alias_zone} does not exist as a DNS zone in ComputeStacks."
+            else
+              "No local zone file found."
+            end
             event.event_details.create!(
-              data: "Unable to validate #{domain} using DNS: No local zone file found.",
+              data: "Unable to validate #{domain} using DNS: #{reason}",
               event_code: "0994c35516f37636"
             )
             event.fail! "Missing zone file"
             break
+          end
+          # On the alias path, confirm the operator's CNAME is in place before
+          # touching DNS or the CA: a DNS-01 attempt without it is a certain
+          # failed authorization, and the renewal sweep would repeat it.
+          if auth_request.dns_alias.present?
+            alias_check = LetsEncryptServices::DnsAliasCheckService.new(auth_request.load_balancer)
+            unless alias_check.perform
+              alias_check.errors.each do |err|
+                event.event_details.create!(data: err, event_code: "7774fe2fd9ee5ae0")
+              end
+              event.fail! "DNS Alias Missing"
+              break
+            end
           end
           unless primary_domain.system_can_update?
             event.event_details.create!(

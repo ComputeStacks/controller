@@ -58,6 +58,16 @@ class Api::ContainerServicesController < Api::ApplicationController
   #     * `bastions`: Array<Integer>
   #     * `domains`: Array<Integer>
   #     * `deployed_containers`: Integer
+  #     * `node_status`: Object - availability of the nodes running the service's containers (none deployed:
+  #       its availability zone's nodes). Read from stored state.
+  #         * `state`: String<online,maintenance,offline> - worst state among those nodes
+  #         * `since`: DateTime | null - when that state began
+  #         * `planned`: Boolean - true for maintenance, false for an unplanned outage
+  #         * `message`: String | null - operator's notice to customers; null while `online`
+  #         * `operations`: Object - what each action does in this state (see doc/maintenance.md)
+  #             * `power`: String<available,deferred,refused> - deferred runs when maintenance ends; latest request wins
+  #             * `backup`, `restore`, `export`, `scale`, `bastion_password_reset`: String<available,refused>
+  #             * `config_changes`: String<available,deferred> - deferred until the node reconnects
   #     * `help`: Object
   #         * `general`: String
   #         * `ssh`: String
@@ -74,7 +84,7 @@ class Api::ContainerServicesController < Api::ApplicationController
   #         * `products`: String (url)
   #
   def index
-    @services = paginate Deployment::ContainerService.find_all_for(current_user)
+    @services = paginate Deployment::ContainerService.find_all_for(current_user).preload(containers: :node, region: :nodes)
   end
 
   ##
@@ -119,6 +129,16 @@ class Api::ContainerServicesController < Api::ApplicationController
   #     * `bastions`: Array<Integer>
   #     * `domains`: Array<Integer>
   #     * `deployed_containers`: Integer
+  #     * `node_status`: Object - availability of the nodes running the service's containers (none deployed:
+  #       its availability zone's nodes). Read from stored state.
+  #         * `state`: String<online,maintenance,offline> - worst state among those nodes
+  #         * `since`: DateTime | null - when that state began
+  #         * `planned`: Boolean - true for maintenance, false for an unplanned outage
+  #         * `message`: String | null - operator's notice to customers; null while `online`
+  #         * `operations`: Object - what each action does in this state (see doc/maintenance.md)
+  #             * `power`: String<available,deferred,refused> - deferred runs when maintenance ends; latest request wins
+  #             * `backup`, `restore`, `export`, `scale`, `bastion_password_reset`: String<available,refused>
+  #             * `config_changes`: String<available,deferred> - deferred until the node reconnects
   #     * `help`: Object
   #         * `general`: String
   #         * `ssh`: String

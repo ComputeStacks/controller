@@ -501,6 +501,26 @@ class Setting < ApplicationRecord
     end
 
     ##
+    # DNS zone used for ACME DNS-01 alias validation of load balancer wildcard
+    # certificates. Blank disables the feature.
+    #
+    # @return [String, nil] normalized zone name (no trailing dot), or nil when blank
+    def le_dns_alias_zone
+      s = Setting.find_by(name: "le_dns_alias_zone", category: "acme")
+      if s.nil?
+        s = Setting.create!(
+          name: "le_dns_alias_zone",
+          category: "acme",
+          description: "Zone hosted on our DNS provider used to validate load balancer wildcard certificates whose domain is not hosted here. Each load balancer gets 'lb<id>.<zone>'; the operator adds a CNAME from '_acme-challenge.<lb domain>' to it. Leave blank to disable. This zone is managed by the system; do not edit it by hand or share it with another controller.",
+          value: "",
+          encrypted: false
+        )
+      end
+      v = s.value.to_s.strip.downcase.delete_suffix(".")
+      v.presence
+    end
+
+    ##
     # Custom ACME Server
 
     def acme_directory
@@ -745,6 +765,7 @@ class Setting < ApplicationRecord
         hostname
         le
         le_auto_enabled?
+        le_dns_alias_zone
         le_dns_sleep
         monarx_init!
         registry_base_url

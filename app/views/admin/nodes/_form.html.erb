@@ -113,19 +113,6 @@
 <hr>
 <% end %>
 
-<div class="panel-body">
-  <div class="row">
-    <div class="col-sm-12">
-      <div class="form-group">
-        <label>Maintenance Mode</label>
-        <%= f.check_box :maintenance, class: 'form-control' %>
-        <% unless @node.maintenance %>
-          <span class="help-block"><b>Warning:</b> This will place the node in offline mode and attempt to migrate all containers elsewhere in the AZ. Containers with locally mounted volumes will not be migrated.</span>
-        <% end %>
-      </div>
-    </div>
-  </div>
-</div>
 <div class="panel-footer">
   <%= link_to t('actions.cancel'), "/admin/regions/#{@node.region.id}", class: 'btn btn-default', style: 'margin-right: 10px;' %>
   <%= submit_tag t('actions.save'), class: 'btn btn-success' %>

@@ -729,7 +729,7 @@ nodes:
 | `volume_device` | no | `.volume_device` | plaintext, e.g. `/dev/sda`. Required for the block I/O limits below to have any effect. |
 | `block_read_bps` / `block_write_bps` | no (default `0`) | `.block_*_bps` | plaintext integer, `>= 0`. `0` = unlimited. |
 | `block_read_iops` / `block_write_iops` | no (default `0`) | `.block_*_iops` | plaintext integer, `>= 0`. |
-| `maintenance` | no (default `false`) | `.maintenance` | plaintext boolean. |
+| `maintenance` | no (default `false`) | `.maintenance_requested` | plaintext boolean: the **controller's** maintenance hold. **Create only** — set on a node the apply creates, never written to an existing node; a difference on an existing node is reported as drift. `nodes.maintenance` itself is a generated column (controller hold OR the node's own hold) and cannot be written. The hold reaches the agent on the next maintenance drift pass (every 2 minutes). To change it on a running node, see [maintenance.md](maintenance.md). |
 
 **`agent_token` is not a manifest field.** `Node` mints one in a `before_save` when the column is
 blank, and only its SHA-256 (`Node#agent_token_hash`) ever leaves the controller. The provisioner
@@ -872,7 +872,7 @@ user_group:
 | Key | Required | Maps to | Notes |
 | --- | --- | --- | --- |
 | `name` | no (default `default`) | `.name` | plaintext. Validated `length: 2..50`. Only used when creating; a differing name on an existing group is reported, not applied. |
-| `link_regions` | no (default `all`) | `regions_user_groups` | `all` links the default group to every region; `none` links nothing. Links are **added only, never removed**, so this keeps working on a live controller — it is how a newly attached region becomes orderable. |
+| `link_regions` | no (default `all`) | `regions_user_groups` | `all` links the default group to every region; `new` links it only to the regions this run created; `none` links nothing. Links are **added only, never removed**, so this keeps working on a live controller — it is how a newly attached region becomes orderable. Attaching to a live controller should use `new`: `all` would also link any region an operator deliberately left unlinked, such as an internal one, and the tool cannot take that back. |
 
 **Natural key:** `is_default: true`. If no default group exists one is created with
 `is_default: true` and the default `BillingPlan` (`belongs_to :billing_plan` is required, so
@@ -1131,7 +1131,7 @@ locations:
           stats_password: "s3cr3t-stats"
 
 user_group:
-  link_regions: all
+  link_regions: new
 ```
 
 Note the two client sections carry **no `create: true`**. They are references: if the endpoints do

@@ -26,6 +26,8 @@ class Api::Admin::ContainerServicesController < Api::Admin::ApplicationControlle
   #
   def index
     @container_services = paginate Deployment::ContainerService.all.sorted
+    # `all` renders the full service, including `node_status`.
+    @container_services = @container_services.preload(containers: :node, region: :nodes) if params[:all]
     respond_to :json, :xml
   end
 

@@ -30,10 +30,20 @@ class Agent::ChangelogProjectorTest < ActiveSupport::TestCase
     ContainerActionRegistry.instance_variable_set(:@handlers, @saved)
   end
 
-  def stub_changelog(entries, since: 0)
+  def stub_changelog(entries, since: 0, high_water: nil)
+    body = {entries: entries}
+    body[:high_water] = high_water if high_water
     stub_request(:get, "#{@base}/v1/admin/changelog")
       .with(query: hash_including("since" => since.to_s))
-      .to_return(status: 200, body: {entries: entries}.to_json, headers: {"Content-Type" => "application/json"})
+      .to_return(status: 200, body: body.to_json, headers: {"Content-Type" => "application/json"})
+  end
+
+  # A node_maintenance entry as the agent writes it: the payload has NO seq.
+  def maintenance_entry(seq, local: nil, controller: nil, instance: "inst-1")
+    {"seq" => seq, "entity_type" => "node_maintenance", "entity_id" => "node", "op" => "upsert",
+     "payload" => {"paused" => !(local || controller).nil?, "controller" => controller, "local" => local,
+                   "paused_since" => ((local || controller) ? 1_760_000_000 : nil), "skipped_backups" => 0,
+                   "sample" => nil, "instance_id" => instance, "controller_gen" => 0}}
   end
 
   def stub_ack
@@ -272,5 +282,76 @@ class Agent::ChangelogProjectorTest < ActiveSupport::TestCase
     ContainerActionServices::Sweep.new.call
     ContainerActionWorkers::DispatchWorker.drain
     assert_equal 1, FakeActionHandler.calls
+  end
+
+  # --- node_maintenance ------------------------------------------------------------
+
+  test "a node_maintenance entry projects at the ENTRY seq (its payload has none), newest wins" do
+    @node.update_columns(maintenance_requested: false, maintenance_holds: {}, maintenance_seq: 0, agent_instance_id: nil)
+    stub_changelog([maintenance_entry(3, local: {"since" => 1, "reason" => "first", "by" => "root"}),
+      maintenance_entry(5, local: {"since" => 1, "reason" => "docker-upgrade", "by" => "root"})])
+
+    Agent::ChangelogProjector.new(@node).call
+
+    @node.reload
+    assert_equal 5, @node.maintenance_seq
+    assert_equal "docker-upgrade", @node.maintenance_local_hold["reason"]
+    assert @node.maintenance
+    assert_equal 5, @node.changelog_cursor
+  end
+
+  test "the poll advertises node_maintenance" do
+    stub = stub_request(:get, "#{@base}/v1/admin/changelog").with(query: hash_including("since" => "0"),
+      headers: {"X-CS-Changelog-Types" => "node_maintenance"})
+      .to_return(status: 200, body: {entries: [], high_water: 0}.to_json)
+    Agent::ChangelogProjector.new(@node).call
+    assert_requested stub
+  end
+
+  test "the ack is sent only after the maintenance projection committed" do
+    @node.update_columns(maintenance_holds: {}, maintenance_seq: 0)
+    stub_changelog([maintenance_entry(7, local: {"since" => 1, "reason" => "x", "by" => "root"})])
+    seq_at_ack = nil
+    stub_request(:post, "#{@base}/v1/admin/changelog/ack").to_return do
+      seq_at_ack = Node.where(id: @node.id).pick(:maintenance_seq)
+      {status: 200, body: {acked: 7}.to_json}
+    end
+    Agent::ChangelogProjector.new(@node).call
+    assert_equal 7, seq_at_ack
+    assert_equal 7, @node.reload.changelog_acked
+  end
+
+  test "a malformed node_maintenance entry halts below it" do
+    bad = {"seq" => 2, "entity_type" => "node_maintenance", "entity_id" => "node", "op" => "upsert", "payload" => nil}
+    stub_changelog([task_entry(1, "t1", status: "completed"), bad])
+    Agent::ChangelogProjector.new(@node).call
+    assert_equal 1, @node.reload.changelog_cursor
+  end
+
+  test "unknown types still halt, and high_water is NOT adopted past a halt" do
+    unknown = {"seq" => 2, "entity_type" => "mystery", "entity_id" => "x", "op" => "upsert", "payload" => {}}
+    stub_changelog([task_entry(1, "t1", status: "completed"), unknown], high_water: 50)
+    Agent::ChangelogProjector.new(@node).call
+    assert_equal 1, @node.reload.changelog_cursor
+  end
+
+  test "high_water advances the cursor past rows the agent scanned but didn't return" do
+    stub_changelog([task_entry(1, "t1", status: "completed")], high_water: 9)
+    Agent::ChangelogProjector.new(@node).call
+    assert_equal 9, @node.reload.changelog_cursor
+    assert_requested :post, "#{@base}/v1/admin/changelog/ack", body: {seq: 9}.to_json
+  end
+
+  test "an empty page adopts high_water, and never regresses the cursor" do
+    @node.update_columns(changelog_cursor: 5, changelog_acked: 5)
+    stub_changelog([], since: 5, high_water: 12)
+    Agent::ChangelogProjector.new(@node).call
+    assert_equal 12, @node.reload.changelog_cursor
+
+    WebMock.reset!
+    stub_ack
+    stub_changelog([], since: 12, high_water: 3)
+    Agent::ChangelogProjector.new(@node).call
+    assert_equal 12, @node.reload.changelog_cursor
   end
 end

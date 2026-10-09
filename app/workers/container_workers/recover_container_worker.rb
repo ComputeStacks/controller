@@ -22,9 +22,9 @@ module ContainerWorkers
       #       Currently being handled by the node health check job.
 
       if container.docker_client
-        PowerCycleContainerService.new(container, "start", audit).perform
+        PowerCycleContainerService.new(container, "start", audit).tap { |s| s.supersede = false }.perform
       else
-        PowerCycleContainerService.new(container, "rebuild", audit).perform
+        PowerCycleContainerService.new(container, "rebuild", audit).tap { |s| s.supersede = false }.perform
       end
     rescue ActiveRecord::RecordNotFound
       nil # Silently fail

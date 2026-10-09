@@ -47,6 +47,9 @@ class CallbackService
   def data_from_event!
     self.data = {
       "timestamp" => timestamp,
+      "event_id" => event_log.id,
+      "status" => event_log.status,
+      "code" => event_log.result_code,
       "success" => event_log.success?,
       "data" => event_log.event_details.map(&:data)
     }

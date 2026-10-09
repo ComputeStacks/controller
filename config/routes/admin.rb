@@ -119,6 +119,11 @@ Rails.application.routes.draw do
     resources :nodes do
       scope module: "nodes" do
         resources :events
+        resource :maintenance, only: %i[create destroy], controller: "maintenance" do
+          post :release_all
+          post :refresh
+        end
+        resource :customer_notice, only: %i[update destroy], controller: "customer_notice"
       end
     end
 
@@ -133,6 +138,7 @@ Rails.application.routes.draw do
         resources :nodes,
           :network_migrate
         resources :rebuild_networks, only: :create
+        resources :retry_dead_agent_syncs, only: :create
       end
     end
 

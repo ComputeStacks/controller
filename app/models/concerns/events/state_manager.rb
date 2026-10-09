@@ -63,18 +63,25 @@ module Events
       perform_callback_reply!
     end
 
+    # `code` is a stable, machine-readable reason (e.g. "superseded", "node_offline") that
+    # callbacks report next to `status`, so receivers need not match the prose `msg`.
     # @return [Boolean]
-    def cancel!(msg)
+    def cancel!(msg, code: nil)
       return false unless active?
-      update status: "cancelled", state_reason: msg
+      update({status: "cancelled", state_reason: msg}.merge(result_code_attrs(code)))
       perform_callback_reply!
     end
 
     # @return [Boolean]
-    def fail!(msg)
+    def fail!(msg, code: nil)
       return false unless active?
-      update status: "failed", state_reason: msg
+      update({status: "failed", state_reason: msg}.merge(result_code_attrs(code)))
       perform_callback_reply!
+    end
+
+    # The stable reason a cancel! or fail! recorded, or nil.
+    def result_code
+      labels["result_code"].presence
     end
 
     # Handle any callbacks added to this event
@@ -123,6 +130,12 @@ module Events
       # CallbackWorker's 4-hour cutoff and retry buckets and should stamp the transition.
       ActiveRecord.after_all_transactions_commit { CallbackWorker.perform_async d }
       true
+    end
+
+    private
+
+    def result_code_attrs(code)
+      code.blank? ? {} : {labels: labels.merge("result_code" => code.to_s)}
     end
   end
 end

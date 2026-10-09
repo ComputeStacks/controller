@@ -21,6 +21,11 @@
           Containers
           <b class="pull-right"><%= region.container_count %></b>
         </li>
+        <li>
+          In Maintenance
+          <% in_maint = region.nodes.where(maintenance: true).count %>
+          <b class="pull-right<%= " text-warning" if in_maint.positive? %>"><%= in_maint %></b>
+        </li>
       </ul>
       <div>
         <%= link_to raw("#{icon('fa-solid', 'gear')} #{t('actions.manage')}"), admin_region_url(region), class: "btn btn-default btn-block" %>

@@ -156,4 +156,28 @@ class Admin::NodesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match @node.label, response.body
   end
+
+  test "the edit page renders the maintenance panel outside the node form" do
+    get "/admin/nodes/#{@node.id}/edit"
+
+    assert_response :success
+    assert_match "Enter Maintenance", response.body
+    assert_no_match "node[maintenance_requested]", response.body
+  end
+
+  # Maintenance has its own actions (Admin::Nodes::MaintenanceController); saving the
+  # node form must not change it, even if a stale form posts the old fields.
+  test "update ignores maintenance fields" do
+    @node.update_columns(maintenance_requested: false, maintenance_gen: 0)
+    AgentWorkers::PushMaintenanceWorker.jobs.clear
+
+    patch "/admin/nodes/#{@node.id}", params: {node: {label: @node.label, maintenance_requested: "1", maintenance: "1"}}
+
+    assert_response :redirect
+    @node.reload
+    refute @node.maintenance_requested
+    refute @node.maintenance
+    assert_equal 0, @node.maintenance_gen
+    assert_empty AgentWorkers::PushMaintenanceWorker.jobs
+  end
 end

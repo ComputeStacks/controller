@@ -1,0 +1,76 @@
+<%#
+  Read-only maintenance state for one node, from stored columns only (no agent call).
+  Used on the node's edit page and its events page. Wording lives in
+  Nodes::MaintenanceStatusPresenter, shared with the admin API.
+%>
+<% status = Nodes::MaintenanceStatusPresenter.new(node) %>
+<% controller_hold = node.maintenance_controller_hold %>
+<% local_hold = node.maintenance_local_hold %>
+<ul class="list-unstyled maintenance-status">
+  <li>
+    Maintenance
+    <b class="pull-right">
+      <% if status.effective? %>
+        <span class="label label-warning">In maintenance</span> <%= status.held_by_text %>
+      <% else %>
+        <span class="text-muted">Not in maintenance</span>
+      <% end %>
+    </b>
+  </li>
+  <li>
+    Controller hold
+    <b class="pull-right">
+      <% if node.maintenance_requested %>
+        requested<%= " (#{node.maintenance_reason})" if node.maintenance_reason.present? %>, gen <%= node.maintenance_gen %>
+        <% if controller_hold.nil? %>
+          <span class="text-muted">&mdash; not yet confirmed by the node</span>
+        <% end %>
+      <% else %>
+        <span class="text-muted">none</span>
+      <% end %>
+    </b>
+  </li>
+  <li>
+    Node hold
+    <b class="pull-right">
+      <% if local_hold %>
+        <%= local_hold["reason"].presence || "no reason given" %><%= " by #{local_hold["by"]}" if local_hold["by"].present? %><%= " since #{status.hold_since_text(local_hold)}" if status.hold_since_text(local_hold) %>
+      <% else %>
+        <span class="text-muted">none</span>
+      <% end %>
+    </b>
+  </li>
+  <% if status.quiesce_text %>
+    <li>
+      Background work
+      <b class="pull-right"><%= status.quiesce_text %></b>
+    </li>
+  <% end %>
+  <% if status.skipped_backups.positive? %>
+    <li>
+      Skipped backups
+      <b class="pull-right"><%= status.skipped_backups %></b>
+    </li>
+  <% end %>
+  <% if status.effective? && status.running.any? %>
+    <li>
+      Running
+      <b class="pull-right">
+        <%= status.running.map { |r| [r["kind"], r["volume"]].compact_blank.join(" ") }.join(", ") %>
+      </b>
+    </li>
+  <% end %>
+  <li>
+    Agent status
+    <b class="pull-right">
+      <% if status.observed_at %>
+        checked <%= time_ago_in_words status.observed_at %>
+      <% else %>
+        <span class="text-muted">never checked</span>
+      <% end %>
+    </b>
+  </li>
+  <% status.warning_labels.each do |code, label| %>
+    <li><span class="label label-danger" data-warning="<%= code %>"><%= label %></span></li>
+  <% end %>
+</ul>

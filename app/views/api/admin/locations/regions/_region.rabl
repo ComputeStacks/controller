@@ -8,3 +8,9 @@ end
 child :user_groups do
   attributes :id, :name
 end
+node :maintenance_summary do |i|
+  Nodes::MaintenanceStatusPresenter.summary(i.nodes)
+end
+node :pending_agent_syncs do |i|
+  Nodes::MaintenanceStatusPresenter.pending_agent_syncs([i.id])
+end

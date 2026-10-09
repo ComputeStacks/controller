@@ -31,6 +31,10 @@
           <div id="project-<%= i.id %>" style="display:inline;">
             <span style="cursor: pointer;padding-right:10px;" onclick='window.location="/deployments/<%= i.token %>";' title="<%= i.name %>">
               <strong><%= truncate i.name.upcase, length: 35 %></strong>
+              <% node_state = Nodes::CustomerStatusPresenter.for_project(i)["state"] %>
+              <% unless node_state == "online" %>
+                <span class="label <%= node_state == "maintenance" ? "label-warning" : "label-danger" %>"><%= t "node_status.label.#{node_state}" %></span>
+              <% end %>
             </span>
             <span style="padding-right:10px;">
               <%= pluralize i.services.where(is_load_balancer: false).count, t('obj.service'), t('obj.services') %>

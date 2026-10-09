@@ -36,19 +36,41 @@ class LetsEncryptAuth < ApplicationRecord
     expires_at.nil? ? true : expires_at <= Time.now
   end
 
-  # @return [Dns::Zone]
+  # Load balancer whose shared (wildcard) certificate this authorization is for.
+  #
+  # @return [LoadBalancer, nil]
+  def load_balancer
+    certificate.load_balancers.find_by("lower(load_balancers.domain) = ?", domain.to_s.downcase)
+  end
+
+  # DNS alias name to write the challenge into, when the domain is not hosted
+  # on our DNS provider but an ACME DNS alias zone is configured.
+  #
+  # @return [String, nil]
+  def dns_alias
+    return nil unless Dns::Zone.find_covering(domain).nil?
+    load_balancer&.acme_dns_alias
+  end
+
+  # A local zone covering the domain wins. Otherwise, fall back to the alias zone.
+  #
+  # The alias zone is matched by exact name, not by a suffix walk: the walk
+  # returns the shortest match, so with `acme.example.com` delegated and
+  # `example.com` also local, it would write the TXT into the parent zone,
+  # below the delegation cut, where nobody would ever see it.
+  #
+  # @return [Dns::Zone, nil]
   def dns_zone
-    # Allow a few extra levels.
-    i = 2
-    count = 4
-    z = nil
-    loop do
-      tld = domain.split(".").last(i)
-      z = Dns::Zone.find_by(name: tld.join("."))
-      break unless z.nil?
-      break if i > count
-      i += 1
-    end
-    z
+    z = Dns::Zone.find_covering(domain)
+    return z unless z.nil?
+    return nil if dns_alias.blank?
+    Dns::Zone.find_by(name: Setting.le_dns_alias_zone)
+  end
+
+  # Fully qualified name of the DNS-01 challenge record we write.
+  #
+  # @return [String]
+  def dns_record_fqdn
+    dns_alias.presence || "#{record_name}.#{domain}"
   end
 end

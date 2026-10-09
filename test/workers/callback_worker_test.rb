@@ -151,4 +151,35 @@ class CallbackWorkerTest < ActiveSupport::TestCase
     # The give-up is its own code, not the transient-deferral one.
     assert_nil SystemEvent.find_by(event_code: "4b5ba53233315e32")
   end
+
+  test "the payload names the event, its status and its result code" do
+    event = make_event("pending")
+    event.cancel!("Superseded", code: "superseded")
+    stub_request(:post, URL).to_return(status: 200, body: "")
+
+    CallbackWorker.new.perform args_for(event)
+
+    assert_requested(:post, URL) do |req|
+      body = JSON.parse(req.body)
+      assert_equal event.id, body["event_id"]
+      assert_equal "cancelled", body["status"]
+      assert_equal "superseded", body["code"]
+      assert_equal false, body["success"]
+      true
+    end
+  end
+
+  test "an ordinary result has no code" do
+    event = make_event("completed")
+    stub_request(:post, URL).to_return(status: 200, body: "")
+
+    CallbackWorker.new.perform args_for(event)
+
+    assert_requested(:post, URL) do |req|
+      body = JSON.parse(req.body)
+      assert_equal "completed", body["status"]
+      assert_nil body["code"]
+      true
+    end
+  end
 end

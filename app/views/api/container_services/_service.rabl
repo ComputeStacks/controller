@@ -67,6 +67,11 @@ node :deployed_containers do |i|
   i.containers.count
 end
 
+# Preload `containers: :node, region: :nodes` on lists (see the presenter).
+node :node_status do |i|
+  Nodes::CustomerStatusPresenter.for_service(i)
+end
+
 node :help do |i|
   {
     general: image_content_general(i.container_image),

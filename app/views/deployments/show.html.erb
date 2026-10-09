@@ -89,6 +89,11 @@
   </div>
 </div>
 
+<%= render partial: "shared/node_status_banner",
+  locals: {
+    status: Nodes::CustomerStatusPresenter.for_project(@deployment),
+  } %>
+
 <%# Volume clones run after the order completes, so the project is usable while its data is
     still copying. Polled on its own rather than folded into a tab, because the customer is
     dropped on the overview tab and would otherwise never see it. Empty for most projects. %>

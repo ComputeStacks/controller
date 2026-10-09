@@ -8,15 +8,42 @@ module Nodes
 
     # Push this node's firewall (NAT) rules to its cs-agent. The agent reconciles nftables on
     # the PUT — there is no reload step.
+    #
+    # A push that isn't made (rules failed to build) or isn't accepted is recorded as a
+    # pending `firewall` sync and replayed by AgentWorkers::PendingSyncWorker, which calls
+    # this with record_drop: false (it does its own bookkeeping). The generation is read
+    # BEFORE the rules are built, so a success clears only the drop it covers.
+    # @param record_drop [Boolean]
     # @return [Boolean]
-    def update_iptable_config!
+    def update_iptable_config!(record_drop: true)
+      gen = record_drop ? Agent::PendingSync.generation_for(region: region_id, node: self, kind: "firewall") : nil
+      pushed = push_iptable_config!
+      if record_drop
+        if pushed
+          Agent::PendingSync.clear!(region: region_id, node: self, kind: "firewall", if_generation: gen)
+        else
+          Agent::PendingSync.record!(region: region_id, node: self, kind: "firewall",
+            error: @iptable_rules_failed ? "firewall rules could not be built" : "agent did not accept the firewall push")
+        end
+      end
+      pushed
+    end
+
+    private
+
+    # @return [Boolean]
+    def push_iptable_config!
+      @iptable_rules_failed = false
       data = consul_iptable_rules
       # A rule-build failure yields nil, never an empty ruleset. The agent reconciles nftables
       # to exactly what it receives, so PUTting {rules: []} would close every published port on
       # this node — a dark outage from a transient error (e.g. a nil network mid-migration).
       # Report "not pushed" instead; callers already treat false that way, and the cutover
       # backfill leaves the node un-latched so a re-run retries it.
-      return false if data.nil?
+      if data.nil?
+        @iptable_rules_failed = true
+        return false
+      end
 
       if Feature.check("log_iptables")
         SystemEvent.create!(
@@ -30,8 +57,6 @@ module Nodes
       report_firewall_push_failure! unless pushed
       pushed
     end
-
-    private
 
     # A failed push leaves this node's nftables stale, and until now that was invisible:
     # put_firewall_rules folds transport errors into `false` (so ReloadIptableWorker's own

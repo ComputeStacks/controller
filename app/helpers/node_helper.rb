@@ -12,7 +12,7 @@ module NodeHelper
     return "panel-default" if node.nil? || !node.active
     if node.disconnected
       "panel-danger"
-    elsif node.maintenance || node.failed_health_checks > 0
+    elsif node.maintenance || node.failed_health_checks > 0 || node_maintenance_status(node).warnings?
       "panel-warning"
     else
       "panel-success"
@@ -23,13 +23,19 @@ module NodeHelper
     if node.disconnected
       "Offline"
     elsif node.maintenance
-      (node.job_status == "evacuating") ? "Entering Maintenance Mode" : "In Maintenance Mode"
+      (node.job_status == "evacuating") ? "Entering Maintenance Mode" : node_maintenance_status(node).state_text
     elsif node.failed_health_checks > 0
       pluralize node.failed_health_checks, "failed health check", plural: "failed health checks"
     else
       return "Online" if node.job_status == "idle"
       (node.job_status == "checkup") ? "Performing Checkup" : node.job_status.capitalize
     end
+  end
+
+  # Memoized per node for the render, since the card asks it several questions.
+  def node_maintenance_status(node)
+    @node_maintenance_status ||= {}
+    @node_maintenance_status[node.object_id] ||= Nodes::MaintenanceStatusPresenter.new(node)
   end
 
   def node_last_event(node)

@@ -29,8 +29,8 @@ class Admin::Volumes::ExportsController < Admin::Volumes::BaseController
       event.update(labels: event.labels.merge("task_id" => jid))
       flash[:success] = "Preparing your download…"
     else
-      event.fail! "Fatal Error"
-      flash[:alert] = "Failed to start export, check volume event logs."
+      event.fail!(@volume.dispatch_error || "Fatal Error")
+      flash[:alert] = @volume.dispatch_error || "Failed to start export, check volume event logs."
     end
     redirect_to helpers.volume_path(@volume)
   end

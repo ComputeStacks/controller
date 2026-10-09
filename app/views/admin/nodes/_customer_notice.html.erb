@@ -1,0 +1,36 @@
+<%#
+  The node's customer notice, on the node edit page. Separate from the maintenance form
+  so it can also be used during an unplanned outage. Every change goes through
+  NodeServices::CustomerNoticeService.
+%>
+<% node_state = Nodes::CustomerStatusPresenter.state_for(@node) %>
+<div class="panel panel-default" id="node-customer-notice">
+  <div class="panel-heading">
+    <div class="panel-title">Customer Notice</div>
+  </div>
+  <div class="panel-body">
+    <%= form_tag "/admin/nodes/#{@node.id}/customer_notice", method: :patch do %>
+      <div class="form-group">
+        <%= text_area_tag :customer_notice, @node.customer_notice, class: "form-control", rows: 2,
+          placeholder: "Message to customers", disabled: node_state == "online" && @node.customer_notice.blank? %>
+        <span class="help-block">
+          Plain text, shown as-is (not translated). It is visible to every customer with something
+          on this node's availability zone (<%= @node.region&.name %>), and to all API users via
+          <code>/api/locations</code>. It can only be set while the node is in maintenance or
+          offline, and clears itself when the node is back online.
+          <% if node_state == "online" %>
+            <b>This node is online, so a notice cannot be set right now.</b>
+          <% end %>
+        </span>
+      </div>
+      <%= submit_tag "Save Notice", class: "btn btn-default", disabled: node_state == "online" %>
+      <% if @node.customer_notice.present? %>
+        <%= link_to "Clear Notice",
+          "/admin/nodes/#{@node.id}/customer_notice",
+          method: :delete,
+          data: { confirm: "Clear the customer notice on #{@node.label}?" },
+          class: "btn btn-warning" %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
