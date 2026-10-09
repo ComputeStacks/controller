@@ -22,6 +22,11 @@ jobs:
     services:
       postgres:
         image: postgres:17
+        # Log in to Docker Hub: runners share IPs, and the anonymous pull limit failed
+        # the v9.8.1 release before the suite ever ran.
+        credentials:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
         env:
           POSTGRES_USER: cstacks
           POSTGRES_PASSWORD: cstacks
@@ -35,6 +40,9 @@ jobs:
           - 5432:5432
       redis:
         image: redis:alpine
+        credentials:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s

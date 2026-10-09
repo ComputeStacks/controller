@@ -24,6 +24,8 @@ jobs:
   # Run the very same suite the push workflow runs, rather than a copy that can drift.
   test:
     uses: ./.github/workflows/test.yml
+    # A called workflow gets no secrets unless they are passed; test.yml logs in to Docker Hub.
+    secrets: inherit
 
   release:
     needs: test
