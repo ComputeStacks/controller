@@ -445,7 +445,7 @@ class Setting < ApplicationRecord
           name: "cs_bastion_image",
           category: "computestacks",
           description: "ComputeStacks Bastion Image",
-          value: "ghcr.io/computestacks/cs-docker-bastion:v2",
+          value: "ghcr.io/computestacks/cs-docker-bastion:v4",
           encrypted: false
         )
       end

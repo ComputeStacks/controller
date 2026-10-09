@@ -134,7 +134,7 @@ readonly FLUENTD_LOKI_IMAGE="grafana/fluent-plugin-loki:2.9.10"
 readonly CADVISOR_IMAGE="ghcr.io/google/cadvisor:v0.60.5"
 # Images the controller expects to already be on a node when it schedules work.
 readonly BORG_IMAGE="ghcr.io/computestacks/cs-docker-borg:1.6"
-readonly BASTION_IMAGE="ghcr.io/computestacks/cs-docker-bastion:v2"
+readonly BASTION_IMAGE="ghcr.io/computestacks/cs-docker-bastion:v4"
 readonly XTRABACKUP24_IMAGE="ghcr.io/computestacks/cs-docker-xtrabackup:2.4"
 readonly XTRABACKUP80_IMAGE="ghcr.io/computestacks/cs-docker-xtrabackup:8.0"
 

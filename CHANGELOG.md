@@ -1,5 +1,11 @@
 # Change Log
 
+## v9.8.1
+
+- [FIX] **SFTP containers no longer crash-loop on start.** The default bastion image was still `cs-docker-bastion:v2`, which reads project metadata from the path the v9.6 metadata cutover removed. Every SFTP container built from it exited at start with `Fatal error: unexpected character 'p'` and restarted endlessly, while the controller showed it as running. The default is now `ghcr.io/computestacks/cs-docker-bastion:v4`, and the upgrade migration moves the "ComputeStacks Bastion Image" setting from v2 to v4. A value you changed yourself is left as it is; if it points at your own build, that build needs the `/v1/managed/` metadata paths.
+
+    **Existing SFTP containers must be rebuilt to pick up the new image.** The image is read only when an SFTP container is created or rebuilt, so containers already on a node keep running v2 until then; restarting is not enough. Rebuild each one from the power menu on the admin SFTP containers list (`/admin/sftp`). Rotating a project's SSH password also rebuilds its SFTP container.
+
 ## v9.8.0
 
 - [FEATURE] **Maintenance mode now reaches the node, and a node can put itself into maintenance.** Until now maintenance was a flag on the controller only: the node agent kept running backups, restores and cleanup while the operator worked on the node. With cs-agent 3.4.0 or later, setting maintenance on the controller also pauses that work on the node, and running `cs-agent maintenance on` on the node itself puts the node into maintenance on the controller. Each side places and releases only its own hold, and the node stays in maintenance while either hold remains, so releasing maintenance in the admin cannot unpause a node in the middle of a Docker upgrade.

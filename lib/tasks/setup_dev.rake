@@ -143,7 +143,7 @@ task setup_dev: :environment do
   # Must match the tag lib/dev/single-node.sh preloads and the Setting default
   # in app/models/setting.rb; `:latest` here defeated the preload and pulled a
   # different image than production runs.
-  Setting.find_by(name: "cs_bastion_image").update value: "ghcr.io/computestacks/cs-docker-bastion:v2"
+  Setting.find_by(name: "cs_bastion_image").update value: "ghcr.io/computestacks/cs-docker-bastion:v4"
 
   puts "Creating log & metric clients..."
   mc = MetricClient.first.nil? ? MetricClient.create!(endpoint: "http://#{vagrant_vm_ip}:9090") : MetricClient.first
