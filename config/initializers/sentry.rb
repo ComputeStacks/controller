@@ -33,12 +33,6 @@ if SENTRY_CONFIGURED
     # of them fire per query.
     config.rails.structured_logging.enabled = false
 
-    config.traces_sample_rate = if ENV["SENTRY_TRACE_SAMPLE_RATE"].blank?
-      0.2
-    else
-      ENV["SENTRY_TRACE_SAMPLE_RATE"].to_f.clamp(0.0, 1.0)
-    end
-
     ##
     # Attribute an event to the installation that sent it.
     #

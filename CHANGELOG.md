@@ -1,5 +1,9 @@
 # Change Log
 
+## v9.8.2
+
+- [CHANGE] Disable Sentry Tracing.
+
 ## v9.8.1
 
 - [FIX] **SFTP containers no longer crash-loop on start.** The default bastion image was still `cs-docker-bastion:v2`, which reads project metadata from the path the v9.6 metadata cutover removed. Every SFTP container built from it exited at start with `Fatal error: unexpected character 'p'` and restarted endlessly, while the controller showed it as running. The default is now `ghcr.io/computestacks/cs-docker-bastion:v4`, and the upgrade migration moves the "ComputeStacks Bastion Image" setting from v2 to v4. A value you changed yourself is left as it is; if it points at your own build, that build needs the `/v1/managed/` metadata paths.
