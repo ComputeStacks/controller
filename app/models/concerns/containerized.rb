@@ -4,7 +4,33 @@
 module Containerized
   extend ActiveSupport::Concern
 
+  # Total seconds an API listing may spend on live `on_latest_image` checks. Each check is
+  # capped at ~10s (two 5s fast-client calls), but a listing of many containers on a slow
+  # node could otherwise still blow past the client's request timeout.
+  LATEST_IMAGE_BUDGET = 10
+
   class_methods do
+    # Pre-compute `on_latest_image` for a listing within `budget` seconds. Once the budget is
+    # spent, or a node fails to answer, the remaining containers (all, or those on that node)
+    # report true -- the same "unknown" answer the live check gives -- without asking Docker.
+    # The budget is checked before each call, so the last check may run past it.
+    #
+    # @param [Array<Deployment::Container>] containers
+    # @param [Numeric] budget seconds
+    def resolve_latest_images(containers, budget: LATEST_IMAGE_BUDGET)
+      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      failed_nodes = []
+      containers.each do |container|
+        if Process.clock_gettime(Process::CLOCK_MONOTONIC) - started >= budget || failed_nodes.include?(container.node_id)
+          container.latest_image_result = true
+          next
+        end
+        value, ok = container.latest_image_check
+        failed_nodes << container.node_id unless ok
+        container.latest_image_result = value
+      end
+    end
+
     # Given a container name, find the local resource
     def resource_by_name(name)
       return nil if name.blank?
@@ -16,26 +42,38 @@ module Containerized
     end
   end
 
+  # Lets a caller that has already decided the answer (e.g. the containers API skipping a
+  # slow node once its request budget is spent) pre-set it, so rendering makes no Docker call.
+  attr_writer :latest_image_result
+
+  # Is the running container on the newest image for its tag?
+  #
+  # Deployment::Sftp overrides this with stored state; this live check serves containers.
   # @return [Boolean]
   def latest_image?
-    c = docker_client
-    # if the container is not on the node, then we _will_ have the latest image
-    return true if c.nil?
+    return @latest_image_result if defined?(@latest_image_result) && !@latest_image_result.nil?
 
-    c_image_tag = c.info["Config"]["Image"]
-    c_image_id = c.info["Image"]
+    latest_image_check.first
+  end
 
-    running_image = Docker::Image.get(c_image_id, {}, node.client(3))
+  # Live check behind #latest_image?, bounded by the node's fast client (5s per call).
+  #
+  # Anything we cannot answer is reported as `true` -- the same answer as a container that
+  # is not on the node. `ok` is false only when the node was asked and failed to answer
+  # (error/timeout), so a caller can stop asking that node.
+  #
+  # @return [Array(Boolean, Boolean)] [value, ok]
+  def latest_image_check
+    return [true, true] if node.nil? || !node.online?
 
-    running_image.info["RepoTags"].include? c_image_tag
+    c = Docker::Container.get(name, {}, node.fast_client)
+    running_image = Docker::Image.get(c.info["Image"], {}, node.fast_client)
+    [Array(running_image.info["RepoTags"]).include?(c.info["Config"]["Image"]), true]
   rescue Docker::Error::NotFoundError
-    true
-  rescue => e
-    event.event_details.create!(
-      data: e.message,
-      event_code: "20fb4e443fde83de"
-    )
-    false
+    # Container (or its image) is not on the node: it will get the latest image when built.
+    [true, true]
+  rescue
+    [true, false]
   end
 
   def halt_auto_recovery?
@@ -93,6 +131,11 @@ module Containerized
     # VolumeServices::MarkVolumesMountedService.
     if created && is_a?(Deployment::Container)
       VolumeServices::MarkVolumesMountedService.new(self, build_client.dig("HostConfig", "Binds"), event).perform
+    end
+    # A freshly built bastion runs the configured image that was just pulled; reset the
+    # stored flag rather than wait for NodeServices::BastionImageStatusService's daily run.
+    if created && is_a?(Deployment::Sftp) && persisted? && !on_latest_image
+      update_column(:on_latest_image, true)
     end
     created
   rescue Docker::Error::ConflictError => e

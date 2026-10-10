@@ -16,7 +16,7 @@
   <% end %>
   <% archives.each do |i| %>
     <%
-      archive_name = (Base64.urlsafe_decode64(i[:id]) rescue nil)
+      archive_name = (Base64.urlsafe_decode64(i[:id]).force_encoding(Encoding::UTF_8) rescue nil)
       export = (archive_name && exports[archive_name]) || {status: "none"}
     %>
     <tr>

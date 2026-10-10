@@ -44,7 +44,7 @@ jobs:
     # host networking, which is what the Dockerfile's ARG defaults already point at.
     services:
       postgres:
-        image: postgres:17-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_USER: cstacks
           POSTGRES_PASSWORD: cstacks

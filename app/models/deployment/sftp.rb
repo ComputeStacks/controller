@@ -20,6 +20,10 @@
 # @!attribute pw_auth
 #   @return [Boolean]
 #
+# @!attribute on_latest_image
+#   Whether the container runs the configured bastion image. Refreshed daily.
+#   @return [Boolean]
+#
 # @!attribute ingress_rules
 #   @return [Array<Network::IngressRule>]
 #
@@ -168,6 +172,14 @@ class Deployment::Sftp < ApplicationRecord
 
   def image
     Setting.computestacks_bastion_image
+  end
+
+  # Stored state, never a live node query: refreshed daily by
+  # NodeServices::BastionImageStatusService and reset on (re)build.
+  # Overrides Containerized#latest_image?.
+  # @return [Boolean]
+  def latest_image?
+    on_latest_image
   end
 
   def password

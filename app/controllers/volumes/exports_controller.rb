@@ -43,7 +43,7 @@ class Volumes::ExportsController < Volumes::BaseController
   private
 
   def decoded_archive
-    Base64.urlsafe_decode64(params[:id].to_s)
+    Base64.urlsafe_decode64(params[:id].to_s).force_encoding(Encoding::UTF_8)
   rescue ArgumentError
     ""
   end

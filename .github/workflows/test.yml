@@ -21,7 +21,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17
+        image: postgres:18
         # Log in to Docker Hub: runners share IPs, and the anonymous pull limit failed
         # the v9.8.1 release before the suite ever ran.
         credentials:

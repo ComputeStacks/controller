@@ -174,10 +174,10 @@ module VolumeServices
     def decode_snapshot(value, volume)
       return nil if value.blank?
       begin
-        Base64.urlsafe_decode64(value)
+        Base64.urlsafe_decode64(value).force_encoding(Encoding::UTF_8)
       rescue ArgumentError
         begin
-          Base64.strict_decode64(value)
+          Base64.strict_decode64(value).force_encoding(Encoding::UTF_8)
         rescue ArgumentError
           errors << "Cannot clone #{volume.label}: requested snapshot id is not valid."
           :error

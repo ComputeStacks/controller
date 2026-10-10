@@ -13,5 +13,6 @@ class Api::ContainerServices::BastionsControllerTest < ActionDispatch::Integrati
     refute_empty data["bastions"]
 
     assert data["bastions"].first["on_latest_image"]
+    assert data["bastions"].first.key?("pw_auth")
   end
 end

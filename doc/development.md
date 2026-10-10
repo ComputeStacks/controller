@@ -373,6 +373,16 @@ workstation.** Expected — see [DNS and TLS](#dns-and-tls-what-resolves-and-wha
 This is a deliberate boundary, not a bug; add host entries or a resolver
 yourself if you need it.
 
+**The postgres container exits after moving to Postgres 18.** The compose file
+runs `postgres:18`, which keeps its data under `/var/lib/postgresql/18/docker`,
+so the volume is now mounted at `/var/lib/postgresql` rather than
+`.../data`. A volume created by the old `postgres:17` service holds 17 data the
+new server refuses to start on. Dev data is disposable: run `docker compose down`,
+remove the volume (`docker volume rm <project>_postgres`, listed by
+`docker volume ls`), then `docker compose up -d` and `./bin/rails db:setup`. To
+keep the data, `pg_dumpall` it from a `postgres:17` container on the old volume
+first and restore it into the new one.
+
 ## Follow-up: `rake bootstrap:apply`
 
 `rake setup_dev` is the current bring-up path and this doc describes it, but

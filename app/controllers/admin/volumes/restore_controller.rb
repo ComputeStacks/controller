@@ -6,13 +6,13 @@ class Admin::Volumes::RestoreController < Admin::Volumes::BaseController
   before_action :volume_mounted?, only: %i[create update destroy]
 
   def update
-    if params[:id].blank?
+    name = decoded_archive
+    if name.blank?
       redirect_to helpers.volume_path(@volume), alert: "Unknown backup."
       return false
     end
     audit = Audit.create_from_object!(@volume, "backup.restore", request.remote_ip, current_user)
     @volume.current_audit = audit
-    name = Base64.decode64(params[:id])
 
     event = @volume.event_logs.create!(
       locale: "volume.restore",
@@ -34,6 +34,13 @@ class Admin::Volumes::RestoreController < Admin::Volumes::BaseController
   end
 
   private
+
+  # Archive ids are urlsafe base64 (see Volume#list_archives).
+  def decoded_archive
+    Base64.urlsafe_decode64(params[:id].to_s).force_encoding(Encoding::UTF_8)
+  rescue ArgumentError
+    ""
+  end
 
   def can_perform?
     if @volume.operation_in_progress?

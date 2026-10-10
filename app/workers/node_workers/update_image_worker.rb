@@ -41,6 +41,11 @@ module NodeWorkers
       end
 
       ##
+      # Refresh stored bastion image status now that the bastion image is pulled.
+      # Never raises, so it cannot abort the prune below.
+      NodeServices::BastionImageStatusService.new(node).perform
+
+      ##
       # Clean stale images
       c = node.client(5)
       return if c.nil?

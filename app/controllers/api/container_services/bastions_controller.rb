@@ -14,7 +14,7 @@ class Api::ContainerServices::BastionsController < Api::ContainerServices::BaseC
   #     * `id`: Integer
   #     * `name`: String
   #     * `status`: String
-  #     * `on_latest_image`: Boolean
+  #     * `on_latest_image`: Boolean | Read from stored state, refreshed daily.
   #     * `node_id`: Integer
   #     * `ip_addr`: String
   #     * `created_at`: DateTime
@@ -52,7 +52,7 @@ class Api::ContainerServices::BastionsController < Api::ContainerServices::BaseC
   #     * `id`: Integer
   #     * `name`: String
   #     * `status`: String
-  #     * `on_latest_image`: Boolean
+  #     * `on_latest_image`: Boolean | Read from stored state, refreshed daily.
   #     * `node_id`: Integer
   #     * `ip_addr`: String
   #     * `created_at`: DateTime

@@ -21,7 +21,7 @@ class Api::Volumes::BackupsController < Api::Volumes::BaseController
     statuses = @volume.export_status_map
     archives = @volume.list_archives.map do |a|
       name = begin
-        Base64.urlsafe_decode64(a[:id])
+        Base64.urlsafe_decode64(a[:id]).force_encoding(Encoding::UTF_8)
       rescue ArgumentError
         nil
       end
@@ -116,7 +116,7 @@ class Api::Volumes::BackupsController < Api::Volumes::BaseController
   # failure. Other failures are `422 Unprocessable Entity` with `errors`.
   #
   def destroy
-    name = Base64.decode64 params[:id]
+    name = decoded_archive
     return api_obj_error(["Missing backup name"]) if name.blank?
     if export_in_progress?(name)
       return api_obj_error(["Cannot delete a backup while its download is being prepared."])
@@ -162,6 +162,13 @@ class Api::Volumes::BackupsController < Api::Volumes::BaseController
   end
 
   private
+
+  # Archive ids are urlsafe base64 (see Volume#list_archives).
+  def decoded_archive
+    Base64.urlsafe_decode64(params[:id].to_s).force_encoding(Encoding::UTF_8)
+  rescue ArgumentError
+    ""
+  end
 
   def can_perform?
     # A volume awaiting its first mount exists on the node but no container has the bind

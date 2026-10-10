@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_09_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_10_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -723,6 +723,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_09_000001) do
     t.text "password_encrypted"
     t.integer "load_balancer_id"
     t.boolean "pw_auth", default: true, null: false
+    t.boolean "on_latest_image", default: true, null: false
     t.index ["deployment_id"], name: "index_deployment_sftps_on_deployment_id"
     t.index ["node_id"], name: "index_deployment_sftps_on_node_id"
   end

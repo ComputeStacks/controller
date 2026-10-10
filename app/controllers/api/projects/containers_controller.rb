@@ -11,7 +11,8 @@ class Api::Projects::ContainersController < Api::Projects::BaseController
   # * `containers`: Array<Container> | Each includes `node_status`; see `GET /api/containers/{id}`.
   #
   def index
-    @containers = paginate @deployment.deployed_containers.sorted.preload(:node)
+    @containers = paginate(@deployment.deployed_containers.sorted.preload(:node)).to_a
+    Deployment::Container.resolve_latest_images(@containers)
     respond_to do |format|
       format.any(:json, :xml) { render template: "api/containers/index" }
     end

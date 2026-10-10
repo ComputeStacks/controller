@@ -1,5 +1,13 @@
 # Change Log
 
+## v9.8.3
+
+- [FIX] **Deleting or restoring some backups no longer fails.** Backup ids are URL-safe base64, but deleting a backup (API, portal and admin) and restoring one (portal and admin) decoded them as standard base64. An id containing `-` or `_`, which happens when the backup's name has a character such as `~` or any non-ASCII letter, decoded to a garbled name, so the request failed on the node. Invalid ids are now refused before anything is sent to the node. Names with non-ASCII letters also now match their download status on the backups list.
+
+- [FIX] **The bastion list in the API now includes `pw_auth`.** It was returned when viewing a single bastion, but missing from `GET /api/projects/{id}/bastions` and `GET /api/container_services/{id}/bastions`.
+
+- [FIX] **Listing bastions or containers in the API no longer hangs when a node is slow.** `on_latest_image` was worked out by asking the node's Docker daemon about each container while the request waited, with timeouts of up to 45 seconds to connect and 180 seconds to read. A slow node or one dropping packets could stall the bastions and containers endpoints past an API client's timeout, and an error during that check returned a 500. For bastions, `on_latest_image` is now stored and refreshed by the nightly image update (`nodes.daily_maintenance`), compared against the configured bastion image, and reset when a bastion is rebuilt, so listing bastions no longer contacts the node. For containers the check is still live, so freshly pushed images show up right away, but each call now gives up after 5 seconds, a node already offline or in maintenance is skipped, and listing containers stops making these checks after about 10 seconds. Wherever the node can't answer in time, `on_latest_image` is `true`, the same answer as for a container that isn't on the node.
+
 ## v9.8.2
 
 - [CHANGE] Disable Sentry Tracing.

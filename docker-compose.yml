@@ -1,12 +1,12 @@
 services:
   postgres:
-    image: postgres:17
+    image: postgres:18
     environment:
       - POSTGRES_PASSWORD=controller
       - POSTGRES_USER=controller
       - POSTGRES_DB=controller
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql
     ports:
       - "${DB_PORT:?DB_PORT not set -- run this from a shell where mise has loaded .envrc (cd into the repo after 'mise trust'), or use 'mise exec -- docker compose ...'}:5432"
   redis:

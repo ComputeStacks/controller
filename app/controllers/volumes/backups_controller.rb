@@ -41,7 +41,7 @@ class Volumes::BackupsController < Volumes::BaseController
   end
 
   def destroy
-    name = Base64.decode64(params[:id])
+    name = decoded_archive
     if name.blank?
       redirect_to helpers.volume_path(@volume), alert: "Unknown backup."
       return false
@@ -73,6 +73,13 @@ class Volumes::BackupsController < Volumes::BaseController
   end
 
   private
+
+  # Archive ids are urlsafe base64 (see Volume#list_archives).
+  def decoded_archive
+    Base64.urlsafe_decode64(params[:id].to_s).force_encoding(Encoding::UTF_8)
+  rescue ArgumentError
+    ""
+  end
 
   def export_in_progress?(archive)
     @volume.event_logs.active
