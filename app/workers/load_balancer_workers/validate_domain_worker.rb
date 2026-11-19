@@ -37,7 +37,9 @@ module LoadBalancerWorkers
         domain_valid_check: Time.now
       )
       is_valid ? event.done! : event.fail!("Fatal Error")
-      if is_valid && lb.le
+      # Only order when a certificate is actually needed (none yet, expiring, or
+      # the domain changed), so re-running validation by hand never re-issues.
+      if is_valid && lb.le && (lb.lets_encrypt.nil? || lb.lets_encrypt.can_renew?)
         le_gen_service = LoadBalancerServices::LetsEncryptService.new(lb, audit)
         le_gen_service.event = event
         le_gen_service.perform

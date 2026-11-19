@@ -38,6 +38,11 @@ export DEV_VM_IP=
 # routing to DEV_VM_IP.
 # export CONTROLLER_IP=
 
+# Optional private registry for dev images (config/dev_private_images.yml).
+# Use a read-only (read_registry) deploy token, not a personal login.
+# export DEV_REGISTRY_USERNAME=
+# export DEV_REGISTRY_PASSWORD=
+
 ##
 # You should not need to change anything else below this section.
 ##
@@ -62,9 +67,9 @@ export PDNS_DNS_PORT=55003
 export PDNS_API_PORT=55004
 export ACME_API_PORT=55005
 
-# Local Resolver for testing
-export RESOLVER_LIST="${DOCKER_IP}"
-export RESOLVER_PORT="${PDNS_DNS_PORT}"
+# Recursive resolvers for domain validation (the local PowerDNS is authoritative only)
+export RESOLVER_LIST="1.1.1.1,8.8.8.8"
+export RESOLVER_PORT=53
 
 # Postgres
 export DB_PORT=55001

@@ -112,6 +112,7 @@ en:
         variant_migrate: "[%{image}] Migrating from %{old} to %{variant}"
       sftp:
         reload_ssh_keys: "[%{container}] Reload User SSH Keys"
+        select_php_version: "[%{container}] Select PHP Version"
       snapshots:
         restore: "Restoring snapshot %{snapshot} to volume %{volume}."
       system:

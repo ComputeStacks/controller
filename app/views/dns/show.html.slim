@@ -119,7 +119,7 @@
                   .btn-group
                     = link_to icon('fa-solid', 'wrench'), "/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}/edit", class: 'btn btn-sm btn-default', title: 'Edit'
                     = link_to icon('fa-solid', 'trash'), "/dns/#{@zone.id}-#{@zone.name.parameterize}/records/#{i_id}", method: :delete, data: {confirm: t('confirm_prompt')}, class: 'btn btn-sm btn-danger', title: 'Destroy'
-            - @zone_client.records['AAAA'].each do |i,k|
+            - @zone_client.records['AAAA'].each_with_index do |i,k|
               - i_id = @zone.available_actions.include?('update_by_zone') ? "#{k}-#{i.type}" : i.id
               tr
                 td style="word-wrap:break-word;"= i.name

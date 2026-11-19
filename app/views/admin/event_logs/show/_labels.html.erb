@@ -3,7 +3,7 @@
   <% log.labels.each_key do |i| %>
     <tr>
       <td><%= i %></td>
-      <td><%= truncate log.labels[i] %></td>
+      <td><%= truncate log.labels[i].to_s %></td>
     </tr>
   <% end %>
   </tbody>

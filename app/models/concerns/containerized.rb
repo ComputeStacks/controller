@@ -114,7 +114,13 @@ module Containerized
     elsif is_a? Deployment::Sftp
       build_command
     end
-    return false if build_client.nil?
+    if build_client.nil?
+      event&.event_details&.create!(
+        data: "Unable to generate the configuration for container #{name}: #{build_config_blocker}.",
+        event_code: "c84556a62f63c3b1"
+      )
+      return false
+    end
 
     created = Docker::Container.create(build_client, node.client).is_a?(Docker::Container)
     # Mount detection. This is the only place a container is actually created, so it is the only
@@ -144,6 +150,23 @@ module Containerized
       event_code: "f6e058590c10e99e"
     )
     false
+  end
+
+  ##
+  # Why `build!` got no config to send to docker. Containers mirror `runtime_config`'s checks
+  # (Containers::ContainerRuntime#runtime_config_blocker); SFTP mirrors `build_command`'s.
+  #
+  # @return [String]
+  def build_config_blocker
+    if respond_to?(:runtime_config_blocker)
+      runtime_config_blocker || "custom host setup failed or runtime config raised"
+    elsif local_ip.blank?
+      "no private IP address"
+    elsif deployment.nil?
+      "no project"
+    else
+      "unknown reason"
+    end
   end
 
   # @param [EventLog] event

@@ -56,6 +56,7 @@ yarn-error.log
 public/packs
 
 config/database.yml
+config/dev_private_images.yml
 .envrc
 
 # dont commit generated yard

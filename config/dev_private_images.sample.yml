@@ -1,0 +1,21 @@
+# Copy to config/dev_private_images.yml (gitignored) to have `rake setup_dev`
+# (or `rake dev:private_images` on its own) repoint these seeded images and the
+# bastion at a private registry. Credentials come from DEV_REGISTRY_USERNAME /
+# DEV_REGISTRY_PASSWORD in .envrc. The node needs the same login for the
+# bastion: see `single-node.sh --registry-login`.
+#
+# Quote every tag: YAML reads an unquoted 8.10 as the number 8.1.
+registry: registry.example.com
+bastion: registry.example.com/images/bastion:v4
+images:
+  php:
+    path: images/php
+    tags: ["v8.3", "v8.4"]
+    default: "v8.4"
+  wordpress:
+    path: images/wordpress
+    tags: ["php8.4", "php8.5"]
+    default: "php8.5"
+  pma:
+    path: images/phpmyadmin
+    tags: ["latest"]

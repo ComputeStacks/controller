@@ -32,6 +32,7 @@ import "src/utils/multi-checkboxes"
 import "src/utils/range-slider"
 import "src/utils/remote-resource"
 import "src/utils/trix"
+import "src/utils/user-autocomplete"
 
 
 Rails.start();

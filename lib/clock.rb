@@ -46,6 +46,11 @@ module Clockwork
     VolumeWorkers::CloneSweepWorker.perform_async
   end
 
+  # Resolves firing alerts Alertmanager stopped re-sending (a lost resolve notification).
+  every(30.minutes, "alerts.resolve_stale") do
+    AlertWorkers::ResolveStaleWorker.perform_async
+  end
+
   every(1.day, "agent.action_prune", at: "02:30") do
     AgentWorkers::ActionPruneWorker.perform_async
   end
@@ -70,6 +75,11 @@ module Clockwork
     NetworkWorkers::PrivateNetCleanupWorker.perform_async
   end
 
+  # Alert only: reports projects/containers missing their private network or IP.
+  every(30.minutes, "network.integrity") do
+    NetworkWorkers::ProjectNetworkIntegrityWorker.perform_async
+  end
+
   every(20.minutes, "volume.cleanup") do
     VolumeWorkers::TrashVolumeWorker.perform_async
   end
@@ -80,6 +90,12 @@ module Clockwork
 
   every(1.hour, "billing.phases", at: "**:02") do
     SubscriptionWorkers::PhaseAdvanceWorker.perform_async
+  end
+
+  # Deletes projects left empty by failed orders (after 24 hours, at most 10 a run) and reports
+  # the ones that are not empty, stuck orders, and failed orders that left services behind.
+  every(1.hour, "project.failed_order_sweep") do
+    ProjectWorkers::FailedOrderSweepWorker.perform_async
   end
 
   every(1.hour, "le.validate_domains") do

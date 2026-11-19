@@ -49,16 +49,21 @@ class Dns::Zone < ApplicationRecord
   ##
   # Manage State for provisioners that use 'update_by_zone'.
   # By default, it will return the current client.
+  #
+  # The saved state is dumped without its API client, so provider credentials
+  # never land in `saved_state`; a fresh client is attached on load.
   def state_load!
     return client if saved_state.nil? || !available_actions.include?("update_by_zone")
-    Marshal.load(saved_state)
+    zone = Marshal.load(saved_state)
+    zone.client = remote_client if zone.respond_to?(:client=)
+    zone
   end
 
   # Data = updated client.
   def state_save!(data)
     return false unless available_actions.include?("update_by_zone")
     update(
-      saved_state: Marshal.dump(data),
+      saved_state: self.class.dump_state(data),
       saved_state_ts: Time.now.utc
     )
   end
@@ -71,6 +76,16 @@ class Dns::Zone < ApplicationRecord
   end
 
   class << self
+    # Marshal a remote zone without its API client (and the credentials it holds).
+    # Dumps a shallow copy so the caller's object keeps its client.
+    def dump_state(data)
+      if data.respond_to?(:client=)
+        data = data.dup
+        data.client = nil
+      end
+      Marshal.dump(data)
+    end
+
     ##
     # Find the local zone that covers `fqdn` by walking its label suffixes,
     # shortest first (2 labels, then 3, ... up to 5).

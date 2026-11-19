@@ -94,8 +94,10 @@ This was an open question; it is now settled as a deliberate boundary, not a bug
   - If you need the wildcard (`*.a.cstacks.local`) to resolve generally, point a
     per-domain resolver at the node's IP for that zone instead of at the dev
     PowerDNS container.
-  - **No TLS is set up anywhere except the container registry.** Don't add any —
-    a single-node dev environment is never internet-exposed and sits on one L2.
+  - **By default no TLS is set up anywhere except the container registry.** If
+    you want the controller on a real HTTPS name (for example, to reach it
+    from your laptop over Tailscale), see
+    [Optional: HTTPS on a real domain](#optional-https-on-a-real-domain).
 
 ## Prerequisites
 
@@ -176,6 +178,15 @@ that the remote shell then re-splits:
 Defaults: `--hostname csdev`, `--region dev` — both must match what `rake
 setup_dev` creates later, so don't change them unless you also change the rake
 task. Full flag reference: `single-node.sh --help`.
+
+**Second disk (recommended).** Give the node VM a raw, unformatted second disk
+and add `--data-device /dev/disk/by-id/<disk>` on the *first* run. Docker and
+containerd state then lives on that disk, formatted XFS and mounted at
+`/var/lib/docker-data` with project quotas, the same layout production nodes
+use. It must be there before docker is first installed: the script refuses a
+node where docker already ran on the root disk (rebuild it with the disk
+attached), and it only ever formats a disk with no signature at all. Without
+the flag everything stays on the root disk.
 
 This runs steps 1–15 (Docker, kernel tuning, haproxy, the wildcard cert, the
 registry filesystem, node_exporter, observability, the firewall shape, cs-agent
@@ -288,6 +299,18 @@ step 5 exists), renders `agent.yml`, and (re)starts cs-agent. The self-checks
 at the end now report `cs-agent is active` and a 401 from its HTTP port instead
 of skipping.
 
+Then, on the workstation, push the controller's desired state (firewall and
+every volume) to the new agent and latch the node:
+
+```bash
+bin/rails agent:datachannel_backfill
+```
+
+Until this runs, the controller refuses to dispatch any task to the node, so
+every backup, restore and export fails with a bare "Fatal Error", and the agent
+logs `firewall desired-state not yet populated`. It is idempotent; re-run it
+after re-enrolling a node.
+
 ### 7. Run it
 
 ```bash
@@ -296,6 +319,104 @@ of skipping.
 
 Log in at `http://localhost:3005` (or the workstation's address, from the node's
 side).
+
+## Optional: images from a private registry
+
+By default the seeded images (php, wordpress, pma, …) and the bastion come
+from public registries. To develop against private builds instead:
+
+- **Workstation.** Copy `config/dev_private_images.sample.yml` to
+  `config/dev_private_images.yml` (gitignored), fill in the registry, image
+  paths, tags and bastion reference, and set `DEV_REGISTRY_USERNAME` /
+  `DEV_REGISTRY_PASSWORD` in `.envrc`, ideally a read-only deploy token.
+  `rake setup_dev` then repoints those images (registry auth on, the listed
+  tags as variants, tags the registry doesn't carry removed) and sets
+  `cs_bastion_image`. Re-run it alone with `bundle exec rake dev:private_images`
+  after changing the file.
+- **Node.** The controller hands each image's credentials to the node per
+  pull, but the bastion is pulled by the node itself, so the node needs its
+  own login. Copy the token to the node and add to the step 2 command:
+
+  ```bash
+  --registry-login <registry> --registry-username <user> \
+  --registry-password-file /root/registry-token \
+  --bastion-image <the same bastion reference as the yml>
+  ```
+
+  This logs root's docker in (as production's `docker_config` role does) and
+  preloads that bastion instead of the public one. When the bastion tag
+  changes, update both and re-run the script (without `--enroll-only`).
+
+## Optional: HTTPS on a real domain
+
+Puts the controller (and Guacamole, and anything else on the workstation)
+behind nginx with a real wildcard certificate, e.g. `https://cs.dev.example.com`.
+Useful when you reach the workstation from another machine, typically over
+Tailscale. The node's load balancer is unaffected and keeps its self-signed
+wildcard certificate.
+
+1. **DNS.** Point `dev.example.com` and `*.dev.example.com` at the address
+   your browser uses to reach the workstation (its Tailscale IP, for a
+   tailnet-only setup). If the DNS provider can proxy, leave it off (DNS only).
+
+2. **Certificate.** As root, install
+   [acme.sh](https://github.com/acmesh-official/acme.sh) and issue a wildcard
+   certificate over DNS-01, so the workstation never needs to be reachable from
+   the internet. With Cloudflare, use an API token limited to Zone → DNS → Edit
+   on that one zone:
+
+   ```bash
+   sudo -i
+   export CF_Token=<token> CF_Zone_ID=<zone id>
+   ~/.acme.sh/acme.sh --issue --server letsencrypt --dns dns_cf \
+     -d dev.example.com -d '*.dev.example.com'
+   mkdir -p /etc/nginx/ssl
+   ~/.acme.sh/acme.sh --install-cert -d dev.example.com --ecc \
+     --fullchain-file /etc/nginx/ssl/dev.example.com.fullchain.pem \
+     --key-file /etc/nginx/ssl/dev.example.com.key \
+     --reloadcmd "systemctl reload nginx"
+   ~/.acme.sh/acme.sh --install-cronjob
+   ```
+
+   acme.sh stores the token in its domain config for renewals, so don't keep
+   another copy around. Other DNS providers have their own `--dns` plugins.
+
+3. **nginx.** Install it, copy `lib/dev/nginx-https.conf.sample` to
+   `/etc/nginx/sites-available/dev.conf`, replace the domain, the private
+   network and the ports for your setup, then:
+
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/dev.conf /etc/nginx/sites-enabled/
+   sudo rm /etc/nginx/sites-enabled/default
+   sudo nginx -t && sudo systemctl reload nginx
+   ```
+
+   Every server only accepts the private network and Tailscale ranges. Keep
+   it that way unless the workstation has a firewall in front of it.
+
+4. **Controller.** Set `PORTAL_HTTP_SCHEME=https` in `.envrc`, then point the
+   hostname and Guacamole URL at the new names and restart `bin/dev`:
+
+   ```bash
+   bin/rails runner '
+     Setting.find_by(name: "hostname").update!(value: "cs.dev.example.com")
+     Region.find_by(name: "dev").update!(guac_url: "https://guac.dev.example.com/guacamole")'
+   ```
+
+   `Setting.hostname` is used both in links for people (mail, alerts) and by
+   the node, which calls back to `PORTAL_HTTP_SCHEME://Setting.hostname/api`.
+   `rake setup_dev` resets both values, so re-run this after it.
+
+5. **Node.** The node and the containers on it must be able to resolve and
+   reach `cs.dev.example.com`. If DNS points at a Tailscale IP, either put the
+   node on the tailnet too, or add the name to the node's `/etc/hosts` with
+   the workstation's private IP (and keep that network in nginx's allow list).
+   Containers don't read the host's `/etc/hosts`, so anything running inside
+   one still needs DNS to work. Check from the node:
+
+   ```bash
+   curl -sI https://cs.dev.example.com/ | head -1
+   ```
 
 ## Verification
 

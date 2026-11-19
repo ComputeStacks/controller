@@ -120,6 +120,23 @@ module Containers
       nil
     end
 
+    ##
+    # Why `runtime_config` would answer nil, as a short human string, or nil when none of its
+    # cheap sanity checks fail. Mirrors those checks in the same order, for the build event.
+    #
+    # Deliberately does NOT call `setup_custom_hosts!`, which creates and updates host
+    # entries; when every cheap check passes, that step (or the config itself) is what failed.
+    #
+    # @return [String, nil]
+    def runtime_config_blocker
+      return "no service" if service.nil?
+      return "no project" if deployment.nil?
+      return "no image variant" if image_variant.nil?
+      return "no container image" if container_image.nil?
+      return "no private IP address" if local_ip.blank?
+      nil
+    end
+
     # Service command, parsed
     def parsed_command
       return nil if service.command&.strip.blank?

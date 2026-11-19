@@ -134,6 +134,8 @@ BASE_PACKAGES=(
   build-essential autoconf patch pkg-config
   libpq-dev libssl-dev libyaml-dev libreadline-dev zlib1g-dev
   libgmp-dev libncurses-dev libffi-dev libgdbm-dev uuid-dev
+  libatk1.0-0t64 libatk-bridge2.0-0t64 libatspi2.0-0t64 libasound2t64 libgbm1
+  libxcomposite1 libxdamage1 libxfixes3 libxrandr2
 )
 
 install_base_packages() {

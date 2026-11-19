@@ -273,4 +273,15 @@ class UserTest < ActiveSupport::TestCase
     # TODO: Test AppEvent Destruction works here.
     assert user.destroy
   end
+
+  test "changing password checks current password against the stored one" do
+    user = users(:admin)
+    user.assign_attributes(current_password: "mypass1!1@", password: "n3w-pass!word", password_confirmation: "n3w-pass!word")
+    assert user.valid?, user.errors.full_messages.join(", ")
+
+    user = users(:admin)
+    user.assign_attributes(current_password: "wrong", password: "n3w-pass!word", password_confirmation: "n3w-pass!word")
+    assert_not user.valid?
+    assert_includes user.errors[:base], "current password is invalid"
+  end
 end

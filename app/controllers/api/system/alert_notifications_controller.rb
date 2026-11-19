@@ -12,6 +12,7 @@ class Api::System::AlertNotificationsController < Api::System::BaseController
     params.permit(
       :receiver, :status, alerts: [[
         :fingerprint,
+        :status,
         labels: {},
         annotations: [
           :description,

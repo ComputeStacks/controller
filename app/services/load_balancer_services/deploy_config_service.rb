@@ -28,7 +28,8 @@ module LoadBalancerServices
       Sidekiq::Queue.new(queue_name).select do |i|
         if lb.nil?
           q1 = i.item["class"] == "LoadBalancerWorkers::DeployConfigWorker"
-          q2 = i.args.empty?
+          # Queued by #perform as `[nil]`, so nil args count as no args.
+          q2 = i.args.compact.empty?
         else
           q1 = i.item["class"] == "LoadBalancerWorkers::DeployConfigWorker"
           q2 = i.args.include? lb.global_id.to_s

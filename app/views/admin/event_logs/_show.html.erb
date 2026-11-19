@@ -1,9 +1,6 @@
 <div class="col-md-4">
   <div class="row">
     <div class="col-md-12">
-      <% unless log.state_reason.blank? %>
-        <div class="alert <%= log_reason_class(log) %>"><%= log.state_reason %></div>
-      <% end %>
       <div class="panel panel-default">
         <table class="table-list">
           <tr>
@@ -65,6 +62,9 @@
 
   <div class="row">
     <div class="col-md-12">
+      <% unless log.state_reason.blank? %>
+        <div class="alert <%= log_reason_class(log) %>"><%= log.state_reason %></div>
+      <% end %>
       <% unless deployment_event(log).strip.blank? %>
         <div class="panel panel-default">
           <div class="panel-body">

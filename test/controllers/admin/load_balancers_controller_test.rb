@@ -8,6 +8,18 @@ class LoadBalancersControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:admin) # Admin user owns the registry.
   end
 
+  test "the list shows which domains were never checked" do
+    lb = load_balancers(:default)
+    lb.update_columns(domain_valid: true, domain_valid_check: nil)
+    get "/admin/load_balancers"
+    assert_response :success
+    assert_select "span.label-warning", "Never checked"
+
+    lb.update_columns(domain_valid: false, domain_valid_check: Time.now)
+    get "/admin/load_balancers"
+    assert_select "span.label-danger", "Invalid"
+  end
+
   test "can create new load balancer" do
     key = OpenSSL::PKey::RSA.new(2048)
     public_key = key.public_key

@@ -161,5 +161,5 @@ gem 'docker_registry', github: 'ComputeStacks/docker-registry-ruby', ref: '02d16
 gem 'docker_ssh', github: 'ComputeStacks/docker-ssh-ruby', ref: '0b01ab8'
 gem 'docker_volume_local', github: 'ComputeStacks/docker-volume-local', ref: 'b6f066a'
 gem 'docker_volume_nfs', github: 'ComputeStacks/docker-volume-nfs', ref: '2614c82'
-gem 'pdns', github: 'ComputeStacks/powerdns-ruby', ref: '21a31b9'
+gem 'pdns', github: 'ComputeStacks/powerdns-ruby', ref: '669ee63'
 gem 'whmcs', github: 'ComputeStacks/whmcs-ruby', ref: '7dc4f4e'

@@ -59,6 +59,8 @@ module Containers
         )
         l.deployments << deployment if deployment
         l.users << user if user
+        # Explicit: this branch used to answer the `users <<` array, which callers read as success.
+        false
       elsif ip_address.nil?
         if generate_container_ip!
           reload_ip_address

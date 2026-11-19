@@ -40,6 +40,9 @@
 # @!attribute last_event
 #   @return [DateTime]
 #
+# @!attribute last_reported_at
+#   @return [DateTime] When Alertmanager last reported this alert as firing
+#
 class AlertNotification < ApplicationRecord
   include Authorization::Alert
 

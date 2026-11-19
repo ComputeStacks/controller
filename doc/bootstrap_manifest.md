@@ -528,7 +528,7 @@ Maps to `provision_drivers`, `product_modules` and `dns_zones`.
 dns:
   driver:
     module_name: Pdns
-    endpoint: http://10.100.1.9:8081/api/v1/servers/localhost
+    endpoint: http://10.100.1.9:8081/api/v1/servers
     auth_type: static
     username: admin
     api_key: "…"
@@ -576,7 +576,7 @@ reported.
 | Key | Required | Maps to | Write semantics |
 | --- | --- | --- | --- |
 | `module_name` | **yes** | `provision_drivers.module_name` | plaintext. `Pdns` for PowerDNS, `Autodns` for AutoDNS. The value is `eval`'d into a class name by the model, so it must be an existing driver module. |
-| `endpoint` | **yes** | `.endpoint` | plaintext. For PowerDNS the full API server path, e.g. `http://host:8081/api/v1/servers/localhost`. **[Updated](#address-updates) on an existing driver under `UPDATE_ADDRESSES=1`**, and only then. |
+| `endpoint` | **yes** | `.endpoint` | plaintext. For PowerDNS the API servers URL ending at `/servers`, e.g. `http://host:8081/api/v1/servers` (the gem appends the server id). **[Updated](#address-updates) on an existing driver under `UPDATE_ADDRESSES=1`**, and only then. |
 | `auth_type` | no (default `static`) | `.auth_type` | plaintext |
 | `username` | no | `.username` | plaintext |
 | `api_key` | no | `.api_key` | **`Secret.encrypt!`** — the manifest carries plaintext. `ProvisionDriver#cloud_auth` calls `Secret.decrypt!` on this column; a raw write decrypts to `nil` and DNS silently stops working with no error anywhere. **[Rotated](#credential-rotation).** |
@@ -990,7 +990,7 @@ log_clients:
 dns:
   driver:
     module_name: Pdns
-    endpoint: http://10.100.1.9:8081/api/v1/servers/localhost
+    endpoint: http://10.100.1.9:8081/api/v1/servers
     auth_type: static
     username: admin
     api_key: "pdns-api-key"

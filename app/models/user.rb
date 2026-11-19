@@ -328,6 +328,10 @@ class User < ApplicationRecord
     "#{full_name} (#{id})"
   end
 
+  def full_name_with_email
+    "#{full_name} <#{email}>"
+  end
+
   def is_service_account?
     labels["kind"] == "service_account"
   end
@@ -477,7 +481,7 @@ class User < ApplicationRecord
 
   def check_current_password
     return if current_password.blank?
-    unless valid_password? current_password
+    unless Devise::Encryptor.compare(self.class, encrypted_password_in_database, current_password)
       errors.add(:base, "current password is invalid")
     end
   end

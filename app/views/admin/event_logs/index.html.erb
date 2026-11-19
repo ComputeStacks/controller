@@ -15,26 +15,7 @@
     </p>
   </div>
 </div>
-<div class="row">
-  <%= form_tag "/admin/event_logs", method: :get do %>
-    <% unless params[:status].blank? %><input type="hidden" name="status" value="<%= params[:status] %>"><% end %>
-    <div class="col-md-2 col-sm-3 col-col-xs-4">
-      <label>STATUS</label>
-      <select name="status" title="Filter by status" class="form-control chosen-select-standard">
-        <option value="">Show All</option>
-        <option value="active" <% if params[:status] == 'active' %>selected="selected"<% end %>>All Active</option>
-        <option value="pending" <% if params[:status] == 'pending' %>selected="selected"<% end %>>Pending</option>
-        <option value="running" <% if params[:status] == 'running' %>selected="selected"<% end %>>Running</option>
-        <option value="completed" <% if params[:status] == 'completed' %>selected="selected"<% end %>>Completed</option>
-        <option value="cancelled" <% if params[:status] == 'cancelled' %>selected="selected"<% end %>>Cancelled</option>
-        <option value="failed" <% if params[:status] == 'failed' %>selected="selected"<% end %>>Failed</option>
-      </select>
-    </div>
-    <div class="col-md-2 col-sm-3 col-col-xs-4">
-      <%= submit_tag "Filter", class: 'btn btn-primary', style: 'margin-top:20px;' %>
-    </div>
-  <% end %>
-</div>
+<%= render partial: "admin/event_logs/index/filter" %>
 <hr>
 <div class="row">
   <div class="col-md-12">

@@ -281,7 +281,7 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
     region_id = Region.first.id
 
     moved = greenfield_manifest
-    moved["dns"]["driver"]["endpoint"] = "http://10.100.9.9:8081/api/v1/servers/localhost"
+    moved["dns"]["driver"]["endpoint"] = "http://10.100.9.9:8081/api/v1/servers"
     moved["dns"]["driver"]["username"] = "somebody-else"
     moved["dns"]["driver"]["settings"]["config"]["zone_type"] = "native"
 
@@ -293,7 +293,7 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
     assert_equal 1, ProvisionDriver.count
     assert_equal driver_id, ProductModule.find_by(name: "dns").primary.id
     driver = ProvisionDriver.find(driver_id)
-    assert_equal "http://10.100.1.9:8081/api/v1/servers/localhost", driver.endpoint
+    assert_equal "http://10.100.1.9:8081/api/v1/servers", driver.endpoint
     assert_equal "admin", driver.username
     assert_equal "master", driver.settings.dig("config", "zone_type")
     assert Region.exists?(region_id)
@@ -321,7 +321,7 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
     @io = StringIO.new
     recorder = apply!(greenfield_manifest)
 
-    driver = ProvisionDriver.find_by(endpoint: "http://10.100.1.9:8081/api/v1/servers/localhost")
+    driver = ProvisionDriver.find_by(endpoint: "http://10.100.1.9:8081/api/v1/servers")
     assert_not_nil driver, @io.string
     assert_not_equal dead_driver_id, driver.id
     # Repaired, not left dangling: otherwise the driver just created is wired to
@@ -334,7 +334,7 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
   test "a dns primary pointing at a different live driver is only reported" do
     apply!(greenfield_manifest)
     product_module = ProductModule.find_by(name: "dns")
-    chosen = ProvisionDriver.create!(module_name: "Pdns", endpoint: "http://10.100.9.9:8081/api/v1/servers/localhost")
+    chosen = ProvisionDriver.create!(module_name: "Pdns", endpoint: "http://10.100.9.9:8081/api/v1/servers")
     product_module.update!(primary_id: chosen.id)
 
     @io = StringIO.new
@@ -415,7 +415,7 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
     rotated = greenfield_manifest
     rotated["dns"]["driver"]["api_key"] = "pdns-rotated-key"
     rotated["dns"]["driver"]["api_secret"] = "pdns-rotated-secret"
-    rotated["dns"]["driver"]["endpoint"] = "http://10.100.9.9:8081/api/v1/servers/localhost"
+    rotated["dns"]["driver"]["endpoint"] = "http://10.100.9.9:8081/api/v1/servers"
 
     @io = StringIO.new
     recorder = apply!(rotated)
@@ -424,7 +424,7 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
     assert_equal "pdns-rotated-key", Secret.decrypt!(driver.api_key), @io.string
     assert_equal "pdns-rotated-secret", Secret.decrypt!(driver.api_secret), @io.string
     # Same row, non-credential field: still bootstrap-only.
-    assert_equal "http://10.100.1.9:8081/api/v1/servers/localhost", driver.endpoint, @io.string
+    assert_equal "http://10.100.1.9:8081/api/v1/servers", driver.endpoint, @io.string
 
     assert_equal 2, recorder.rotated, @io.string
     assert_equal 0, recorder.updated, @io.string
@@ -639,20 +639,20 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
     driver_id = ProductModule.find_by(name: "dns").primary.id
 
     moved = greenfield_manifest
-    moved["dns"]["driver"]["endpoint"] = "http://100.64.0.9:8081/api/v1/servers/localhost"
+    moved["dns"]["driver"]["endpoint"] = "http://100.64.0.9:8081/api/v1/servers"
 
     @io = StringIO.new
     recorder = apply!(moved, update_addresses: true)
 
     driver = ProvisionDriver.find(driver_id)
-    assert_equal "http://100.64.0.9:8081/api/v1/servers/localhost", driver.endpoint, @io.string
+    assert_equal "http://100.64.0.9:8081/api/v1/servers", driver.endpoint, @io.string
     assert_equal 1, ProvisionDriver.count, @io.string
     assert_equal 1, recorder.rotated, @io.string
     assert_equal 0, recorder.warned, @io.string
     assert_includes @io.string,
       %([readdress] ProvisionDriver Pdns — endpoint: ) +
-        %("http://10.100.1.9:8081/api/v1/servers/localhost" -> ) +
-        %("http://100.64.0.9:8081/api/v1/servers/localhost")
+        %("http://10.100.1.9:8081/api/v1/servers" -> ) +
+        %("http://100.64.0.9:8081/api/v1/servers")
   end
 
   # Everything else on those same rows is still bootstrap-only, flag or no flag.
@@ -1113,6 +1113,22 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
     assert_match(/Node node1001/, @io.string)
   end
 
+  # The load balancer is created inside the apply's transaction; a validation job
+  # pushed before the commit ran against a row it could not see and recorded nothing.
+  test "a new load balancer's domain validation is queued exactly once" do
+    LoadBalancerWorkers::ValidateDomainWorker.clear
+    apply!(greenfield_manifest)
+
+    lb = Region.find_by(name: "ams-005").load_balancer
+    assert_equal [lb.id], LoadBalancerWorkers::ValidateDomainWorker.jobs.map { |j| j["args"].first }
+  end
+
+  test "DRY_RUN queues no domain validation" do
+    LoadBalancerWorkers::ValidateDomainWorker.clear
+    apply!(greenfield_manifest, dry_run: true)
+    assert_empty LoadBalancerWorkers::ValidateDomainWorker.jobs
+  end
+
   test "DRY_RUN over a live install reports drift and writes nothing" do
     apply!(greenfield_manifest)
     configure_setting!("registry_node", "10.100.1.99")
@@ -1425,7 +1441,7 @@ class Bootstrap::ApplyServiceTest < ActiveSupport::TestCase
       "dns" => {
         "driver" => {
           "module_name" => "Pdns",
-          "endpoint" => "http://10.100.1.9:8081/api/v1/servers/localhost",
+          "endpoint" => "http://10.100.1.9:8081/api/v1/servers",
           "auth_type" => "static",
           "username" => "admin",
           "api_key" => "pdns-api-key",

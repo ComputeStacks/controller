@@ -109,11 +109,9 @@ class ProvisionDriver < ApplicationRecord
   end
 
   def is_available?
-    version = service_client.version
+    service_client.version.present?
   rescue
     false
-  else
-    %w[Float Fixnum Integer].include?(version.class.to_s)
   end
 
   def service_client

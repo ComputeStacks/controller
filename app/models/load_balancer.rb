@@ -366,17 +366,42 @@ class LoadBalancer < ApplicationRecord
     errors.add(:shared_certificate, "is an invalid certificate")
   end
 
+  # Both triggers decide at save time (saved_change_to_attribute? only describes
+  # the latest save) but act once every open transaction has committed. Pushed
+  # from inside a transaction, a job can run before the row is visible: the
+  # worker's find_by returns nil and it exits without recording a verdict, which
+  # is what happened to every load balancer created by `rake bootstrap:apply`.
+  # A rolled-back transaction (a bootstrap dry run) queues nothing.
+  #
+  # The deferred work runs after the point of no return, so it must not raise:
+  # the save has already committed, and an exception here would tell the caller
+  # (e.g. bootstrap:apply's "nothing was written") that it hadn't. A failure is
+  # alerted and the load balancer is left without a verdict or certificate,
+  # the same accepted risk as Events::StateManager#perform_callback_reply!.
   def trigger_domain_validation
     return if skip_validation
-    if saved_change_to_attribute?("domain")
-      LoadBalancerWorkers::ValidateDomainWorker.perform_async id, current_audit&.id
+    return unless saved_change_to_attribute?("domain")
+    audit_id = current_audit&.id
+    ActiveRecord.after_all_transactions_commit do
+      LoadBalancerWorkers::ValidateDomainWorker.perform_async id, audit_id
+    rescue => e
+      ExceptionAlertService.new(e, "548fa06d0d3b989b").perform
     end
   end
 
+  # When the domain changed in the same save, ValidateDomainWorker runs the
+  # LetsEncryptService itself once the new domain validates. Running it here
+  # too would race that worker into a second ACME order, and on create would
+  # order a certificate before validation (domain_valid defaults to true).
   def trigger_le_generation
     return if skip_validation
-    if saved_change_to_attribute?("le")
-      LoadBalancerServices::LetsEncryptService.new(self, current_audit).perform
+    return unless saved_change_to_attribute?("le")
+    return if le && saved_change_to_attribute?("domain")
+    audit = current_audit
+    ActiveRecord.after_all_transactions_commit do
+      LoadBalancerServices::LetsEncryptService.new(self, audit).perform
+    rescue => e
+      ExceptionAlertService.new(e, "e65ecb77d4d86326").perform
     end
   end
 end

@@ -75,23 +75,24 @@ task setup_dev: :environment do
   # Default Prices
   plan = BillingPlan.find_by is_default: true
 
-  container_product = Product.find_by name: "small", kind: "package"
-  if container_product.package.nil?
-    container_product.create_package cpu: 1, memory: 512, storage: 10, local_disk: 5, bandwidth: 500
-    container_product_resource = plan.billing_resources.create! product: container_product
-    container_product_resource.prices.create! price: 0.00343,
-      currency: "USD",
-      billing_phase: container_product_resource.billing_phases.first,
-      regions: Region.all
-  end
+  # Container packages. A downstream app's dev seeds reference these by product id
+  # (small = 1, medium = 2, large = 7): small and medium come from db/seeds.rb,
+  # and large is created here, after the four resource products, so a fresh
+  # database gives it id 7. Sizes are re-applied on every run.
+  {
+    "small" => {label: "Small", cpu: 1, memory: 1024, storage: 10, bandwidth: 1024, price: 0.00343},
+    "medium" => {label: "Medium", cpu: 2, memory: 2048, storage: 25, bandwidth: 1024, price: 0.00686},
+    "large" => {label: "Large", cpu: 4, memory: 4096, storage: 50, bandwidth: 2048, price: 0.01372}
+  }.each do |name, spec|
+    product = Product.find_by(name: name, kind: "package") || Product.create!(label: spec[:label], kind: "package")
+    sizes = spec.slice(:cpu, :memory, :storage, :bandwidth).merge(local_disk: 5)
+    product.package.nil? ? product.create_package(sizes) : product.package.update!(sizes)
+    next unless product.billing_resources.empty?
 
-  container_product_med = Product.find_by name: "medium", kind: "package"
-  if container_product_med.package.nil?
-    container_product_med.create_package cpu: 1, memory: 1024, storage: 10, local_disk: 5, bandwidth: 1024
-    container_product_med_resource = plan.billing_resources.create! product: container_product_med
-    container_product_med_resource.prices.create! price: 0.005145,
+    resource = plan.billing_resources.create! product: product
+    resource.prices.create! price: spec[:price],
       currency: "USD",
-      billing_phase: container_product_med_resource.billing_phases.first,
+      billing_phase: resource.billing_phases.first,
       regions: Region.all
   end
 
@@ -201,4 +202,8 @@ task setup_dev: :environment do
       provider_ref: "cstacks.local.",
       provision_driver: pdns_driver
   end
+
+  # Optional: repoint images and the bastion at a private registry
+  # (config/dev_private_images.yml; see doc/development.md). No-op without it.
+  Rake::Task["dev:private_images"].invoke
 end

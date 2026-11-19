@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_10_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_16_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -99,6 +99,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_10_000001) do
     t.datetime "updated_at", null: false
     t.integer "event_count", default: 1, null: false
     t.datetime "last_event", precision: nil, null: false
+    t.datetime "last_reported_at"
     t.index ["container_id"], name: "index_alert_notifications_on_container_id"
     t.index ["fingerprint"], name: "index_alert_notifications_on_fingerprint", unique: true
     t.index ["labels"], name: "index_alert_notifications_on_labels", using: :gin
@@ -823,6 +824,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_10_000001) do
     t.jsonb "labels", default: {}, null: false
     t.index "((labels ->> 'task_id'::text))", name: "index_event_logs_on_task_id_label"
     t.index ["audit_id"], name: "index_event_logs_on_audit_id"
+    t.index ["created_at"], name: "index_event_logs_on_created_at"
     t.index ["event_code"], name: "index_event_logs_on_event_code"
     t.index ["locale"], name: "index_event_logs_on_locale"
     t.index ["status"], name: "index_event_logs_on_status"

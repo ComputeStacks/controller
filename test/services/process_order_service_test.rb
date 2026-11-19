@@ -67,6 +67,165 @@ class ProcessOrderServiceTest < ActiveSupport::TestCase
     assert @project.reload.consul_auth_key.present?, "expected the metadata bearer to be minted"
   end
 
+  # --- the order's containers must have a network and IP before anything is built --------
+  #
+  # 2026-10-20: two concurrent orders claimed the same network row, and the loser's order
+  # completed with containers that had no network and no IP. This one deliberately IS an
+  # `errors` entry: building a container with no IP can only fail.
+
+  class RecordingDeployer
+    attr_accessor :volume_clones
+    attr_reader :calls
+
+    def initialize
+      @calls = 0
+    end
+
+    def perform
+      @calls += 1
+      true
+    end
+
+    def errors = []
+  end
+
+  # Answers from a per-container script of results (last one repeats); :ready otherwise.
+  class ScriptedEnsure
+    attr_reader :reason
+
+    def initialize(container, script, log)
+      @container = container
+      @script = script
+      @log = log
+    end
+
+    def perform
+      @log << @container
+      queue = @script[@container]
+      return :ready if queue.nil?
+      status = (queue.length > 1) ? queue.shift : queue.first
+      @reason = "#{@container.name} is broken" unless status == :ready
+      status
+    end
+  end
+
+  def finalize_with_network_check(ensure_new: nil)
+    fake = FakeProvisioner.new
+    deployer = RecordingDeployer.new
+    client = Object.new
+    client.define_singleton_method(:provision_tenant!) { true }
+    sleeps = []
+    run = -> do
+      Agent::Client.stub(:new, ->(*, **) { client }) do
+        ProvisionServices::SftpProvisioner.stub(:new, ->(*) { fake }) do
+          ProjectServices::MetadataSshKeys.stub(:new, ->(*) { fake }) do
+            DeployServices::DeployProjectService.stub(:new, ->(*) { deployer }) do
+              @service.stub(:sleep, ->(s) { sleeps << s }) do
+                @service.send(:finalize!)
+              end
+            end
+          end
+        end
+      end
+    end
+    ok = if ensure_new
+      NetworkServices::EnsureContainerNetworkService.stub(:new, ensure_new) { run.call }
+    else
+      run.call
+    end
+    [ok, deployer, sleeps]
+  end
+
+  def scripted(script)
+    log = []
+    [->(container, _event) { ScriptedEnsure.new(container, script, log) }, log]
+  end
+
+  test "a container this order created with no IP is repaired before it is deployed" do
+    network = networks(:net_gen_0)
+    Network.where(deployment_id: @project.id).update_all(deployment_id: nil)
+    network.update_columns(deployment_id: @project.id, active: true)
+    container = deployment_containers(:wordpress_1)
+    container.ip_address.destroy!
+    @service.result[:containers] << container.reload
+
+    ok, deployer, = finalize_with_network_check
+
+    assert ok, @service.errors.inspect
+    assert_empty @service.errors
+    assert_equal network.id, container.reload.ip_address&.network_id
+    assert_equal 1, deployer.calls, "the order must still be deployed"
+  end
+
+  test "a container that cannot be repaired fails the order before any build is queued" do
+    container = deployment_containers(:wordpress_1)
+    @service.result[:containers] << container
+    ensure_new, log = scripted(container => [:retry])
+
+    ok, deployer, sleeps = finalize_with_network_check(ensure_new: ensure_new)
+
+    refute ok
+    assert_equal ["#{container.name} is broken"], @service.errors
+    assert_equal 0, deployer.calls, "nothing may be deployed for a container with no network"
+    assert_equal 3, log.count(container)
+    assert_equal [2, 2], sleeps
+  end
+
+  test "a failed container is not asked again" do
+    container = deployment_containers(:wordpress_1)
+    @service.result[:containers] << container
+    ensure_new, log = scripted(container => [:failed])
+
+    ok, deployer, sleeps = finalize_with_network_check(ensure_new: ensure_new)
+
+    refute ok
+    assert_equal 1, log.count(container)
+    assert_empty sleeps
+    assert_equal 0, deployer.calls
+  end
+
+  test "retries stop once the container is ready" do
+    container = deployment_containers(:wordpress_1)
+    @service.result[:containers] << container
+    ensure_new, log = scripted(container => [:retry, :ready])
+
+    ok, deployer, sleeps = finalize_with_network_check(ensure_new: ensure_new)
+
+    assert ok, @service.errors.inspect
+    assert_empty @service.errors
+    assert_equal 2, log.count(container)
+    assert_equal [2], sleeps
+    assert_equal 1, deployer.calls
+  end
+
+  test "the project's pre-existing containers are not checked" do
+    old_sftp = deployment_sftp(:project_test_testone)
+    old = deployment_containers(:mysql_1)
+    old.ip_address.destroy!
+    new_container = deployment_containers(:wordpress_1)
+    @service.result[:containers] << new_container
+    ensure_new, log = scripted(old => [:failed])
+
+    ok, deployer, = finalize_with_network_check(ensure_new: ensure_new)
+
+    assert ok, @service.errors.inspect
+    refute_includes log, old
+    assert_includes log, new_container
+    refute_includes log, old_sftp, "pre-existing SFTP containers are not checked"
+    assert_equal 1, deployer.calls
+  end
+
+  test "an SFTP container created by this order is checked" do
+    sftp = deployment_sftp(:project_test_testone)
+    sftp.update_column :created_at, Time.current
+    ensure_new, log = scripted(sftp => [:ready])
+
+    ok, = finalize_with_network_check(ensure_new: ensure_new)
+
+    assert ok, @service.errors.inspect
+    assert_includes log, sftp
+  end
+
   # --- releasing the project's private network on failure -------------------------------
   #
   # Detaching the row is not a release. The row stays `active`, and `active` is the only
@@ -127,7 +286,7 @@ class ProcessOrderServiceTest < ActiveSupport::TestCase
   # fail!. An unsaved Order can't do the last one.
   class FakeOrder
     attr_reader :failed
-    attr_accessor :deployment
+    attr_accessor :deployment, :order_data
 
     def current_event = nil
 
@@ -275,5 +434,200 @@ class ProcessOrderServiceTest < ActiveSupport::TestCase
     network.reload
     assert_nil network.deployment_id, "the range this order allocated must not stay bound to a failed project"
     assert_equal false, network.active
+  end
+
+  # --- the provisioning loop: dependencies first, stop at the first failure ---------------
+  #
+  # Production, 2026-09-04: orders for [wordpress, mariadb, redis] built WordPress and Redis,
+  # then failed on the database, leaving sites that could never work. The loop also skipped
+  # every other product on a pass (it deleted from the array it was iterating).
+
+  # Stands in for ContainerServiceOrderService. The test's script, keyed by product label,
+  # says what each product does: :ok, :fail (false, no errors), :error (an error message),
+  # or :defer (volumes not ready yet) followed by what it does once ready.
+  class ScriptedJob
+    attr_accessor :provision_state
+    attr_reader :errors, :result
+
+    def initialize(product, script, log)
+      @product = product
+      @script = script
+      @log = log
+      @errors = []
+      @result = {containers: [], subscriptions: [], load_balancers: [], volumes: [], volume_map: [], volume_clones: []}
+    end
+
+    def ready_to_provision?
+      queue = @script[@product[:label]]
+      return true unless queue&.first == :defer
+      queue.shift
+      false
+    end
+
+    def perform
+      @log << @product[:label]
+      case Array(@script[@product[:label]]).first
+      when :fail then false
+      when :error
+        @errors << "#{@product[:label]} broke"
+        false
+      else true
+      end
+    end
+  end
+
+  def create_order(labels)
+    raw_order = labels.map do |label|
+      {product_type: "container", image_variant_id: container_image_image_variants(label).id, label: label.to_s}
+    end
+    Order.create!(
+      user: users(:admin),
+      deployment: @project,
+      location: regions(:regionone).location,
+      status: "pending",
+      order_data: {"project" => {"id" => @project.id}, "region_id" => regions(:regionone).id, "raw_order" => raw_order}
+    )
+  end
+
+  # Runs the real perform with everything around the loop stubbed out.
+  def perform_order(order, script = {})
+    log = []
+    order.current_event = @event
+    service = ProcessOrderService.new(order)
+    service.region.stub(:has_clustered_networking?, true) do
+      OrderServices::ContainerServiceOrderService.stub(:new, ->(_o, _e, _p, product) { ScriptedJob.new(product, script, log) }) do
+        service.stub(:valid?, true) do
+          service.stub(:within_quota?, true) do
+            service.stub(:init_project!, true) do
+              service.stub(:finalize!, true) do
+                service.stub(:sleep, nil) do
+                  [service.perform, service, log]
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+  test "dependencies are provisioned first, and every product once, in order" do
+    order = create_order(%i[wordpress_default mariadb_default pma_default])
+
+    ok, service, log = perform_order(order)
+
+    assert ok, service.errors.inspect
+    assert_equal %w[mariadb_default wordpress_default pma_default], log
+    assert order.reload.success?
+  end
+
+  test "a failed dependency stops the order before anything else is built" do
+    order = create_order(%i[wordpress_default mariadb_default pma_default])
+
+    ok, service, log = perform_order(order, {"mariadb_default" => [:error]})
+
+    refute ok
+    assert_equal %w[mariadb_default], log
+    assert_equal ["mariadb_default broke"], service.errors
+    assert order.reload.failed?
+  end
+
+  test "a product that fails without errors still stops the order" do
+    order = create_order(%i[pma_default elasticsearch_default nginx_default])
+
+    ok, service, log = perform_order(order, {"elasticsearch_default" => [:fail]})
+
+    refute ok
+    assert_equal %w[pma_default elasticsearch_default], log
+    assert_equal ["Failed to build product"], service.errors
+    assert_equal "Failed to build product", order.reload.order_data["failure_reason"]
+  end
+
+  test "a product waiting on volumes is retried on the next pass and is not a failure" do
+    order = create_order(%i[pma_default elasticsearch_default nginx_default])
+
+    ok, service, log = perform_order(order, {"pma_default" => [:defer]})
+
+    assert ok, service.errors.inspect
+    assert_equal %w[elasticsearch_default nginx_default pma_default], log
+    assert order.reload.success?
+  end
+
+  test "two identical products are both built" do
+    order = create_order(%i[pma_default pma_default])
+
+    ok, service, log = perform_order(order)
+
+    assert ok, service.errors.inspect
+    assert_equal %w[pma_default pma_default], log
+  end
+
+  # --- why the order failed -------------------------------------------------------------
+
+  test "the failure reason is the order's errors, and survives a reload" do
+    order = create_order(%i[pma_default])
+    service = ProcessOrderService.new(order)
+    service.event = @event
+    service.errors = ["image is gone", "no capacity"]
+
+    service.send(:fail_process!, "Failed to provision all resources")
+
+    order.reload
+    assert order.failed?
+    assert_equal "image is gone; no capacity", order.order_data["failure_reason"]
+    assert_equal "image is gone; no capacity", order.data[:failure_reason]
+    detail = @event.event_details.find_by(event_code: "1adee2a19e284b32")
+    assert_equal "ProcessOrderService error output:\n\nimage is gone\nno capacity", detail.data
+  end
+
+  test "with no errors, the failure reason and error output are the fail message" do
+    order = create_order(%i[pma_default])
+    service = ProcessOrderService.new(order)
+    service.event = @event
+
+    service.send(:fail_process!, "Over quota")
+
+    assert_equal "Over quota", order.reload.order_data["failure_reason"]
+    detail = @event.event_details.find_by(event_code: "1adee2a19e284b32")
+    refute_nil detail, "the error output must be written even with no errors"
+    assert_match "Over quota", detail.data
+  end
+
+  test "with no errors and no message, the failure is still recorded" do
+    order = create_order(%i[pma_default])
+    service = ProcessOrderService.new(order)
+    service.event = @event
+
+    service.send(:fail_process!)
+
+    assert_equal "Unknown failure", order.reload.order_data["failure_reason"]
+    refute_nil @event.event_details.find_by(event_code: "1adee2a19e284b32")
+  end
+
+  test "an exception during the order is named in the failure reason" do
+    order = create_order(%i[pma_default])
+    order.current_event = @event
+    service = ProcessOrderService.new(order)
+
+    service.stub(:valid?, -> { raise ArgumentError, "bad product params" }) do
+      assert_raises(ArgumentError) { service.perform }
+    end
+
+    order.reload
+    assert order.failed?
+    assert_equal "Fatal Error; ArgumentError: bad product params", order.order_data["failure_reason"]
+    assert_match "ArgumentError: bad product params",
+      @event.event_details.find_by(event_code: "1adee2a19e284b32").data
+  end
+
+  test "a long failure reason is truncated" do
+    order = create_order(%i[pma_default])
+    service = ProcessOrderService.new(order)
+    service.event = @event
+    service.errors = ["x" * 5_000]
+
+    service.send(:fail_process!, "boom")
+
+    assert_operator order.reload.order_data["failure_reason"].length, :<=, 1_000
   end
 end

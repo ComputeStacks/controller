@@ -1,0 +1,16 @@
+// Suggestion list for src/utils/user-autocomplete.js. It grows to fit the longest
+// match, never narrower than its input nor wider than the screen; past that,
+// labels wrap instead of scrolling sideways.
+.user-autocomplete .dropdown-menu {
+  min-width: 100%;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  max-height: 300px;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  > li > a {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

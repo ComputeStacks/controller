@@ -10,6 +10,9 @@ class ProcessOrderService
 
   def initialize(order)
     self.order = order
+    # SFTP containers are not tracked in `result`; this tells this order's apart (see
+    # ensure_container_networks!).
+    @started_at = Time.current
     self.event = order.current_event
     self.project = order.deployment.nil? ? nil : order.deployment
     self.region = if order.data[:region_id].blank?
@@ -78,12 +81,16 @@ class ProcessOrderService
       end
     end
 
-    to_provision = order.data[:raw_order]
+    # Dependencies first (the database before the site that needs it), and stop at the first
+    # product that fails: anything provisioned after a failed dependency would only be left
+    # behind half-built. A failed order is reported, never rolled back.
+    to_provision = OrderServices::ProductDependencySorter.new(order.data[:raw_order]).perform
     loop_end = 3.minutes.from_now
     loop do
       break if to_provision.empty?
       break if loop_end <= Time.now
-      to_provision.each_with_index do |product, index|
+      # Walk a snapshot, so removing a finished product never skips its neighbor.
+      to_provision.dup.each do |product|
         base_job = case product[:product_type]
         when "container"
           OrderServices::ContainerServiceOrderService
@@ -95,6 +102,7 @@ class ProcessOrderService
         # Keep pushing the result forward so each cycle can track what's been done so far.
         job.provision_state = result
 
+        # Not a failure: its volumes aren't ready yet, so it is retried on the next pass.
         next unless job.ready_to_provision?
 
         job_status = job.perform
@@ -111,8 +119,12 @@ class ProcessOrderService
         # make sure we capture that and stop the order process from finalizing
         errors << "Failed to build product" if job.errors.empty? && !job_status
 
-        # Remove this from the stack
-        to_provision.delete_at index
+        # Remove this from the stack -- by identity, so an order for two identical products
+        # still builds both.
+        to_provision.delete_if { |p| p.equal?(product) }
+
+        # Fail fast: start nothing after a failed product.
+        break unless errors.empty?
       end
       break unless errors.empty?
       sleep 2
@@ -127,6 +139,10 @@ class ProcessOrderService
     end
     complete_process!
     true
+  rescue => e
+    # Kept for fail_process!'s failure reason; the ensure below fails the order.
+    @fatal_error = e
+    raise
   ensure
     # If this is triggered and the event is still running, then something bad happened.
     if event.running?
@@ -224,6 +240,11 @@ class ProcessOrderService
     # Store current known publish ssh keys for sftp containers to pull.
     ProjectServices::MetadataSshKeys.new(project).perform
 
+    # Unlike the tenant above, this one IS an order failure: a container with no private
+    # network or IP gets no runtime config, and DeployProjectService would queue a build that
+    # can only fail. Stop here, before any build is queued.
+    return false unless ensure_container_networks!
+
     # Actually provision the resources on the compute resources
     resource_provisioner = DeployServices::DeployProjectService.new(project, event)
     resource_provisioner.volume_clones = result[:volume_clones]
@@ -249,6 +270,50 @@ class ProcessOrderService
     end
 
     errors.empty?
+  end
+
+  ##
+  # Passes over this order's containers before giving up on their network/IP.
+  NETWORK_CHECK_PASSES = 3
+
+  ##
+  # Make sure every container this order created, and the project's SFTP containers, have
+  # their private network and IP before anything is built.
+  #
+  # On 2026-10-20 two concurrent orders claimed the same network row; the loser's containers
+  # were created with no network and no IP, and its order still completed. The claim is now
+  # atomic, but the order no longer trusts it: EnsureContainerNetworkService repairs what is
+  # missing, with a short inline retry for a network another worker is still creating.
+  #
+  # Only `result[:containers]` and SFTP containers created since this order started -- never
+  # the project's pre-existing containers. An old broken container must not fail a new order
+  # (the integrity sweep reports those).
+  #
+  # @return [Boolean] false (with one `errors` entry per container) when any is still not ready
+  def ensure_container_networks!
+    new_sftp = project.sftp_containers.active.where("deployment_sftps.created_at >= ?", @started_at).to_a
+    pending = (result[:containers] + new_sftp).uniq
+    reasons = {}
+
+    NETWORK_CHECK_PASSES.times do |pass|
+      break if pending.empty?
+      sleep 2 if pass > 0
+      pending = pending.select do |container|
+        service = NetworkServices::EnsureContainerNetworkService.new(container, event)
+        status = service.perform
+        if status == :ready
+          reasons.delete(container)
+          false
+        else
+          reasons[container] = service.reason.presence || "Container #{container.name} is missing its private network or IP address."
+          # Nothing to gain from asking again about a :failed container.
+          status == :retry
+        end
+      end
+    end
+
+    reasons.each_value { |reason| errors << reason }
+    reasons.empty?
   end
 
   def valid?
@@ -292,14 +357,24 @@ class ProcessOrderService
   ##
   # Final management
 
+  ##
+  # Fail the order and record why, every time.
+  #
+  # The reason goes on the event (detail 1adee2a19e284b32) AND on the order itself as
+  # `order_data["failure_reason"]`. The order is the durable record: a failed order's project
+  # may later be deleted, which detaches the order and leaves the project's events to be
+  # pruned, while orders are kept.
   def fail_process!(msg = nil)
-    unless errors.empty?
-      event.event_details.create!(
-        data: "ProcessOrderService error output:\n\n#{errors.join("\n")}",
-        event_code: "1adee2a19e284b32"
-      )
-    end
+    lines = errors.empty? ? [msg.presence || "Unknown failure"] : errors.map(&:to_s)
+    lines << "#{@fatal_error.class}: #{@fatal_error.message}" if @fatal_error
+    event.event_details.create!(
+      data: "ProcessOrderService error output:\n\n#{lines.join("\n")}",
+      event_code: "1adee2a19e284b32"
+    )
     event.fail! msg
+    # `order.data` is a copy, so write order_data directly. Saved by fail!'s update_attribute,
+    # in the same write as the status.
+    order.order_data = (order.order_data || {}).merge("failure_reason" => lines.join("; ").truncate(1_000))
     order.fail!
 
     release_network!

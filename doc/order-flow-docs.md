@@ -19,6 +19,36 @@ Documenting flow of models, workers, and services used when an order event is tr
           + ProjectServices::StoreMetadata
           + VolumeServices::EnqueueCloneService  (see Volume Clone)
 
+### Provisioning order and failures
+
+* **Dependencies first.** `OrderServices::ProductDependencySorter` puts a product whose image is a
+  dependency of another product's image ahead of it, matched by image id or role the same way
+  `ContainerServices::ServiceConfig#init_link!` links services (so MariaDB is built before the
+  WordPress that needs it). Unrelated products, and products in a dependency cycle, keep their
+  original order.
+* **Each pass walks the pending products in that order.** A product whose volumes are not ready
+  yet (`ready_to_provision?`) is skipped and retried on the next pass, two seconds later; that is
+  not a failure. The whole loop gives up after three minutes.
+* **Fail fast.** The first product that fails stops the order: nothing after it is started, in
+  this pass or any later one, and the order fails.
+* **A failed order is reported, never rolled back.** Products built before the failure stay.
+  `ProcessOrderService#fail_process!` always writes the "ProcessOrderService error output" event
+  detail, and stores the reason on the order itself as `order_data["failure_reason"]`: the
+  specific errors (or the fail message when there are none), plus the exception on a crash,
+  truncated to 1,000 characters. The order is the durable record -- it outlives the project's
+  events.
+* **Projects left behind by failed orders are swept.** `ProjectWorkers::FailedOrderSweepWorker`
+  (`lib/clock.rb`, hourly) deletes a project its failed order created once every order for it has
+  failed, and it has been empty and quiet for 24 hours: no services, containers, SFTP containers,
+  volumes, collaborators, SSH keys or notifiers, an owner, and no event in that time. Each project
+  is checked again right before it is deleted, at most 10 a run, through the admin Delete path
+  acting as the owner. Its orders get `order_data["deleted_project"]` (and a backfilled
+  `failure_reason` for orders that failed before it was recorded), and each deleting run writes
+  its own SystemEvent. It never deletes anything else; it reports, in SystemEvents updated in
+  place, projects left by failed orders that are not empty, orders stuck processing or pending
+  for over an hour, and failed orders of the last 7 days whose provisioning event's services
+  still exist.
+
 ## Volume Clone
 
 Ordering a volume with `action: "clone"` copies another volume's data into the new one. The

@@ -25,6 +25,7 @@
 #   step_01_base_system ............ roles/common (packages, conflicting pkgs)
 #   step_02_reboot_gate ............ roles/common/tasks/reboot_if_required.yml
 #   step_03_kernel ................. roles/node_kernel  (subset -- see below)
+#   step_03b_data_disk ............. roles/node_storage (subset; --data-device)
 #   step_04_docker_engine .......... geerlingguy.docker + site.yml hold/unhold
 #   step_05_docker_daemon_json ..... roles/docker_config
 #   step_06_docker_listener ........ roles/docker_tls   (WITHOUT the TLS half)
@@ -41,7 +42,8 @@
 #   step_16_enrollment ............. roles/cs_agent/tasks/{read_token_hash,enroll}.yml
 #   step_17_self_checks ............ roles/validate
 #
-# LAST SYNCED WITH THE PROVISIONER: 2026-09-12
+# LAST SYNCED WITH THE PROVISIONER: 2026-09-12 (structure)
+# PINNED_VERSIONS LAST SYNCED:      2026-11-01
 #
 # ---------------------------------------------------------------------------
 # DELIBERATE DIVERGENCES FROM PRODUCTION (all approved, all dev-only)
@@ -66,14 +68,16 @@
 #    `ops` network is created. The controller's MetricClient / LogClient dial
 #    them directly on the VM IP; there is no nginx vhost and no basic auth.
 #  * alertmanager and every alerts_*.yml rule file are dropped.
-#  * Backups are disabled (backups.enabled: false) -- there is no backup
-#    server. `backups.key` is still generated and written so that turning them
-#    on later is not a new decision.
+#  * Backups go to LOCAL borg repositories on this node (one docker volume,
+#    `b-<volume>`, per backed-up volume) instead of a backup server over SSH.
 #  * node_kernel's production-scale tuning is NOT ported. Only the module
 #    loads, the inotify limits, vm.max_map_count and BBR are kept. In
 #    particular vm.min_free_kbytes=524288 is actively harmful on a 6 GB VM and
 #    nf_conntrack hashsize=250000 is pointless here.
 #  * No blanket `apt-get upgrade`, no unattended-upgrades, no sshd hardening.
+#  * The docker engine is NOT pinned or held (production pins and holds it).
+#    Dev tracks Docker's latest release on purpose, so an upstream change that
+#    breaks ComputeStacks shows up here before a production pin is bumped.
 #
 # ---------------------------------------------------------------------------
 # THINGS THAT ARE LOAD-BEARING AND MUST NOT BE "CLEANED UP"
@@ -105,21 +109,18 @@ set -euo pipefail
 # PINNED_VERSIONS -- mirrors playbooks/group_vars/all/versions.yml.
 # ===========================================================================
 # Every externally-sourced version lives here, in one place. Bump deliberately
-# and re-check against the provisioner; nothing below floats.
+# and re-check against the provisioner; nothing below floats -- except the
+# docker engine, which dev deliberately leaves on Docker's latest release
+# (see step 4).
 #
-# apt packages -- VERIFIED 2026-09-12 against the live indexes:
-#   https://download.docker.com/linux/ubuntu/dists/resolute/stable/binary-amd64/Packages
+# cs-agent -- copied 2026-11-01 from the provisioner's versions.yml
+# (cs_agent_apt_version), which verifies it against:
 #   https://repo.computestacks.com/public/dists/stable/main/binary-amd64/Packages
-# The provisioner pins docker-ce 5:29.7.2 / containerd.io 2.3.4 / buildx 0.36.1
-# (checked 2026-08-28); the versions below are the newest that resolve today,
-# and 29.8.0 is what actually installed on the dev VM on 2026-09-12.
-readonly DOCKER_CE_VERSION="5:29.8.0-1~ubuntu.26.04~resolute"
-readonly CONTAINERD_VERSION="2.3.5-1~ubuntu.26.04~resolute"
-readonly BUILDX_VERSION="0.37.1-1~ubuntu.26.04~resolute"
-# cs-agent 3.3.0, NOT 3.0.0. The third DOCKER-USER isolation rule landed in
-# v3.1.0; a 3.0.0 agent silently reinstates cross-project reachability.
+# cs-agent 3.5.0, matching production. Never below 3.1.0: the third
+# DOCKER-USER isolation rule landed there, and an older agent silently
+# reinstates cross-project reachability. 3.4.0 added `cs-agent maintenance`.
 # Package version == agent version since the node-agent rename.
-readonly CS_AGENT_VERSION="3.3.0"
+readonly CS_AGENT_VERSION="3.5.0"
 # Ubuntu 26.04 universe. Best effort: if this exact version has rolled out of
 # the archive the install falls back to whatever resolute currently ships.
 readonly NODE_EXPORTER_APT_VERSION="1.10.2-1"
@@ -134,7 +135,7 @@ readonly FLUENTD_LOKI_IMAGE="grafana/fluent-plugin-loki:2.9.10"
 readonly CADVISOR_IMAGE="ghcr.io/google/cadvisor:v0.60.5"
 # Images the controller expects to already be on a node when it schedules work.
 readonly BORG_IMAGE="ghcr.io/computestacks/cs-docker-borg:1.6"
-readonly BASTION_IMAGE="ghcr.io/computestacks/cs-docker-bastion:v4"
+readonly DEFAULT_BASTION_IMAGE="ghcr.io/computestacks/cs-docker-bastion:v4"
 readonly XTRABACKUP24_IMAGE="ghcr.io/computestacks/cs-docker-xtrabackup:2.4"
 readonly XTRABACKUP80_IMAGE="ghcr.io/computestacks/cs-docker-xtrabackup:8.0"
 
@@ -173,6 +174,11 @@ readonly AGENT_BACKUP_KEY_FILE="${AGENT_CONFIG_DIR}/backups.key"
 readonly DOCKER_DROPIN="/etc/systemd/system/docker.service.d/startup.conf"
 readonly HOSTS_MARKER_BEGIN="# BEGIN computestacks dev (lib/dev/single-node.sh)"
 readonly HOSTS_MARKER_END="# END computestacks dev (lib/dev/single-node.sh)"
+# Data disk layout -- roles/node_storage defaults. A contract with production.
+readonly DATA_MOUNT="/var/lib/docker-data"
+readonly DATA_LABEL="dockerdata"
+readonly DATA_MOUNT_OPTS="defaults,noatime,prjquota"
+readonly DATA_DROPIN="10-cs-data-disk.conf"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_DIR
@@ -191,6 +197,11 @@ SSH_PUBKEY_FILE=""
 ENROLL_ONLY="no"
 SKIP_OBSERVABILITY="no"
 DRY_RUN="no"
+BASTION_IMAGE="$DEFAULT_BASTION_IMAGE"
+REGISTRY_LOGIN=""
+REGISTRY_USERNAME=""
+REGISTRY_PASSWORD_FILE=""
+DATA_DEVICE=""
 
 # Mutable state
 FILE_CHANGED="no"        # set by write_file on every call
@@ -239,6 +250,24 @@ Options:
                           prometheus the controller rejects every order.
                           fluentd is installed regardless -- it is a hard
                           dependency of container creation, not observability.
+  --data-device <path>    Whole raw second disk for docker + containerd state
+                          (prefer /dev/disk/by-id/...). Formatted XFS with
+                          project quotas, as production's node_storage role
+                          does. Only a disk with no signature at all is
+                          formatted; must be given before docker is first
+                          installed. Omit to keep everything on the root disk.
+  --bastion-image <ref>   Bastion image to preload instead of the default
+                          (ghcr.io/computestacks/cs-docker-bastion:v4). Must
+                          equal the controller's cs_bastion_image setting.
+  --registry-login <host> Log root's docker in to this private registry
+                          before any image is pulled, the way production's
+                          roles/docker_config does. Needs both flags below.
+  --registry-username <u> Username for --registry-login (e.g. a read-only
+                          deploy token's name).
+  --registry-password-file <p>
+                          File holding the password/token for
+                          --registry-login. Read on stdin by `docker login`,
+                          so it never appears in ps or shell history.
   --dry-run               Print what would change and touch nothing.
   --help                  This text.
 
@@ -449,11 +478,23 @@ parse_args() {
       --ssh-pubkey-file)  SSH_PUBKEY_FILE="${2:-}"; shift 2 ;;
       --enroll-only)      ENROLL_ONLY="yes"; shift ;;
       --skip-observability) SKIP_OBSERVABILITY="yes"; shift ;;
+      --bastion-image)    BASTION_IMAGE="${2:-}"; shift 2 ;;
+      --data-device)      DATA_DEVICE="${2:-}"; shift 2 ;;
+      --registry-login)   REGISTRY_LOGIN="${2:-}"; shift 2 ;;
+      --registry-username) REGISTRY_USERNAME="${2:-}"; shift 2 ;;
+      --registry-password-file) REGISTRY_PASSWORD_FILE="${2:-}"; shift 2 ;;
       --dry-run)          DRY_RUN="yes"; shift ;;
       -h|--help)          usage; exit 0 ;;
       *) usage >&2; die "unknown argument: $1" ;;
     esac
   done
+
+  [ -n "$BASTION_IMAGE" ] || die "--bastion-image needs a value"
+  if [ -n "$REGISTRY_LOGIN" ] || [ -n "$REGISTRY_USERNAME" ] || [ -n "$REGISTRY_PASSWORD_FILE" ]; then
+    [ -n "$REGISTRY_LOGIN" ] && [ -n "$REGISTRY_USERNAME" ] && [ -n "$REGISTRY_PASSWORD_FILE" ] \
+      || die "--registry-login, --registry-username and --registry-password-file go together"
+    [ -r "$REGISTRY_PASSWORD_FILE" ] || die "cannot read --registry-password-file $REGISTRY_PASSWORD_FILE"
+  fi
 }
 
 # ===========================================================================
@@ -835,6 +876,202 @@ EOF
 }
 
 # ===========================================================================
+# Step 3b -- docker data disk (roles/node_storage, subset)
+# ===========================================================================
+#
+# Optional (--data-device). Puts docker's AND containerd's state on a
+# dedicated XFS disk mounted with enforced project quotas -- docker 29 keeps
+# images and writable layers under /var/lib/containerd, so a disk under
+# /var/lib/docker alone leaves most of the growth on the root disk.
+#
+# Same layout as production: the whole disk (no partition table), XFS labeled
+# `dockerdata`, mounted by UUID at /var/lib/docker-data with prjquota (XFS can
+# only enable project quotas at mount time, never on a remount), and
+# /var/lib/docker + /var/lib/containerd bind-mounted from it. No `nofail`: a
+# missing disk must stop the boot rather than let docker write to the root
+# disk. RequiresMountsFor= keeps both daemons from starting without it.
+#
+# Runs before docker is installed. It formats only a disk with no signature at
+# all, never remounts or unmounts anything, and refuses (changing nothing) on
+# anything it does not recognise -- including docker having already run on
+# the root disk, which needs a rebuild with the disk attached.
+
+data_disk_refuse() {
+  die "--data-device ${DATA_DEVICE}: $*. Nothing was changed."
+}
+
+# Path must be absent or an empty plain directory when nothing is mounted on it.
+data_disk_path_free() {
+  local path="$1"
+  if [ -L "$path" ]; then
+    data_disk_refuse "$path is a symlink"
+  elif [ -e "$path" ] && [ ! -d "$path" ]; then
+    data_disk_refuse "$path exists and is not a directory"
+  elif [ -d "$path" ] && [ -n "$(find "$path" -mindepth 1 -maxdepth 1 -print -quit)" ]; then
+    data_disk_refuse "$path already has contents on the root disk (docker or containerd ran before the data disk was in place); rebuild the VM with the disk attached"
+  fi
+}
+
+# Mounted from this device's filesystem root (sub="") or subdirectory, or free.
+data_disk_check_mount() {
+  local path="$1" sub="$2" dev="$3" src
+  if mountpoint -q "$path"; then
+    src="$(findmnt -no SOURCE --mountpoint "$path")"
+    if [ -z "$sub" ]; then
+      [ "$src" = "$dev" ] || data_disk_refuse "$path is already mounted from $src"
+    else
+      [ "$src" = "${dev}[/${sub}]" ] || data_disk_refuse "$path is already mounted from $src, not ${dev}[/${sub}]"
+    fi
+  else
+    data_disk_path_free "$path"
+  fi
+}
+
+# Rewrite /etc/fstab: every line for the three paths dropped, then ours (by
+# UUID, never LABEL), with the bind lines only when $2 is yes.
+data_disk_write_fstab() {
+  local uuid="$1" binds="$2" body bind_lines=""
+  body="$(awk -v a="$DATA_MOUNT" '$2 != a && $2 != "/var/lib/docker" && $2 != "/var/lib/containerd"' /etc/fstab)"
+  if [ "$binds" = "yes" ]; then
+    bind_lines="${DATA_MOUNT}/docker /var/lib/docker none bind 0 0
+${DATA_MOUNT}/containerd /var/lib/containerd none bind 0 0"
+  fi
+  write_file /etc/fstab 0644 <<EOF
+${body}
+UUID=${uuid} ${DATA_MOUNT} xfs ${DATA_MOUNT_OPTS} 0 0${bind_lines:+
+${bind_lines}}
+EOF
+  if [ "$FILE_CHANGED" = "yes" ]; then
+    run systemctl daemon-reload
+  fi
+}
+
+step_03b_data_disk() {
+  step "Step 3b/17  docker data disk"
+  if [ -z "$DATA_DEVICE" ]; then
+    info "no --data-device: docker and containerd stay on the root disk"
+    return 0
+  fi
+
+  apt_install nohold xfsprogs
+
+  local dev
+  dev="$(realpath -e -- "$DATA_DEVICE" 2>/dev/null)" || data_disk_refuse "no such device"
+  [ -b "$dev" ] || data_disk_refuse "$dev is not a block device"
+  [ "$(lsblk -dno TYPE "$dev")" = "disk" ] \
+    || data_disk_refuse "$dev is a $(lsblk -dno TYPE "$dev"), not a whole disk"
+  [ "$(lsblk -nro NAME "$dev" | wc -l)" -eq 1 ] \
+    || data_disk_refuse "$dev has partitions or devices stacked on it"
+
+  local pttype
+  pttype="$(blkid -p -s PTTYPE -o value "$dev" 2>/dev/null || true)"
+  [ -z "$pttype" ] || data_disk_refuse "$dev carries a ${pttype} partition table; use the whole raw disk (wipefs -a if it is really unused)"
+
+  # blkid -p exits 2 both for "no signature" and "could not read"; only the
+  # second prints anything.
+  local probe rc=0 err fstype="" label="" state
+  err="$(mktemp)"
+  probe="$(blkid -p -o export "$dev" 2>"$err")" || rc=$?
+  if [ "$rc" -eq 2 ] && [ ! -s "$err" ]; then
+    state="blank"
+  elif [ "$rc" -eq 0 ]; then
+    fstype="$(printf '%s\n' "$probe" | sed -n 's/^TYPE=//p')"
+    label="$(printf '%s\n' "$probe" | sed -n 's/^LABEL=//p')"
+    if [ "$fstype" = "xfs" ] && [ "$label" = "$DATA_LABEL" ]; then
+      state="ours"
+    else
+      rm -f "$err"
+      data_disk_refuse "$dev carries a ${fstype:-unknown} signature (label '${label}'), not XFS '${DATA_LABEL}'; wipefs -a it if it is really unused"
+    fi
+  else
+    local msg; msg="$(cat "$err")"; rm -f "$err"
+    data_disk_refuse "blkid could not read $dev (rc ${rc}: ${msg})"
+  fi
+  rm -f "$err"
+  if [ "$state" = "blank" ] && [ -n "$(lsblk -dno FSTYPE "$dev")" ]; then
+    data_disk_refuse "blkid sees no signature but lsblk reports $(lsblk -dno FSTYPE "$dev")"
+  fi
+
+  # Mounted nowhere except the data mount, the two bind targets, or beneath
+  # them. Read from mountinfo by major:minor: `lsblk -r` joins several
+  # mountpoints into one \x0a-escaped field, and bind mounts count too.
+  local majmin mp
+  majmin="$(lsblk -dno MAJ:MIN "$dev" | tr -d ' ')"
+  while IFS= read -r mp; do
+    [ -n "$mp" ] || continue
+    case "$mp" in
+      "$DATA_MOUNT"|"$DATA_MOUNT"/*|/var/lib/docker|/var/lib/docker/*|/var/lib/containerd|/var/lib/containerd/*) ;;
+      *) data_disk_refuse "$dev is mounted at $mp" ;;
+    esac
+  done < <(awk -v mm="$majmin" '$3 == mm { print $5 }' /proc/self/mountinfo)
+
+  data_disk_check_mount "$DATA_MOUNT" "" "$dev"
+  data_disk_check_mount /var/lib/docker docker "$dev"
+  data_disk_check_mount /var/lib/containerd containerd "$dev"
+  info "$dev: $state"
+
+  if [ "$state" = "blank" ]; then
+    run mkfs.xfs -L "$DATA_LABEL" -n ftype=1 "$dev"
+    if is_dry_run; then
+      info "[dry-run] then: fstab, mount ${DATA_MOUNT} (prjquota), bind /var/lib/docker and /var/lib/containerd, unit drop-ins"
+      return 0
+    fi
+    # `mount UUID=...` resolves through /dev/disk/by-uuid, which udev creates.
+    udevadm settle
+  fi
+
+  local uuid
+  uuid="$(blkid -p -s UUID -o value "$dev")"
+  [ -n "$uuid" ] || data_disk_refuse "could not read the filesystem UUID"
+
+  # fstab in two passes, so a failed run never leaves a line whose source
+  # does not exist yet (no `nofail`: such a line stops the next boot). First
+  # the data mount only; the bind lines once their source directories exist.
+  # On a built node the bind sources already exist: write all three at once,
+  # so a re-run leaves fstab untouched instead of dropping and re-adding them.
+  local early_binds="no"
+  if mountpoint -q "$DATA_MOUNT" && [ -d "${DATA_MOUNT}/docker" ] && [ -d "${DATA_MOUNT}/containerd" ]; then
+    early_binds="yes"
+  fi
+  data_disk_write_fstab "$uuid" "$early_binds"
+
+  if ! mountpoint -q "$DATA_MOUNT"; then
+    ensure_dir "$DATA_MOUNT" 0755
+    run mount "$DATA_MOUNT"
+  fi
+  # (Under --dry-run nothing was mounted, so there is nothing to inspect.)
+  if mountpoint -q "$DATA_MOUNT"; then
+    case ",$(findmnt -no OPTIONS --mountpoint "$DATA_MOUNT")," in
+      *,prjquota,*|*,pquota,*) ;;
+      *) data_disk_refuse "$DATA_MOUNT is mounted without enforced project quotas; stop docker and containerd, unmount the bind mounts and $DATA_MOUNT, and re-run" ;;
+    esac
+  fi
+
+  ensure_dir "${DATA_MOUNT}/docker" 0710
+  ensure_dir "${DATA_MOUNT}/containerd" 0711
+  data_disk_write_fstab "$uuid" yes
+  local target
+  for target in /var/lib/docker /var/lib/containerd; do
+    if ! mountpoint -q "$target"; then
+      ensure_dir "$target" "$([ "$target" = /var/lib/docker ] && echo 0710 || echo 0711)"
+      run mount "$target"
+    fi
+  done
+
+  local unit reload="no"
+  for unit in docker containerd; do
+    write_file "/etc/systemd/system/${unit}.service.d/${DATA_DROPIN}" 0644 <<'EOF'
+# Managed by lib/dev/single-node.sh (mirrors roles/node_storage).
+[Unit]
+RequiresMountsFor=/var/lib/docker /var/lib/containerd
+EOF
+    [ "$FILE_CHANGED" = "yes" ] && reload="yes"
+  done
+  [ "$reload" = "yes" ] && run systemctl daemon-reload
+  info "docker and containerd state on $dev (${DATA_MOUNT}, prjquota)"
+}
+
+# ===========================================================================
 # Step 4 -- docker engine (geerlingguy.docker + site.yml's hold/unhold)
 # ===========================================================================
 
@@ -880,15 +1117,19 @@ EOF
 
   clear_stale_docker_dropin
 
-  # Each docker package carries its own version scheme -- containerd.io and
-  # the buildx plugin do NOT share docker-ce's -- so each is pinned on its own.
-  # docker-ce-rootless-extras is in the provisioner's list but is not installed
-  # here: nothing in dev runs rootless.
-  apt_install hold \
-    "docker-ce=${DOCKER_CE_VERSION}" \
-    "docker-ce-cli=${DOCKER_CE_VERSION}" \
-    "containerd.io=${CONTAINERD_VERSION}" \
-    "docker-buildx-plugin=${BUILDX_VERSION}"
+  # Unpinned and unheld: dev follows Docker's latest release, and ordinary
+  # `apt upgrade` moves it (see DELIBERATE DIVERGENCES). The unhold releases a
+  # hold left by an older version of this script. docker-ce-rootless-extras
+  # is in the provisioner's list but not installed here: nothing in dev runs
+  # rootless.
+  local docker_pkgs=(docker-ce docker-ce-cli containerd.io docker-buildx-plugin)
+  local pkg
+  for pkg in "${docker_pkgs[@]}"; do
+    if apt-mark showhold | grep -qx "$pkg"; then
+      run apt-mark unhold "$pkg" >/dev/null
+    fi
+  done
+  apt_install nohold "${docker_pkgs[@]}"
   local engine_changed="$APT_CHANGED"
 
   run systemctl enable docker >/dev/null 2>&1 || true
@@ -924,6 +1165,15 @@ EOF
     run systemctl reload docker || run systemctl restart docker
   else
     info "unchanged"
+  fi
+
+  # Private registry login -> /root/.docker/config.json, as production's
+  # roles/docker_config does from `docker_registries`. Images the controller
+  # deploys with registry_auth get their credentials per pull; this login is
+  # for what the node pulls on its own, chiefly a private bastion image.
+  if [ -n "$REGISTRY_LOGIN" ]; then
+    info "docker login ${REGISTRY_LOGIN} as ${REGISTRY_USERNAME}"
+    run_sh "docker login --username '${REGISTRY_USERNAME}' --password-stdin '${REGISTRY_LOGIN}' < '${REGISTRY_PASSWORD_FILE}' >/dev/null"
   fi
 }
 
@@ -1932,10 +2182,12 @@ queue:
   numworkers: 3
 
 backups:
-  # There is no backup server in a dev environment. \`key\` is written anyway
-  # so that adding one later is not a new decision.
-  enabled: false
+  # No backup server in a dev environment: with borg.ssh unset the agent keeps
+  # each repository in a local docker volume (b-<volume>) on this node.
+  enabled: true
   key: "${backups_key}"
+  borg:
+    image: "${BORG_IMAGE}"
 
 # TOP-LEVEL, not nested under backups: the agent reads \`mariadb.*\`.
 mariadb:
@@ -2036,6 +2288,26 @@ check_pass() { printf '  PASS  %s\n' "$*"; }
 check_fail() {
   printf '  FAIL  %s\n' "$*"
   SELF_CHECK_FAILURES=$(( SELF_CHECK_FAILURES + 1 ))
+}
+check_data_disk() {
+  local dev
+  if [ -n "$DATA_DEVICE" ]; then
+    dev="$(realpath -e -- "$DATA_DEVICE" 2>/dev/null || echo "$DATA_DEVICE")"
+  elif mountpoint -q "$DATA_MOUNT"; then
+    # --enroll-only and re-runs without the flag still check a built disk.
+    dev="$(findmnt -no SOURCE --mountpoint "$DATA_MOUNT")"
+  else
+    check_skip "data disk (no --data-device)"
+    return 0
+  fi
+  if [ "$(findmnt -no SOURCE --mountpoint "$DATA_MOUNT" 2>/dev/null)" = "$dev" ] \
+    && findmnt -no OPTIONS --mountpoint "$DATA_MOUNT" | tr ',' '\n' | grep -qxE 'prjquota|pquota' \
+    && [ "$(findmnt -no SOURCE --mountpoint /var/lib/docker 2>/dev/null)" = "${dev}[/docker]" ] \
+    && [ "$(findmnt -no SOURCE --mountpoint /var/lib/containerd 2>/dev/null)" = "${dev}[/containerd]" ]; then
+    check_pass "data disk $dev at $DATA_MOUNT (prjquota), docker + containerd bound from it"
+  else
+    check_fail "data disk: $DATA_MOUNT / /var/lib/docker / /var/lib/containerd are not all mounted from $dev with prjquota"
+  fi
 }
 check_skip() { printf '  SKIP  %s\n' "$*"; }
 
@@ -2174,6 +2446,7 @@ step_17_self_checks() {
   fi
 
   check_unit_active docker
+  check_data_disk
   check_unit_active prometheus-node-exporter
   check_unit_enabled haproxy
 
@@ -2272,7 +2545,7 @@ EOF
   cat <<EOF
 Reference: the ComputeStacks Ansible provisioner is authoritative for how a
 real production node is built. This script is a stripped single-host
-derivative of it, last synced 2026-09-12.
+derivative of it: structure last synced 2026-09-12, version pins 2026-11-01.
 
 EOF
 }
@@ -2301,6 +2574,7 @@ main() {
   step_01_base_system
   step_02_reboot_gate
   step_03_kernel
+  step_03b_data_disk
   step_04_docker_engine
   step_05_docker_daemon_json
   step_06_docker_listener

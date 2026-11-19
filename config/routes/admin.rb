@@ -10,6 +10,7 @@ Rails.application.routes.draw do
     delete "system_events/all", to: "system_events#destroy_all" # Mass delete system events
     get "system_events/filter/:filter(/:filter_id)", to: "system_events#index" # Filter system events
     post "users/:id/become" => "users#impersonate"
+    get "users/autocomplete" => "user_autocomplete#index" # JSON user lookup for filter inputs
     delete "volumes", to: "volumes#destroy"
 
     resources :container_registry do
@@ -101,6 +102,7 @@ Rails.application.routes.draw do
     resources :load_balancers do
       scope module: "load_balancers" do
         resources :deploy_load_balancer
+        resources :validate_domain, only: :create
       end
     end
 

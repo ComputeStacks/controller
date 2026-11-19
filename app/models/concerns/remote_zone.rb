@@ -13,8 +13,13 @@ module RemoteZone
     attr_accessor :soa_email, :commit_changes, :revert_changes, :run_module_create, :skip_provision_driver
   end
 
+  # Authenticated API client for this zone's provider.
+  def remote_client
+    (provision_driver.host_settings["auth_type"] == "user") ? auth.client : provision_driver.service_client
+  end
+
   def client
-    auth_client = (provision_driver.host_settings["auth_type"] == "user") ? auth.client : provision_driver.service_client
+    auth_client = remote_client
     # TODO: Go back and look at how settings & Configuration is saved here in ComputeStacks.
     # if provision_driver.settings['config'] && provision_driver.module_name != 'Onapp'
     #   eval("#{provision_driver.module_name}").configure(provision_driver.settings['config'])

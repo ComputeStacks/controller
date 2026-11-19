@@ -1,0 +1,80 @@
+<% filter = @filter %>
+<%= form_tag request.path, method: :get do %>
+  <div class="row">
+    <div class="col-md-2 col-sm-4">
+      <label>STATUS</label>
+      <select name="status" class="form-control chosen-select-standard">
+        <option value="">Show All</option>
+        <% EventLog::AdminFilter::STATUSES.each do |value, label| %>
+          <option value="<%= value %>" <% if filter.status == value %>selected="selected"<% end %>><%= label %></option>
+        <% end %>
+      </select>
+    </div>
+    <div class="col-md-4 col-sm-8">
+      <label>EVENT KIND</label>
+      <select name="kind[]" multiple="multiple" data-placeholder="Any kind" class="form-control chosen-select-standard">
+        <% filter.unknown_kinds.each do |k| %>
+          <option value="<%= k %>" selected="selected"><%= k %></option>
+        <% end %>
+        <% EventLog::AdminFilter.kind_groups.each do |family, kinds| %>
+          <optgroup label="<%= family %>">
+            <option value="<%= family %>.*" <% if filter.kinds.include?("#{family}.*") %>selected="selected"<% end %>>All <%= family %> events</option>
+            <% kinds.each do |key, label| %>
+              <option value="<%= key %>" title="<%= key %>" <% if filter.kinds.include?(key) %>selected="selected"<% end %>><%= label %></option>
+            <% end %>
+          </optgroup>
+        <% end %>
+      </select>
+    </div>
+    <div class="col-md-2 col-sm-4">
+      <label>TIMEFRAME</label>
+      <select name="period" class="form-control chosen-select-standard">
+        <option value="">Any time</option>
+        <% EventLog::AdminFilter::PERIODS.each do |value, (label, _)| %>
+          <option value="<%= value %>" <% if filter.period == value %>selected="selected"<% end %>><%= label %></option>
+        <% end %>
+      </select>
+    </div>
+    <div class="col-md-4 col-sm-8">
+      <label>BETWEEN (UTC)</label>
+      <span class="help-block" style="display:inline; margin-left:5px;">overrides timeframe</span>
+      <input type="text" name="timerange" class="datetimefilter form-control" value="<%= filter.timerange %>" autocomplete="off" />
+    </div>
+  </div>
+  <div class="row" style="margin-top:10px;">
+    <% unless defined?(@user) && @user %>
+      <div class="col-md-3 col-sm-4">
+        <label>PERFORMED BY</label>
+        <div class="user-autocomplete dropdown" style="position:relative;"
+             data-url="/admin/users/autocomplete"
+             data-fixed="<%= EventLog::AdminFilter::PERFORMER_OPTIONS.map { |id, label| {id: id, label: label} }.to_json %>">
+          <input type="hidden" name="performed_by" value="<%= filter.performed_by %>">
+          <input type="text" class="form-control" value="<%= filter.performed_by_label %>" placeholder="Anyone" autocomplete="off">
+          <ul class="dropdown-menu"></ul>
+        </div>
+      </div>
+    <% end %>
+    <div class="col-md-3 col-sm-4">
+      <label>EVENT CODE</label>
+      <input type="text" name="code" class="form-control" value="<%= filter.code %>" placeholder="e.g. d7ef6c0313fb1375" />
+    </div>
+    <div class="col-md-4 col-sm-8">
+      <label>&nbsp;</label>
+      <div class="checkbox" style="margin-top:0;">
+        <label style="margin-right:15px;">
+          <input type="checkbox" name="with_details" value="1" <% if filter.flag?(:with_details) %>checked="checked"<% end %>> Has details
+        </label>
+        <label>
+          <input type="checkbox" name="with_system_events" value="1" <% if filter.flag?(:with_system_events) %>checked="checked"<% end %>> Has system errors
+        </label>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-4">
+      <label>&nbsp;</label>
+      <div>
+        <%= submit_tag "Filter", class: 'btn btn-primary', name: nil %>
+        <%= link_to "Reset", request.path, class: 'btn btn-default' %>
+      </div>
+    </div>
+  </div>
+<% end %>

@@ -35,6 +35,9 @@ module ContainerServices
       return false unless pre_migration!
       return false unless rebuild!
       return false unless post_migration!
+      # Only a completed migration changes what the metadata (and the bastion's PHP) should say;
+      # a failed one leaves the containers on the previous variant, which is what was already published.
+      ProjectWorkers::RefreshMetadataPhpWorker.perform_async service.deployment.id, audit.id
       true
     rescue => e
       ExceptionAlertService.new(e, "3932bc1fa2eebfcf").perform
