@@ -1,5 +1,9 @@
 # Change Log
 
+## v9.8.8
+
+- [FIX] **A load balancer's domain is now re-checked when one of its public or proxy addresses is added, changed or removed.** The check ran only when the domain itself changed, so a domain checked before its address existed stayed invalid until someone edited the domain.
+
 ## v9.8.7
 
 - [FIX] **The controller image now runs Ruby 3.4.13, which fixes seven security vulnerabilities in Ruby's regular expression engine and string case conversion.** Ruby's maintainers are aware of proofs of concept that use some of them for remote code execution. Earlier images ran a vulnerable Ruby 3.4 release.

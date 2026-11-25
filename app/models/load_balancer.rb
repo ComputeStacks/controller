@@ -339,6 +339,17 @@ class LoadBalancer < ApplicationRecord
     Dns::Zone.find_covering(domain).nil?
   end
 
+  # Public so LoadBalancerAddr can call it.
+  def queue_domain_validation
+    return if skip_validation
+    audit_id = current_audit&.id
+    ActiveRecord.after_all_transactions_commit do
+      LoadBalancerWorkers::ValidateDomainWorker.perform_async id, audit_id
+    rescue => e
+      ExceptionAlertService.new(e, "548fa06d0d3b989b").perform
+    end
+  end
+
   private
 
   def set_ext_ip
@@ -379,14 +390,8 @@ class LoadBalancer < ApplicationRecord
   # alerted and the load balancer is left without a verdict or certificate,
   # the same accepted risk as Events::StateManager#perform_callback_reply!.
   def trigger_domain_validation
-    return if skip_validation
     return unless saved_change_to_attribute?("domain")
-    audit_id = current_audit&.id
-    ActiveRecord.after_all_transactions_commit do
-      LoadBalancerWorkers::ValidateDomainWorker.perform_async id, audit_id
-    rescue => e
-      ExceptionAlertService.new(e, "548fa06d0d3b989b").perform
-    end
+    queue_domain_validation
   end
 
   # When the domain changed in the same save, ValidateDomainWorker runs the

@@ -34,6 +34,9 @@ class LoadBalancerAddr < ApplicationRecord
   #
   validates :role, inclusion: {in: %w[connect internal public proxy]}
 
+  # One declaration: a second after_commit naming the same method replaces the first.
+  after_commit :recheck_domain, if: :recheck_domain?
+
   # validate :is_ipaddr
   validate :ip_network_size
 
@@ -46,6 +49,26 @@ class LoadBalancerAddr < ApplicationRecord
   end
 
   private
+
+  # Only roles that LoadBalancer#full_public_ip_list reads (public and proxy)
+  # can change the domain check; a connect/internal change must not re-check,
+  # since a transient DNS failure would flip a valid domain.
+  DOMAIN_CHECK_ROLES = %w[public proxy].freeze
+
+  def recheck_domain?
+    return DOMAIN_CHECK_ROLES.include?(role) if previously_new_record? || destroyed?
+    return false unless saved_change_to_role? || saved_change_to_ip_addr?
+
+    DOMAIN_CHECK_ROLES.include?(role) || DOMAIN_CHECK_ROLES.include?(role_before_last_save)
+  end
+
+  # A domain checked before its address existed stays invalid until re-checked.
+  # Nothing to re-check when the load balancer itself is being destroyed.
+  def recheck_domain
+    lb = load_balancer
+    return if lb.nil? || lb.destroyed? || !LoadBalancer.exists?(lb.id)
+    lb.queue_domain_validation
+  end
 
   def ip_network_size
     Rails.logger.debug "#{ip_addr.inspect} #{ip_addr.class}"
