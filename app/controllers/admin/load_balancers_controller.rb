@@ -2,7 +2,7 @@ class Admin::LoadBalancersController < Admin::ApplicationController
   before_action :find_load_balancer, except: %w[index new create]
 
   def index
-    @load_balancers = LoadBalancer.sorted
+    @load_balancers = LoadBalancer.sorted.includes(:lets_encrypt, :region)
   end
 
   def show

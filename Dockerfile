@@ -57,6 +57,9 @@ RUN set -ex; \
 
 WORKDIR /usr/src/app
 
+# cert-issuer issues load balancer certificates (ACME DNS-01). Pinned by digest; see
+# https://github.com/ComputeStacks/cert-issuer for the contract.
+COPY --from=ghcr.io/computestacks/cert-issuer:0.1.0@sha256:a9526477c006f7bfced650f47968e53899fc4a3caebfe7ae59e88f96e7cb63f9 /usr/local/bin/cert-issuer /usr/local/bin/cert-issuer
 COPY lib/build/nginx.conf /etc/nginx/sites-enabled/default
 COPY lib/build/supervisord.conf /etc/supervisord.conf
 COPY . /usr/src/app
@@ -67,6 +70,7 @@ COPY . /usr/src/app
 # into the API version field, the Sentry release tag and the admin UI. As assignments
 # they fail the build instead.
 RUN cd /usr/src/app \
+      && /usr/local/bin/cert-issuer version \
       && CS_VERSION="$(cat VERSION)" \
       && [ -n "$CS_VERSION" ] \
       && CS_GIT_SHA="$(git rev-parse --short --verify HEAD)" \

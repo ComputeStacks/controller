@@ -1,0 +1,17 @@
+<div class="col-sm-4">
+  <div class="panel panel-body">
+    <strong>Load balancer certificates</strong>
+    <p style="margin-top:8px;">
+      Wildcard certificates for load balancers are validated over DNS by
+      cert-issuer, using a lego DNS provider.
+    </p>
+    <ul style="padding-left:18px;">
+      <li><b>DNS Provider:</b> the lego provider code, such as <code>cloudflare</code> or <code>route53</code>.
+        See the <%= link_to "lego DNS provider list", "https://go-acme.github.io/lego/dns/", target: "_blank", rel: "noopener" %>.</li>
+      <li><b>DNS Provider Credentials:</b> one <code>KEY=value</code> per line, using the variable names from that provider's lego page. Blank lines and lines starting with <code>#</code> are ignored.</li>
+      <li><b>DNS Alias Zone:</b> a zone hosted at that provider. Each load balancer then needs
+        <code>_acme-challenge.&lt;domain&gt; CNAME lb&lt;id&gt;.&lt;zone&gt;</code>; the load balancer's edit page shows the exact record.</li>
+    </ul>
+    <p class="text-muted" style="margin-bottom:0;">To issue a certificate now: <code>rake "lets_encrypt:issue_lb[&lt;id&gt;|all]"</code></p>
+  </div>
+</div>

@@ -18,6 +18,8 @@ class Setting < ApplicationRecord
 
   validates :name, uniqueness: true
 
+  validate :validate_dns_provider_settings
+
   before_save :set_value
 
   after_update_commit :check_billing_module
@@ -483,21 +485,77 @@ class Setting < ApplicationRecord
       ActiveRecord::Type::Boolean.new.cast s.value
     end
 
-    # @return [Integer]
-    def le_dns_sleep
-      s = Setting.find_by(name: "le_dns_sleep", category: "acme")
+    PROVIDER_ENV_KEY = /\A[A-Z_][A-Z0-9_]*\z/
+    PROVIDER_ENV_FORBIDDEN = %w[PATH].freeze
+    PROVIDER_ENV_PRODUCTION_FORBIDDEN = %w[CERT_ISSUER_INSECURE_SKIP_PROPAGATION_CHECK].freeze
+
+    ##
+    # DNS provider code (a lego DNS provider code) used for load balancer
+    # certificate DNS validation. Blank disables load balancer certificates.
+    #
+    # @return [String]
+    def le_dns_provider
+      s = Setting.find_by(name: "le_dns_provider", category: "acme")
       if s.nil?
         s = Setting.create!(
-          name: "le_dns_sleep",
+          name: "le_dns_provider",
           category: "acme",
-          description: "How long to wait (in seconds) before verifying DNS with wildcard certificates. Min 2, Max 90.",
-          value: "10",
+          description: "DNS provider code used for load balancer certificate DNS validation (a lego DNS provider code). Leave blank to disable load balancer certificates.",
+          value: "",
           encrypted: false
         )
       end
-      v = s.value.to_i
-      return 2 if v < 2
-      (v > 90) ? 90 : v
+      s.value.to_s.strip
+    end
+
+    ##
+    # Credentials for the DNS provider: one KEY=value per line.
+    #
+    # @return [String, nil]
+    def le_dns_provider_secret
+      s = Setting.find_by(name: "le_dns_provider_secret", category: "acme")
+      if s.nil?
+        s = Setting.create!(
+          name: "le_dns_provider_secret",
+          category: "acme",
+          description: "Credentials for the DNS provider, one KEY=value environment variable per line, using the provider's own variable names.",
+          value: "",
+          encrypted: true
+        )
+      end
+      s.value.blank? ? nil : s.decrypted_value
+    end
+
+    ##
+    # @return [Hash{String=>String}] environment variables for the DNS provider
+    # @raise [ArgumentError] when the stored credentials are malformed
+    def le_dns_provider_env
+      parse_provider_env(le_dns_provider_secret)
+    end
+
+    ##
+    # Parse KEY=value lines. Errors name the line number only; a line holds secrets.
+    #
+    # @param text [String, nil]
+    # @return [Hash{String=>String}]
+    # @raise [ArgumentError]
+    def parse_provider_env(text)
+      env = {}
+      text.to_s.each_line.with_index(1) do |raw, n|
+        line = raw.strip
+        next if line.empty? || line.start_with?("#")
+        key, sep, val = line.partition("=")
+        raise ArgumentError, "Line #{n}: expected KEY=value" if sep.empty?
+        key = key.strip
+        raise ArgumentError, "Line #{n}: invalid variable name" unless PROVIDER_ENV_KEY.match?(key)
+        raise ArgumentError, "Line #{n}: variable #{key} is not allowed" if PROVIDER_ENV_FORBIDDEN.include?(key)
+        if Rails.env.production? && PROVIDER_ENV_PRODUCTION_FORBIDDEN.include?(key)
+          raise ArgumentError, "Line #{n}: variable #{key} is not allowed in production"
+        end
+        raise ArgumentError, "Line #{n}: duplicate variable #{key}" if env.key?(key)
+        env[key] = val.strip
+      end
+      env
     end
 
     ##
@@ -511,7 +569,7 @@ class Setting < ApplicationRecord
         s = Setting.create!(
           name: "le_dns_alias_zone",
           category: "acme",
-          description: "Zone hosted on our DNS provider used to validate load balancer wildcard certificates whose domain is not hosted here. Each load balancer gets 'lb<id>.<zone>'; the operator adds a CNAME from '_acme-challenge.<lb domain>' to it. Leave blank to disable. This zone is managed by the system; do not edit it by hand or share it with another controller.",
+          description: "Zone managed by the DNS provider (le_dns_provider) for load balancer certificate validation. Each load balancer's '_acme-challenge.<domain>' must be a CNAME to 'lb<id>.<zone>'. Leave blank only if the DNS provider manages each load balancer's domain directly.",
           value: "",
           encrypted: false
         )
@@ -766,7 +824,8 @@ class Setting < ApplicationRecord
         le
         le_auto_enabled?
         le_dns_alias_zone
-        le_dns_sleep
+        le_dns_provider
+        le_dns_provider_secret
         monarx_init!
         registry_base_url
         registry_node
@@ -785,6 +844,23 @@ class Setting < ApplicationRecord
   end
 
   private
+
+  # Runs before set_value encrypts, so an encrypted value is still plaintext here.
+  def validate_dns_provider_settings
+    return unless will_save_change_to_value?
+    case name
+    when "le_dns_provider"
+      unless value.blank? || value.match?(/\A[a-z0-9][a-z0-9.-]*\z/)
+        errors.add(:value, "must be a DNS provider code (lowercase letters, digits, '.' and '-')")
+      end
+    when "le_dns_provider_secret"
+      begin
+        Setting.parse_provider_env(value)
+      rescue ArgumentError => e
+        errors.add(:value, e.message)
+      end
+    end
+  end
 
   def set_value
     if encrypted && !value.blank?

@@ -321,6 +321,86 @@ class Agent::ChangelogProjectorTest < ActiveSupport::TestCase
     assert_equal 7, @node.reload.changelog_acked
   end
 
+  test "a replaced control.db seen in the changelog resets cursor and ack, and the next pass re-reads from 0" do
+    @node.update_columns(agent_instance_id: "old", maintenance_seq: 900, changelog_cursor: 900, changelog_acked: 900)
+    # The new DB's seq has already passed the old cursor; its earlier rows are unread.
+    stub_changelog([maintenance_entry(901, instance: "new")], since: 900)
+    ack = stub_ack
+
+    Agent::ChangelogProjector.new(@node.reload).call
+
+    @node.reload
+    assert_equal "new", @node.agent_instance_id
+    assert_equal 0, @node.changelog_cursor, "the old cursor must not survive the replacement"
+    assert_equal 0, @node.changelog_acked
+    assert_not_requested ack
+
+    stub_changelog([task_entry(1, "t-new", status: "completed"), maintenance_entry(901, instance: "new")], since: 0)
+    Agent::ChangelogProjector.new(@node).call
+    assert_equal "completed", AgentTask.find("t-new").status
+    assert_equal 901, @node.reload.changelog_cursor
+    assert_equal 901, @node.changelog_acked
+  end
+
+  def stub_changelog_from(instance, entries:, since:, high_water:)
+    stub_request(:get, "#{@base}/v1/admin/changelog").with(query: hash_including("since" => since.to_s))
+      .to_return(status: 200, headers: {"Content-Type" => "application/json"},
+        body: {entries: entries, high_water: high_water, instance_id: instance}.to_json)
+  end
+
+  test "a changelog page from a new control.db is not projected; the drift refresh resets the cursor at once" do
+    @node.update_columns(agent_instance_id: "old", maintenance_requested: false, maintenance_holds: {"local" => {"since" => 1, "reason" => "x"}},
+      maintenance_seq: 900, changelog_cursor: 900, changelog_acked: 900)
+    stub_changelog_from("new", entries: [task_entry(950, "t-late")], since: 900, high_water: 950)
+    status = stub_request(:get, "#{@base}/v1/admin/maintenance").to_return(status: 200,
+      headers: {"Content-Type" => "application/json"},
+      body: {"paused" => false, "controller" => nil, "local" => nil, "controller_gen" => 0, "running" => [], "pending" => 0,
+             "skipped_backups" => 0, "seq" => 0, "quiesce" => "quiesced", "sample" => nil, "instance_id" => "new"}.to_json)
+    ack = stub_ack
+
+    Agent::ChangelogProjector.new(@node.reload).call
+
+    assert_requested status
+    assert_not_requested ack
+    assert_nil AgentTask.find_by(id: "t-late"), "a page read with the old cursor is not projected"
+    @node.reload
+    assert_equal "new", @node.agent_instance_id
+    assert_equal [0, 0], [@node.changelog_cursor, @node.changelog_acked]
+    assert_equal false, @node.maintenance, "the old instance's hold is dropped"
+
+    stub_changelog_from("new", entries: [task_entry(1, "t-new", status: "completed")], since: 0, high_water: 1)
+    Agent::ChangelogProjector.new(@node).call
+    assert_equal "completed", AgentTask.find("t-new").status
+    assert_equal 1, @node.reload.changelog_cursor
+  end
+
+  test "the same, an unknown, or a missing instance_id projects as usual" do
+    [["inst-1", "inst-1"], ["inst-1", nil], [nil, "inst-1"]].each_with_index do |(stored, reported), i|
+      WebMock.reset!
+      stub_ack
+      @node.update_columns(agent_instance_id: stored, changelog_cursor: i, changelog_acked: i)
+      stub_changelog_from(reported, entries: [task_entry(i + 1, "t-#{i}")], since: i, high_water: i + 1)
+      Agent::ChangelogProjector.new(@node.reload).call
+      assert_equal i + 1, @node.reload.changelog_cursor, "stored=#{stored.inspect} reported=#{reported.inspect}"
+    end
+  end
+
+  test "a reset that lands mid-pass is not overwritten by the stale pass" do
+    @node.update_columns(agent_instance_id: "old", changelog_cursor: 900, changelog_acked: 800)
+    stub_request(:get, "#{@base}/v1/admin/changelog").with(query: hash_including("since" => "900")).to_return do
+      # MaintenanceDriftWorker notices the new instance while this pass is in flight.
+      Node.where(id: @node.id).update_all(agent_instance_id: "new", changelog_cursor: 0, changelog_acked: 0)
+      {status: 200, body: {entries: [task_entry(950, "t1")], high_water: 950}.to_json,
+       headers: {"Content-Type" => "application/json"}}
+    end
+    ack = stub_ack
+
+    Agent::ChangelogProjector.new(@node.reload).call
+
+    assert_equal [0, 0], Node.where(id: @node.id).pick(:changelog_cursor, :changelog_acked)
+    assert_not_requested ack
+  end
+
   test "a malformed node_maintenance entry halts below it" do
     bad = {"seq" => 2, "entity_type" => "node_maintenance", "entity_id" => "node", "op" => "upsert", "payload" => nil}
     stub_changelog([task_entry(1, "t1", status: "completed"), bad])

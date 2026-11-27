@@ -1,7 +1,8 @@
 module LetsEncryptServices
   ##
   # Verify that a load balancer's domain delegates its ACME DNS-01 challenge
-  # to our DNS alias zone, i.e. that this record exists at the operator's DNS host:
+  # to the configured DNS alias zone, i.e. that this record exists at the operator's DNS host.
+  # The alias zone is only a name here; it does not need to exist as a local zone:
   #
   #   _acme-challenge.<domain>. CNAME lb<id>.<alias zone>.
   #
@@ -12,7 +13,7 @@ module LetsEncryptServices
   #   svc = LetsEncryptServices::DnsAliasCheckService.new(load_balancer)
   #   svc.perform # => true / false
   #   svc.errors  # => ["..."]
-  #   svc.failure # => nil, :no_alias, :missing_zone, :missing_record, :mismatch, :lookup_error
+  #   svc.failure # => nil, :no_alias, :missing_record, :mismatch, :lookup_error
   #
   class DnsAliasCheckService
     attr_reader :load_balancer, :errors, :failure
@@ -39,17 +40,6 @@ module LetsEncryptServices
       if expected.blank?
         errors << "No DNS alias zone is configured (setting 'le_dns_alias_zone'), so #{domain} cannot use DNS alias validation."
         @failure = :no_alias
-        return false
-      end
-
-      # Exact name, not Dns::Zone.find_covering: a suffix walk returns the
-      # shortest match, so with `acme.example.com` delegated to us and
-      # `example.com` also local, it would pick the parent zone, below the
-      # delegation cut, where ACME would never see the challenge record.
-      alias_zone = Setting.le_dns_alias_zone
-      if Dns::Zone.find_by(name: alias_zone).nil?
-        errors << "The DNS alias zone #{alias_zone} does not exist as a DNS zone in ComputeStacks. Create it (it must be delegated to our DNS servers) before using DNS alias validation."
-        @failure = :missing_zone
         return false
       end
 

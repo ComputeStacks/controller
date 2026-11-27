@@ -25,9 +25,15 @@ services:
     ports:
       - "${PDNS_DNS_PORT:?PDNS_DNS_PORT not set -- run this from a shell where mise has loaded .envrc (cd into the repo after 'mise trust'), or use 'mise exec -- docker compose ...'}:53/udp"
       - "${PDNS_API_PORT:?PDNS_API_PORT not set -- run this from a shell where mise has loaded .envrc (cd into the repo after 'mise trust'), or use 'mise exec -- docker compose ...'}:8081/tcp"
-  acme_test: # Only used for automated testing
+  acme_test: # Local ACME server for tests and dev certificates
     image: ghcr.io/letsencrypt/pebble:latest
-    command: -config /test/config/pebble-config.json -strict
+    # Pebble's bundled config also has a 6-day "shortlived" profile, which it
+    # picks at random when a client asks for none; that cert is always due for
+    # renewal, so dev would reissue it every few minutes. Ours has only the
+    # 90-day profile.
+    command: -config /dev-config/pebble-config.json -strict
+    volumes:
+      - ./lib/dev/pebble/pebble-config.json:/dev-config/pebble-config.json:ro
     environment:
       - GODEBUG="tls13=1"
       - PEBBLE_VA_ALWAYS_VALID=1

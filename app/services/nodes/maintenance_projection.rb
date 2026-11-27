@@ -41,9 +41,13 @@ module Nodes
         if instance && locked.agent_instance_id.nil?
           locked.update_columns(agent_instance_id: instance) # first contact: adopt silently
         elsif instance && locked.agent_instance_id != instance
-          # control.db was replaced: its seq restarted, so the old guard means nothing.
+          # control.db was replaced: its seq restarted, so the old guards mean nothing.
+          # The changelog cursor/ack restart too, or Agent::ChangelogProjector would skip
+          # every new entry until the new seq passed the old cursor. A projector pass
+          # already in flight can't re-poison them: its writes are gated on the
+          # instance it started with.
           replaced = [locked.agent_instance_id, instance]
-          locked.update_columns(agent_instance_id: instance, maintenance_seq: 0)
+          locked.update_columns(agent_instance_id: instance, maintenance_seq: 0, changelog_cursor: 0, changelog_acked: 0)
         end
 
         scope = Node.where(id: locked.id)
@@ -181,7 +185,7 @@ module Nodes
 
     def report_instance_change(node, old_id, new_id)
       SystemEvent.create!(
-        message: "agent control.db replaced on #{node.label} [node #{node.id}]: maintenance state re-synced from the new instance",
+        message: "agent control.db replaced on #{node.label} [node #{node.id}]: maintenance state and changelog re-synced from the new instance",
         log_level: "warn",
         data: {"node_id" => node.id, "old_instance_id" => old_id, "new_instance_id" => new_id},
         event_code: "356126ba18ab3539"

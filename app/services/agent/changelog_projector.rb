@@ -59,8 +59,13 @@ module Agent
     private
 
     def project
+      # The instance this pass's cursor belongs to (same load as the cursor). A changed
+      # instance_id resets cursor/ack (Nodes::MaintenanceProjection); gating our writes
+      # on it keeps a pass that started before the reset from re-poisoning them.
+      @instance_id = @node.agent_instance_id
       client = Agent::Client.for_node(@node)
       entries = client.changelog(since: @node.changelog_cursor, limit: PULL_LIMIT)
+      return resync_instance if instance_replaced?(client.last_instance_id)
       high_water = client.last_high_water.to_i
       if entries.empty? # steady state; still flush a pending ack
         advance_cursor(high_water) if high_water > @node.changelog_cursor
@@ -245,21 +250,53 @@ module Agent
 
     # --- cursor + ack --------------------------------------------------------------
 
-    # Advance with GREATEST so a stale in-memory value can never regress the DB.
+    # Advance with GREATEST so a stale in-memory value can never regress the DB. No-op
+    # once the control.db instance changed under this pass (the next pass re-reads
+    # from the reset cursor; projection is idempotent).
     def advance_cursor(seq)
-      Node.where(id: @node.id).update_all(["changelog_cursor = GREATEST(changelog_cursor, ?)", seq.to_i])
+      return unless same_instance_scope.update_all(["changelog_cursor = GREATEST(changelog_cursor, ?)", seq.to_i]) == 1
       @node.changelog_cursor = [@node.changelog_cursor, seq].max
     end
 
     # Report the durable projection watermark to the agent (drives its prune). Only POST
     # when the cursor has moved past the last acked seq; monotonic, tolerant. GREATEST on
-    # the write guards against regression.
+    # the write guards against regression. Never ack an old instance's seq to a new
+    # control.db (it would let the agent prune rows we haven't read).
     def flush_ack
       seq = @node.changelog_cursor
       return if seq <= @node.changelog_acked
+      return unless same_instance_scope.exists?
       return unless Agent::Client.for_node(@node).ack_changelog(seq)
-      Node.where(id: @node.id).update_all(["changelog_acked = GREATEST(changelog_acked, ?)", seq.to_i])
+      same_instance_scope.update_all(["changelog_acked = GREATEST(changelog_acked, ?)", seq.to_i])
       @node.changelog_acked = [@node.changelog_acked, seq].max
+    end
+
+    # --- replaced control.db ---------------------------------------------------------
+
+    # The page came from a different control.db than our cursor belongs to (agents that
+    # predate instance_id in the changelog response omit it; the drift worker covers
+    # them). With no stored instance yet, first contact is adopted by the maintenance
+    # projection, not here.
+    def instance_replaced?(reported)
+      reported.present? && @instance_id.present? && reported != @instance_id
+    end
+
+    # Project nothing from this page (it was read with the old cursor). Run the drift
+    # refresh now instead of waiting up to 2 minutes for it: it reads the agent's
+    # maintenance Status under the maintenance lock, and its instance change resets
+    # cursor and ack (Nodes::MaintenanceProjection) and re-syncs the holds. The next
+    # pass reads from seq 0. If a push or drift pass holds the lock, that's fine: we
+    # skip again and retry on the next poll.
+    def resync_instance
+      Rails.logger.info("agent changelog: #{@node.label} reports a new control.db instance; re-syncing")
+      AgentWorkers::MaintenanceDriftWorker.new.refresh!(@node)
+    end
+
+    # Ungated while no instance is known: first contact adopts the id without a reset
+    # (and an agent < 3.4 never reports one).
+    def same_instance_scope
+      scope = Node.where(id: @node.id)
+      @instance_id.nil? ? scope : scope.where(agent_instance_id: @instance_id)
     end
 
     # --- per-node advisory lock ----------------------------------------------------

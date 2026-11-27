@@ -51,6 +51,15 @@ class Nodes::MaintenanceProjectionTest < ActiveSupport::TestCase
     assert_equal "first", @node.reload.agent_instance_id
   end
 
+  test "a changed instance_id resets the changelog cursor and ack; first contact does not" do
+    @node.update_columns(changelog_cursor: 900, changelog_acked: 900)
+    apply(payload(instance: "old"), 50)
+    assert_equal [900, 900], [@node.reload.changelog_cursor, @node.changelog_acked]
+
+    apply(payload(instance: "new"), 3)
+    assert_equal [0, 0], [@node.reload.changelog_cursor, @node.changelog_acked]
+  end
+
   test "a changed instance_id resets the seq guard and alerts" do
     apply(payload(local: {"since" => 1, "reason" => "x"}, instance: "old"), 50)
 

@@ -38,15 +38,15 @@ class LoadBalancerAcmeDnsAliasTest < ActiveSupport::TestCase
     assert_nil LoadBalancer.new(domain: "x.example.com").acme_dns_alias
   end
 
-  test "alias required when no local zone covers the domain" do
+  test "alias required when an alias zone is set" do
     set_alias_zone("acme.example.com")
     assert @lb.acme_dns_alias_required?
   end
 
-  test "alias not required when a local zone covers the domain" do
+  test "alias still required when a local zone covers the domain" do
     set_alias_zone("acme.example.com")
     @lb.update_columns(domain: "apps.foo.local")
-    refute @lb.acme_dns_alias_required?
+    assert @lb.acme_dns_alias_required?
   end
 
   test "alias not required when automatic certificates are off" do

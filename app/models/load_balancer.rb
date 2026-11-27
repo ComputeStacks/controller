@@ -319,8 +319,7 @@ class LoadBalancer < ApplicationRecord
   end
 
   # Name in the ACME DNS alias zone that `_acme-challenge.<domain>` should
-  # CNAME to, so the wildcard DNS-01 challenge can be answered when `domain`
-  # is not hosted on our DNS provider.
+  # CNAME to, so the wildcard DNS-01 challenge is answered in the alias zone.
   #
   # @return [String, nil]
   def acme_dns_alias
@@ -329,14 +328,12 @@ class LoadBalancer < ApplicationRecord
     "lb#{id}.#{zone}"
   end
 
-  # True when automatic certificates are on, an alias zone is configured, and
-  # no local DNS zone covers this load balancer's domain.
+  # True when automatic certificates are on and an alias zone is configured.
+  # Always CNAME: required even when a local DNS zone covers the domain.
   #
   # @return [Boolean]
   def acme_dns_alias_required?
-    return false unless le
-    return false if acme_dns_alias.blank?
-    Dns::Zone.find_covering(domain).nil?
+    le && acme_dns_alias.present?
   end
 
   # Public so LoadBalancerAddr can call it.

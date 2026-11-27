@@ -46,6 +46,9 @@ module LoadBalancerServices
         event.fail! "Failure"
       else
         load_balancer.update lets_encrypt: lecert
+        # Link before enqueuing so the renewal sweep and the running-request
+        # guard see this request.
+        event.lets_encrypts << lecert unless event.lets_encrypts.exists?(lecert.id)
         LetsEncryptWorkers::GenerateCertWorker.perform_async lecert.id, event.id
       end
       errors.empty?

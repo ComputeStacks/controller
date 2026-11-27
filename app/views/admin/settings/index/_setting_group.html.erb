@@ -7,6 +7,16 @@
           <div class="remote-resource pull-right" data-url="/admin/settings/billing_module"></div>
         <% end %>
       </div>
+      <% if group == 'acme' && (acme_warnings = acme_lb_warnings).any? %>
+        <div class="panel-body" style="padding-top:0;">
+          <div class="alert alert-warning" style="margin-bottom:0;">
+            <% acme_warnings.each do |w| %><div><%= w %></div><% end %>
+            <% if acme_warnings.any? { |w| w.include?("failed to renew") } %>
+              <div><%= link_to "View certificates", "/admin/lets_encrypt" %></div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
       <table class="table table-list">
         <tbody>
         <% items.each do |i| %>

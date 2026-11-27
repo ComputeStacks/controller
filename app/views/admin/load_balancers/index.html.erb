@@ -16,6 +16,7 @@
             <th>Public IP</th>
             <th>Domain</th>
             <th>Domain Check</th>
+            <th>Certificate</th>
             <th>Last Deployed</th>
             <th></th>
           </tr>
@@ -23,7 +24,7 @@
         <tbody>
           <% if @load_balancers.empty? %>
             <tr>
-              <td colspan="7" class="text-center">No Load Balancers</td>
+              <td colspan="8" class="text-center">No Load Balancers</td>
             </tr>
           <% end %>
           <% @load_balancers.each do |lb| %>
@@ -43,6 +44,7 @@
                   <span class="label label-danger">Invalid</span> <small class="text-muted"><%= l lb.domain_valid_check.to_date %></small>
                 <% end %>
               </td>
+              <td><%= admin_lb_certificate_status(lb) %></td>
               <td class="remote-resource refresh" data-url="<%= "/admin/load_balancers/#{lb.id}?js=true" %>"><%= l lb.job_performed %></td>
               <td class="text-right">
                 <%= link_to icon('fa-solid', 'rotate'), "/admin/load_balancers/#{lb.id}/deploy_load_balancer", method: :post, class: 'btn btn-success btn-sm', title: 'Deploy LoadBalancer Config', data: { confirm: 'Are you sure?' } %>

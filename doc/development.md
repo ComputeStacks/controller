@@ -418,6 +418,80 @@ wildcard certificate.
    curl -sI https://cs.dev.example.com/ | head -1
    ```
 
+## Load balancer certificates (cert-issuer + pebble)
+
+Load balancer certificates are wildcard certificates issued over DNS-01 by the
+`cert-issuer` binary, which the production image bundles at
+`/usr/local/bin/cert-issuer`. In development the controller runs outside docker,
+so it needs its own copy of the binary, an ACME server and a DNS provider. Dev
+uses fakes for the last two:
+
+- **ACME server:** the compose `acme_test` service (pebble). It runs with
+  `PEBBLE_VA_ALWAYS_VALID=1`, so it accepts every challenge without checking
+  DNS. Its certificates are not trusted by browsers, which is fine for dev.
+- **DNS provider:** lego's `exec` provider with `EXEC_PATH=/bin/true`, so no
+  DNS record is ever written, plus `CERT_ISSUER_INSECURE_SKIP_PROPAGATION_CHECK=1`
+  so cert-issuer doesn't wait for one. The controller refuses that switch in
+  production.
+
+This exercises the whole controller side (requests, storing the certificate,
+backoff, deploying to HAProxy, the admin pages) but not a real DNS provider.
+
+### New installs
+
+`bundle exec rake setup_dev` does all of it: it runs `rake dev:acme_pebble`
+(below) and `lib/dev/install-cert-issuer.sh`.
+
+### Updating an existing dev environment
+
+After pulling the release that introduced cert-issuer (v9.9.0):
+
+```
+bundle exec rails db:migrate
+lib/dev/install-cert-issuer.sh      # copies the binary into lib/dev/bin/
+bundle exec rake dev:acme_pebble    # points ACME at pebble, sets the exec provider
+docker compose up -d acme_test      # if pebble isn't already running
+```
+
+Then restart `./bin/dev`.
+
+- `lib/dev/install-cert-issuer.sh` reads the image the `Dockerfile` pins and
+  copies the binary out of it into `lib/dev/bin/cert-issuer` (gitignored),
+  where the app looks for it outside production. Re-run it whenever the pin
+  changes; it does nothing when the installed version already matches. To use
+  a binary somewhere else, export `CERT_ISSUER_BIN=/path/to/cert-issuer`.
+- `rake dev:acme_pebble` only changes settings that are unset or still at
+  their defaults: `acme_directory` (from Let's Encrypt staging to
+  `https://$DOCKER_IP:$ACME_API_PORT/dir`), `le_dns_provider` (`exec`) and its
+  credentials. It leaves a provider or directory you set yourself alone. Since
+  `acme_directory` is global, container-domain certificates (HTTP-01) also come
+  from pebble afterwards.
+- Leave **DNS Alias Zone** blank. With it set, every load balancer needs a real
+  `_acme-challenge` CNAME, which a dev setup doesn't have.
+
+### Issuing a certificate
+
+Turn on **Enable Automatic SSL Certificate** on the dev load balancer, then
+click Validate Domain on the load balancer list, or issue it directly:
+
+```
+bundle exec rake "lets_encrypt:issue_lb[<load balancer id>]"
+```
+
+The load balancer list then shows the certificate's expiry; failures appear on
+**Admin -> ACME Certificates** with the reason in the event log.
+
+pebble keeps everything in memory, so restarting the `acme_test` container
+forgets its accounts. cert-issuer registers the account again on the next run;
+container-domain certificates may fail until you clear the stale account
+(`LetsEncryptAccount.update_all(account_id: nil)` in `rails console`).
+
+### Tests
+
+`test/services/lets_encrypt_services/cert_issuer_contract_test.rb` runs
+whenever the binary is found. The end-to-end test against pebble is opt-in:
+`CERT_ISSUER_PEBBLE=1 bin/rails test test/integration/cert_issuer_pebble_test.rb`.
+
 ## Verification
 
 - `single-node.sh`'s own step 17 self-checks run at the end of both the first

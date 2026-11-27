@@ -29,7 +29,7 @@
               <td><%= link_to i.id, "/admin/lets_encrypt/#{i.id}" %></td>
               <td><%= i.user.nil? ? "System" : link_to(i.user.full_name, admin_user_path(i.user)) %></td>
               <td><%= truncate i.names.join(", "), length: 20 %></td>
-              <td><%= i.status %></td>
+              <td><%= i.status %><% if i.failure_count.to_i > 0 %> <span class="label label-danger" title="<%= admin_lets_encrypt_backoff(i) %>"><%= pluralize(i.failure_count, "failure") %></span><% end %></td>
               <td><%= i.expires_at.nil? ? "n/a" : l(i.expires_at, format: :short) %></td>
               <td><%= i.last_generated_at.nil? ? "n/a" : l(i.last_generated_at, format: :short) %></td>
               <td><%= l i.created_at, format: :short %></td>

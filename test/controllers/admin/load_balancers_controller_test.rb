@@ -20,6 +20,24 @@ class LoadBalancersControllerTest < ActionDispatch::IntegrationTest
     assert_select "span.label-danger", "Invalid"
   end
 
+  test "the list shows certificate expiry and renewal backoff" do
+    lb = load_balancers(:default)
+    cert = LetsEncrypt.create!(user_id: nil, account: LetsEncryptAccount.create!)
+    lb.update_columns(le: true, lets_encrypt_id: cert.id)
+    get "/admin/load_balancers"
+    assert_select "span.label-warning", "Not issued"
+
+    cert.update_columns(expires_at: 5.days.from_now, failure_count: 3, next_attempt_at: 2.hours.from_now)
+    get "/admin/load_balancers"
+    assert_select "span.label-danger", "5d left"
+    assert_select "small.text-danger", /3 failed attempts, retry in about 2 hours/
+
+    cert.update_columns(expires_at: 60.days.from_now, failure_count: 0, next_attempt_at: nil)
+    get "/admin/load_balancers"
+    assert_select "span.label-success", "60d left"
+    assert_select "small.text-danger", false
+  end
+
   test "can create new load balancer" do
     key = OpenSSL::PKey::RSA.new(2048)
     public_key = key.public_key

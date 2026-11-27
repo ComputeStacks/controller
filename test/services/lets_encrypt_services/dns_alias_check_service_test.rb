@@ -20,7 +20,6 @@ class LetsEncryptServices::DnsAliasCheckServiceTest < ActiveSupport::TestCase
   setup do
     @lb = load_balancers(:default)
     @lb.update_columns(le: true)
-    Dns::Zone.create!(name: "acme.bar.local", skip_provision_driver: true)
     Setting.le_dns_alias_zone
     Setting.find_by(name: "le_dns_alias_zone").update_columns(value: "acme.bar.local")
     @alias = "lb#{@lb.id}.acme.bar.local"
@@ -67,13 +66,6 @@ class LetsEncryptServices::DnsAliasCheckServiceTest < ActiveSupport::TestCase
     refute ok
     assert_equal :lookup_error, svc.failure
     refute_empty svc.errors
-  end
-
-  test "fails when the alias zone is not a local zone" do
-    Dns::Zone.find_by(name: "acme.bar.local").destroy
-    ok, svc = check({[@qname, "CNAME"] => ["#{@qname}. 300 IN CNAME #{@alias}."]})
-    refute ok
-    assert_equal :missing_zone, svc.failure
   end
 
   test "fails when no alias zone is configured" do

@@ -11,12 +11,14 @@
     .col-sm-12: .form-group
       = label_tag :value, 'Value'
       - if @setting.encrypted
-        = f.text_area :value, class: 'form-control', value: @setting.decrypted_value, rows: 5
+        = f.text_area :value, class: "form-control#{' code-font' if setting_display_in_fw_font?(@setting)}", value: (@setting.errors.any? ? @setting.value : @setting.decrypted_value), rows: 5, placeholder: setting_placeholder(@setting), spellcheck: false, autocomplete: 'off'
       - else
         - if @setting.name == 'billing_module'
           = f.select :value, options_for_select(setting_billing_module_list, @setting.value), {}, class: 'form-control'
         - else
-          - if setting_display_in_fw_font?(@setting)
+          - if setting_single_line?(@setting)
+            = f.text_field :value, class: 'form-control code-font', placeholder: setting_placeholder(@setting), spellcheck: false
+          - elsif setting_display_in_fw_font?(@setting)
             = f.text_area :value, class: 'form-control code-font', rows: 5
           - else
             = f.text_area :value, class: 'form-control', rows: 5

@@ -359,7 +359,9 @@ print_next_steps() {
   echo "      docker compose up -d"
   echo "      bundle install"
   echo "      ./bin/rails db:setup"
-  echo "      bundle exec rake setup_dev    # creates the Node row for ${node_display}"
+  echo "      bundle exec rake setup_dev    # creates the Node row for ${node_display},"
+  echo "                                    # points ACME at the local pebble and installs"
+  echo "                                    # cert-issuer (load balancer certificates)"
   echo "      ./bin/dev                     # web, worker, clock on :3005"
   echo
   echo " 5. Back on the node VM, enroll it:"

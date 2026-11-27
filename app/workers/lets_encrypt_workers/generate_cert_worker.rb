@@ -7,6 +7,9 @@ module LetsEncryptWorkers
 
     sidekiq_options retry: false, queue: "acme"
 
+    EXPIRY_ALERT_CODE = "c9cbc1bf4793da31"
+    WILDCARD_UNSUPPORTED_CODE = "643b139e88b3d942"
+
     # @param lets_encrypt_id [Integer] id of {LetsEncrypt}
     # @param event_id [Integer] id of {EventLog}
     def perform(lets_encrypt_id, event_id = nil)
@@ -14,6 +17,11 @@ module LetsEncryptWorkers
         return unless Setting.le_auto_enabled?
         LetsEncrypt.all.each do |le|
           next unless le.can_renew?
+          if le.load_balancers.exists?
+            alert_if_expiring(le)
+            next if Setting.le_dns_provider.blank?
+            next if le.next_attempt_at.present? && le.next_attempt_at > Time.now
+          end
           next if le.event_logs.where(status: "running").exists?
           LetsEncryptWorkers::GenerateCertWorker.perform_async le.id
         end
@@ -30,12 +38,21 @@ module LetsEncryptWorkers
       lets_encrypt = LetsEncrypt.find_by(id: lets_encrypt_id)
       return false if lets_encrypt.nil?
 
+      # Load balancer certificates are issued by cert-issuer (DNS-01), which
+      # runs its own guard against concurrent runs.
+      lb_cert = lets_encrypt.load_balancers.exists?
+
       # Dont try to generate at the same time!
-      return false if lets_encrypt.event_logs.where(status: "running").exists?
+      return false if !lb_cert && lets_encrypt.event_logs.where(status: "running").where.not(id: event&.id).exists?
 
       # Determine if we need a new account.
       unless lets_encrypt.has_default_acme_provider?
         lets_encrypt.update account: LetsEncryptAccount.find_or_create
+      end
+
+      if lb_cert
+        outcome = LetsEncryptServices::CertIssuerService.new(lets_encrypt, event: event, sweep: event_id.nil?).perform
+        return outcome == :issued
       end
 
       account_client = lets_encrypt.account.client
@@ -68,69 +85,20 @@ module LetsEncryptWorkers
         # auth_domain = auth.wildcard ? "*.#{auth.domain}" : auth.domain
         auth_request = lets_encrypt.lets_encrypt_auths.create!(domain: auth.domain)
         if auth.wildcard
-          auth_challenge = auth.dns
-          primary_domain = auth_request.dns_zone
-          if primary_domain.nil?
-            alias_zone = Setting.le_dns_alias_zone
-            reason = if alias_zone.blank?
-              "No local zone file found, and no DNS alias zone is configured."
-            elsif auth_request.dns_alias.present?
-              "No local zone file found, and the DNS alias zone #{alias_zone} does not exist as a DNS zone in ComputeStacks."
-            else
-              "No local zone file found."
-            end
-            event.event_details.create!(
-              data: "Unable to validate #{domain} using DNS: #{reason}",
-              event_code: "0994c35516f37636"
-            )
-            event.fail! "Missing zone file"
-            break
-          end
-          # On the alias path, confirm the operator's CNAME is in place before
-          # touching DNS or the CA: a DNS-01 attempt without it is a certain
-          # failed authorization, and the renewal sweep would repeat it.
-          if auth_request.dns_alias.present?
-            alias_check = LetsEncryptServices::DnsAliasCheckService.new(auth_request.load_balancer)
-            unless alias_check.perform
-              alias_check.errors.each do |err|
-                event.event_details.create!(data: err, event_code: "7774fe2fd9ee5ae0")
-              end
-              event.fail! "DNS Alias Missing"
-              break
-            end
-          end
-          unless primary_domain.system_can_update?
-            event.event_details.create!(
-              data: "Unable to modify DNS Zone file for #{domain}: You have uncommitted changes. Please save them, or revert the zone file to the copy from the DNS server.",
-              event_code: "710c75e09bec15ed"
-            )
-            event.fail! "Dirty Zone File State"
-            break
-          end
-          auth_request.update(
-            challenge_type: "dns",
-            record_name: auth_challenge.record_name,
-            record_type: auth_challenge.record_type,
-            record_content: auth_challenge.record_content,
-            expires_at: auth.expires
+          event.event_details.create!(
+            data: "Unable to validate #{domain}: Wildcard names are only supported on load balancer certificates.",
+            event_code: WILDCARD_UNSUPPORTED_CODE
           )
-          dns_challenge = LetsEncryptServices::DnsChallengeService.new(auth_request, event)
-          unless dns_challenge.perform
-            event.fail! "DNS Challenge Failed"
-            break
-          end
-          # You can only request dns validation once, so we need to allow some time to process
-          sleep(Setting.le_dns_sleep)
-          auth_challenge.reload
-        else # HTTP Auth
-          auth_challenge = auth.http
-          auth_request.update(
-            challenge_type: "http",
-            token: auth_challenge.token,
-            content: auth_challenge.file_content,
-            expires_at: auth.expires
-          )
+          event.fail! "Wildcard not supported"
+          break
         end
+        auth_challenge = auth.http
+        auth_request.update(
+          challenge_type: "http",
+          token: auth_challenge.token,
+          content: auth_challenge.file_content,
+          expires_at: auth.expires
+        )
 
         auth_challenge.request_validation
         challenge_timeout = (Rails.env.test? ? 5.seconds.from_now : 4.minutes.from_now).to_time
@@ -142,17 +110,11 @@ module LetsEncryptWorkers
         # Handle a failed validation
         unless auth_challenge.status == "valid"
           # Remove from domain list, remove valid status on domain, and log error.
-          if auth.wildcard
-            LetsEncryptServices::ValidationResponseService.new(
-              nil, domain, auth_challenge.error, event
-            ).perform
-          else
-            container_domain = Deployment::ContainerDomain.find_by(domain: domain)
-            event.container_domains << container_domain if container_domain
-            LetsEncryptServices::ValidationResponseService.new(
-              container_domain, domain, auth_challenge.error, event
-            ).perform
-          end
+          container_domain = Deployment::ContainerDomain.find_by(domain: domain)
+          event.container_domains << container_domain if container_domain
+          LetsEncryptServices::ValidationResponseService.new(
+            container_domain, domain, auth_challenge.error, event
+          ).perform
           # Remove the failed domain from the list of valid domains.
           domains.delete domain
           if domains.empty?
@@ -309,8 +271,9 @@ module LetsEncryptWorkers
         event.fail! "Fatal Error"
       end
     ensure
-      if defined?(event) && event
-        event.reload
+      # find_by: can_provision? may have deleted the event.
+      event = EventLog.find_by(id: event.id) if defined?(event) && event
+      if event
         case event.status
         when "running"
           event.fail! "Fatal Error"
@@ -335,6 +298,22 @@ module LetsEncryptWorkers
         event.lets_encrypts << lets_encrypt if lets_encrypt
         event
       end
+    end
+
+    # Load balancer certs close to expiry that keep failing to renew, or can't
+    # renew because no DNS provider is configured: alert at most once per cert
+    # per day.
+    def alert_if_expiring(le)
+      return if le.expires_at.nil? || le.expires_at >= 14.days.from_now
+      no_provider = Setting.le_dns_provider.blank?
+      return unless no_provider || le.failure_count.to_i > 0
+      return unless Rails.cache.write("le_expiry_alert:#{le.id}", true, expires_in: 1.day, unless_exist: true)
+      domains = le.load_balancers.pluck(:domain).join(", ")
+      reason = no_provider ? "cannot renew because no DNS provider is configured (setting le_dns_provider)" : "has failed to renew #{le.failure_count} time(s) in a row"
+      ExceptionAlertService.new(
+        RuntimeError.new("Load balancer certificate for #{domains} expires #{le.expires_at.utc.iso8601} and #{reason} (LetsEncrypt #{le.id})."),
+        EXPIRY_ALERT_CODE
+      ).perform
     end
 
     def reload_load_balancer!(lets_encrypt)

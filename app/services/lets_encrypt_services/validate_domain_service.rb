@@ -62,9 +62,8 @@ module LetsEncryptServices
     private
 
     ##
-    # When the load balancer's domain is not hosted on our DNS and an ACME DNS
-    # alias zone is configured, the wildcard challenge must be delegated to us
-    # with `_acme-challenge.<domain> CNAME <alias>`.
+    # When an ACME DNS alias zone is configured, the wildcard challenge must
+    # be delegated to it, for every load balancer, with `_acme-challenge.<domain> CNAME <alias>`.
     def valid_dns_alias?
       return true unless load_balancer&.acme_dns_alias_required?
 

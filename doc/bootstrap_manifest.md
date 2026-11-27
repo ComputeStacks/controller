@@ -471,6 +471,7 @@ Settings the provisioner is expected to set:
 | `cr_le` | `container_registry` | Domain to use for the registry's ACME certificate. Blank disables it. Note the row may still be sitting under the legacy `computestacks` category on an old install; `Setting.computestacks_cr_le` migrates it, and `Setting.setup!` calls that — another reason to leave `defaults: true`. |
 | `app_name`, `company_name`, `general_support` | branding/general | Optional. |
 | `acme_directory`, `acme_email` | `acme` | Optional; `acme_kid` / `acme_hmac_key` are encrypted (EAB). |
+| `le_dns_alias_zone`, `le_dns_provider`, `le_dns_provider_secret` | `acme` | Load balancer certificate DNS validation. `le_dns_provider` is a lego DNS provider code (blank disables load balancer certificates). `le_dns_provider_secret` is encrypted and multi-line, one `KEY=value` environment variable per line (use a YAML block scalar); it is validated on save and redacted in diffs. |
 | `smtp_server`, `smtp_port`, `smtp_username`, `smtp_password`, `smtp_from` | `mail` | Optional. `smtp_password` is encrypted. |
 
 ---

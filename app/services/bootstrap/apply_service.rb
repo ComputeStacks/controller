@@ -202,8 +202,8 @@ module Bootstrap
     # anything containing "hmac". Checked against every name Setting.setup!
     # creates:
     #
-    #   REDACTED (9): belco_api_key, belco_shared_secret, dixa_api_key,
-    #     acme_hmac_key, monarx_api_key, monarx_api_secret, monarx_agent_key,
+    #   REDACTED (10): belco_api_key, belco_shared_secret, dixa_api_key,
+    #     acme_hmac_key, le_dns_provider_secret, monarx_api_key, monarx_api_secret, monarx_agent_key,
     #     monarx_agent_secret, smtp_password
     #     (belco_api_key and dixa_api_key are the two that were plaintext and
     #     unredacted before this pattern existed; the rest are already
@@ -215,7 +215,7 @@ module Bootstrap
     #     branding_img_login, branding_email_logo, company_name,
     #     cs_bastion_image, cr_le, dixa, signup_form, general_support,
     #     google_analytics, google_analytics_id, hostname, le, le_auto,
-    #     le_dns_sleep, monarx_active, monarx_enterprise_id,
+    #     le_dns_provider, monarx_active, monarx_enterprise_id,
     #     registry_base_url, registry_node, registry_selinux,
     #     registry_ssh_port, smtp_from, smtp_server, smtp_port,
     #     smtp_username, ssh_motd, webhook_billing_event,

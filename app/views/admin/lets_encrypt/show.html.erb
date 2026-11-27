@@ -51,6 +51,25 @@
 
 </div>
 
+<% if @lets_encrypt.load_balancers.exists? %>
+  <div class="row" style="margin-top:25px;">
+    <div class="col-sm-12">
+      <% if (backoff = admin_lets_encrypt_backoff(@lets_encrypt)) %>
+        <div class="alert alert-danger" style="margin-bottom:0;">
+          <strong>Renewal failing:</strong> <%= backoff %>. The latest certificate event in the event log has the cause.
+          To retry now, run <code>rake "lets_encrypt:issue_lb[<%= @lets_encrypt.load_balancers.first.id %>]"</code>.
+        </div>
+      <% else %>
+        <div class="alert alert-info" style="margin-bottom:0;">
+          Load balancer certificate for
+          <%= safe_join(@lets_encrypt.load_balancers.map { |lb| link_to(lb.label, edit_admin_load_balancer_url(lb)) }, ", ") %>,
+          issued over DNS by cert-issuer.
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
 <div class="row" style="margin-top:25px;">
   <div class="col-md-6 col-sm-12">
     <div class="panel panel-primary">

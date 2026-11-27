@@ -2,11 +2,11 @@
   .row.has-breadcrumb
     ol.breadcrumb
       li= link_to "General Settings", "/admin/settings"
-      li.active= "#{@setting.name} Edit"
+      li.active= "Edit #{normalize_setting_title @setting.name}"
 
 
 .row: div class="#{settings_form_cols @setting}"
-  p.lead= "Edit #{@setting.name}"
+  p.lead= "Edit #{normalize_setting_title @setting.name}"
 
 .row
   div class="#{settings_form_cols @setting}"
@@ -15,5 +15,7 @@
 
   - if @setting.errors.count.zero? && !settings_avail_vars(@setting).empty?
     = render partial: 'admin/settings/vars', locals: { setting: @setting }
+  - elsif @setting.errors.count.zero? && setting_help_partial(@setting)
+    = render partial: setting_help_partial(@setting), locals: { setting: @setting }
   - elsif @setting.errors.count > 0
     = render partial: 'admin/billing_plans/errors'

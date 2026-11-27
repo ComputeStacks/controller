@@ -36,6 +36,10 @@ module Agent
     # scanned. nil before a call, or when the call failed.
     attr_reader :last_high_water
 
+    # The `instance_id` (the agent's control.db id) of the last #changelog response.
+    # nil before a call, when the call failed, or from an agent that predates it.
+    attr_reader :last_instance_id
+
     # Build a client scoped to a node for admin/node-level calls that aren't tied to
     # a project (e.g. the changelog pull). `project` is unused by those calls, so it
     # is safe to pass nil here — resolve_node/token_hash/project.id are never reached.
@@ -148,10 +152,12 @@ module Agent
     # @param entity_type [String, nil] optional server-side filter
     # @param limit [Integer]
     # Advertises `X-CS-Changelog-Types: node_maintenance`, so maintenance entries are
-    # included, and records the response's `high_water` in #last_high_water.
+    # included, and records the response's `high_water` in #last_high_water and its
+    # `instance_id` in #last_instance_id.
     # @return [Array<Hash>] entries (possibly empty)
     def changelog(since:, entity_type: nil, limit: 1000)
       @last_high_water = nil
+      @last_instance_id = nil
       q = {since: since, limit: limit}
       q[:entity_type] = entity_type if entity_type
       resp = http.headers("X-CS-Changelog-Types" => CHANGELOG_TYPES).get("#{base_url}/v1/admin/changelog", params: q)
@@ -162,6 +168,7 @@ module Agent
       data = JSON.parse(resp.body.to_s)
       return [] unless data.is_a?(Hash)
       @last_high_water = Integer(data["high_water"], exception: false) if data.key?("high_water")
+      @last_instance_id = data["instance_id"].presence&.to_s
       Array(data["entries"])
     rescue Errno::ECONNREFUSED, SocketError, HTTP::Error, JSON::ParserError => e
       # A node in maintenance is expected to be unreachable at times (rebooting, docker

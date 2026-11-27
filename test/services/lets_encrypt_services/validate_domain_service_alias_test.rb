@@ -21,7 +21,6 @@ class LetsEncryptServices::ValidateDomainServiceAliasTest < ActiveSupport::TestC
   setup do
     @lb = load_balancers(:default)
     @lb.update_columns(le: true, public_ip: "198.51.100.10")
-    Dns::Zone.create!(name: "acme.bar.local", skip_provision_driver: true)
     Setting.le_dns_alias_zone
     Setting.find_by(name: "le_dns_alias_zone").update_columns(value: "acme.bar.local")
     @domain = @lb.domain
@@ -61,11 +60,12 @@ class LetsEncryptServices::ValidateDomainServiceAliasTest < ActiveSupport::TestC
     assert event.event_details.where(event_code: "076f360f9c009c74").exists?
   end
 
-  test "alias check skipped when a local zone covers the domain" do
+  test "alias check still applies when a local zone covers the domain" do
     @lb.update_columns(domain: "apps.foo.local")
     @domain = "apps.foo.local"
     @qname = "_acme-challenge.#{@domain}"
-    ok, event = run_validation(nil)
-    assert ok, event.event_details.pluck(:data).join("\n")
+    ok, event = run_validation(Dnsruby::NXDomain)
+    refute ok
+    assert event.event_details.where(event_code: "076f360f9c009c74").exists?
   end
 end

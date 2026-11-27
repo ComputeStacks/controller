@@ -203,6 +203,14 @@ task setup_dev: :environment do
       provision_driver: pdns_driver
   end
 
+  # Load balancer certificates: pebble plus the fake `exec` DNS provider, and
+  # the cert-issuer binary from the image the Dockerfile pins.
+  puts "Configuring ACME for the compose pebble..."
+  Rake::Task["dev:acme_pebble"].invoke
+  unless system(Rails.root.join("lib/dev/install-cert-issuer.sh").to_s)
+    puts "WARNING: could not install cert-issuer; run lib/dev/install-cert-issuer.sh once docker works."
+  end
+
   # Optional: repoint images and the bastion at a private registry
   # (config/dev_private_images.yml; see doc/development.md). No-op without it.
   Rake::Task["dev:private_images"].invoke

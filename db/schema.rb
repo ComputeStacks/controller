@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_16_000002) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_27_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -920,6 +920,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_16_000002) do
     t.text "pkey_encrypted"
     t.text "crt"
     t.string "common_name"
+    t.datetime "next_attempt_at"
+    t.integer "failure_count", default: 0, null: false
     t.index ["account_id"], name: "index_lets_encrypts_on_account_id"
     t.index ["user_id"], name: "index_lets_encrypts_on_user_id"
   end
